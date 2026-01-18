@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRU Data Network | Instant Data Ghana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); }
+        .network-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .network-card:hover { transform: translateY(-8px); shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        #admin-actions-bar { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; }
+        
+        /* Floating WhatsApp Button Style */
+        .wa-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            z-index: 100;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .wa-float:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex flex-col">
+
+    <nav class="sticky top-0 z-[60] glass border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
+            <div onclick="navigateTo('home')" class="text-2xl font-extrabold tracking-tighter cursor-pointer flex items-center gap-2">
+                <span class="bg-blue-600 text-white px-2 py-1 rounded-lg italic">TRU</span> DATA
+            </div>
+            <div class="flex gap-4 md:gap-8 items-center">
+                <button onclick="navigateTo('home')" class="font-bold text-sm hover:text-blue-600 hidden md:block">Home</button>
+                <button id="admin-nav-btn" class="text-[10px] bg-slate-100 px-3 py-1 rounded-full font-bold text-slate-400 hover:bg-blue-600 hover:text-white transition uppercase">Admin Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="app-view" class="flex-grow"></main>
+
+    <div id="admin-actions-bar" class="w-[90%] max-w-lg bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-slate-700 animate__animated animate__slideInUp">
+        <div class="flex flex-col">
+            <span class="text-[9px] font-black uppercase text-blue-400 tracking-widest">Active Processing</span>
+            <span id="active-order-label" class="text-xs font-bold truncate max-w-[150px]">Order...</span>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="cancelActiveProcess()" class="px-3 py-2 text-[10px] font-bold bg-slate-800 rounded-lg">Dismiss</button>
+            <button id="global-fulfill-btn" class="px-4 py-2 text-[10px] font-black bg-green-600 rounded-lg uppercase">Confirm & Fulfill</button>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = "https://kefcmjfvrqbgtivssdwn.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNtamZ2cnFiZ3RpdnNzZHduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MDM1NTIsImV4cCI6MjA4NDE3OTU1Mn0.HoXeKRW4-cGfMexGZpdmEvDHK-XXtXDSoMWWWbq4HKw";
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+        const SUPPORT_EMAIL = 'juvie111243@gmail.com';
+
+        const NETWORKS = {
+            mtn: { name: 'MTN Ghana', color: 'bg-[#FFCC00]', text: 'text-black', logo: './2.png' },
+            airteltigo: { name: 'AirtelTigo', color: 'bg-[#0077B5]', text: 'text-white', logo: './3.png' },
+            telecel: { name: 'Telecel', color: 'bg-[#E60000]', text: 'text-white', logo: './4.png' }
+        };
+
+        const BUNDLES = [
+            { id:'m-1', network:'mtn', size:'1GB', price:7 },
+            { id:'m-2', network:'mtn', size:'2GB', price:12 },
+            { id:'m-3', network:'mtn', size:'3GB', price:17 },
+            { id:'m-4', network:'mtn', size:'4GB', price:22 },
+            { id:'m-5', network:'mtn', size:'5GB', price:27 },
+            { id:'m-6', network:'mtn', size:'6GB', price:32 },
+            { id:'m-8', network:'mtn', size:'8GB', price:40 },
+            { id:'m-10', network:'mtn', size:'10GB', price:52 },
+            { id:'m-15', network:'mtn', size:'15GB', price:70 },
+            { id:'m-20', network:'mtn', size:'20GB', price:93 },
+            { id:'m-25', network:'mtn', size:'25GB', price:117 },
+            { id:'m-30', network:'mtn', size:'30GB', price:138 },
+            { id:'m-40', network:'mtn', size:'40GB', price:179 },
+            { id:'m-50', network:'mtn', size:'50GB', price:225 },
+
+            { id:'a-1', network:'airteltigo', size:'1GB', price:7 },
+            { id:'a-2', network:'airteltigo', size:'2GB', price:12 },
+            { id:'a-3', network:'airteltigo', size:'3GB', price:17 },
+            { id:'a-4', network:'airteltigo', size:'4GB', price:22 },
+            { id:'a-5', network:'airteltigo', size:'5GB', price:27 },
+
+            { id:'t-5', network:'telecel', size:'5GB', price:27 },
+            { id:'t-10', network:'telecel', size:'10GB', price:42 },
+            { id:'t-20', network:'telecel', size:'20GB', price:76 },
+            { id:'t-25', network:'telecel', size:'25GB', price:93 },
+            { id:'t-30', network:'telecel', size:'30GB', price:120 },
+            { id:'t-40', network:'telecel', size:'40GB', price:183 },
+            { id:'t-50', network:'telecel', size:'50GB', price:190 },
+            { id:'t-100', network:'telecel', size:'100GB', price:365 }
+        ];
+
+        let state = { 
+            view: 'home', 
+            isAdmin: false, 
+            isDirectMode: false,
+            orders: [], 
+            searchQuery: '',
+            networkFilter: 'all',
+            activeOrderData: null 
+        };
+
+        window.adminAuth = async (e) => {
+            e.preventDefault();
+            const { error } = await _supabase.auth.signInWithPassword({
+                email: document.getElementById('adm-u').value.trim(),
+                password: document.getElementById('adm-p').value
+            });
+            if(error) return alert("Login Failed");
+            state.isAdmin = true;
+            navigateTo('admin-dashboard');
+        };
+
+        function navigateTo(view, params = null) {
+            state.view = view;
+            state.params = params;
+            if (view === 'admin-dashboard') fetchOrders();
+            render();
+            window.scrollTo(0,0);
+        }
+
+        async function fetchOrders() {
+            const { data } = await _supabase.from('orders').select('*');
+            state.orders = data || [];
+            render();
+        }
+
+        function selectPlan(bundle) {
+            state.activeOrderData = { bundle };
+            navigateTo('confirm-phone');
+        }
+
+        async function handleOrderButton() {
+            const phone = document.getElementById('p-num').value;
+            if(!phone || phone.length < 10) return alert("Enter valid phone number");
+            state.activeOrderData.phone = phone;
+
+            if (state.isAdmin && state.isDirectMode) {
+                processDirectOrder();
+            } else {
+                startPaystack();
+            }
+        }
+
+        window.onPaymentSuccess = async function(response) {
+            const { bundle, phone } = state.activeOrderData;
+            const order = { 
+                ref: response.reference, 
+                phone, 
+                network: bundle.network, 
+                bundle_size: bundle.size, 
+                amount: bundle.price, 
+                status: 'Pending', 
+                type: 'Customer', 
+                date: new Date().toISOString() 
+            };
+            await _supabase.from('orders').insert([order]);
+            navigateTo('success', order);
+        };
+
+        function startPaystack() {
+            const { bundle } = state.activeOrderData;
+            const handler = PaystackPop.setup({
+                key: 'pk_live_ea1b78f7fb20ea947f216c78e6ae3adc32d45f1b',
+                email: SUPPORT_EMAIL,
+                amount: Math.round(bundle.price * 100),
+                currency: 'GHS',
+                callback: (res) => window.onPaymentSuccess(res),
+                onClose: () => console.log('Window closed')
+            });
+            handler.openIframe();
+        }
+
+        function processDirectOrder() {
+            const { bundle, phone } = state.activeOrderData;
+            window.open('https://evnetwork.shop', '_blank');
+            
+            const bar = document.getElementById('admin-actions-bar');
+            document.getElementById('active-order-label').innerText = `Direct: ${phone}`;
+            bar.style.display = 'flex';
+
+            document.getElementById('global-fulfill-btn').onclick = async () => {
+                const order = { 
+                    ref: 'DIR-' + Math.random().toString(36).substr(2, 9).toUpperCase(), 
+                    phone, network: bundle.network, bundle_size: bundle.size, 
+                    amount: bundle.price, status: 'Completed', type: 'Admin (Direct)', 
+                    date: new Date().toISOString() 
+                };
+                await _supabase.from('orders').insert([order]);
+                cancelActiveProcess();
+                state.isDirectMode = false;
+                navigateTo('admin-dashboard');
+            };
+        }
+
+        function openProcessTab(order) {
+            window.open('https://evnetwork.shop', '_blank');
+            const bar = document.getElementById('admin-actions-bar');
+            document.getElementById('active-order-label').innerText = `${order.phone}`;
+            bar.style.display = 'flex';
+
+            document.getElementById('global-fulfill-btn').onclick = async () => {
+                await _supabase.from('orders').update({ status: 'Completed' }).eq('ref', order.ref);
+                cancelActiveProcess();
+                fetchOrders();
+            };
+        }
+
+        function cancelActiveProcess() {
+            document.getElementById('admin-actions-bar').style.display = 'none';
+        }
+
+        function renderHome() {
+            return `
+            <div class="animate__animated animate__fadeIn">
+                ${state.isDirectMode ? '<div class="bg-blue-600 text-white py-2 text-center text-[10px] font-black uppercase tracking-widest">Direct Order Mode</div>' : ''}
+                
+                <section class="bg-slate-900 text-white py-24 px-4 text-center">
+                    <h1 class="text-5xl md:text-7xl font-black mb-6">TRU DATA</h1>
+                    <p class="text-lg text-slate-400 mb-12 uppercase tracking-widest font-bold">Ghana's Fastest Data Hub</p>
+                    <a href="#networks" class="bg-white text-slate-900 px-12 py-5 rounded-2xl font-black shadow-2xl inline-block">Order Now</a>
+                </section>
+
+                <section id="networks" class="max-w-7xl mx-auto px-4 -mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
+                    ${Object.entries(NETWORKS).map(([id, net]) => `
+                        <div onclick="navigateTo('network', '${id}')" class="${net.color} ${net.text} p-10 rounded-[2.5rem] shadow-xl cursor-pointer network-card text-center">
+                            <img src="${net.logo}" class="h-14 mx-auto mb-6 bg-white p-2 rounded-xl">
+                            <h3 class="text-2xl font-black uppercase">${net.name}</h3>
+                        </div>
+                    `).join('')}
+                </section>
+
+                <section class="max-w-7xl mx-auto px-4 py-16">
+                    <div class="grid md:grid-cols-2 gap-12 items-center">
+                        <div class="bg-white p-10 rounded-[3rem] border shadow-sm">
+                            <h2 class="text-3xl font-black mb-6">Support Center</h2>
+                            <p class="text-slate-500 font-bold mb-8">Need help with your order? Our team is available to assist you 24/7.</p>
+                            <div class="space-y-4">
+                                <a href="mailto:${SUPPORT_EMAIL}" class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl hover:bg-blue-50 transition">
+                                    <span class="text-2xl">📧</span>
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase text-slate-400">Email Us</p>
+                                        <p class="font-bold">${SUPPORT_EMAIL}</p>
+                                    </div>
+                                </a>
+                                <a href="https://wa.me/233597578538" target="_blank" class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl hover:bg-green-50 transition">
+                                    <span class="text-2xl">💬</span>
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase text-slate-400">WhatsApp Support</p>
+                                        <p class="font-bold">0597578538</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-4xl font-black mb-8">How it works</h2>
+                            <div class="space-y-8">
+                                <div class="flex gap-6">
+                                    <span class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0">1</span>
+                                    <div>
+                                        <h4 class="font-black text-xl">Select Bundle</h4>
+                                        <p class="text-slate-500 font-bold">Choose your preferred network and the data package that fits your needs.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-6">
+                                    <span class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0">2</span>
+                                    <div>
+                                        <h4 class="font-black text-xl">Make Payment</h4>
+                                        <p class="text-slate-500 font-bold">Enter your phone number and pay securely via MoMo using Paystack.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-6">
+                                    <span class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0">3</span>
+                                    <div>
+                                        <h4 class="font-black text-xl">Get Data</h4>
+                                        <p class="text-slate-500 font-bold">Once payment is successful, your data is processed and sent instantly.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="py-12 text-center text-slate-400 font-bold text-xs uppercase tracking-widest border-t">
+                    <p>© 2026 TRU DATA NETWORK GHANA</p>
+                </footer>
+
+                <a href="https://wa.me/233597578538" class="wa-float" target="_blank">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-2.32 0-4.519.903-6.16 2.544-1.64 1.64-2.543 3.838-2.543 6.158 0 1.61.439 3.191 1.272 4.578L3.375 23l3.818-1.226c1.328.724 2.822 1.107 4.337 1.107l.001-.001c2.32 0 4.52-.903 6.161-2.544 1.64-1.64 2.544-3.838 2.544-6.159 0-2.32-.904-4.518-2.544-6.159-1.64-1.641-3.839-2.545-6.161-2.545zm5.035 11.031c-.193.543-1.137 1.032-1.571 1.096-.434.064-.91.133-2.736-.605-2.203-.891-3.626-3.134-3.737-3.282-.11-.148-.891-1.185-.891-2.26s.555-1.604.752-1.821c.198-.217.433-.271.577-.271.145 0 .289.001.416.007.133.006.312-.05.488.372.181.434.619 1.506.674 1.617.054.111.091.241.016.39-.075.148-.112.241-.223.37-.111.13-.233.29-.333.388-.111.111-.227.232-.097.455.13.223.578 1.019 1.241 1.604.854.753 1.572 1.018 1.795 1.13.223.111.353.093.483-.056.13-.149.555-.65.703-.872.148-.222.297-.186.5-.111.204.074 1.297.611 1.519.722.222.112.37.167.426.26.055.092.055.536-.138 1.079z"/></svg>
+                </a>
+            </div>`;
+        }
+
+        function renderNetwork(id) {
+            const net = NETWORKS[id];
+            return `<div class="max-w-7xl mx-auto px-4 py-16 animate__animated animate__fadeIn">
+                <button onclick="navigateTo('home')" class="mb-8 font-bold text-blue-600">← Back</button>
+                <h2 class="text-4xl font-black mb-12">Select Plan (${net.name})</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    ${BUNDLES.filter(b => b.network === id).map(b => `
+                        <div class="bg-white border p-8 rounded-[2rem] shadow-sm text-center">
+                            <h4 class="text-4xl font-black mb-2">${b.size}</h4>
+                            <p class="font-black text-blue-600 text-xl mb-6">₵${b.price.toFixed(2)}</p>
+                            <button onclick='selectPlan(${JSON.stringify(b)})' class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold">Select</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        function renderConfirmPhone() {
+            const { bundle } = state.activeOrderData;
+            return `<div class="max-w-xl mx-auto py-24 px-4 animate__animated animate__fadeInUp">
+                <div class="bg-white p-10 rounded-[3rem] shadow-2xl border text-center">
+                    <h2 class="text-3xl font-black mb-4">Phone Number</h2>
+                    <p class="mb-8 font-bold text-slate-400 uppercase tracking-widest text-xs">${bundle.network} • ${bundle.size}</p>
+                    <input id="p-num" type="tel" placeholder="024XXXXXXX" class="w-full p-6 border-4 rounded-[2rem] text-center text-3xl font-black mb-8 focus:border-blue-600 outline-none">
+                    <button onclick="handleOrderButton()" class="w-full ${state.isDirectMode ? 'bg-blue-600' : 'bg-slate-900'} text-white py-6 rounded-[2rem] font-black text-xl shadow-xl uppercase">
+                        ${state.isDirectMode ? 'Go to Processing' : 'Pay Now'}
+                    </button>
+                    <button onclick="navigateTo('home')" class="mt-6 text-slate-400 font-bold block w-full">Cancel</button>
+                </div>
+            </div>`;
+        }
+
+        function renderAdminDashboard() {
+            const stats = state.orders.reduce((acc, o) => {
+                const amt = parseFloat(o.amount || 0);
+                acc.total += amt;
+                if(o.network === 'mtn') acc.mtn += amt;
+                if(o.network === 'airteltigo') acc.art += amt;
+                if(o.network === 'telecel') acc.tel += amt;
+                return acc;
+            }, { total: 0, mtn: 0, art: 0, tel: 0 });
+
+            let filtered = state.orders.filter(o => o.phone.includes(state.searchQuery));
+            if(state.networkFilter !== 'all') {
+                filtered = filtered.filter(o => o.network === state.networkFilter);
+            }
+            filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            return `
+            <div class="min-h-screen bg-[#F8FAFC]">
+                <div class="max-w-7xl mx-auto px-4 py-12 animate__animated animate__fadeIn">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-slate-900 text-white p-6 rounded-3xl"><p class="text-[10px] font-black uppercase opacity-50">Total Revenue</p><h3 class="text-2xl font-black">₵${stats.total.toFixed(2)}</h3></div>
+                        <div class="bg-[#FFCC00] text-black p-6 rounded-3xl"><p class="text-[10px] font-black uppercase opacity-60">MTN</p><h3 class="text-2xl font-black">₵${stats.mtn.toFixed(2)}</h3></div>
+                        <div class="bg-blue-600 text-white p-6 rounded-3xl"><p class="text-[10px] font-black uppercase opacity-60">AirtelTigo</p><h3 class="text-2xl font-black">₵${stats.art.toFixed(2)}</h3></div>
+                        <div class="bg-red-600 text-white p-6 rounded-3xl"><p class="text-[10px] font-black uppercase opacity-60">Telecel</p><h3 class="text-2xl font-black">₵${stats.tel.toFixed(2)}</h3></div>
+                    </div>
+
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+                        <div class="flex items-center gap-4">
+                            <h2 class="text-4xl font-black text-slate-900">Orders</h2>
+                            <button onclick="state.isDirectMode = true; navigateTo('home')" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-black text-xs transition">+ DIRECT</button>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-3 w-full lg:w-auto">
+                            <select onchange="state.networkFilter = this.value; render();" class="p-4 border-2 rounded-2xl font-bold outline-none focus:border-blue-600 bg-white text-slate-900">
+                                <option value="all" ${state.networkFilter === 'all' ? 'selected' : ''}>All Networks</option>
+                                <option value="mtn" ${state.networkFilter === 'mtn' ? 'selected' : ''}>MTN Only</option>
+                                <option value="airteltigo" ${state.networkFilter === 'airteltigo' ? 'selected' : ''}>AirtelTigo Only</option>
+                                <option value="telecel" ${state.networkFilter === 'telecel' ? 'selected' : ''}>Telecel Only</option>
+                            </select>
+                            <input type="tel" placeholder="Search phone..." oninput="state.searchQuery = this.value; render();" class="p-4 border-2 rounded-2xl flex-grow lg:w-64 font-bold outline-none focus:border-blue-600 text-slate-900">
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] border overflow-hidden shadow-sm text-slate-900">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left min-w-[900px]">
+                                <thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
+                                    <tr>
+                                        <th class="p-6">Time Received</th>
+                                        <th class="p-6">Customer</th>
+                                        <th class="p-6">Bundle Details</th>
+                                        <th class="p-6">Status</th>
+                                        <th class="p-6 text-right">Fulfillment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${filtered.map(o => {
+                                        const d = new Date(o.date);
+                                        return `
+                                        <tr class="border-b hover:bg-slate-50">
+                                            <td class="p-6">
+                                                <div class="text-xs font-black text-slate-800">${d.toLocaleDateString()}</div>
+                                                <div class="text-[10px] text-slate-400 font-bold">${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                                            </td>
+                                            <td class="p-6">
+                                                <div class="font-black text-blue-600">${o.phone}</div>
+                                                <div class="text-[9px] font-bold text-slate-400 uppercase">${o.type || 'Customer'}</div>
+                                            </td>
+                                            <td class="p-6 font-bold text-xs uppercase text-slate-500">${o.network} • ${o.bundle_size} (₵${o.amount})</td>
+                                            <td class="p-6"><span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${o.status === 'Completed' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'}">${o.status}</span></td>
+                                            <td class="p-6 text-right space-x-2 whitespace-nowrap">
+                                                ${o.status !== 'Completed' ? `
+                                                    <button onclick='openProcessTab(${JSON.stringify(o)})' class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black hover:bg-blue-600 transition">PROCESS</button>
+                                                ` : `<span class="text-green-500 font-black text-[10px] px-4">FULFILLED</span>`}
+                                                <button onclick="if(confirm('Delete?')) _supabase.from('orders').delete().eq('ref','${o.ref}').then(()=>fetchOrders())" class="text-red-300 p-2 font-black text-[10px]">DEL</button>
+                                            </td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function render() {
+            const viewTarget = document.getElementById('app-view');
+            const adminBtn = document.getElementById('admin-nav-btn');
+            
+            adminBtn.innerText = state.isAdmin ? (state.isDirectMode ? "EXIT DIRECT MODE" : "Dashboard") : "Admin Login";
+            adminBtn.onclick = () => {
+                if(state.isDirectMode) { state.isDirectMode = false; navigateTo('admin-dashboard'); }
+                else navigateTo(state.isAdmin ? 'admin-dashboard' : 'admin-login');
+            };
+            
+            if (state.view === 'home') viewTarget.innerHTML = renderHome();
+            else if (state.view === 'network') viewTarget.innerHTML = renderNetwork(state.params);
+            else if (state.view === 'confirm-phone') viewTarget.innerHTML = renderConfirmPhone();
+            else if (state.view === 'admin-login') viewTarget.innerHTML = `<div class="max-w-md mx-auto py-32 px-4"><form onsubmit="adminAuth(event)" class="bg-white p-12 rounded-[3rem] shadow-2xl border text-center"><h2 class="text-3xl font-black mb-8">Admin Access</h2><input id="adm-u" type="email" placeholder="Email" class="w-full p-5 border-2 rounded-2xl mb-4 font-bold" required><input id="adm-p" type="password" placeholder="Password" class="w-full p-5 border-2 rounded-2xl mb-6 font-bold" required><button type="submit" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black">Login</button></form></div>`;
+            else if (state.view === 'admin-dashboard') viewTarget.innerHTML = renderAdminDashboard();
+            else if (state.view === 'success') viewTarget.innerHTML = `<div class="py-24 text-center animate__animated animate__zoomIn"><h2 class="text-5xl font-black mb-4">Order Placed!</h2><p class="mb-10 text-xl font-bold text-slate-500">Your ${state.params.bundle_size} for ${state.params.phone} is pending.</p><button onclick="navigateTo('home')" class="bg-blue-600 text-white px-10 py-4 rounded-xl font-bold">Done</button></div>`;
+        }
+
+        render();
+    </script>
+</body>
+</html>
+
