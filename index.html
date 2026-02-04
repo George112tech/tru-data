@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRU Data Network | Buy Cheap Data Bundles in Ghana - MTN, Telecel, AirtelTigo</title>
-<meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. 24/7 service. Best data deals in Accra, Kumasi, Tamale and across Ghana.">
+<title>TRU Data Network | Buy Data Bundles in Ghana - MTN, Telecel, AirtelTigo</title>
+<meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. Data top up service across Ghana.">
 <meta name="keywords" content="buy data Ghana, MTN data bundles, Telecel data, AirtelTigo data, cheap data Ghana, mobile data Ghana, internet bundles, data top up Ghana, TRU Data Network">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2637582768279029" crossorigin="anonymous"></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -547,6 +547,33 @@ input:focus, select:focus {
     display: none !important;
   }
 }
+
+/* Disclaimer Styling */
+.disclaimer-box {
+  background: linear-gradient(135deg, rgba(254, 252, 232, 0.9) 0%, rgba(254, 249, 195, 0.9) 100%);
+  border-left: 4px solid #eab308;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+  color: #854d0e;
+}
+
+[data-theme="dark"] .disclaimer-box {
+  background: linear-gradient(135deg, rgba(66, 32, 6, 0.9) 0%, rgba(113, 63, 18, 0.9) 100%);
+  color: #fde047;
+  border-left-color: #eab308;
+}
+
+.affiliate-disclosure {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
 </style>
 </head>
 
@@ -625,12 +652,22 @@ input:focus, select:focus {
   </div>
 </footer>
 
-<div id="admin-actions-bar" class="w-[90%] max-w-lg glass-enhanced text-white p-5 rounded-2xl shadow-2xl flex items-center justify-between border animate__animated animate__slideInUp">
+<div id="admin-actions-bar" class="w-[90%] max-w-lg glass-enhanced text-white p-5 rounded-2xl shadow-2xl flex flex-col gap-4 border animate__animated animate__slideInUp">
   <div class="flex flex-col">
     <span class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-1">Active Processing</span>
-    <span id="active-order-label" class="text-sm font-bold truncate max-w-[150px] text-slate-900 dark:text-white"></span>
+    <span id="active-order-label" class="text-sm font-bold truncate max-w-[250px] text-slate-900 dark:text-white"></span>
   </div>
-  <div class="flex gap-3">
+  
+  <div class="affiliate-disclosure">
+    <p class="text-xs font-semibold mb-2">Select Provider for Direct Order:</p>
+    <div class="flex gap-2 mb-2">
+      <button onclick="selectProvider('evnetwork')" id="btn-evnetwork" class="flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold transition-all">EV Network</button>
+      <button onclick="selectProvider('refer2bundle')" id="btn-refer2bundle" class="flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all">Refer2Bundle</button>
+    </div>
+    <p class="text-[10px] opacity-75">You will be redirected to complete the order on the selected platform.</p>
+  </div>
+  
+  <div class="flex gap-3 justify-end">
     <button onclick="cancelActiveProcess()" class="admin-btn px-4 py-2.5 text-[11px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all">
       Dismiss
     </button>
@@ -674,37 +711,56 @@ const NETWORKS = {
   telecel:{name:'Telecel',color:'bg-[#E60000]',text:'text-white',logo:'./4.png', description: 'Fast 4G internet at competitive prices'}
 };
 
+// Updated Prices
 const BUNDLES = [
-  {id:'m-1',network:'mtn',size:'1GB',price:7, validity:'30 Days'}, 
-  {id:'m-2',network:'mtn',size:'2GB',price:12, validity:'30 Days'},
-  {id:'m-3',network:'mtn',size:'3GB',price:17, validity:'30 Days'}, 
-  {id:'m-4',network:'mtn',size:'4GB',price:22, validity:'30 Days'},
-  {id:'m-5',network:'mtn',size:'5GB',price:27, validity:'30 Days'}, 
-  {id:'m-6',network:'mtn',size:'6GB',price:32, validity:'30 Days'},
-  {id:'m-8',network:'mtn',size:'8GB',price:40, validity:'30 Days'}, 
-  {id:'m-10',network:'mtn',size:'10GB',price:52, validity:'30 Days'},
-  {id:'m-15',network:'mtn',size:'15GB',price:70, validity:'30 Days'}, 
-  {id:'m-20',network:'mtn',size:'20GB',price:93, validity:'30 Days'},
-  {id:'m-25',network:'mtn',size:'25GB',price:117, validity:'30 Days'}, 
-  {id:'m-30',network:'mtn',size:'30GB',price:138, validity:'30 Days'},
-  {id:'m-40',network:'mtn',size:'40GB',price:179, validity:'30 Days'}, 
-  {id:'m-50',network:'mtn',size:'50GB',price:225, validity:'30 Days'},
-  {id:'a-1',network:'airteltigo',size:'1GB',price:7, validity:'30 Days'}, 
-  {id:'a-2',network:'airteltigo',size:'2GB',price:12, validity:'30 Days'},
-  {id:'a-3',network:'airteltigo',size:'3GB',price:17, validity:'30 Days'}, 
-  {id:'a-4',network:'airteltigo',size:'4GB',price:22, validity:'30 Days'}, 
-  {id:'a-5',network:'airteltigo',size:'5GB',price:27, validity:'30 Days'},
-  {id:'t-5',network:'telecel',size:'5GB',price:27, validity:'30 Days'},
-  {id:'t-10',network:'telecel',size:'10GB',price:42, validity:'30 Days'},
-  {id:'t-20',network:'telecel',size:'20GB',price:76, validity:'30 Days'},
-  {id:'t-25',network:'telecel',size:'25GB',price:93, validity:'30 Days'},
-  {id:'t-30',network:'telecel',size:'30GB',price:120, validity:'30 Days'},
-  {id:'t-40',network:'telecel',size:'40GB',price:183, validity:'30 Days'},
-  {id:'t-50',network:'telecel',size:'50GB',price:190, validity:'30 Days'},
-  {id:'t-100',network:'telecel',size:'100GB',price:365, validity:'30 Days'}
+  // MTN Bundles
+  {id:'m-1',network:'mtn',size:'1GB',price:5.40, validity:'30 Days'}, 
+  {id:'m-2',network:'mtn',size:'2GB',price:10.00, validity:'30 Days'},
+  {id:'m-3',network:'mtn',size:'3GB',price:15.00, validity:'30 Days'}, 
+  {id:'m-4',network:'mtn',size:'4GB',price:19.50, validity:'30 Days'},
+  {id:'m-5',network:'mtn',size:'5GB',price:23.50, validity:'30 Days'}, 
+  {id:'m-6',network:'mtn',size:'6GB',price:27.00, validity:'30 Days'},
+  {id:'m-7',network:'mtn',size:'7GB',price:32.00, validity:'30 Days'},
+  {id:'m-8',network:'mtn',size:'8GB',price:37.50, validity:'30 Days'}, 
+  {id:'m-10',network:'mtn',size:'10GB',price:42.80, validity:'30 Days'},
+  {id:'m-12',network:'mtn',size:'12GB',price:55.50, validity:'30 Days'},
+  {id:'m-15',network:'mtn',size:'15GB',price:64.00, validity:'30 Days'}, 
+  {id:'m-20',network:'mtn',size:'20GB',price:82.00, validity:'30 Days'},
+  {id:'m-25',network:'mtn',size:'25GB',price:102.90, validity:'30 Days'}, 
+  {id:'m-30',network:'mtn',size:'30GB',price:130.00, validity:'30 Days'},
+  {id:'m-40',network:'mtn',size:'40GB',price:163.50, validity:'30 Days'}, 
+  {id:'m-50',network:'mtn',size:'50GB',price:193.90, validity:'30 Days'},
+  {id:'m-100',network:'mtn',size:'100GB',price:386.90, validity:'30 Days'},
+  
+  // AirtelTigo Bundles
+  {id:'a-1',network:'airteltigo',size:'1GB',price:6.50, validity:'30 Days'}, 
+  {id:'a-2',network:'airteltigo',size:'2GB',price:11.00, validity:'30 Days'},
+  {id:'a-3',network:'airteltigo',size:'3GB',price:15.50, validity:'30 Days'}, 
+  {id:'a-4',network:'airteltigo',size:'4GB',price:20.50, validity:'30 Days'},
+  {id:'a-5',network:'airteltigo',size:'5GB',price:23.50, validity:'30 Days'},
+  {id:'a-6',network:'airteltigo',size:'6GB',price:27.00, validity:'30 Days'},
+  {id:'a-7',network:'airteltigo',size:'7GB',price:32.00, validity:'30 Days'},
+  {id:'a-8',network:'airteltigo',size:'8GB',price:34.50, validity:'30 Days'},
+  {id:'a-10',network:'airteltigo',size:'10GB',price:42.50, validity:'30 Days'},
+  {id:'a-15',network:'airteltigo',size:'15GB',price:64.00, validity:'30 Days'},
+  {id:'a-20',network:'airteltigo',size:'20GB',price:82.00, validity:'30 Days'},
+  {id:'a-25',network:'airteltigo',size:'25GB',price:99.90, validity:'30 Days'},
+  {id:'a-30',network:'airteltigo',size:'30GB',price:118.70, validity:'30 Days'},
+  {id:'a-40',network:'airteltigo',size:'40GB',price:163.50, validity:'30 Days'},
+  {id:'a-50',network:'airteltigo',size:'50GB',price:199.90, validity:'30 Days'},
+  
+  // Telecel Bundles
+  {id:'t-10',network:'telecel',size:'10GB',price:40.00, validity:'30 Days'},
+  {id:'t-15',network:'telecel',size:'15GB',price:58.00, validity:'30 Days'},
+  {id:'t-20',network:'telecel',size:'20GB',price:78.00, validity:'30 Days'},
+  {id:'t-25',network:'telecel',size:'25GB',price:99.00, validity:'30 Days'},
+  {id:'t-30',network:'telecel',size:'30GB',price:113.00, validity:'30 Days'},
+  {id:'t-40',network:'telecel',size:'40GB',price:148.00, validity:'30 Days'},
+  {id:'t-50',network:'telecel',size:'50GB',price:183.00, validity:'30 Days'},
+  {id:'t-100',network:'telecel',size:'100GB',price:369.00, validity:'30 Days'}
 ];
 
-let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null};
+let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'evnetwork'};
 
 /* ================== UTILITY FUNCTIONS ================== */
 function showToast(message, duration = 3000) {
@@ -719,6 +775,16 @@ function showToast(message, duration = 3000) {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 400);
   }, duration);
+}
+
+function selectProvider(provider) {
+  state.selectedProvider = provider;
+  document.getElementById('btn-evnetwork').className = provider === 'evnetwork' 
+    ? 'flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold transition-all'
+    : 'flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all';
+  document.getElementById('btn-refer2bundle').className = provider === 'refer2bundle'
+    ? 'flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold transition-all'
+    : 'flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all';
 }
 
 /* ================== CORE FUNCTIONS ================== */
@@ -736,25 +802,29 @@ function renderExtendedContent() {
     }
     
     return `
-    <!-- Additional SEO Content Section -->
+    <!-- AdSense Policy Compliant Content Section -->
     <section class="max-w-7xl mx-auto px-6 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="disclaimer-box mb-8">
+        <strong>Important Notice:</strong> TRU Data Network is an independent platform that facilitates data bundle purchases. We are not directly affiliated with MTN, Telecel, or AirtelTigo. All network names and logos are trademarks of their respective owners. Prices and availability are subject to change based on network provider policies.
+      </div>
+      
       <div class="grid md:grid-cols-3 gap-8 mb-16">
         <div class="p-6 card-theme rounded-2xl animate-slide-up">
           <h3 class="text-xl font-bold mb-3 text-blue-600">Why Choose TRU Data?</h3>
           <p class="text-sm text-muted-theme leading-relaxed">
-            TRU Data Network provides the most competitive data bundle prices in Ghana. We partner directly with major networks to bring you instant delivery, 24/7 availability, and secure payment processing through Paystack.
+            TRU Data Network provides competitive data bundle prices in Ghana. We partner with authorized vendors to bring you convenient access to data packages, secure payment processing through Paystack, and customer support.
           </p>
         </div>
         <div class="p-6 card-theme rounded-2xl animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
           <h3 class="text-xl font-bold mb-3 text-purple-600">Coverage Across Ghana</h3>
           <p class="text-sm text-muted-theme leading-relaxed">
-            Whether you're in Accra, Kumasi, Tamale, Cape Coast, or anywhere in Ghana, our service works nationwide. Stay connected with reliable data bundles no matter your location.
+            Our service is available nationwide. Whether you're in Accra, Kumasi, Tamale, Cape Coast, or anywhere in Ghana, you can purchase data bundles through our platform.
           </p>
         </div>
         <div class="p-6 card-theme rounded-2xl animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
           <h3 class="text-xl font-bold mb-3 text-green-600">Secure & Trusted</h3>
           <p class="text-sm text-muted-theme leading-relaxed">
-            Over 50,000 successful transactions processed. Your payments are secured by Paystack encryption. We never store your mobile money PIN or card details.
+            Your payments are processed securely through Paystack. We do not store your mobile money PIN or card details. All transactions are encrypted for your protection.
           </p>
         </div>
       </div>
@@ -769,21 +839,21 @@ function renderExtendedContent() {
                         <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">1</div>
                         <div>
                             <h4 class="font-bold text-lg mb-1">Select Your Network</h4>
-                            <p class="text-muted-theme text-sm">Choose between MTN, Telecel, or AirtelTigo to see available data offers tailored for your network.</p>
+                            <p class="text-muted-theme text-sm">Choose between MTN, Telecel, or AirtelTigo to see available data offers for your network.</p>
                         </div>
                     </div>
                     <div class="flex gap-4 animate-slide-up stagger-2 opacity-0" style="animation-fill-mode: forwards;">
                         <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">2</div>
                         <div>
                             <h4 class="font-bold text-lg mb-1">Pick a Bundle</h4>
-                            <p class="text-muted-theme text-sm">Select from our wide range of data packages starting from as low as ₵7. All bundles come with 30-day validity.</p>
+                            <p class="text-muted-theme text-sm">Select from our range of data packages. All bundles come with 30-day validity unless otherwise stated.</p>
                         </div>
                     </div>
                     <div class="flex gap-4 animate-slide-up stagger-3 opacity-0" style="animation-fill-mode: forwards;">
                         <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">3</div>
                         <div>
-                            <h4 class="font-bold text-lg mb-1">Pay & Receive Instantly</h4>
-                            <p class="text-muted-theme text-sm">Pay securely with Mobile Money or Card via Paystack. Your data is credited to your line within minutes.</p>
+                            <h4 class="font-bold text-lg mb-1">Pay & Receive</h4>
+                            <p class="text-muted-theme text-sm">Pay securely with Mobile Money or Card via Paystack. Data is typically credited within minutes.</p>
                         </div>
                     </div>
                 </div>
@@ -793,7 +863,7 @@ function renderExtendedContent() {
                 <ul class="space-y-4">
                     <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
                         <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
-                        24/7 Instant Delivery
+                        Convenient Online Ordering
                     </li>
                     <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
                         <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
@@ -805,7 +875,7 @@ function renderExtendedContent() {
                     </li>
                     <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
                         <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
-                        Direct Network Connectivity
+                        Customer Support Available
                     </li>
                 </ul>
             </div>
@@ -827,26 +897,26 @@ function renderExtendedContent() {
     <section class="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700 animate-gradient py-20 text-white relative overflow-hidden">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
         <div class="max-w-5xl mx-auto px-6 text-center relative z-10">
-            <h2 class="text-4xl font-black mb-6 animate-slide-up">Ghana's Fastest Data Top-up Service</h2>
+            <h2 class="text-4xl font-black mb-6 animate-slide-up">Your Reliable Data Top-up Service</h2>
             <p class="text-xl opacity-90 mb-10 leading-relaxed max-w-3xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-                Join thousands of Ghanaians who rely on TRU Data Network for their daily internet needs. Whether for remote work in Accra, streaming in Kumasi, online learning in Tamale, or social media across Ghana, we ensure you never run out of data.
+                TRU Data Network helps Ghanaians stay connected with convenient access to data bundles. Whether for remote work in Accra, streaming in Kumasi, online learning in Tamale, or social media across Ghana, we aim to make data purchases simple and accessible.
             </p>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div class="animate-scale-in stagger-1 bg-white/10 backdrop-blur-sm rounded-2xl p-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-4xl font-black mb-1">50k+</h3>
-                    <p class="text-xs uppercase font-bold opacity-80">Orders Completed</p>
+                    <h3 class="text-4xl font-black mb-1">24/7</h3>
+                    <p class="text-xs uppercase font-bold opacity-80">Online Service</p>
                 </div>
                 <div class="animate-scale-in stagger-2 bg-white/10 backdrop-blur-sm rounded-2xl p-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-4xl font-black mb-1">99.9%</h3>
-                    <p class="text-xs uppercase font-bold opacity-80">Uptime</p>
+                    <h3 class="text-4xl font-black mb-1">Fast</h3>
+                    <p class="text-xs uppercase font-bold opacity-80">Processing</p>
                 </div>
                 <div class="animate-scale-in stagger-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-4xl font-black mb-1">15s</h3>
-                    <p class="text-xs uppercase font-bold opacity-80">Avg Delivery</p>
+                    <h3 class="text-4xl font-black mb-1">Secure</h3>
+                    <p class="text-xs uppercase font-bold opacity-80">Payments</p>
                 </div>
                 <div class="animate-scale-in stagger-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-4xl font-black mb-1">24/7</h3>
-                    <p class="text-xs uppercase font-bold opacity-80">Support Available</p>
+                    <h3 class="text-4xl font-black mb-1">Support</h3>
+                    <p class="text-xs uppercase font-bold opacity-80">Available</p>
                 </div>
             </div>
         </div>
@@ -856,29 +926,34 @@ function renderExtendedContent() {
     <section class="max-w-4xl mx-auto px-6 py-20">
         <article class="prose prose-slate dark:prose-invert max-w-none">
             <h2 class="text-3xl font-black mb-6 text-center animate-slide-up">Understanding Mobile Data in Ghana</h2>
+            
+            <div class="disclaimer-box mb-8">
+              <strong>Disclaimer:</strong> The following information is for educational purposes only. Network coverage, speeds, and availability may vary by location. Please verify current offerings directly with your service provider.
+            </div>
+            
             <div class="grid md:grid-cols-2 gap-8 text-sm text-muted-theme leading-relaxed">
                 <div class="animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">MTN Ghana Data Bundles</h3>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">MTN Ghana Data Services</h3>
                     <p class="mb-4">
-                        MTN is Ghana's largest telecommunications network, offering extensive coverage across all 16 regions. Our MTN data bundles range from 1GB to 50GB, perfect for both light users and heavy data consumers. MTN's 4G+ network provides fast internet speeds ideal for video conferencing, HD streaming, and large file downloads.
+                        MTN is one of Ghana's largest telecommunications networks, offering extensive coverage across the country. MTN data bundles range from 1GB to 100GB, catering to various user needs. MTN's 4G+ network provides internet speeds suitable for video conferencing, streaming, and file downloads.
                     </p>
                 </div>
                 <div class="animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">Telecel Data Offers</h3>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">Telecel Data Services</h3>
                     <p class="mb-4">
-                        Telecel (formerly Vodafone) offers competitive data packages with excellent value for money. Known for their reliable network infrastructure, Telecel data bundles are perfect for professionals and students who need consistent connectivity. Their 4G network covers major cities including Accra, Tema, Kumasi, and Takoradi.
+                        Telecel (formerly Vodafone Ghana) offers data packages with various options. Their 4G network covers major cities including Accra, Tema, Kumasi, and Takoradi. Telecel provides different data bundle sizes to match various usage patterns.
                     </p>
                 </div>
                 <div class="animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">AirtelTigo Data Packages</h3>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">AirtelTigo Data Services</h3>
                     <p class="mb-4">
-                        AirtelTigo provides some of the most affordable data bundles in Ghana, making it the preferred choice for budget-conscious users. Their merged network infrastructure offers improved coverage and competitive pricing, especially for social media bundles and night data plans.
+                        AirtelTigo provides data bundles with various pricing options. Their merged network infrastructure offers coverage across Ghana. Users can choose from different data package sizes based on their individual requirements.
                     </p>
                 </div>
                 <div class="animate-slide-up stagger-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">Choosing the Right Data Plan</h3>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">Choosing a Data Plan</h3>
                     <p class="mb-4">
-                        When selecting a data bundle, consider your usage patterns. Light users (1-3GB) are suitable for messaging and light browsing. Moderate users (5-10GB) can handle social media and video streaming. Heavy users and professionals should consider 20GB+ packages for uninterrupted connectivity throughout the month.
+                        When selecting a data bundle, consider your usage patterns. Light users may prefer smaller packages (1-3GB) for messaging and browsing. Moderate users (5-10GB) can handle social media and occasional streaming. Heavy users may require larger packages (20GB+) for work or entertainment purposes.
                     </p>
                 </div>
             </div>
@@ -888,7 +963,7 @@ function renderExtendedContent() {
     <!-- FAQ Section -->
     <section class="max-w-4xl mx-auto px-6 py-24">
         <h2 class="text-3xl font-black text-center mb-4 animate-slide-up">Frequently Asked Questions</h2>
-        <p class="text-center text-muted-theme mb-12 animate-slide-up stagger-1" style="animation-fill-mode: forwards;">Everything you need to know about buying data in Ghana</p>
+        <p class="text-center text-muted-theme mb-12 animate-slide-up stagger-1" style="animation-fill-mode: forwards;">Common questions about purchasing data through our platform</p>
         
         <div class="space-y-4">
             <div class="p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-1 opacity-0" style="animation-fill-mode: forwards;">
@@ -897,7 +972,7 @@ function renderExtendedContent() {
                     How long does it take to receive my data?
                 </h4>
                 <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    Most orders are processed within 1 to 5 minutes after successful payment. During peak hours, it may take up to 15 minutes. You will receive a confirmation SMS from your network provider once the data is active on your line.
+                    Orders are typically processed within minutes after successful payment. During high-traffic periods, processing may take longer. You will receive a confirmation SMS from your network provider once the data is credited to your line.
                 </p>
             </div>
             
@@ -907,7 +982,7 @@ function renderExtendedContent() {
                     What if my data doesn't arrive?
                 </h4>
                 <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    Our system is highly reliable with a 99.9% success rate. However, if there's a delay beyond 30 minutes, please contact our support team immediately via the WhatsApp button with your transaction reference number. We resolve all issues within 2 hours.
+                    If you experience delays beyond 30 minutes, please contact our support team via WhatsApp with your transaction reference number. We aim to resolve all issues promptly.
                 </p>
             </div>
             
@@ -917,7 +992,7 @@ function renderExtendedContent() {
                     Is my payment information safe?
                 </h4>
                 <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    Absolutely. We use Paystack, the leading payment processor in Africa, which is PCI-DSS compliant. We do not store your credit card details, Mobile Money PIN, or any sensitive payment information. All transactions are encrypted with 256-bit SSL.
+                    We use Paystack, a leading payment processor in Africa, which is PCI-DSS compliant. We do not store your credit card details or Mobile Money PIN. All transactions are encrypted.
                 </p>
             </div>
             
@@ -927,7 +1002,7 @@ function renderExtendedContent() {
                     Can I buy data for someone else?
                 </h4>
                 <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    Yes! During checkout, simply enter the recipient's phone number instead of your own. The data will be credited directly to their line. This is perfect for gifting data to family members or employees.
+                    Yes. During checkout, enter the recipient's phone number. The data will be credited to their line. This is useful for gifting data to family members or friends.
                 </p>
             </div>
             
@@ -937,7 +1012,7 @@ function renderExtendedContent() {
                     Do the data bundles expire?
                 </h4>
                 <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    All our data bundles come with 30 days validity from the date of purchase. Unused data will expire after this period. We recommend purchasing data that you can consume within 30 days.
+                    Data bundles typically come with 30 days validity from the date of purchase. Please check the specific validity period for your selected bundle. Unused data will expire after this period.
                 </p>
             </div>
         </div>
@@ -946,14 +1021,13 @@ function renderExtendedContent() {
     <!-- Trust Indicators -->
     <section class="max-w-6xl mx-auto px-6 py-16 border-t border-slate-200 dark:border-slate-800">
         <div class="text-center mb-12">
-            <h3 class="text-2xl font-bold mb-2">Trusted by Ghanaians Nationwide</h3>
-            <p class="text-muted-theme">Serving customers in all 16 regions of Ghana</p>
+            <h3 class="text-2xl font-bold mb-2">Networks We Support</h3>
+            <p class="text-muted-theme">Compatible with major Ghanaian mobile networks</p>
         </div>
-        <div class="flex flex-wrap justify-center gap-8 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-            <div class="text-2xl font-black text-slate-400">MTN</div>
-            <div class="text-2xl font-black text-slate-400">Telecel</div>
-            <div class="text-2xl font-black text-slate-400">AirtelTigo</div>
-            <div class="text-2xl font-black text-slate-400">Paystack</div>
+        <div class="flex flex-wrap justify-center gap-8 items-center opacity-60">
+            <div class="text-xl font-bold text-slate-400">MTN Ghana</div>
+            <div class="text-xl font-bold text-slate-400">Telecel</div>
+            <div class="text-xl font-bold text-slate-400">AirtelTigo</div>
         </div>
     </section>`;
 }
@@ -970,31 +1044,31 @@ function renderHome(){
       
       <div class="relative z-10 max-w-4xl mx-auto">
         <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight animate-slide-up leading-tight">
-            Buy Cheap Data Bundles <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">in Ghana</span>
+            Buy Data Bundles <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">in Ghana</span>
         </h1>
         <p class="max-w-2xl mx-auto text-slate-300 text-lg md:text-xl mb-8 animate-slide-up stagger-1 leading-relaxed" style="animation-fill-mode: forwards;">
-            Get instant MTN, Telecel, and AirtelTigo data bundles at the best prices. Secure Paystack payments. Nationwide delivery in minutes. Trusted by 50,000+ Ghanaians.
+            Convenient access to MTN, Telecel, and AirtelTigo data bundles. Secure Paystack payments. Nationwide service across Ghana.
         </p>
         
         <!-- Trust Badges -->
         <div class="flex flex-wrap justify-center gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
             <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2">
                 <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                Instant Delivery
+                Secure Checkout
             </span>
             <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2">
                 <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                Secure Payment
+                Paystack Verified
             </span>
             <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2">
                 <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                Best Prices
+                Competitive Prices
             </span>
         </div>
         
         <div class="animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
             <a href="#networks" class="cta-button text-white px-10 py-5 rounded-2xl font-black shadow-2xl inline-flex items-center gap-3 text-lg group">
-                Buy Data Now
+                View Data Plans
                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
             </a>
         </div>
@@ -1017,7 +1091,7 @@ function renderHome(){
         <div class="text-center mb-12">
             <h2 class="text-3xl md:text-4xl font-black mb-4 animate-slide-up">Choose Your Network</h2>
             <p class="text-muted-theme max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-                Select your mobile network below to view available data bundles. We support all major networks in Ghana with instant activation.
+                Select your mobile network below to view available data bundles. We facilitate purchases for all major networks in Ghana.
             </p>
         </div>
         
@@ -1051,34 +1125,38 @@ function renderHome(){
     <!-- More Content for SEO -->
     <section class="bg-slate-50 dark:bg-slate-900/50 py-20">
         <div class="max-w-6xl mx-auto px-6">
+            <div class="disclaimer-box mb-8">
+              <strong>Affiliate Disclosure:</strong> TRU Data Network may receive compensation when you purchase data bundles through our platform. This helps us maintain our service and continue offering competitive prices.
+            </div>
+            
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="animate-slide-up">
-                    <h2 class="text-3xl font-black mb-6">The Smart Way to Buy Data in Ghana</h2>
+                    <h2 class="text-3xl font-black mb-6">Convenient Data Purchases in Ghana</h2>
                     <p class="text-muted-theme mb-6 leading-relaxed">
-                        Stop overpaying for data bundles. TRU Data Network connects you directly to the best deals from MTN, Telecel, and AirtelTigo. Our platform is designed for speed, security, and savings.
+                        TRU Data Network provides a platform for purchasing mobile data bundles. We work to offer competitive pricing and a streamlined purchasing experience for MTN, Telecel, and AirtelTigo customers.
                     </p>
                     <ul class="space-y-3">
                         <li class="flex items-center gap-3 text-sm font-semibold">
                             <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                            Save up to 30% compared to standard rates
+                            Competitive pricing compared to standard rates
                         </li>
                         <li class="flex items-center gap-3 text-sm font-semibold">
                             <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                            No registration required - buy instantly
+                            Simple ordering process - no complex registration
                         </li>
                         <li class="flex items-center gap-3 text-sm font-semibold">
                             <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                            24/7 customer support via WhatsApp
+                            Customer support via WhatsApp
                         </li>
                         <li class="flex items-center gap-3 text-sm font-semibold">
-                            <svg class="w-5 h-5 text-blue-500" fill="currentValue" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                            Works with all mobile devices
+                            <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            Compatible with all mobile devices
                         </li>
                     </ul>
                 </div>
                 <div class="relative animate-scale-in stagger-2" style="animation-fill-mode: forwards;">
                     <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl blur-2xl opacity-20"></div>
-                    <img src="./11.png" alt="TRU Data App" class="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto">
+                    <img src="./11.png" alt="TRU Data App Interface" class="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto">
                 </div>
             </div>
         </div>
@@ -1103,7 +1181,7 @@ function renderLandingPage(){
       <div class="relative z-10 mb-12 animate-scale-in">
         <div class="relative group">
           <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-          <img src="./11.png" alt="TRU Data Network Logo - Buy Data Bundles in Ghana" class="hero-logo relative z-10 animate-float">
+          <img src="./11.png" alt="TRU Data Network Logo - Data Bundle Platform" class="hero-logo relative z-10 animate-float">
         </div>
       </div>
 
@@ -1113,15 +1191,15 @@ function renderLandingPage(){
           Welcome to <span class="gradient-text">TruData</span>
         </h1>
         <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 font-semibold animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-          Your Trusted Platform for Mobile Data Information in Ghana
+          Your Platform for Mobile Data Bundle Purchases in Ghana
         </p>
         <p class="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
-          TruData is a digital information platform designed to help users understand, compare, and choose mobile data bundle options with confidence. We provide clear, well-organized information that allows users to explore data plans across different mobile networks without confusion or guesswork.
+          TruData is a digital platform designed to help users purchase mobile data bundles conveniently. We provide an organized interface that allows users to explore and buy data plans across different mobile networks in Ghana.
         </p>
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
             <button onclick="navigateTo('home')" class="cta-button text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-2">
-                Explore Data Bundles
+                Browse Data Bundles
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
             </button>
             <button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
@@ -1139,8 +1217,12 @@ function renderLandingPage(){
     <!-- Mission Section -->
     <section class="py-20 px-4 bg-white dark:bg-slate-900">
       <div class="max-w-4xl mx-auto text-center">
+        <div class="disclaimer-box text-left mb-8">
+          <strong>Independent Service Notice:</strong> TruData Network operates as an independent third-party service. We are not owned by or directly affiliated with MTN Ghana, Telecel, or AirtelTigo. All trademarks belong to their respective owners.
+        </div>
+        
         <p class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-8 animate-slide-up">
-          In a world where internet access is essential for education, business, communication, and entertainment, making the right data choice matters. TruData was created to simplify that decision by presenting relevant data bundle information in a transparent and user-friendly way.
+          In today's connected world, internet access is essential for education, business, communication, and entertainment. TruData was created to simplify the process of purchasing mobile data by providing a centralized platform where users can compare and buy data plans from multiple networks.
         </p>
         
         <!-- Ad Container -->
@@ -1159,13 +1241,13 @@ function renderLandingPage(){
     <section class="py-20 px-4 bg-slate-50 dark:bg-slate-800/30">
       <div class="max-w-6xl mx-auto">
         <h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">What You Can Do on TruData</h2>
-        <p class="text-center text-slate-500 dark:text-slate-400 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">TruData helps users by providing comprehensive mobile data information services:</p>
+        <p class="text-center text-slate-500 dark:text-slate-400 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">TruData provides the following services for mobile data customers:</p>
         
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-1" style="animation-fill-mode: forwards;">
             <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">📱</div>
             <h3 class="font-bold text-lg mb-2">Easy Access</h3>
-            <p class="text-sm text-muted-theme">Mobile data bundle information at your fingertips, organized for quick access</p>
+            <p class="text-sm text-muted-theme">Browse mobile data bundle options organized by network for convenient comparison</p>
           </div>
           
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-2" style="animation-fill-mode: forwards;">
@@ -1177,13 +1259,13 @@ function renderLandingPage(){
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-3" style="animation-fill-mode: forwards;">
             <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">🌐</div>
             <h3 class="font-bold text-lg mb-2">Network Based</h3>
-            <p class="text-sm text-muted-theme">Organized by network provider for faster navigation and comparison</p>
+            <p class="text-sm text-muted-theme">Organized by network provider for faster navigation</p>
           </div>
           
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-4" style="animation-fill-mode: forwards;">
             <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">⚡</div>
             <h3 class="font-bold text-lg mb-2">Simple Interface</h3>
-            <p class="text-sm text-muted-theme">Designed for all devices and user levels with intuitive navigation</p>
+            <p class="text-sm text-muted-theme">Designed for all devices with intuitive navigation</p>
           </div>
         </div>
       </div>
@@ -1194,7 +1276,7 @@ function renderLandingPage(){
       <div class="max-w-6xl mx-auto">
         <h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">Who TruData Is For</h2>
         <p class="text-center text-slate-600 dark:text-slate-300 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-          TruData is built for a wide range of users who value clear information and informed choices when purchasing mobile data in Ghana.
+          TruData serves a wide range of users who need convenient access to mobile data purchasing options.
         </p>
         
         <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -1202,7 +1284,7 @@ function renderLandingPage(){
             <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-blue-500/30">🎓</div>
             <div>
               <h4 class="font-bold text-lg mb-1">Students</h4>
-              <p class="text-sm text-muted-theme">Who rely on mobile data for online learning, research, and educational resources</p>
+              <p class="text-sm text-muted-theme">Who need mobile data for online learning, research, and educational resources</p>
             </div>
           </div>
           
@@ -1210,7 +1292,7 @@ function renderLandingPage(){
             <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-purple-500/30">💼</div>
             <div>
               <h4 class="font-bold text-lg mb-1">Professionals</h4>
-              <p class="text-sm text-muted-theme">And remote workers who need reliable connectivity for video calls and cloud services</p>
+              <p class="text-sm text-muted-theme">And remote workers who need reliable connectivity for work activities</p>
             </div>
           </div>
           
@@ -1218,7 +1300,7 @@ function renderLandingPage(){
             <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-green-500/30">🏪</div>
             <div>
               <h4 class="font-bold text-lg mb-1">Business Owners</h4>
-              <p class="text-sm text-muted-theme">Small and medium business owners managing online activities and digital payments</p>
+              <p class="text-sm text-muted-theme">Managing online business activities and digital operations</p>
             </div>
           </div>
           
@@ -1226,7 +1308,7 @@ function renderLandingPage(){
             <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-orange-500/30">👥</div>
             <div>
               <h4 class="font-bold text-lg mb-1">Everyday Users</h4>
-              <p class="text-sm text-muted-theme">Who want better control over data spending and avoid bill shock</p>
+              <p class="text-sm text-muted-theme">Who want convenient options for managing data purchases</p>
             </div>
           </div>
         </div>
@@ -1243,7 +1325,7 @@ function renderLandingPage(){
           Many users experience challenges such as unclear pricing, confusing bundle options, or limited explanations when selecting mobile data plans. TruData addresses these challenges by focusing on transparency and accessibility.
         </p>
         <p class="text-lg text-slate-300 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
-          By organizing information clearly and presenting it in a straightforward format, TruData empowers users to make smarter digital decisions and get the best value for their money.
+          By organizing information clearly and presenting it in a straightforward format, TruData helps users make informed digital decisions and find suitable data options for their needs.
         </p>
         
         <!-- Ad Container Dark -->
@@ -1264,63 +1346,13 @@ function renderLandingPage(){
       <div class="max-w-4xl mx-auto text-center relative z-10">
         <h2 class="text-3xl md:text-4xl font-black mb-6 text-white animate-slide-up">Ready to Get Started?</h2>
         <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-          To explore available data bundle options, simply proceed to the network selection page where you can choose your preferred mobile network and view relevant data packages.
+          To explore available data bundle options, proceed to the network selection page where you can choose your preferred mobile network and view relevant data packages.
         </p>
         <button onclick="navigateTo('home')" class="bg-white text-blue-600 px-12 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 hover:shadow-white/25 transition-all animate-slide-up stagger-2 flex items-center gap-3 mx-auto" style="animation-fill-mode: forwards;">
-          👉 Explore Mobile Networks
+          Explore Mobile Networks
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </button>
       </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="py-20 px-4 bg-slate-50 dark:bg-slate-800/30">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-3xl font-black text-center mb-12 animate-slide-up">What Our Users Say</h2>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="p-6 card-theme rounded-2xl animate-scale-in stagger-1" style="animation-fill-mode: forwards;">
-                    <div class="flex items-center gap-1 mb-4">
-                        ${'★'.repeat(5).split('').map(s => `<span class="text-yellow-400 text-lg">${s}</span>`).join('')}
-                    </div>
-                    <p class="text-sm text-muted-theme mb-4">"Fastest data delivery I've experienced. Got my MTN bundle in less than 2 minutes. Highly recommended!"</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600">KK</div>
-                        <div>
-                            <div class="font-bold text-sm">Kwame K.</div>
-                            <div class="text-xs text-muted-theme">Accra</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="p-6 card-theme rounded-2xl animate-scale-in stagger-2" style="animation-fill-mode: forwards;">
-                    <div class="flex items-center gap-1 mb-4">
-                        ${'★'.repeat(5).split('').map(s => `<span class="text-yellow-400 text-lg">${s}</span>`).join('')}
-                    </div>
-                    <p class="text-sm text-muted-theme mb-4">"Best prices in Ghana. I save at least 20% on every purchase compared to buying directly from the network."</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center font-bold text-purple-600">AA</div>
-                        <div>
-                            <div class="font-bold text-sm">Abena A.</div>
-                            <div class="text-xs text-muted-theme">Kumasi</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="p-6 card-theme rounded-2xl animate-scale-in stagger-3" style="animation-fill-mode: forwards;">
-                    <div class="flex items-center gap-1 mb-4">
-                        ${'★'.repeat(5).split('').map(s => `<span class="text-yellow-400 text-lg">${s}</span>`).join('')}
-                    </div>
-                    <p class="text-sm text-muted-theme mb-4">"The website is so easy to use. No complicated steps, just select, pay, and receive. Perfect for busy people."</p>
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-600">YM</div>
-                        <div>
-                            <div class="font-bold text-sm">Yaw M.</div>
-                            <div class="text-xs text-muted-theme">Tamale</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </section>
   </div>`;
 }
@@ -1331,28 +1363,32 @@ function renderAbout(){
         <section class="py-20 px-4 max-w-4xl mx-auto">
             <h1 class="text-4xl md:text-5xl font-black mb-8 text-center animate-slide-up">About TRU Data Network</h1>
             
+            <div class="disclaimer-box mb-8">
+              <strong>Company Information:</strong> TRU Data Network is an independent business operating in Ghana. We facilitate the purchase of mobile data bundles through partnerships with authorized vendors. We are not a telecommunications company.
+            </div>
+            
             <div class="prose prose-slate dark:prose-invert max-w-none">
                 <p class="text-lg text-muted-theme mb-8 animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-                    TRU Data Network was founded in 2024 with a simple mission: to make mobile data more affordable and accessible to every Ghanaian. We recognized that many people were paying too much for data simply because they didn't have access to better deals.
+                    TRU Data Network was established to provide Ghanaians with a convenient way to purchase mobile data bundles online. We recognized that many people were looking for easier ways to buy data without visiting physical stores or navigating complex USSD codes.
                 </p>
                 
                 <div class="grid md:grid-cols-2 gap-8 mb-12">
                     <div class="p-6 card-theme rounded-2xl animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
                         <h3 class="text-xl font-bold mb-3 text-blue-600">Our Vision</h3>
-                        <p class="text-sm text-muted-theme">To become Ghana's most trusted platform for mobile data services, empowering every citizen with affordable internet access.</p>
+                        <p class="text-sm text-muted-theme">To become a trusted platform for mobile data purchases in Ghana, providing convenient access to connectivity for all users.</p>
                     </div>
                     <div class="p-6 card-theme rounded-2xl animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
                         <h3 class="text-xl font-bold mb-3 text-purple-600">Our Mission</h3>
-                        <p class="text-sm text-muted-theme">To provide transparent, affordable, and instant data services while maintaining the highest standards of customer satisfaction.</p>
+                        <p class="text-sm text-muted-theme">To simplify the data purchasing process while maintaining transparency and customer satisfaction.</p>
                     </div>
                 </div>
                 
                 <h2 class="text-2xl font-bold mb-4 animate-slide-up stagger-4" style="animation-fill-mode: forwards;">Why We Exist</h2>
                 <p class="text-muted-theme mb-6 animate-slide-up stagger-4" style="animation-fill-mode: forwards;">
-                    In today's digital age, internet connectivity is not a luxury—it's a necessity. From students attending online classes to professionals working remotely, everyone needs reliable and affordable data. However, the process of buying data in Ghana has traditionally been fragmented and expensive.
+                    In today's digital age, internet connectivity is increasingly important for education, work, and communication. However, the process of purchasing data in Ghana can sometimes be inconvenient. TRU Data Network addresses this by providing an online platform where users can browse, compare, and purchase data bundles from major networks.
                 </p>
                 <p class="text-muted-theme mb-6 animate-slide-up stagger-5" style="animation-fill-mode: forwards;">
-                    TRU Data Network bridges this gap by aggregating the best data deals from all major networks and presenting them in an easy-to-use platform. We handle the complexities so you can focus on what matters: staying connected.
+                    We work with authorized partners to facilitate these purchases. While we strive to offer competitive prices, all data is provided through official network channels.
                 </p>
                 
                 <div class="ad-container my-12 min-h-[250px]">
@@ -1370,21 +1406,21 @@ function renderAbout(){
                         <svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <div>
                             <strong class="block text-slate-900 dark:text-white">Transparency</strong>
-                            <span class="text-sm text-muted-theme">No hidden fees, no surprises. What you see is what you pay.</span>
+                            <span class="text-sm text-muted-theme">Clear pricing with no hidden fees. What you see is what you pay.</span>
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
                         <svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <div>
                             <strong class="block text-slate-900 dark:text-white">Reliability</strong>
-                            <span class="text-sm text-muted-theme">We guarantee instant delivery or your money back.</span>
+                            <span class="text-sm text-muted-theme">We work to ensure timely processing of all orders.</span>
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
                         <svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <div>
-                            <strong class="block text-slate-900 dark:text-white">Customer First</strong>
-                            <span class="text-sm text-muted-theme">24/7 support to ensure you're never stranded.</span>
+                            <strong class="block text-slate-900 dark:text-white">Customer Support</strong>
+                            <span class="text-sm text-muted-theme">Assistance available via WhatsApp for order inquiries.</span>
                         </div>
                     </li>
                 </ul>
@@ -1412,7 +1448,7 @@ function render(){
   else if(state.view==='confirm-phone') app.innerHTML=renderConfirmPhone();
   else if(state.view==='admin-login') app.innerHTML=`<div class="max-w-md mx-auto py-32 px-4"><form onsubmit="adminAuth(event)" class="card-theme p-12 rounded-[2.5rem] shadow-2xl text-center animate-scale-in"><div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white text-3xl font-black">TRU</div><h2 class="text-3xl font-black mb-2">Admin Access</h2><p class="text-sm text-muted-theme mb-8">Secure login for authorized personnel only</p><input id="adm-u" type="email" placeholder="Email address" class="w-full p-5 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl mb-4 font-bold transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/20 outline-none" required><input id="adm-p" type="password" placeholder="Password" class="w-full p-5 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl mb-8 font-bold transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/20 outline-none" required><button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-5 rounded-2xl font-black shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">Sign In</button></form></div>`;
   else if(state.view==='admin-dashboard') app.innerHTML=renderAdminDashboard();
-  else if(state.view==='success') app.innerHTML=`<div class="py-24 text-center animate__animated animate__zoomIn px-4"><div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-4xl md:text-5xl font-black mb-4">Order Placed Successfully!</h2><p class="mb-6 text-xl font-bold text-slate-500">Your ${state.params.bundle_name} for ${state.params.Phone} is being processed.</p><div class="max-w-md mx-auto p-6 card-theme rounded-2xl mb-8 text-left"><p class="text-sm text-muted-theme mb-2">Reference: <span class="font-mono font-bold text-slate-900 dark:text-white">${state.params.ref || 'N/A'}</span></p><p class="text-sm text-muted-theme">You will receive a confirmation SMS shortly. If you don't receive your data within 15 minutes, please contact us via WhatsApp.</p></div><div class="flex flex-col sm:flex-row gap-4 justify-center"><button onclick="navigateTo('landing')" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">Back to Home</button><button onclick="navigateTo('home')" class="px-8 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-2 border-slate-300 dark:border-slate-700 hover:border-blue-500 transition-all">Buy More Data</button></div></div>`;
+  else if(state.view==='success') app.innerHTML=`<div class="py-24 text-center animate__animated animate__zoomIn px-4"><div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-4xl md:text-5xl font-black mb-4">Order Placed Successfully!</h2><p class="mb-6 text-xl font-bold text-slate-500">Your ${state.params.bundle_name} for ${state.params.Phone} is being processed.</p><div class="max-w-md mx-auto p-6 card-theme rounded-2xl mb-8 text-left"><p class="text-sm text-muted-theme mb-2">Reference: <span class="font-mono font-bold text-slate-900 dark:text-white">${state.params.ref || 'N/A'}</span></p><p class="text-sm text-muted-theme">You will receive a confirmation SMS shortly. If you don't receive your data within the expected timeframe, please contact us via WhatsApp.</p></div><div class="flex flex-col sm:flex-row gap-4 justify-center"><button onclick="navigateTo('landing')" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">Back to Home</button><button onclick="navigateTo('home')" class="px-8 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-2 border-slate-300 dark:border-slate-700 hover:border-blue-500 transition-all">Buy More Data</button></div></div>`;
 
   // Update Extended Content
   ext.innerHTML = renderExtendedContent();
@@ -1475,10 +1511,12 @@ async function updateStatus(ref, status){
 function cancelActiveProcess(){
     document.getElementById('admin-actions-bar').style.display='none';
     state.activeOrderData = null;
+    state.selectedProvider = 'evnetwork';
 }
 
 function selectPlan(bundle){
     state.activeOrderData={bundle};
+    state.selectedProvider = 'evnetwork';
     navigateTo('confirm-phone');
 }
 
@@ -1492,7 +1530,10 @@ async function handleOrderButton(){
     state.activeOrderData.phone = phone;
     
     if(state.isAdmin && state.isDirectMode){
-        processDirectOrder();
+        // Show provider selection in admin bar
+        document.getElementById('active-order-label').innerText = `${phone} - ${state.activeOrderData.bundle.size} (${state.activeOrderData.bundle.network.toUpperCase()})`;
+        document.getElementById('admin-actions-bar').style.display = 'flex';
+        showToast('⚠️ Select provider and confirm order');
     } else {
         const email = document.getElementById('cust-email').value.trim();
         if(!email || !email.includes('@')) {
@@ -1556,6 +1597,11 @@ async function processDirectOrder(){
     const {bundle, phone} = state.activeOrderData;
     const ref = 'DIR-' + Math.random().toString(36).slice(2, 10).toUpperCase();
     
+    // Open selected provider
+    const providerUrl = state.selectedProvider === 'evnetwork' 
+        ? 'https://evnetwork.shop' 
+        : 'https://refer2bundle.com';
+    
     try {
         await supa.from('orders').insert([{
             ref: ref,
@@ -1564,12 +1610,14 @@ async function processDirectOrder(){
             bundle_name: bundle.size,
             Amount: bundle.price,
             Status: 'Processing',
+            provider: state.selectedProvider,
             created_at: new Date().toISOString()
         }]);
         
-        window.open('https://evnetwork.shop', '_blank');
+        window.open(providerUrl, '_blank');
         state.isDirectMode = false;
-        showToast('✅ Direct order created');
+        state.selectedProvider = 'evnetwork';
+        showToast('✅ Direct order created - Opening ' + (state.selectedProvider === 'evnetwork' ? 'EV Network' : 'Refer2Bundle'));
         fetchOrders();
         navigateTo('admin-dashboard');
     } catch(err) {
@@ -1613,7 +1661,11 @@ function renderNetwork(id){
         
         <div class="mb-12 animate-slide-up">
             <h2 class="text-4xl font-black mb-3">Select Your Plan</h2>
-            <p class="text-muted-theme text-lg">${net.name} - Choose from ${networkBundles.length} available bundles</p>
+            <p class="text-muted-theme text-lg">${net.name} - ${networkBundles.length} available bundles</p>
+        </div>
+        
+        <div class="disclaimer-box mb-8">
+          <strong>Note:</strong> Prices are subject to change based on network provider policies. All bundles are subject to availability and network terms and conditions.
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16">
@@ -1661,6 +1713,10 @@ function renderConfirmPhone(){
                 <p class="text-muted-theme">You're purchasing <span class="font-bold text-slate-900 dark:text-white">${bundle.size}</span> for <span class="price-tag text-sm ml-1">₵${bundle.price.toFixed(2)}</span></p>
             </div>
             
+            <div class="disclaimer-box text-left text-xs mb-6">
+              <strong>Important:</strong> Please verify all details before proceeding. Data bundles are non-refundable once delivered to the wrong number due to incorrect input.
+            </div>
+            
             <div class="space-y-4 mb-8">
                 <div class="relative">
                     <input id="p-num" type="tel" placeholder="Enter phone number (024...)" 
@@ -1675,7 +1731,15 @@ function renderConfirmPhone(){
                            class="w-full p-4 border-4 dark:bg-slate-800 dark:border-slate-700 rounded-2xl text-center font-bold focus:border-blue-600 outline-none transition-all">
                     <p class="text-xs text-slate-400 mt-2">For payment receipt and confirmation</p>
                 </div>
-                ` : ''}
+                ` : `
+                <div class="affiliate-disclosure text-left">
+                  <p class="text-xs font-semibold mb-2">Select Provider:</p>
+                  <div class="flex gap-2">
+                    <button type="button" onclick="state.selectedProvider='evnetwork'; document.getElementById('btn-ev-direct').className='flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold'; document.getElementById('btn-ref-direct').className='flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold';" id="btn-ev-direct" class="flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold">EV Network</button>
+                    <button type="button" onclick="state.selectedProvider='refer2bundle'; document.getElementById('btn-ref-direct').className='flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold'; document.getElementById('btn-ev-direct').className='flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold';" id="btn-ref-direct" class="flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold">Refer2Bundle</button>
+                  </div>
+                </div>
+                `}
             </div>
             
             <button onclick="handleOrderButton()" 
@@ -1722,7 +1786,7 @@ function renderAdminDashboard(){
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-slide-up">
                 <div>
                     <h2 class="text-3xl md:text-4xl font-black gradient-text">Admin Dashboard</h2>
-                    <p class="text-sm text-muted-theme mt-1">Manage orders and monitor transactions in real-time</p>
+                    <p class="text-sm text-muted-theme mt-1">Manage orders and monitor transactions</p>
                 </div>
                 <div class="flex gap-3">
                     <button onclick="refreshOrders()" class="admin-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2">
@@ -1829,7 +1893,7 @@ function renderAdminDashboard(){
                                 </td>
                                 <td class="p-5">
                                     <div class="font-black text-slate-900 dark:text-white text-base">${o.Phone}</div>
-                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">${o.Network}</div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">${o.Network}${o.provider ? ' • ' + o.provider : ''}</div>
                                 </td>
                                 <td class="p-5">
                                     <div class="font-bold text-slate-700 dark:text-slate-200">${o.bundle_name}</div>
