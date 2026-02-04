@@ -895,7 +895,7 @@ function renderExtendedContent() {
     </div>
 
     <section class="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700 animate-gradient py-20 text-white relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.05\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\" fill=\"%23ffffff\" fill-opacity=\"0.05\" fill-rule=\"evenodd\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
         <div class="max-w-5xl mx-auto px-6 text-center relative z-10">
             <h2 class="text-4xl font-black mb-6 animate-slide-up">Your Reliable Data Top-up Service</h2>
             <p class="text-xl opacity-90 mb-10 leading-relaxed max-w-3xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
@@ -1530,10 +1530,43 @@ async function handleOrderButton(){
     state.activeOrderData.phone = phone;
     
     if(state.isAdmin && state.isDirectMode){
-        // Show provider selection in admin bar
-        document.getElementById('active-order-label').innerText = `${phone} - ${state.activeOrderData.bundle.size} (${state.activeOrderData.bundle.network.toUpperCase()})`;
-        document.getElementById('admin-actions-bar').style.display = 'flex';
-        showToast('⚠️ Select provider and confirm order');
+        // Direct order with provider selection - save with Processing status and redirect
+        const provider = state.selectedProvider || 'evnetwork';
+        const providerUrl = provider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
+        const {bundle} = state.activeOrderData;
+        const ref = 'DIR-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+        
+        try {
+            // First, save to database
+            const {data, error} = await supa.from('orders').insert([{
+                ref: ref,
+                Phone: phone,
+                Network: bundle.network,
+                bundle_name: bundle.size,
+                Amount: bundle.price,
+                Status: 'Processing', // Set to Processing as required
+                provider: provider,
+                created_at: new Date().toISOString()
+            }]).select();
+            
+            if(error) throw error;
+            
+            // Refresh orders list to show the new order immediately
+            await fetchOrders();
+            
+            // Show success toast
+            showToast('✅ Direct order created and saved');
+            
+            // Only open external site after successful save
+            window.open(providerUrl, '_blank');
+            
+            // Reset state and navigate to dashboard
+            state.isDirectMode = false;
+            state.selectedProvider = 'evnetwork';
+            navigateTo('admin-dashboard');
+        } catch(err) {
+            showToast('❌ Error creating order: ' + err.message);
+        }
     } else {
         const email = document.getElementById('cust-email').value.trim();
         if(!email || !email.includes('@')) {
@@ -1593,41 +1626,13 @@ async function onPaymentSuccess(response){
     }
 }
 
-async function processDirectOrder(){
-    const {bundle, phone} = state.activeOrderData;
-    const ref = 'DIR-' + Math.random().toString(36).slice(2, 10).toUpperCase();
-    
-    // Open selected provider
-    const providerUrl = state.selectedProvider === 'evnetwork' 
-        ? 'https://evnetwork.shop' 
-        : 'https://refer2bundle.com';
-    
-    try {
-        await supa.from('orders').insert([{
-            ref: ref,
-            Phone: phone,
-            Network: bundle.network,
-            bundle_name: bundle.size,
-            Amount: bundle.price,
-            Status: 'Processing',
-            provider: state.selectedProvider,
-            created_at: new Date().toISOString()
-        }]);
-        
-        window.open(providerUrl, '_blank');
-        state.isDirectMode = false;
-        state.selectedProvider = 'evnetwork';
-        showToast('✅ Direct order created - Opening ' + (state.selectedProvider === 'evnetwork' ? 'EV Network' : 'Refer2Bundle'));
-        fetchOrders();
-        navigateTo('admin-dashboard');
-    } catch(err) {
-        showToast('❌ Error creating order');
-    }
-}
-
 function openProcessTab(order){
     // Store order reference for the fulfill button
     state.currentProcessingOrder = order;
+    
+    // Set default provider for existing orders
+    state.selectedProvider = order.provider || 'evnetwork';
+    selectProvider(state.selectedProvider);
     
     window.open('https://evnetwork.shop', '_blank');
     updateStatus(order.ref, 'Processing');
@@ -1635,7 +1640,7 @@ function openProcessTab(order){
     document.getElementById('active-order-label').innerText = `${order.Phone} - ${order.bundle_name}`;
     document.getElementById('admin-actions-bar').style.display = 'flex';
     
-    // Set up the fulfill button with proper context
+    // Set up the fulfill button
     const fulfillBtn = document.getElementById('global-fulfill-btn');
     fulfillBtn.onclick = async () => {
         try {
