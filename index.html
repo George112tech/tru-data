@@ -1120,7 +1120,7 @@ function resetToAutoMode() {
 /* ================== PHONE VALIDATION ================== */
 function validateGhanaPhone(phone) {
   // Remove any spaces or dashes
-  phone = phone.replace(/[\\s-]/g, '');
+  phone = phone.replace(/[\s-]/g, '');
   
   // Check if it starts with valid Ghana prefixes
   const validPrefixes = ['024', '054', '055', '059', '027', '057', '026', '056', '020', '050', '023', '053', '028', '058'];
@@ -1129,8 +1129,8 @@ function validateGhanaPhone(phone) {
   // Must be exactly 10 digits
   const isCorrectLength = phone.length === 10;
   
-  // Must contain only digits
-  const isOnlyDigits = /^\\d+$/.test(phone);
+  // Must contain only digits - FIXED: Use single backslash for regex
+  const isOnlyDigits = /^\d+$/.test(phone);
   
   return {
     isValid: startsWithValidPrefix && isCorrectLength && isOnlyDigits,
