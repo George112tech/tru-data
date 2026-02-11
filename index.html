@@ -239,11 +239,6 @@ body {
   100% { background-position: 200% 0; }
 }
 
-@keyframes border-glow {
-  0%, 100% { border-color: var(--accent-primary); }
-  50% { border-color: var(--accent-secondary); }
-}
-
 .animate-float { animation: float 6s ease-in-out infinite; }
 .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
 .animate-gradient { background-size: 200% 200%; animation: gradient-shift 8s ease infinite; }
@@ -777,6 +772,81 @@ input:focus, select:focus {
   background: var(--bg-card);
   color: var(--text-primary);
 }
+
+/* Wallet Styles */
+.wallet-card {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+
+.wallet-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  transform: rotate(45deg);
+}
+
+.wallet-balance {
+  font-size: 2.5rem;
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+}
+
+.wallet-label {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1;
+}
+
+.deposit-fee-note {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 0.5rem;
+}
+
+/* View Wallet Button Fix */
+.view-wallet-btn {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--accent-primary);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.view-wallet-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border-color: white;
+}
+
+[data-theme="dark"] .view-wallet-btn {
+  background: rgba(30, 30, 46, 0.9);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .view-wallet-btn:hover {
+  background: rgba(30, 30, 46, 1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
 </style>
 </head>
 
@@ -799,6 +869,12 @@ input:focus, select:focus {
       
       <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-blue-600 dark:hover:text-blue-400 hidden md:block transition-colors duration-300">Buy Data</button>
       <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-blue-600 dark:hover:text-blue-400 hidden md:block transition-colors duration-300">About</button>
+      
+      <!-- User Auth Section -->
+      <div id="user-auth-section" class="hidden md:flex items-center gap-3">
+        <!-- Populated by JS -->
+      </div>
+      
       <button id="admin-nav-btn" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-4 py-2.5 rounded-full font-bold text-slate-500 hover:bg-blue-600 hover:text-white transition-all uppercase shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Admin</button>
     </div>
   </div>
@@ -957,7 +1033,7 @@ const PAYSTACK_KEY = "pk_live_ea1b78f7fb20ea947f216c78e6ae3adc32d45f1b";
 const supa = supabase.createClient(SB_URL, SB_KEY);
 
 const NETWORKS = {
-  mtn:{name:'MTN Ghana',color:'bg-[#FFCC00]',text:'text-black',logo:'./2.png', description: 'Ghana\s largest network with widest coverage'},
+  mtn:{name:'MTN Ghana',color:'bg-[#FFCC00]',text:'text-black',logo:'./2.png', description: 'Ghana\'s largest network with widest coverage'},
   airteltigo:{name:'AirtelTigo',color:'bg-[#0077B5]',text:'text-white',logo:'./3.png', description: 'Affordable data plans with great value'},
   telecel:{name:'Telecel',color:'bg-[#E60000]',text:'text-white',logo:'./4.png', description: 'Fast 4G internet at competitive prices'}
 };
@@ -1047,7 +1123,24 @@ const EXPRESS_BUNDLES = [
   {id:'t-100',network:'telecel',size:'100GB',price:365, validity:'30 Days'}
 ];
 
-let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'evnetwork',currentProcessingOrder:null,confirmationSelectedProvider:'evnetwork',isExpressMode:false,expressOverride:null};
+let state={
+  view:'landing',
+  isAdmin:false,
+  isDirectMode:false,
+  orders:[],
+  searchQuery:'',
+  networkFilter:'all',
+  activeOrderData:null,
+  selectedProvider:'evnetwork',
+  currentProcessingOrder:null,
+  confirmationSelectedProvider:'evnetwork',
+  isExpressMode:false,
+  expressOverride:null,
+  // User Auth State
+  user: null,
+  userProfile: null,
+  depositAmount: ''
+};
 
 /* ================== UTILITY FUNCTIONS ================== */
 function showToast(message, duration = 3000) {
@@ -1072,6 +1165,34 @@ function selectProvider(provider) {
   document.getElementById('btn-refer2bundle').className = provider === 'refer2bundle'
     ? 'flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold transition-all'
     : 'flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all';
+}
+
+function selectConfirmationProvider(provider) {
+  state.confirmationSelectedProvider = provider;
+  document.getElementById('btn-evnetwork-confirm').classList.toggle('selected', provider === 'evnetwork');
+  document.getElementById('btn-refer2bundle-confirm').classList.toggle('selected', provider === 'refer2bundle');
+}
+
+function closeAdminConfirmation() {
+  document.getElementById('admin-order-confirmation').style.display = 'none';
+  state.currentProcessingOrder = null;
+}
+
+function confirmProcessOrder() {
+  if (!state.currentProcessingOrder) return;
+  
+  const order = state.currentProcessingOrder;
+  const provider = state.confirmationSelectedProvider;
+  const providerUrl = provider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
+  
+  // Update order status
+  updateStatus(order.ref, 'Processing');
+  
+  // Open provider in new tab
+  window.open(providerUrl, '_blank');
+  
+  closeAdminConfirmation();
+  showToast('✅ Order marked as Processing. Redirecting...');
 }
 
 /* ================== TIME CHECKING FOR EXPRESS MODE ================== */
@@ -1129,7 +1250,7 @@ function validateGhanaPhone(phone) {
   // Must be exactly 10 digits
   const isCorrectLength = phone.length === 10;
   
-  // Must contain only digits - FIXED: Use single backslash for regex
+  // Must contain only digits
   const isOnlyDigits = /^\d+$/.test(phone);
   
   return {
@@ -1142,11 +1263,44 @@ function validateGhanaPhone(phone) {
 
 /* ================== CORE FUNCTIONS ================== */
 async function navigateTo(view,params=null){
+  try {
     state.view=view;
     state.params=params;
-    if(view==='admin-dashboard')await fetchOrders();
+    if(view==='admin-dashboard') await fetchOrders();
+    if(view==='wallet') await fetchUserProfile();
     render();
     window.scrollTo(0,0);
+  } catch (err) {
+    console.error('Navigation error:', err);
+    showToast('❌ Error loading page. Please try again.');
+  }
+}
+
+function updateAuthUI() {
+  const authSection = document.getElementById('user-auth-section');
+  if (!authSection) return;
+  
+  if (state.user) {
+    authSection.innerHTML = `
+      <div class="flex items-center gap-3">
+        <button onclick="navigateTo('wallet')" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+          Wallet
+        </button>
+        <button onclick="logoutUser()" class="text-xs font-bold text-slate-500 hover:text-red-500 transition-colors">
+          Logout
+        </button>
+      </div>
+    `;
+  } else {
+    authSection.innerHTML = `
+      <div class="flex items-center gap-2">
+        <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600 transition-colors">Login</button>
+        <span class="text-slate-300">|</span>
+        <button onclick="navigateTo('register')" class="text-xs font-bold bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors">Sign Up</button>
+      </div>
+    `;
+  }
 }
 
 function renderExtendedContent() {
@@ -1191,22 +1345,22 @@ function renderExtendedContent() {
                     <div class="flex gap-4 animate-slide-up stagger-1 opacity-0" style="animation-fill-mode: forwards;">
                         <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">1</div>
                         <div>
-                            <h4 class="font-bold text-lg mb-1">Select Your Network</h4>
-                            <p class="text-muted-theme text-sm">Choose between MTN, Telecel, or AirtelTigo to see available data offers for your network.</p>
+                            <h4 class="font-bold text-lg mb-1">Create Account</h4>
+                            <p class="text-muted-theme text-sm">Sign up for a free TRU Data account to access our services and manage your wallet.</p>
                         </div>
                     </div>
                     <div class="flex gap-4 animate-slide-up stagger-2 opacity-0" style="animation-fill-mode: forwards;">
                         <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">2</div>
                         <div>
-                            <h4 class="font-bold text-lg mb-1">Pick a Bundle</h4>
-                            <p class="text-muted-theme text-sm">Select from our range of data packages. All bundles come with 30-day validity unless otherwise stated.</p>
+                            <h4 class="font-bold text-lg mb-1">Deposit Funds</h4>
+                            <p class="text-muted-theme text-sm">Add money to your TRU Wallet using Paystack. Funds are credited instantly to your wallet.</p>
                         </div>
                     </div>
                     <div class="flex gap-4 animate-slide-up stagger-3 opacity-0" style="animation-fill-mode: forwards;">
                         <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">3</div>
                         <div>
-                            <h4 class="font-bold text-lg mb-1">Pay & Receive</h4>
-                            <p class="text-muted-theme text-sm">Pay securely with Mobile Money or Card via Paystack. Data is typically credited within minutes.</p>
+                            <h4 class="font-bold text-lg mb-1">Buy Data Instantly</h4>
+                            <p class="text-muted-theme text-sm">Select your network and bundle, then pay seamlessly from your wallet balance.</p>
                         </div>
                     </div>
                 </div>
@@ -1216,7 +1370,7 @@ function renderExtendedContent() {
                 <ul class="space-y-4">
                     <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
                         <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
-                        Convenient Online Ordering
+                        Wallet-Based Purchasing
                     </li>
                     <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
                         <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
@@ -1248,7 +1402,7 @@ function renderExtendedContent() {
     </div>
 
     <section class="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700 animate-gradient py-20 text-white relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z" fill="%23ffffff" fill-opacity="0.05" fill-rule="evenodd"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'0.05\' fill-rule=\'evenodd\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
         <div class="max-w-5xl mx-auto px-6 text-center relative z-10">
             <h2 class="text-4xl font-black mb-6 animate-slide-up">Your Reliable Data Top-up Service</h2>
             <p class="text-xl opacity-90 mb-10 leading-relaxed max-w-3xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
@@ -1322,10 +1476,10 @@ function renderExtendedContent() {
             <div class="p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-1 opacity-0" style="animation-fill-mode: forwards;">
                 <h4 class="font-bold mb-2 text-lg flex items-center gap-2">
                     <span class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 text-sm">?</span>
-                    How long does it take to receive my data?
+                    How do I add money to my wallet?
                 </h4>
                 <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    Orders are typically processed within minutes after successful payment. During high-traffic periods, processing may take longer. You will receive a confirmation SMS from your network provider once the data is credited to your line.
+                    Go to your Wallet page, enter the amount you wish to deposit, and complete the payment via Paystack. Funds are credited instantly to your wallet after payment confirmation.
                 </p>
             </div>
             
@@ -1389,6 +1543,24 @@ function renderHome(){
   const isExpress = isCurrentlyExpress();
   const BUNDLES = getCurrentBundles();
   
+  // Check if user is logged in
+  if (!state.user) {
+    return `
+    <div class="min-h-screen flex items-center justify-center px-4">
+      <div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in">
+        <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        </div>
+        <h2 class="text-2xl font-black mb-4">Login Required</h2>
+        <p class="text-muted-theme mb-8">Please sign in or create an account to purchase data bundles.</p>
+        <div class="flex flex-col gap-3">
+          <button onclick="navigateTo('login')" class="cta-button text-white py-4 rounded-2xl font-bold text-lg">Sign In</button>
+          <button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all">Create Account</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  
   return `
   <div class="animate__animated animate__fadeIn">
     ${state.isDirectMode?'<div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 text-center text-xs font-black uppercase tracking-widest animate-pulse shadow-lg">Direct Order Mode Active</div>':''}
@@ -1405,7 +1577,7 @@ function renderHome(){
     <!-- SEO Hero Section -->
     <section class="relative bg-slate-900 text-white py-24 md:py-32 text-center px-4 overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-br from-blue-900/80 via-purple-900/60 to-slate-900/90"></div>
-      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z" fill="%23ffffff" fill-opacity="0.03" fill-rule="evenodd"/%3E%3C/svg%3E')] opacity-30"></div>
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'/%3E%3C/svg%3E')] opacity-30"></div>
       
       <div class="relative z-10 max-w-4xl mx-auto">
         <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight animate-slide-up leading-tight">
@@ -1415,8 +1587,22 @@ function renderHome(){
             Convenient access to MTN, Telecel, and AirtelTigo data bundles. Secure Paystack payments. Nationwide service across Ghana.
         </p>
         
+        <!-- Wallet Balance Display -->
+        <div class="max-w-sm mx-auto mb-8 animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
+          <div class="wallet-card">
+            <div class="wallet-label">Your Wallet Balance</div>
+            <div class="wallet-balance">₵${state.userProfile ? parseFloat(state.userProfile.balance || 0).toFixed(2) : '0.00'}</div>
+            
+            <!-- FIXED: View Wallet Button - Now properly styled and clickable -->
+            <button onclick="navigateTo('wallet')" class="view-wallet-btn mt-6 px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 mx-auto min-w-[160px]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+              View Wallet
+            </button>
+          </div>
+        </div>
+        
         <!-- Trust Badges -->
-        <div class="flex flex-wrap justify-center gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
+        <div class="flex flex-wrap justify-center gap-4 mb-8 animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
             <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2">
                 <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                 Secure Checkout
@@ -1431,7 +1617,7 @@ function renderHome(){
             </span>
         </div>
         
-        <div class="animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
+        <div class="animate-slide-up stagger-4" style="animation-fill-mode: forwards;">
             <a href="#networks" class="cta-button text-white px-10 py-5 rounded-2xl font-black shadow-2xl inline-flex items-center gap-3 text-lg group">
                 View Data Plans
                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
@@ -1563,8 +1749,8 @@ function renderLandingPage(){
         </p>
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
-            <button onclick="navigateTo('home')" class="cta-button text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-2">
-                Browse Data Bundles
+            <button onclick="navigateTo('register')" class="cta-button text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-2">
+                Get Started
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
             </button>
             <button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
@@ -1682,7 +1868,7 @@ function renderLandingPage(){
 
     <!-- Why It Matters Section -->
     <section class="py-20 px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
-      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.03\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
       
       <div class="max-w-4xl mx-auto text-center relative z-10">
         <h2 class="text-3xl md:text-4xl font-black mb-8 animate-slide-up">Why TruData Matters</h2>
@@ -1711,10 +1897,10 @@ function renderLandingPage(){
       <div class="max-w-4xl mx-auto text-center relative z-10">
         <h2 class="text-3xl md:text-4xl font-black mb-6 text-white animate-slide-up">Ready to Get Started?</h2>
         <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-          To explore available data bundle options, proceed to the network selection page where you can choose your preferred mobile network and view relevant data packages.
+          Create your free account today and start purchasing data bundles with ease.
         </p>
-        <button onclick="navigateTo('home')" class="bg-white text-blue-600 px-12 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 hover:shadow-white/25 transition-all animate-slide-up stagger-2 flex items-center gap-3 mx-auto" style="animation-fill-mode: forwards;">
-          Explore Mobile Networks
+        <button onclick="navigateTo('register')" class="bg-white text-blue-600 px-12 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 hover:shadow-white/25 transition-all animate-slide-up stagger-2 flex items-center gap-3 mx-auto" style="animation-fill-mode: forwards;">
+          Create Free Account
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </button>
       </div>
@@ -1794,39 +1980,645 @@ function renderAbout(){
     </div>`;
 }
 
-function render(){
-  const app=document.getElementById('app-view');
-  const ext=document.getElementById('extended-content');
-  const adminBtn=document.getElementById('admin-nav-btn');
-  
-  adminBtn.innerText=state.isAdmin?(state.isDirectMode?"Exit Direct":"Dashboard"):"Admin";
-  adminBtn.onclick=()=>state.isAdmin?(state.isDirectMode=false,navigateTo('admin-dashboard')):navigateTo('admin-login');
+function renderLogin() {
+  return `
+  <div class="min-h-screen flex items-center justify-center px-4 py-20">
+    <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
+        <h2 class="text-2xl font-black">Welcome Back</h2>
+        <p class="text-sm text-muted-theme mt-2">Sign in to your account to continue</p>
+      </div>
+      
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
+          <input type="email" id="login-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="you@example.com">
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
+          <input type="password" id="login-password" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="••••••••">
+        </div>
+        
+        <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">
+          Sign In
+        </button>
+      </form>
+      
+      <div class="mt-6 text-center">
+        <p class="text-sm text-muted-theme">
+          Don't have an account? 
+          <button onclick="navigateTo('register')" class="text-blue-600 font-bold hover:underline">Create one</button>
+        </p>
+      </div>
+    </div>
+  </div>`;
+}
 
-  // Handle Main View
-  if(state.view==='home'){
-      app.innerHTML=renderHome();
-      setTimeout(() => { try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){} }, 800); 
-  }
-  else if(state.view==='landing') app.innerHTML=renderLandingPage();
-  else if(state.view==='about') app.innerHTML=renderAbout();
-  else if(state.view==='network') app.innerHTML=renderNetwork(state.params);
-  else if(state.view==='confirm-phone') app.innerHTML=renderConfirmPhone();
-  else if(state.view==='admin-login') app.innerHTML=`<div class="max-w-md mx-auto py-32 px-4"><form onsubmit="adminAuth(event)" class="card-theme p-12 rounded-[2.5rem] shadow-2xl text-center animate-scale-in"><div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white text-3xl font-black">TRU</div><h2 class="text-3xl font-black mb-2">Admin Access</h2><p class="text-sm text-muted-theme mb-8">Secure login for authorized personnel only</p><input id="adm-u" type="email" placeholder="Email address" class="w-full p-5 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl mb-4 font-bold transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/20 outline-none" required><input id="adm-p" type="password" placeholder="Password" class="w-full p-5 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl mb-8 font-bold transition-all focus:border-blue-600 focus:ring-4 focus:ring-blue-600/20 outline-none" required><button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-5 rounded-2xl font-black shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]">Sign In</button></form></div>`;
-  else if(state.view==='admin-dashboard') app.innerHTML=renderAdminDashboard();
-  else if(state.view==='success') app.innerHTML=`<div class="py-24 text-center animate__animated animate__zoomIn px-4"><div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-4xl md:text-5xl font-black mb-4">Order Placed Successfully!</h2><p class="mb-6 text-xl font-bold text-slate-500">Your ${state.params.bundle_name} for ${state.params.Phone} is being processed.</p><div class="max-w-md mx-auto p-6 card-theme rounded-2xl mb-8 text-left"><p class="text-sm text-muted-theme mb-2">Reference: <span class="font-mono font-bold text-slate-900 dark:text-white">${state.params.ref || 'N/A'}</span></p><p class="text-sm text-muted-theme">You will receive a confirmation SMS shortly. If you don't receive your data within the expected timeframe, please contact us via WhatsApp.</p></div><div class="flex flex-col sm:flex-row gap-4 justify-center"><button onclick="navigateTo('landing')" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">Back to Home</button><button onclick="navigateTo('home')" class="px-8 py-4 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-2 border-slate-300 dark:border-slate-700 hover:border-blue-500 transition-all">Buy More Data</button></div></div>`;
+function renderRegister() {
+  return `
+  <div class="min-h-screen flex items-center justify-center px-4 py-20">
+    <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
+        <h2 class="text-2xl font-black">Create Account</h2>
+        <p class="text-sm text-muted-theme mt-2">Join TRU Data to start purchasing bundles</p>
+      </div>
+      
+      <form onsubmit="handleRegister(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name</label>
+          <input type="text" id="reg-name" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="John Doe">
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
+          <input type="email" id="reg-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="you@example.com">
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label>
+          <input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="024xxxxxxx">
+        </div>
+        
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
+          <input type="password" id="reg-password" required minlength="6" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="••••••••">
+        </div>
+        
+        <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">
+          Create Account
+        </button>
+      </form>
+      
+      <div class="mt-6 text-center">
+        <p class="text-sm text-muted-theme">
+          Already have an account? 
+          <button onclick="navigateTo('login')" class="text-blue-600 font-bold hover:underline">Sign in</button>
+        </p>
+      </div>
+    </div>
+  </div>`;
+}
 
-  // Update Extended Content
-  ext.innerHTML = renderExtendedContent();
+function renderWallet() {
+  const balance = state.userProfile ? parseFloat(state.userProfile.balance || 0) : 0;
+  const depositFeePercent = 2.00;
   
-  // Re-initialize ads after render
-  setTimeout(() => {
-      try {
-          (adsbygoogle = window.adsbygoogle || []).push({});
-      } catch(e) {}
-  }, 100);
+  return `
+  <div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn">
+    <div class="mb-8">
+      <button onclick="navigateTo('home')" class="font-bold text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 transition-colors flex items-center gap-2 group">
+        <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Back to Home
+      </button>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Balance Card -->
+      <div class="wallet-card animate-scale-in">
+        <div class="wallet-label">Current Balance</div>
+        <div class="wallet-balance">₵${balance.toFixed(2)}</div>
+        <div class="mt-4 flex items-center gap-2 text-sm opacity-90">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Available for purchases
+        </div>
+      </div>
+      
+      <!-- Deposit Form -->
+      <div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode: forwards;">
+        <h3 class="text-xl font-black mb-6">Add Funds</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label>
+            <input type="number" id="deposit-amount" min="5" step="0.01" 
+                   oninput="updateDepositCalculation(this.value)"
+                   class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl text-2xl font-black focus:border-blue-600 outline-none transition-all" 
+                   placeholder="0.00">
+          </div>
+          
+          <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-muted-theme">Deposit Amount:</span>
+              <span class="font-bold" id="calc-amount">₵0.00</span>
+            </div>
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between">
+              <span class="font-bold">Total to Pay:</span>
+              <span class="font-black text-lg text-blue-600" id="calc-total">₵0.00</span>
+            </div>
+          </div>
+          
+          <button onclick="initiateDeposit()" id="deposit-btn" disabled
+                  class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Deposit Now
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Transaction History -->
+    <div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
+      <h3 class="text-xl font-black mb-6">Recent Transactions</h3>
+      <div class="space-y-4" id="transaction-list">
+        <p class="text-center text-muted-theme py-8">Loading transactions...</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateDepositCalculation(amount) {
+  const numAmount = parseFloat(amount) || 0;
+  const feePercent = 2.00;
+  const fee = numAmount * (feePercent / 100);
+  const total = numAmount + fee;
+  
+  // Safely update elements if they exist
+  const amountEl = document.getElementById('calc-amount');
+  const totalEl = document.getElementById('calc-total');
+  const btn = document.getElementById('deposit-btn');
+  
+  if (amountEl) amountEl.textContent = `₵${numAmount.toFixed(2)}`;
+  if (totalEl) totalEl.textContent = `₵${total.toFixed(2)}`;
+  if (btn) btn.disabled = numAmount < 5;
 }
 
 /* ================== AUTH & DATA FUNCTIONS ================== */
+async function handleRegister(e) {
+  e.preventDefault();
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const password = document.getElementById('reg-password').value;
+  
+  // Validate phone
+  const phoneValidation = validateGhanaPhone(phone);
+  if (!phoneValidation.isValid) {
+    showToast('❌ ' + phoneValidation.error);
+    return;
+  }
+  
+  try {
+    // Create auth user
+    const { data: authData, error: authError } = await supa.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+          phone: phone
+        }
+      }
+    });
+    
+    if (authError) throw authError;
+    
+    // Create profile
+    const { error: profileError } = await supa
+      .from('profiles')
+      .insert([{
+        id: authData.user.id,
+        full_name: name,
+        phone: phone,
+        email: email,
+        balance: 0,
+        created_at: new Date().toISOString()
+      }]);
+    
+    if (profileError) throw profileError;
+    
+    showToast('✅ Account created successfully! Please sign in.');
+    navigateTo('login');
+  } catch (err) {
+    showToast('❌ ' + err.message);
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  
+  try {
+    const { data, error } = await supa.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (error) throw error;
+    
+    state.user = data.user;
+    await fetchUserProfile();
+    showToast('✅ Welcome back!');
+    navigateTo('home');
+  } catch (err) {
+    showToast('❌ ' + err.message);
+  }
+}
+
+async function logoutUser() {
+  try {
+    await supa.auth.signOut();
+    state.user = null;
+    state.userProfile = null;
+    showToast('✅ Logged out successfully');
+    navigateTo('landing');
+  } catch (err) {
+    showToast('❌ Logout failed');
+  }
+}
+
+async function fetchUserProfile() {
+  if (!state.user) return;
+  
+  try {
+    const { data, error } = await supa
+      .from('profiles')
+      .select('*')
+      .eq('id', state.user.id)
+      .single();
+    
+    if (error) throw error;
+    state.userProfile = data;
+    
+    // Fetch transactions
+    fetchUserTransactions();
+  } catch (err) {
+    console.error('Error fetching profile:', err);
+  }
+}
+
+async function fetchUserTransactions() {
+  if (!state.user) return;
+  
+  try {
+    const { data, error } = await supa
+      .from('transactions')
+      .select('*')
+      .eq('user_id', state.user.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    
+    if (error) {
+      console.error('Error fetching transactions:', error.message || error);
+      return;
+    }
+    
+    const listEl = document.getElementById('transaction-list');
+    if (listEl) {
+      if (data && data.length > 0) {
+        listEl.innerHTML = data.map(t => `
+          <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'deposit' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  ${t.type === 'deposit' 
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>'
+                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'
+                  }
+                </svg>
+              </div>
+              <div>
+                <p class="font-bold text-sm">${t.type === 'deposit' ? 'Wallet Deposit' : 'Data Purchase'}</p>
+                <p class="text-xs text-muted-theme">${new Date(t.created_at).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-bold ${t.type === 'deposit' ? 'text-green-600' : 'text-slate-900 dark:text-white'}">
+                ${t.type === 'deposit' ? '+' : '-'}₵${parseFloat(t.amount).toFixed(2)}
+              </p>
+              <p class="text-xs text-muted-theme">${t.status}</p>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        listEl.innerHTML = '<p class="text-center text-muted-theme py-8">No transactions yet</p>';
+      }
+    }
+  } catch (err) {
+    console.error('Error in fetchUserTransactions:', err.message || err);
+    const listEl = document.getElementById('transaction-list');
+    if (listEl) {
+      listEl.innerHTML = '<p class="text-center text-muted-theme py-8">Unable to load transactions</p>';
+    }
+  }
+}
+
+/* ================== DEPOSIT FUNCTIONS ================== */
+function initiateDeposit() {
+  const amount = parseFloat(document.getElementById('deposit-amount').value);
+  if (!amount || amount < 5) {
+    showToast('❌ Minimum deposit amount is ₵5.00');
+    return;
+  }
+  
+  const feePercent = 2.00;
+  const fee = amount * (feePercent / 100);
+  const totalAmount = amount + fee;
+  
+  const handler = PaystackPop.setup({
+    key: PAYSTACK_KEY,
+    email: state.user.email,
+    amount: Math.round(totalAmount * 100),
+    currency: 'GHS',
+    metadata: {
+      custom_fields: [
+        { display_name: "Deposit Type", variable_name: "deposit_type", value: "wallet_funding" },
+        { display_name: "Net Amount", variable_name: "net_amount", value: amount.toFixed(2) },
+        { display_name: "Fee", variable_name: "fee", value: fee.toFixed(2) }
+      ]
+    },
+    callback: (response) => processDeposit(response, amount, fee),
+    onClose: () => showToast('Payment window closed')
+  });
+  
+  handler.openIframe();
+}
+
+async function processDeposit(response, netAmount, fee) {
+  try {
+    // Record transaction
+    const { error: transError } = await supa
+      .from('transactions')
+      .insert([{
+        user_id: state.user.id,
+        type: 'deposit',
+        amount: netAmount,
+        fee: fee,
+        reference: response.reference,
+        status: 'completed',
+        created_at: new Date().toISOString()
+      }]);
+    
+    if (transError) throw transError;
+    
+    // Update user balance
+    const newBalance = parseFloat(state.userProfile.balance || 0) + netAmount;
+    const { error: updateError } = await supa
+      .from('profiles')
+      .update({ balance: newBalance })
+      .eq('id', state.user.id);
+    
+    if (updateError) throw updateError;
+    
+    // Update local state
+    state.userProfile.balance = newBalance;
+    
+    showToast(`✅ Deposit successful! ₵${netAmount.toFixed(2)} added to your wallet`);
+    render();
+  } catch (err) {
+    showToast('❌ Error processing deposit: ' + err.message);
+  }
+}
+
+/* ================== NETWORK VIEW ================== */
+function renderNetworkView(networkId) {
+  const network = NETWORKS[networkId];
+  const BUNDLES = getCurrentBundles().filter(b => b.network === networkId);
+  const isExpress = isCurrentlyExpress();
+  
+  return `
+  <div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8">
+    <div class="mb-8">
+      <button onclick="navigateTo('home')" class="font-bold text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 transition-colors flex items-center gap-2 group">
+        <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Back to Networks
+      </button>
+    </div>
+    
+    <div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in">
+      <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+      <img src="${network.logo}" alt="${network.name}" class="h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10">
+      <h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1>
+      <p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p>
+      ${isExpress ? '<div class="mt-4 inline-block bg-black/20 px-4 py-1 rounded-full text-xs font-bold animate-pulse">⚡ Express Mode Active</div>' : ''}
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      ${BUNDLES.map((bundle, idx) => `
+        <div class="card-theme p-6 rounded-2xl hover:border-blue-500 transition-all cursor-pointer group animate-slide-up stagger-${(idx % 5) + 1}" style="animation-fill-mode: forwards;" onclick="initiateOrder('${networkId}', '${bundle.id}')">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="text-2xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">${bundle.size}</h3>
+              <p class="text-sm text-muted-theme">${bundle.validity} Validity</p>
+            </div>
+            <div class="price-tag">₵${bundle.price.toFixed(2)}</div>
+          </div>
+          
+          <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <span class="text-xs font-bold text-slate-500 uppercase">Click to Purchase</span>
+            <svg class="w-5 h-5 text-blue-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function initiateOrder(networkId, bundleId) {
+  const BUNDLES = getCurrentBundles();
+  const bundle = BUNDLES.find(b => b.network === networkId && b.id === bundleId);
+  
+  if (!bundle) {
+    showToast('❌ Bundle not found');
+    return;
+  }
+  
+  if (!state.user) {
+    showToast('❌ Please login first');
+    navigateTo('login');
+    return;
+  }
+  
+  state.activeOrderData = { network: networkId, bundle: bundle };
+  render();
+}
+
+function renderOrderForm() {
+  if (!state.activeOrderData) return '';
+  
+  const { network, bundle } = state.activeOrderData;
+  const netInfo = NETWORKS[network];
+  
+  return `
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn">
+    <div class="card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in">
+      <button onclick="state.activeOrderData=null; render();" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      
+      <div class="text-center mb-6">
+        <div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <span class="text-2xl font-black">${netInfo.name.charAt(0)}</span>
+        </div>
+        <h3 class="text-2xl font-black mb-1">Purchase ${bundle.size}</h3>
+        <p class="text-muted-theme text-sm">${netInfo.name} • ${bundle.validity}</p>
+      </div>
+      
+      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 mb-6">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm text-muted-theme">Bundle Price</span>
+          <span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span>
+        </div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm text-muted-theme">Your Balance</span>
+          <span class="font-bold text-lg ${state.userProfile && state.userProfile.balance >= bundle.price ? 'text-green-600' : 'text-red-500'}">₵${state.userProfile ? parseFloat(state.userProfile.balance || 0).toFixed(2) : '0.00'}</span>
+        </div>
+        <div class="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2 flex justify-between items-center">
+          <span class="font-bold">Total</span>
+          <span class="font-black text-xl text-blue-600">₵${bundle.price.toFixed(2)}</span>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label>
+          <input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="024xxxxxxx">
+          <p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p>
+        </div>
+        
+        <button onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${state.userProfile && state.userProfile.balance >= bundle.price ? '' : 'opacity-50 cursor-not-allowed'}" ${state.userProfile && state.userProfile.balance >= bundle.price ? '' : 'disabled'}>
+          ${state.userProfile && state.userProfile.balance >= bundle.price ? 'Confirm Purchase' : 'Insufficient Balance'}
+        </button>
+        
+        ${state.userProfile && state.userProfile.balance < bundle.price ? `
+        <button onclick="state.activeOrderData=null; navigateTo('wallet')" class="w-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-2xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all">
+          Add Funds to Wallet
+        </button>
+        ` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ================== ORDER FUNCTIONS ================== */
+async function handleOrderButton(){
+  const phone = document.getElementById('p-num').value.trim();
+  
+  // Validate Ghana phone number
+  const validation = validateGhanaPhone(phone);
+  if (!validation.isValid) {
+    showToast('❌ ' + validation.error);
+    return;
+  }
+  
+  const {bundle} = state.activeOrderData;
+  
+  // Check wallet balance
+  const balance = parseFloat(state.userProfile?.balance || 0);
+  if (balance < bundle.price) {
+    showToast('❌ Insufficient balance. Please deposit funds.');
+    navigateTo('wallet');
+    return;
+  }
+  
+  if(state.isAdmin && state.isDirectMode){
+    // Direct order with provider selection - save with Processing status and redirect
+    const provider = state.selectedProvider || 'evnetwork';
+    const providerUrl = provider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
+    const ref = 'DIR-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+    
+    try {
+      // Deduct from balance
+      const newBalance = balance - bundle.price;
+      const { error: balanceError } = await supa
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', state.user.id);
+      
+      if (balanceError) throw balanceError;
+      
+      // Record transaction
+      await supa.from('transactions').insert([{
+        user_id: state.user.id,
+        type: 'purchase',
+        amount: bundle.price,
+        reference: ref,
+        status: 'completed',
+        created_at: new Date().toISOString()
+      }]);
+      
+      // Save order
+      const {error} = await supa.from('orders').insert([{
+        ref: ref,
+        Phone: phone,
+        Network: bundle.network,
+        bundle_name: bundle.size,
+        Amount: bundle.price,
+        Status: 'Processing',
+        provider: provider,
+        user_id: state.user.id,
+        created_at: new Date().toISOString()
+      }]);
+      
+      if(error) throw error;
+      
+      // Update local balance
+      state.userProfile.balance = newBalance;
+      
+      showToast('✅ Direct order created and saved');
+      window.open(providerUrl, '_blank');
+      
+      state.isDirectMode = false;
+      state.selectedProvider = 'evnetwork';
+      navigateTo('admin-dashboard');
+    } catch(err) {
+      showToast('❌ Error creating order: ' + err.message);
+    }
+  } else {
+    // Regular user order - deduct from wallet
+    try {
+      // Deduct from balance
+      const newBalance = balance - bundle.price;
+      const { error: balanceError } = await supa
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', state.user.id);
+      
+      if (balanceError) throw balanceError;
+      
+      const ref = 'ORD-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+      
+      // Record transaction
+      await supa.from('transactions').insert([{
+        user_id: state.user.id,
+        type: 'purchase',
+        amount: bundle.price,
+        reference: ref,
+        status: 'completed',
+        created_at: new Date().toISOString()
+      }]);
+      
+      // Save order
+      await supa.from('orders').insert([{
+        ref: ref,
+        Phone: phone,
+        Network: bundle.network,
+        bundle_name: bundle.size,
+        Amount: bundle.price,
+        Status: 'Pending',
+        user_id: state.user.id,
+        created_at: new Date().toISOString()
+      }]);
+      
+      // Update local balance
+      state.userProfile.balance = newBalance;
+      
+      showToast('✅ Order placed successfully!');
+      navigateTo('success', {
+        bundle_name: bundle.size, 
+        Phone: phone,
+        ref: ref
+      });
+    } catch (err) {
+      showToast('❌ Error placing order: ' + err.message);
+    }
+  }
+}
+
+/* ================== ADMIN FUNCTIONS ================== */
 window.adminAuth=async(e)=>{
     e.preventDefault();
     const email = document.getElementById('adm-u').value.trim();
@@ -1885,568 +2677,363 @@ async function updateStatus(ref, status){
     }
 }
 
-function cancelActiveProcess(){
-    document.getElementById('admin-actions-bar').style.display='none';
-    state.activeOrderData = null;
-    state.selectedProvider = 'evnetwork';
-}
-
-function selectPlan(bundle){
-    state.activeOrderData={bundle};
-    state.selectedProvider = 'evnetwork';
-    navigateTo('confirm-phone');
-}
-
-async function handleOrderButton(){
-    const phone = document.getElementById('p-num').value.trim();
-    
-    // Validate Ghana phone number
-    const validation = validateGhanaPhone(phone);
-    if (!validation.isValid) {
-        showToast('❌ ' + validation.error);
+async function deleteOrder(ref) {
+    // Confirm before deleting
+    if (!confirm(`Are you sure you want to delete order ${ref}? This action cannot be undone.`)) {
         return;
     }
     
-    state.activeOrderData.phone = phone;
-    
-    if(state.isAdmin && state.isDirectMode){
-        // Direct order with provider selection - save with Processing status and redirect
-        const provider = state.selectedProvider || 'evnetwork';
-        const providerUrl = provider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
-        const {bundle} = state.activeOrderData;
-        const ref = 'DIR-' + Math.random().toString(36).slice(2, 10).toUpperCase();
-        
-        try {
-            // First, save to database
-            const {data, error} = await supa.from('orders').insert([{
-                ref: ref,
-                Phone: phone,
-                Network: bundle.network,
-                bundle_name: bundle.size,
-                Amount: bundle.price,
-                Status: 'Processing', // Set to Processing as required
-                provider: provider,
-                created_at: new Date().toISOString()
-            }]).select();
-            
-            if(error) throw error;
-            
-            // Refresh orders list to show the new order immediately
-            await fetchOrders();
-            
-            // Show success toast
-            showToast('✅ Direct order created and saved');
-            
-            // Only open external site after successful save
-            window.open(providerUrl, '_blank');
-            
-            // Reset state and navigate to dashboard
-            state.isDirectMode = false;
-            state.selectedProvider = 'evnetwork';
-            navigateTo('admin-dashboard');
-        } catch(err) {
-            showToast('❌ Error creating order: ' + err.message);
-        }
-    } else {
-        const email = document.getElementById('cust-email').value.trim();
-        if(!email || !email.includes('@')) {
-            showToast('❌ Please enter a valid email address');
-            return;
-        }
-        state.activeOrderData.email = email;
-        startPaystack();
-    }
-}
-
-function startPaystack(){
-    const {bundle, email, phone} = state.activeOrderData;
-    
-    const handler = PaystackPop.setup({
-        key: PAYSTACK_KEY,
-        email: email,
-        amount: Math.round(bundle.price * 100),
-        currency: 'GHS',
-        metadata: {
-            bundle_size: bundle.size,
-            network: bundle.network,
-            phone_number: phone,
-            custom_fields: [
-                {display_name: "Bundle", variable_name: "bundle", value: bundle.size},
-                {display_name: "Network", variable_name: "network", value: bundle.network},
-                {display_name: "Phone Number", variable_name: "phone_number", value: phone}
-            ]
-        },
-        callback: (res) => onPaymentSuccess(res),
-        onClose: () => showToast('Payment window closed')
-    });
-    
-    handler.openIframe();
-}
-
-async function onPaymentSuccess(response){
-    const {bundle, phone, email} = state.activeOrderData;
     try {
-        await supa.from('orders').insert([{
-            ref: response.reference,
-            Phone: phone,
-            Network: bundle.network,
-            bundle_name: bundle.size,
-            Amount: bundle.price,
-            Status: 'Pending',
-            email: email,
-            created_at: new Date().toISOString()
-        }]);
-        showToast('✅ Payment successful! Processing your order...');
-        navigateTo('success', {
-            bundle_name: bundle.size, 
-            Phone: phone,
-            ref: response.reference
-        });
+        const {error} = await supa.from('orders').delete().eq('ref', ref);
+        if(error) throw error;
+        showToast(`✅ Order ${ref} deleted successfully`);
+        fetchOrders();
     } catch(err) {
-        console.error('Insert error:', err);
-        showToast('❌ Error saving order. Please contact support.');
+        showToast('❌ Delete failed: ' + err.message);
     }
 }
 
-/* ================== ADMIN ORDER CONFIRMATION MODAL ================== */
-function openProcessTab(order){
-    // Store order reference for processing
-    state.currentProcessingOrder = order;
-    
-    // Set default provider for existing orders
-    state.confirmationSelectedProvider = 'evnetwork';
-    
-    // Populate the confirmation modal
-    document.getElementById('confirm-phone').textContent = order.Phone;
-    document.getElementById('confirm-network').textContent = NETWORKS[order.Network].name;
-    document.getElementById('confirm-bundle').textContent = order.bundle_name;
-    document.getElementById('confirm-amount').textContent = '₵' + parseFloat(order.Amount).toFixed(2);
-    
-    // Reset provider selection UI
-    document.getElementById('btn-evnetwork-confirm').className = 'provider-btn selected';
-    document.getElementById('btn-refer2bundle-confirm').className = 'provider-btn';
-    
-    // Show the modal
-    document.getElementById('admin-order-confirmation').style.display = 'block';
-}
-
-function selectConfirmationProvider(provider){
-    state.confirmationSelectedProvider = provider;
-    
-    // Update UI
-    document.getElementById('btn-evnetwork-confirm').className = provider === 'evnetwork' ? 'provider-btn selected' : 'provider-btn';
-    document.getElementById('btn-refer2bundle-confirm').className = provider === 'refer2bundle' ? 'provider-btn selected' : 'provider-btn';
-}
-
-function closeAdminConfirmation(){
-    document.getElementById('admin-order-confirmation').style.display = 'none';
-    state.currentProcessingOrder = null;
-}
-
-async function confirmProcessOrder(){
-    const order = state.currentProcessingOrder;
-    if(!order) return;
-    
-    const provider = state.confirmationSelectedProvider;
-    const providerUrl = provider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
-    
-    try {
-        // Update order status to Processing
-        await updateStatus(order.ref, 'Processing');
-        
-        // Open provider website
-        window.open(providerUrl, '_blank');
-        
-        // Show the active processing bar
-        document.getElementById('active-order-label').innerText = `${order.Phone} - ${order.bundle_name}`;
-        document.getElementById('admin-actions-bar').style.display = 'flex';
-        
-        // Set up the fulfill button
-        const fulfillBtn = document.getElementById('global-fulfill-btn');
-        fulfillBtn.onclick = async () => {
-            try {
-                await updateStatus(order.ref, 'Completed');
-                cancelActiveProcess();
-                showToast('✅ Order fulfilled successfully');
-            } catch(err) {
-                showToast('❌ Error completing order');
-            }
-        };
-        
-        // Close the confirmation modal
-        closeAdminConfirmation();
-        
-    } catch(err) {
-        showToast('❌ Error processing order');
-    }
-}
-
-function renderNetwork(id){
-    const net = NETWORKS[id];
-    const BUNDLES = getCurrentBundles();
-    const networkBundles = BUNDLES.filter(b => b.network === id);
-    const isExpress = isCurrentlyExpress();
-    
+function renderAdminLogin() {
     return `
-    <div class="max-w-7xl mx-auto px-4 py-16 animate__animated animate__fadeIn">
-        <button onclick="navigateTo('home')" class="mb-8 font-bold text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 transition-colors flex items-center gap-2 group">
-            <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Back to Networks
-        </button>
-        
-        <div class="mb-12 animate-slide-up">
-            <h2 class="text-4xl font-black mb-3">Select Your Plan</h2>
-            <p class="text-muted-theme text-lg">${net.name} - ${networkBundles.length} available bundles</p>
-            ${isExpress ? `<div class="mt-4 inline-flex items-center gap-2 express-badge"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Express Night Prices Active</div>` : ''}
-        </div>
-        
-        <div class="disclaimer-box mb-8">
-          <strong>Note:</strong> Prices are subject to change based on network provider policies. All bundles are subject to availability and network terms and conditions.
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16">
-            ${networkBundles.map((b, i) => `
-            <div class="card-theme p-6 rounded-3xl shadow-sm text-center feature-card animate-scale-in stagger-${(i%4)+1}" style="animation-fill-mode: forwards; border-top: 4px solid ${id === 'mtn' ? '#FFCC00' : id === 'airteltigo' ? '#0077B5' : '#E60000'}">
-                <div class="mb-4">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">${net.name}</span>
-                </div>
-                <h4 class="text-5xl font-black mb-2 bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">${b.size}</h4>
-                <p class="text-xs text-muted-theme mb-4">Valid for ${b.validity}</p>
-                <div class="mb-6">
-                    <span class="price-tag text-xl">₵${b.price.toFixed(2)}</span>
-                </div>
-                <button onclick='selectPlan(${JSON.stringify(b)})' class="w-full bg-gradient-to-r from-slate-800 to-slate-900 dark:from-blue-600 dark:to-purple-600 text-white py-4 rounded-2xl font-bold hover:scale-105 transition-transform shadow-lg hover:shadow-xl flex items-center justify-center gap-2 group">
-                    Buy Now
-                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                </button>
-            </div>`).join('')}
-        </div>
-        
-        <!-- Network Ad -->
-        <div class="ad-container min-h-[250px]">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-2637582768279029"
-                 data-ad-slot="5392404731"
-                 data-ad-format="rectangle"
-                 data-full-width-responsive="true"></ins>
-        </div>
-    </div>`;
-}
-
-function renderConfirmPhone(){
-    const {bundle} = state.activeOrderData;
-    const net = NETWORKS[bundle.network];
-    const isExpress = isCurrentlyExpress();
-    
-    return `
-    <div class="max-w-xl mx-auto py-16 px-4 animate__animated animate__fadeInUp">
-        <div class="card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl text-center relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-            
-            <div class="mb-6">
-                <img src="${net.logo}" alt="${net.name}" class="h-12 mx-auto mb-4 opacity-50">
-                <h2 class="text-3xl font-black mb-2">Complete Your Order</h2>
-                <p class="text-muted-theme">You're purchasing <span class="font-bold text-slate-900 dark:text-white">${bundle.size}</span> for <span class="price-tag text-sm ml-1">₵${bundle.price.toFixed(2)}</span></p>
-                ${isExpress ? `<div class="mt-3 inline-flex items-center gap-1 express-badge text-xs"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Express Price</div>` : ''}
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="card-theme max-w-md w-full p-8 rounded-3xl shadow-2xl animate-scale-in">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black shadow-lg">A</div>
+                <h2 class="text-2xl font-black">Admin Access</h2>
+                <p class="text-sm text-muted-theme mt-2">Restricted area - Authorized personnel only</p>
             </div>
             
-            <div class="disclaimer-box text-left text-xs mb-6">
-              <strong>Important:</strong> Please verify all details before proceeding. Data bundles are non-refundable once delivered to the wrong number due to incorrect input. Phone number must be a valid Ghana number starting with 024, 054, 055, 059, 027, 057, 026, 056, 020, 050, 023, 053, 028, or 058 (10 digits total).
-            </div>
-            
-            <div class="space-y-4 mb-8">
-                <div class="relative">
-                    <input id="p-num" type="tel" placeholder="Enter phone number (024...)" 
-                           class="w-full p-6 border-4 dark:bg-slate-800 dark:border-slate-700 rounded-2xl text-center text-2xl font-black focus:border-blue-600 outline-none transition-all focus:shadow-lg focus:shadow-blue-500/20" 
-                           maxlength="10">
-                    <p class="text-xs text-slate-400 mt-2">Enter the number to receive the data (10 digits, Ghana format)</p>
+            <form onsubmit="adminAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email</label>
+                    <input type="email" id="adm-u" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="admin@example.com">
                 </div>
                 
-                ${!state.isDirectMode ? `
-                <div class="relative">
-                    <input id="cust-email" type="email" placeholder="Enter your email address" 
-                           class="w-full p-4 border-4 dark:bg-slate-800 dark:border-slate-700 rounded-2xl text-center font-bold focus:border-blue-600 outline-none transition-all">
-                    <p class="text-xs text-slate-400 mt-2">For payment receipt and confirmation</p>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
+                    <input type="password" id="adm-p" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="••••••••">
                 </div>
-                ` : `
-                <div class="affiliate-disclosure text-left">
-                  <p class="text-xs font-semibold mb-2">Select Provider:</p>
-                  <div class="flex gap-2">
-                    <button type="button" onclick="state.selectedProvider='evnetwork'; document.getElementById('btn-ev-direct').className='flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold'; document.getElementById('btn-ref-direct').className='flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold';" id="btn-ev-direct" class="flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold">EV Network</button>
-                    <button type="button" onclick="state.selectedProvider='refer2bundle'; document.getElementById('btn-ref-direct').className='flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold'; document.getElementById('btn-ev-direct').className='flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold';" id="btn-ref-direct" class="flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold">Refer2Bundle</button>
-                  </div>
-                </div>
-                `}
+                
+                <button type="submit" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">
+                    Access Dashboard
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <button onclick="navigateTo('landing')" class="text-sm text-muted-theme hover:text-blue-600 transition-colors">← Back to website</button>
             </div>
-            
-            <button onclick="handleOrderButton()" 
-                    class="w-full ${state.isDirectMode ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gradient-to-r from-slate-800 to-slate-900'} text-white py-5 rounded-2xl font-black text-xl shadow-xl uppercase hover:scale-[1.02] hover:shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3">
-                ${state.isDirectMode ? 'Create Direct Order' : 'Proceed to Payment'}
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-            </button>
-            
-            <button onclick="navigateTo('network', '${bundle.network}')" class="mt-6 text-slate-400 font-bold hover:text-slate-600 dark:hover:text-slate-300 transition-colors flex items-center justify-center gap-2 mx-auto">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                Cancel Order
-            </button>
-        </div>
-        
-        <!-- Security Badge -->
-        <div class="mt-8 flex items-center justify-center gap-2 text-xs text-slate-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-            <span>Secured by Paystack 256-bit SSL</span>
         </div>
     </div>`;
 }
 
 function renderAdminDashboard(){
-    const stats = state.orders.reduce((acc, o) => {
-        const amt = parseFloat(o.Amount || 0);
-        acc.total += amt;
-        acc.count++;
-        if(o.Status === 'Pending') acc.pending++;
-        if(o.Status === 'Completed') acc.completed++;
-        if(o.Network === 'mtn') acc.mtn += amt;
-        if(o.Network === 'airteltigo') acc.art += amt;
-        if(o.Network === 'telecel') acc.tel += amt;
-        return acc;
-    }, {total: 0, count: 0, pending: 0, completed: 0, mtn: 0, art: 0, tel: 0});
-    
-    let filtered = state.orders.filter(o => o.Phone.includes(state.searchQuery));
-    if(state.networkFilter !== 'all') filtered = filtered.filter(o => o.Network === state.networkFilter);
-    
-    const isExpress = isCurrentlyExpress();
-    const isAutoMode = state.expressOverride === null;
+    const filtered = state.orders.filter(o => {
+        const matchesSearch = (o.Phone || '').includes(state.searchQuery) || (o.ref || '').toLowerCase().includes(state.searchQuery.toLowerCase());
+        const matchesNetwork = state.networkFilter === 'all' || o.Network === state.networkFilter;
+        return matchesSearch && matchesNetwork;
+    });
     
     return `
-    <div class="min-h-screen p-4 md:p-6 bg-slate-50 dark:bg-slate-950">
-        <div class="max-w-7xl mx-auto py-6">
-            
-            <!-- Header -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-slide-up">
-                <div>
-                    <h2 class="text-3xl md:text-4xl font-black gradient-text">Admin Dashboard</h2>
-                    <p class="text-sm text-muted-theme mt-1">Manage orders and monitor transactions</p>
-                </div>
-                <div class="flex gap-3 flex-wrap">
-                    <!-- Mode Switcher -->
-                    <div class="mode-switcher">
-                        <button onclick="switchToNormal()" class="mode-btn ${!isExpress ? 'active' : ''}">Normal</button>
-                        <button onclick="switchToExpress()" class="mode-btn ${isExpress ? 'active' : ''}">Express</button>
-                        <button onclick="resetToAutoMode()" class="mode-btn ${isAutoMode ? 'active' : ''}">Auto</button>
-                    </div>
-                    
-                    <button onclick="refreshOrders()" class="admin-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        Refresh
-                    </button>
-                    <button onclick="state.isDirectMode = true; navigateTo('home')" 
-                            class="admin-btn bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-xl font-black text-xs text-white uppercase tracking-wider shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        Direct Order
-                    </button>
-                    <button onclick="adminLogout()" 
-                            class="admin-btn bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 rounded-xl font-black text-xs text-white uppercase tracking-wider shadow-lg shadow-red-600/20 hover:shadow-red-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        Logout
-                    </button>
-                </div>
+    <div class="animate__animated animate__fadeIn max-w-7xl mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-slide-up">
+            <div>
+                <h1 class="text-3xl font-black flex items-center gap-3">
+                    <span class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-3 py-1 rounded-lg text-xl">A</span>
+                    Admin Dashboard
+                </h1>
+                <p class="text-sm text-muted-theme mt-1">Manage orders and system settings</p>
             </div>
-
-            <!-- Mode Indicator Banner -->
-            <div class="mb-6 p-4 rounded-2xl ${isExpress ? 'bg-gradient-to-r from-amber-500 to-orange-600' : 'bg-gradient-to-r from-blue-600 to-purple-600'} text-white animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-6 h-6 ${isExpress ? 'animate-pulse' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            ${isExpress 
-                                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'
-                                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
-                            }
-                        </svg>
-                        <div>
-                            <p class="font-black text-sm uppercase tracking-wider">${isExpress ? '⚡ Express Mode Active' : '☀️ Normal Mode Active'}</p>
-                            <p class="text-xs opacity-80">${isAutoMode ? 'Auto-switching (9PM - 6AM)' : 'Manual Override'}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs opacity-80">Current Time</p>
-                        <p class="font-bold">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                    </div>
-                </div>
+            <div class="flex gap-3">
+                <button onclick="adminLogout()" class="px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all">
+                    Logout
+                </button>
             </div>
-
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8 animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-                <div class="col-span-2 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group">
-                    <p class="text-[10px] font-black uppercase opacity-50 mb-1 group-hover:text-blue-600 transition-colors">Total Revenue</p>
-                    <h3 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">₵${stats.total.toFixed(2)}</h3>
-                    <div class="mt-2 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-1000" style="width: 100%"></div>
-                    </div>
-                </div>
-                
-                <div class="bg-[#FFCC00] p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <p class="text-[10px] font-black uppercase opacity-70 mb-1">MTN</p>
-                    <h3 class="text-xl font-black">₵${stats.mtn.toFixed(2)}</h3>
-                    <div class="mt-1 text-[10px] font-bold opacity-60">${Math.round(stats.total > 0 ? stats.mtn/stats.total*100 : 0)}%</div>
-                </div>
-                
-                <div class="bg-blue-500 p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group text-white">
-                    <p class="text-[10px] font-black uppercase opacity-80 mb-1">AirtelTigo</p>
-                    <h3 class="text-xl font-black">₵${stats.art.toFixed(2)}</h3>
-                    <div class="mt-1 text-[10px] font-bold opacity-80">${Math.round(stats.total > 0 ? stats.art/stats.total*100 : 0)}%</div>
-                </div>
-                
-                <div class="bg-red-500 p-5 rounded-2xl shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group text-white">
-                    <p class="text-[10px] font-black uppercase opacity-80 mb-1">Telecel</p>
-                    <h3 class="text-xl font-black">₵${stats.tel.toFixed(2)}</h3>
-                    <div class="mt-1 text-[10px] font-bold opacity-80">${Math.round(stats.total > 0 ? stats.tel/stats.total*100 : 0)}%</div>
-                </div>
-                
-                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <p class="text-[10px] font-black uppercase opacity-50 mb-1">Pending</p>
-                    <h3 class="text-2xl font-black text-amber-500">${stats.pending}</h3>
-                    <div class="text-[10px] text-muted-theme">of ${stats.count} total</div>
-                </div>
+        </div>
+        
+        <!-- Mode Switcher -->
+        <div class="mb-8 flex flex-wrap gap-4 items-center animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
+            <div class="mode-switcher">
+                <button class="mode-btn ${state.expressOverride === false ? 'active' : ''}" onclick="switchToNormal()">Normal</button>
+                <button class="mode-btn ${state.expressOverride === null ? 'active' : ''}" onclick="resetToAutoMode()">Auto</button>
+                <button class="mode-btn ${state.expressOverride === true ? 'active' : ''}" onclick="switchToExpress()">Express</button>
             </div>
-
-            <!-- Filters -->
-            <div class="flex flex-col sm:flex-row gap-4 mb-6 animate-slide-up stagger-2 opacity-0" style="animation-fill-mode: forwards;">
-                <div class="relative flex-1">
-                    <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" placeholder="Search by phone number..." oninput="state.searchQuery=this.value;render()" 
-                           class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-900 font-bold focus:border-blue-600 outline-none transition-all">
-                </div>
-                <div class="relative">
-                    <select onchange="state.networkFilter=this.value;render()" 
-                            class="pl-4 pr-12 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 dark:bg-slate-900 font-bold focus:border-blue-600 outline-none cursor-pointer hover:border-blue-400 transition-colors appearance-none min-w-[160px]">
-                        <option value="all">All Networks</option>
-                        <option value="mtn">MTN Only</option>
-                        <option value="airteltigo">AirtelTigo</option>
-                        <option value="telecel">Telecel</option>
-                    </select>
-                    <svg class="w-5 h-5 absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
+            <span class="text-sm text-muted-theme">
+                Current: ${isCurrentlyExpress() ? '⚡ Express Mode (9PM-6AM)' : '☀️ Normal Mode'}
+            </span>
+        </div>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
+            <div class="card-theme p-4 rounded-2xl text-center">
+                <div class="text-2xl font-black text-blue-600">${state.orders.length}</div>
+                <div class="text-xs font-bold text-muted-theme uppercase">Total Orders</div>
             </div>
-
-            <!-- Orders Table -->
-            <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-slide-up stagger-3 opacity-0" style="animation-fill-mode: forwards;">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 dark:bg-slate-800/50 text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
-                            <tr>
-                                <th class="p-5">Time</th>
-                                <th class="p-5">Reference</th>
-                                <th class="p-5">Customer</th>
-                                <th class="p-5">Bundle</th>
-                                <th class="p-5 text-right">Amount</th>
-                                <th class="p-5 text-center">Status</th>
-                                <th class="p-5 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            ${filtered.length === 0 ? `
-                            <tr>
-                                <td colspan="7" class="p-12 text-center">
-                                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                    </div>
-                                    <p class="font-bold text-slate-500">No orders found</p>
-                                    <p class="text-xs text-slate-400 mt-1">Try adjusting your filters</p>
-                                </td>
-                            </tr>
-                            ` : filtered.map((o, i) => `
-                            <tr class="table-row animate-slide-up" style="animation-delay: ${i * 0.03}s">
-                                <td class="p-5 text-xs">
-                                    <div class="font-bold text-slate-700 dark:text-slate-200">${new Date(o.created_at).toLocaleDateString()}</div>
-                                    <div class="text-slate-400 mt-0.5">${new Date(o.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                                </td>
-                                <td class="p-5">
-                                    <span class="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-300">${o.ref.slice(0, 12)}...</span>
-                                </td>
-                                <td class="p-5">
-                                    <div class="font-black text-slate-900 dark:text-white text-base">${o.Phone}</div>
-                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">${o.Network}${o.provider ? ' • ' + o.provider : ''}</div>
-                                </td>
-                                <td class="p-5">
-                                    <div class="font-bold text-slate-700 dark:text-slate-200">${o.bundle_name}</div>
-                                </td>
-                                <td class="p-5 text-right">
-                                    <span class="font-black text-slate-900 dark:text-white text-base">₵${parseFloat(o.Amount).toFixed(2)}</span>
-                                </td>
-                                <td class="p-5 text-center">
-                                    <span class="status-badge px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${
-                                        o.Status === 'Completed' 
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                                            : o.Status === 'Processing'
-                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                    }">
-                                        ${o.Status === 'Completed' ? '✓ ' : o.Status === 'Processing' ? '⟳ ' : '⏱ '}${o.Status}
-                                    </span>
-                                </td>
-                                <td class="p-5 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        ${o.Status === 'Pending' ? `
-                                            <button onclick='openProcessTab(${JSON.stringify(o)})' 
-                                                    class="admin-btn bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-1.5">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                PROCESS
-                                            </button>
-                                        ` : o.Status === 'Processing' ? `
-                                            <button onclick="updateStatus('${o.ref}','Completed')" 
-                                                    class="admin-btn bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-lg shadow-green-600/20 hover:shadow-green-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-1.5">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                COMPLETE
-                                            </button>
-                                        ` : `
-                                            <button onclick="updateStatus('${o.ref}','Pending')" 
-                                                    class="admin-btn bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 py-2.5 rounded-xl text-[11px] font-black shadow-lg shadow-amber-600/20 hover:shadow-amber-600/40 hover:-translate-y-0.5 transition-all flex items-center gap-1.5">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
-                                                UNDO
-                                            </button>
-                                        `}
-                                        <button onclick="if(confirm('Permanently delete this order?')) deleteOrder('${o.ref}')" 
-                                                class="admin-btn bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-2.5 rounded-xl text-[11px] font-black shadow-lg shadow-red-600/20 hover:shadow-red-600/40 hover:-translate-y-0.5 transition-all" 
-                                                title="Delete Order">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="card-theme p-4 rounded-2xl text-center">
+                <div class="text-2xl font-black text-yellow-600">${state.orders.filter(o => o.Status === 'Pending').length}</div>
+                <div class="text-xs font-bold text-muted-theme uppercase">Pending</div>
             </div>
-            
-            <!-- Pagination Info -->
-            <div class="mt-4 text-center text-xs text-slate-400 font-medium">
-                Showing ${filtered.length} of ${state.orders.length} orders
+            <div class="card-theme p-4 rounded-2xl text-center">
+                <div class="text-2xl font-black text-green-600">${state.orders.filter(o => o.Status === 'Completed').length}</div>
+                <div class="text-xs font-bold text-muted-theme uppercase">Completed</div>
+            </div>
+            <div class="card-theme p-4 rounded-2xl text-center">
+                <div class="text-2xl font-black text-purple-600">₵${state.orders.reduce((acc, o) => acc + (parseFloat(o.Amount) || 0), 0).toFixed(2)}</div>
+                <div class="text-xs font-bold text-muted-theme uppercase">Revenue</div>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="flex flex-col md:flex-row gap-4 mb-6 animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
+            <input type="text" placeholder="Search phone or reference..." 
+                   value="${state.searchQuery}" 
+                   oninput="state.searchQuery=this.value; render();"
+                   class="flex-1 p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all">
+            <select onchange="state.networkFilter=this.value; render();" 
+                    class="p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all md:w-48">
+                <option value="all">All Networks</option>
+                <option value="mtn">MTN</option>
+                <option value="airteltigo">AirtelTigo</option>
+                <option value="telecel">Telecel</option>
+            </select>
+        </div>
+        
+        <!-- Orders Table -->
+        <div class="card-theme rounded-2xl overflow-hidden animate-slide-up stagger-4" style="animation-fill-mode: forwards;">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                        <tr>
+                            <th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th>
+                            <th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th>
+                            <th class="p-4 text-xs font-black uppercase text-slate-500">Network</th>
+                            <th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th>
+                            <th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th>
+                            <th class="p-4 text-xs font-black uppercase text-slate-500">Status</th>
+                            <th class="p-4 text-xs font-black uppercase text-slate-500">Date</th>
+                            <th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered.length === 0 ? `
+                        <tr>
+                            <td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td>
+                        </tr>
+                        ` : filtered.map(order => `
+                        <tr class="table-row border-b border-slate-200 dark:border-slate-700 last:border-0">
+                            <td class="p-4 font-mono text-xs font-bold">${order.ref}</td>
+                            <td class="p-4 font-bold">${order.Phone}</td>
+                            <td class="p-4">
+                                <span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network === 'mtn' ? 'bg-yellow-100 text-yellow-700' : order.Network === 'airteltigo' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}">
+                                    ${order.Network?.toUpperCase()}
+                                </span>
+                            </td>
+                            <td class="p-4 text-sm">${order.bundle_name}</td>
+                            <td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td>
+                            <td class="p-4">
+                                <span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status === 'Completed' ? 'bg-green-100 text-green-700' : order.Status === 'Processing' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}">
+                                    ${order.Status || 'Pending'}
+                                </span>
+                            </td>
+                            <td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td>
+                            <td class="p-4">
+                                <div class="flex gap-2">
+                                    <button onclick="showProcessConfirmation('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">
+                                        Process
+                                    </button>
+                                    <button onclick="updateStatus('${order.ref}', 'Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">
+                                        Complete
+                                    </button>
+                                    <button onclick="deleteOrder('${order.ref}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>`;
 }
 
-async function deleteOrder(ref) {
-    try {
-        const {error} = await supa.from('orders').delete().eq('ref', ref);
-        if(error) throw error;
-        showToast('✅ Order deleted');
-        fetchOrders();
-    } catch(err) {
-        showToast('❌ Delete failed');
+function showProcessConfirmation(ref) {
+    const order = state.orders.find(o => o.ref === ref);
+    if (!order) return;
+    
+    state.currentProcessingOrder = order;
+    document.getElementById('confirm-phone').textContent = order.Phone;
+    document.getElementById('confirm-network').textContent = order.Network?.toUpperCase();
+    document.getElementById('confirm-bundle').textContent = order.bundle_name;
+    document.getElementById('confirm-amount').textContent = '₵' + parseFloat(order.Amount).toFixed(2);
+    
+    // Reset provider selection
+    selectConfirmationProvider('evnetwork');
+    
+    document.getElementById('admin-order-confirmation').style.display = 'block';
+}
+
+function cancelActiveProcess() {
+    document.getElementById('admin-actions-bar').style.display = 'none';
+    state.isDirectMode = false;
+    state.activeOrderData = null;
+}
+
+/* ================== SUCCESS VIEW ================== */
+function renderSuccessView(params) {
+    return `
+    <div class="min-h-screen flex items-center justify-center px-4 py-20 animate__animated animate__fadeIn">
+        <div class="max-w-md w-full card-theme p-8 md:p-12 rounded-3xl text-center animate-scale-in">
+            <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            
+            <h2 class="text-3xl font-black mb-4">Order Confirmed!</h2>
+            <p class="text-muted-theme mb-8">Your data bundle has been ordered successfully.</p>
+            
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 mb-8 text-left space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-sm text-muted-theme">Reference:</span>
+                    <span class="font-bold font-mono text-sm">${params.ref}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm text-muted-theme">Bundle:</span>
+                    <span class="font-bold">${params.bundle_name}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm text-muted-theme">Phone:</span>
+                    <span class="font-bold">${params.Phone}</span>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="navigateTo('home')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">
+                    Buy More Data
+                </button>
+                <button onclick="navigateTo('wallet')" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-4 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                    View Wallet
+                </button>
+            </div>
+        </div>
+    </div>`;
+}
+
+/* ================== RENDER CONTROLLER ================== */
+function render(){
+    const app = document.getElementById('app-view');
+    const extended = document.getElementById('extended-content');
+    
+    updateAuthUI();
+    
+    // Hide admin actions bar by default
+    document.getElementById('admin-actions-bar').style.display = 'none';
+    
+    switch(state.view){
+        case 'landing':
+            app.innerHTML = renderLandingPage();
+            extended.innerHTML = renderExtendedContent();
+            break;
+        case 'home':
+            app.innerHTML = renderHome();
+            extended.innerHTML = renderExtendedContent();
+            break;
+        case 'network':
+            app.innerHTML = renderNetworkView(state.params);
+            extended.innerHTML = '';
+            break;
+        case 'about':
+            app.innerHTML = renderAbout();
+            extended.innerHTML = '';
+            break;
+        case 'login':
+            app.innerHTML = renderLogin();
+            extended.innerHTML = '';
+            break;
+        case 'register':
+            app.innerHTML = renderRegister();
+            extended.innerHTML = '';
+            break;
+        case 'wallet':
+            app.innerHTML = renderWallet();
+            extended.innerHTML = '';
+            break;
+        case 'success':
+            app.innerHTML = renderSuccessView(state.params);
+            extended.innerHTML = '';
+            break;
+        case 'admin-login':
+            app.innerHTML = renderAdminLogin();
+            extended.innerHTML = '';
+            break;
+        case 'admin-dashboard':
+            if(!state.isAdmin){
+                navigateTo('admin-login');
+                return;
+            }
+            app.innerHTML = renderAdminDashboard();
+            extended.innerHTML = '';
+            break;
+        default:
+            navigateTo('landing');
+    }
+    
+    // If there's an active order being processed, show the modal
+    if (state.activeOrderData) {
+        const modal = document.createElement('div');
+        modal.innerHTML = renderOrderForm();
+        app.appendChild(modal.firstElementChild);
+    }
+    
+    // Initialize Adsense ads if any
+    if (typeof adsbygoogle !== 'undefined') {
+        try {
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        } catch(e) {
+            console.log('AdSense not loaded');
+        }
     }
 }
 
-function refreshOrders() {
-    showToast('🔄 Refreshing...');
-    fetchOrders();
-}
+/* ================== INITIALIZATION ================== */
+document.addEventListener('DOMContentLoaded', async () => {
+    // Check for existing session
+    const { data: { session } } = await supa.auth.getSession();
+    if (session) {
+        state.user = session.user;
+        await fetchUserProfile();
+    }
+    
+    // Setup admin nav button
+    document.getElementById('admin-nav-btn').addEventListener('click', () => {
+        if (state.isAdmin) {
+            navigateTo('admin-dashboard');
+        } else {
+            navigateTo('admin-login');
+        }
+    });
+    
+    // Setup global fulfill button
+    document.getElementById('global-fulfill-btn').addEventListener('click', () => {
+        if (state.activeOrderData) {
+            handleOrderButton();
+        }
+    });
+    
+    render();
+});
 
-// Initialize
-render();
+// Handle auth state changes
+supa.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') {
+        state.user = session.user;
+        fetchUserProfile();
+    } else if (event === 'SIGNED_OUT') {
+        state.user = null;
+        state.userProfile = null;
+        state.isAdmin = false;
+    }
+    render();
+});
 </script>
 </body>
 </html>
