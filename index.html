@@ -1749,7 +1749,7 @@ function renderLandingPage(){
         </p>
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
-            <button onclick="navigateTo('register')" class="cta-button text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-2">
+            <button onclick="navigateTo('login')" class="cta-button text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-2">
                 Get Started
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
             </button>
@@ -2006,11 +2006,9 @@ function renderLogin() {
         </button>
       </form>
       
-      <div class="mt-6 text-center">
-        <p class="text-sm text-muted-theme">
-          Don't have an account? 
-          <button onclick="navigateTo('register')" class="text-blue-600 font-bold hover:underline">Create one</button>
-        </p>
+      <div class="mt-6 flex justify-between items-center">
+        <button onclick="navigateTo('register')" class="text-sm text-blue-600 font-bold hover:underline">Create account</button>
+        <button onclick="navigateTo('forgot-password')" class="text-sm text-muted-theme hover:text-blue-600 transition-colors">Forgot password?</button>
       </div>
     </div>
   </div>`;
@@ -2055,6 +2053,37 @@ function renderRegister() {
       <div class="mt-6 text-center">
         <p class="text-sm text-muted-theme">
           Already have an account? 
+          <button onclick="navigateTo('login')" class="text-blue-600 font-bold hover:underline">Sign in</button>
+        </p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderForgotPassword() {
+  return `
+  <div class="min-h-screen flex items-center justify-center px-4 py-20">
+    <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
+        <h2 class="text-2xl font-black">Reset Password</h2>
+        <p class="text-sm text-muted-theme mt-2">Enter your email to receive reset instructions</p>
+      </div>
+      
+      <form onsubmit="handleForgotPassword(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
+          <input type="email" id="forgot-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="you@example.com">
+        </div>
+        
+        <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">
+          Send Reset Link
+        </button>
+      </form>
+      
+      <div class="mt-6 text-center">
+        <p class="text-sm text-muted-theme">
+          Remember your password? 
           <button onclick="navigateTo('login')" class="text-blue-600 font-bold hover:underline">Sign in</button>
         </p>
       </div>
@@ -2175,22 +2204,47 @@ async function handleRegister(e) {
     
     if (authError) throw authError;
     
-    // Create profile
+    if (!authData.user) {
+      throw new Error('Failed to create user');
+    }
+    
+    // Try to create profile - if it fails, we still have the auth user
+    // Use upsert to avoid conflicts if profile somehow exists
     const { error: profileError } = await supa
       .from('profiles')
-      .insert([{
+      .upsert([{
         id: authData.user.id,
         full_name: name,
         phone: phone,
         email: email,
         balance: 0,
         created_at: new Date().toISOString()
-      }]);
+      }], { onConflict: 'id' });
     
-    if (profileError) throw profileError;
+    if (profileError) {
+      console.error('Profile creation error:', profileError);
+      // Don't throw here - user is created, we can fix profile later
+      showToast('✅ Account created successfully!');
+    }
     
-    showToast('✅ Account created successfully! Please sign in.');
-    navigateTo('login');
+    // Auto-login the user
+    const { data: loginData, error: loginError } = await supa.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+    if (loginError) {
+      // If auto-login fails (e.g., email confirmation required), redirect to login
+      showToast('Please check your email to confirm your account, then log in.');
+      navigateTo('login');
+      return;
+    }
+    
+    // If we got here, login succeeded
+    state.user = loginData.user;
+    await fetchUserProfile();
+    navigateTo('home');
+    
   } catch (err) {
     showToast('❌ ' + err.message);
   }
@@ -2303,6 +2357,25 @@ async function fetchUserTransactions() {
     if (listEl) {
       listEl.innerHTML = '<p class="text-center text-muted-theme py-8">Unable to load transactions</p>';
     }
+  }
+}
+
+/* ================== FORGOT PASSWORD ================== */
+async function handleForgotPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('forgot-email').value.trim();
+  
+  try {
+    const { error } = await supa.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/index.html',
+    });
+    
+    if (error) throw error;
+    
+    showToast('✅ Check your email for password reset instructions!');
+    navigateTo('login');
+  } catch (err) {
+    showToast('❌ ' + err.message);
   }
 }
 
@@ -2951,6 +3024,10 @@ function render(){
             break;
         case 'register':
             app.innerHTML = renderRegister();
+            extended.innerHTML = '';
+            break;
+        case 'forgot-password':
+            app.innerHTML = renderForgotPassword();
             extended.innerHTML = '';
             break;
         case 'wallet':
