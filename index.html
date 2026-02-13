@@ -847,6 +847,24 @@ input:focus, select:focus {
   background: rgba(30, 30, 46, 1);
   border-color: rgba(255, 255, 255, 0.4);
 }
+
+/* Loading State */
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+.error-message {
+  color: var(--accent-danger);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--accent-danger);
+}
 </style>
 </head>
 
@@ -1041,7 +1059,7 @@ const NETWORKS = {
 // Normal Bundles (available all day)
 const NORMAL_BUNDLES = [
   // MTN Bundles
-  {id:'m-1',network:'mtn',size:'1GB',price:5.40, validity:'30 Days'}, 
+  {id:'m-1',network:'mtn',size:'1GB',price:0.01, validity:'30 Days'}, 
   {id:'m-2',network:'mtn',size:'2GB',price:10.00, validity:'30 Days'},
   {id:'m-3',network:'mtn',size:'3GB',price:15.00, validity:'30 Days'}, 
   {id:'m-4',network:'mtn',size:'4GB',price:19.50, validity:'30 Days'},
@@ -1139,14 +1157,21 @@ let state={
   // User Auth State
   user: null,
   userProfile: null,
-  depositAmount: ''
+  depositAmount: '',
+  isLoading: false,
+  connectionError: null
 };
 
 /* ================== UTILITY FUNCTIONS ================== */
-function showToast(message, duration = 3000) {
+function showToast(message, duration = 3000, type = 'info') {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
   toast.className = 'toast';
+  if (type === 'error') {
+    toast.style.borderLeft = '4px solid #ef4444';
+  } else if (type === 'success') {
+    toast.style.borderLeft = '4px solid #10b981';
+  }
   toast.textContent = message;
   container.appendChild(toast);
   
@@ -1272,7 +1297,7 @@ async function navigateTo(view,params=null){
     window.scrollTo(0,0);
   } catch (err) {
     console.error('Navigation error:', err);
-    showToast('❌ Error loading page. Please try again.');
+    showToast('❌ Error loading page. Please try again.', 3000, 'error');
   }
 }
 
@@ -1561,6 +1586,9 @@ function renderHome(){
     </div>`;
   }
   
+  // Get user balance safely
+  const userBalance = state.userProfile ? parseFloat(state.userProfile.balance || 0) : 0;
+  
   return `
   <div class="animate__animated animate__fadeIn">
     ${state.isDirectMode?'<div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 text-center text-xs font-black uppercase tracking-widest animate-pulse shadow-lg">Direct Order Mode Active</div>':''}
@@ -1591,7 +1619,7 @@ function renderHome(){
         <div class="max-w-sm mx-auto mb-8 animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
           <div class="wallet-card">
             <div class="wallet-label">Your Wallet Balance</div>
-            <div class="wallet-balance">₵${state.userProfile ? parseFloat(state.userProfile.balance || 0).toFixed(2) : '0.00'}</div>
+            <div class="wallet-balance">₵${userBalance.toFixed(2)}</div>
             
             <!-- FIXED: View Wallet Button - Now properly styled and clickable -->
             <button onclick="navigateTo('wallet')" class="view-wallet-btn mt-6 px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 mx-auto min-w-[160px]">
@@ -2113,6 +2141,7 @@ function renderWallet() {
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           Available for purchases
         </div>
+        ${!state.userProfile ? '<div class="mt-4 text-xs bg-red-500/20 px-3 py-2 rounded-lg">⚠️ Profile not loaded properly. Please refresh.</div>' : ''}
       </div>
       
       <!-- Deposit Form -->
@@ -2144,6 +2173,8 @@ function renderWallet() {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
             Deposit Now
           </button>
+          
+          ${!state.userProfile ? '<p class="text-xs text-red-500 mt-2">⚠️ Cannot process deposits until profile is loaded.</p>' : ''}
         </div>
       </div>
     </div>
@@ -2171,7 +2202,7 @@ function updateDepositCalculation(amount) {
   
   if (amountEl) amountEl.textContent = `₵${numAmount.toFixed(2)}`;
   if (totalEl) totalEl.textContent = `₵${total.toFixed(2)}`;
-  if (btn) btn.disabled = numAmount < 5;
+  if (btn) btn.disabled = numAmount < 5 || !state.userProfile;
 }
 
 /* ================== AUTH & DATA FUNCTIONS ================== */
@@ -2185,12 +2216,14 @@ async function handleRegister(e) {
   // Validate phone
   const phoneValidation = validateGhanaPhone(phone);
   if (!phoneValidation.isValid) {
-    showToast('❌ ' + phoneValidation.error);
+    showToast('❌ ' + phoneValidation.error, 4000, 'error');
     return;
   }
   
+  state.isLoading = true;
+  
   try {
-    // Create auth user
+    // Step 1: Create auth user
     const { data: authData, error: authError } = await supa.auth.signUp({
       email,
       password,
@@ -2205,48 +2238,63 @@ async function handleRegister(e) {
     if (authError) throw authError;
     
     if (!authData.user) {
-      throw new Error('Failed to create user');
+      throw new Error('Failed to create user account');
     }
     
-    // Try to create profile - if it fails, we still have the auth user
-    // Use upsert to avoid conflicts if profile somehow exists
+    // Step 2: Create profile immediately with user ID
+    // Use insert instead of upsert to avoid conflicts, with error handling
+    const profileData = {
+      id: authData.user.id,
+      full_name: name,
+      phone: phone,
+      email: email,
+      balance: 0,
+      created_at: new Date().toISOString()
+    };
+    
     const { error: profileError } = await supa
       .from('profiles')
-      .upsert([{
-        id: authData.user.id,
-        full_name: name,
-        phone: phone,
-        email: email,
-        balance: 0,
-        created_at: new Date().toISOString()
-      }], { onConflict: 'id' });
+      .insert([profileData]);
     
     if (profileError) {
       console.error('Profile creation error:', profileError);
-      // Don't throw here - user is created, we can fix profile later
-      showToast('✅ Account created successfully!');
+      // If profile creation fails due to duplicate, try to update instead
+      if (profileError.code === '23505') { // Unique violation
+        const { error: updateError } = await supa
+          .from('profiles')
+          .update({
+            full_name: name,
+            phone: phone,
+            email: email
+          })
+          .eq('id', authData.user.id);
+          
+        if (updateError) {
+          console.error('Profile update error:', updateError);
+        }
+      } else {
+        showToast('⚠️ Account created but profile setup incomplete. Please contact support.', 5000, 'error');
+      }
     }
     
-    // Auto-login the user
-    const { data: loginData, error: loginError } = await supa.auth.signInWithPassword({
-      email,
-      password
-    });
-    
-    if (loginError) {
-      // If auto-login fails (e.g., email confirmation required), redirect to login
-      showToast('Please check your email to confirm your account, then log in.');
+    // Step 3: Check if email confirmation is required
+    if (authData.session) {
+      // Email confirmation not required or already confirmed, auto-login
+      state.user = authData.user;
+      await fetchUserProfile();
+      showToast('✅ Account created successfully! Welcome to TRU Data.', 4000, 'success');
+      navigateTo('home');
+    } else {
+      // Email confirmation required
+      showToast('✅ Account created! Please check your email to confirm your account before logging in.', 5000, 'success');
       navigateTo('login');
-      return;
     }
-    
-    // If we got here, login succeeded
-    state.user = loginData.user;
-    await fetchUserProfile();
-    navigateTo('home');
     
   } catch (err) {
-    showToast('❌ ' + err.message);
+    console.error('Registration error:', err);
+    showToast('❌ ' + (err.message || 'Registration failed. Please try again.'), 4000, 'error');
+  } finally {
+    state.isLoading = false;
   }
 }
 
@@ -2265,10 +2313,11 @@ async function handleLogin(e) {
     
     state.user = data.user;
     await fetchUserProfile();
-    showToast('✅ Welcome back!');
+    showToast('✅ Welcome back!', 3000, 'success');
     navigateTo('home');
   } catch (err) {
-    showToast('❌ ' + err.message);
+    console.error('Login error:', err);
+    showToast('❌ ' + (err.message || 'Login failed. Please check your credentials.'), 4000, 'error');
   }
 }
 
@@ -2277,37 +2326,85 @@ async function logoutUser() {
     await supa.auth.signOut();
     state.user = null;
     state.userProfile = null;
-    showToast('✅ Logged out successfully');
+    state.isAdmin = false;
+    showToast('✅ Logged out successfully', 3000, 'success');
     navigateTo('landing');
   } catch (err) {
-    showToast('❌ Logout failed');
+    showToast('❌ Logout failed. Please try again.', 3000, 'error');
   }
 }
 
 async function fetchUserProfile() {
-  if (!state.user) return;
+  if (!state.user) {
+    console.log('No user logged in, skipping profile fetch');
+    return;
+  }
   
   try {
-    const { data, error } = await supa
+    // Try to fetch existing profile
+    let { data, error } = await supa
       .from('profiles')
       .select('*')
       .eq('id', state.user.id)
       .single();
     
-    if (error) throw error;
-    state.userProfile = data;
+    if (error) {
+      console.log('Profile fetch error:', error);
+      
+      // If profile doesn't exist (PGRST116 = no rows), create it
+      if (error.code === 'PGRST116') {
+        console.log('Profile not found, creating new profile...');
+        const newProfile = {
+          id: state.user.id,
+          full_name: state.user.user_metadata?.full_name || 'User',
+          phone: state.user.user_metadata?.phone || '',
+          email: state.user.email,
+          balance: 0,
+          created_at: new Date().toISOString()
+        };
+        
+        const { data: createdProfile, error: createError } = await supa
+          .from('profiles')
+          .insert([newProfile])
+          .select()
+          .single();
+          
+        if (createError) {
+          console.error('Failed to create profile:', createError);
+          throw createError;
+        }
+        
+        data = createdProfile;
+        showToast('✅ Profile created successfully', 3000, 'success');
+      } else {
+        throw error;
+      }
+    }
     
-    // Fetch transactions
-    fetchUserTransactions();
+    if (data) {
+      state.userProfile = data;
+      // Fetch transactions after profile is loaded
+      await fetchUserTransactions();
+    } else {
+      throw new Error('Failed to load or create profile');
+    }
+    
   } catch (err) {
-    console.error('Error fetching profile:', err);
+    console.error('Error in fetchUserProfile:', err);
+    state.userProfile = null;
+    showToast('⚠️ Error loading profile data. Some features may be limited.', 4000, 'error');
   }
 }
 
 async function fetchUserTransactions() {
   if (!state.user) return;
   
+  const listEl = document.getElementById('transaction-list');
+  if (!listEl) return;
+  
   try {
+    listEl.innerHTML = '<div class="flex justify-center py-8"><div class="spinner"></div></div>';
+    
     const { data, error } = await supa
       .from('transactions')
       .select('*')
@@ -2316,46 +2413,41 @@ async function fetchUserTransactions() {
       .limit(10);
     
     if (error) {
-      console.error('Error fetching transactions:', error.message || error);
-      return;
+      throw error;
     }
     
-    const listEl = document.getElementById('transaction-list');
-    if (listEl) {
-      if (data && data.length > 0) {
-        listEl.innerHTML = data.map(t => `
-          <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'deposit' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  ${t.type === 'deposit' 
-                    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>'
-                    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'
-                  }
-                </svg>
-              </div>
-              <div>
-                <p class="font-bold text-sm">${t.type === 'deposit' ? 'Wallet Deposit' : 'Data Purchase'}</p>
-                <p class="text-xs text-muted-theme">${new Date(t.created_at).toLocaleDateString()}</p>
-              </div>
+    if (data && data.length > 0) {
+      listEl.innerHTML = data.map(t => `
+        <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'deposit' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                ${t.type === 'deposit' 
+                  ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>'
+                  : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'
+                }
+              </svg>
             </div>
-            <div class="text-right">
-              <p class="font-bold ${t.type === 'deposit' ? 'text-green-600' : 'text-slate-900 dark:text-white'}">
-                ${t.type === 'deposit' ? '+' : '-'}₵${parseFloat(t.amount).toFixed(2)}
-              </p>
-              <p class="text-xs text-muted-theme">${t.status}</p>
+            <div>
+              <p class="font-bold text-sm">${t.type === 'deposit' ? 'Wallet Deposit' : 'Data Purchase'}</p>
+              <p class="text-xs text-muted-theme">${new Date(t.created_at).toLocaleDateString()} • ${new Date(t.created_at).toLocaleTimeString()}</p>
             </div>
           </div>
-        `).join('');
-      } else {
-        listEl.innerHTML = '<p class="text-center text-muted-theme py-8">No transactions yet</p>';
-      }
+          <div class="text-right">
+            <p class="font-bold ${t.type === 'deposit' ? 'text-green-600' : 'text-slate-900 dark:text-white'}">
+              ${t.type === 'deposit' ? '+' : '-'}₵${parseFloat(t.amount).toFixed(2)}
+            </p>
+            <p class="text-xs ${t.status === 'completed' ? 'text-green-600' : 'text-yellow-600'}">${t.status}</p>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      listEl.innerHTML = '<div class="text-center py-8 text-muted-theme"><svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>No transactions yet</div>';
     }
   } catch (err) {
-    console.error('Error in fetchUserTransactions:', err.message || err);
-    const listEl = document.getElementById('transaction-list');
+    console.error('Error fetching transactions:', err);
     if (listEl) {
-      listEl.innerHTML = '<p class="text-center text-muted-theme py-8">Unable to load transactions</p>';
+      listEl.innerHTML = '<div class="text-center py-8 text-red-500">Failed to load transactions. Please refresh the page.</div>';
     }
   }
 }
@@ -2372,18 +2464,26 @@ async function handleForgotPassword(e) {
     
     if (error) throw error;
     
-    showToast('✅ Check your email for password reset instructions!');
+    showToast('✅ Check your email for password reset instructions!', 4000, 'success');
     navigateTo('login');
   } catch (err) {
-    showToast('❌ ' + err.message);
+    console.error('Password reset error:', err);
+    showToast('❌ ' + (err.message || 'Failed to send reset email'), 4000, 'error');
   }
 }
 
 /* ================== DEPOSIT FUNCTIONS ================== */
 function initiateDeposit() {
-  const amount = parseFloat(document.getElementById('deposit-amount').value);
+  if (!state.userProfile) {
+    showToast('❌ Profile not loaded. Please refresh the page.', 4000, 'error');
+    return;
+  }
+  
+  const amountInput = document.getElementById('deposit-amount');
+  const amount = parseFloat(amountInput.value);
+  
   if (!amount || amount < 5) {
-    showToast('❌ Minimum deposit amount is ₵5.00');
+    showToast('❌ Minimum deposit amount is ₵5.00', 3000, 'error');
     return;
   }
   
@@ -2391,28 +2491,38 @@ function initiateDeposit() {
   const fee = amount * (feePercent / 100);
   const totalAmount = amount + fee;
   
-  const handler = PaystackPop.setup({
-    key: PAYSTACK_KEY,
-    email: state.user.email,
-    amount: Math.round(totalAmount * 100),
-    currency: 'GHS',
-    metadata: {
-      custom_fields: [
-        { display_name: "Deposit Type", variable_name: "deposit_type", value: "wallet_funding" },
-        { display_name: "Net Amount", variable_name: "net_amount", value: amount.toFixed(2) },
-        { display_name: "Fee", variable_name: "fee", value: fee.toFixed(2) }
-      ]
-    },
-    callback: (response) => processDeposit(response, amount, fee),
-    onClose: () => showToast('Payment window closed')
-  });
-  
-  handler.openIframe();
+  try {
+    const handler = PaystackPop.setup({
+      key: PAYSTACK_KEY,
+      email: state.user.email,
+      amount: Math.round(totalAmount * 100),
+      currency: 'GHS',
+      metadata: {
+        custom_fields: [
+          { display_name: "Deposit Type", variable_name: "deposit_type", value: "wallet_funding" },
+          { display_name: "Net Amount", variable_name: "net_amount", value: amount.toFixed(2) },
+          { display_name: "Fee", variable_name: "fee", value: fee.toFixed(2) }
+        ]
+      },
+      callback: (response) => processDeposit(response, amount, fee),
+      onClose: () => showToast('Payment window closed', 3000, 'info')
+    });
+    
+    handler.openIframe();
+  } catch (err) {
+    console.error('Paystack error:', err);
+    showToast('❌ Payment initialization failed. Please try again.', 4000, 'error');
+  }
 }
 
 async function processDeposit(response, netAmount, fee) {
+  if (!state.user || !state.userProfile) {
+    showToast('❌ Session error. Please login again.', 4000, 'error');
+    return;
+  }
+  
   try {
-    // Record transaction
+    // Record transaction first
     const { error: transError } = await supa
       .from('transactions')
       .insert([{
@@ -2425,24 +2535,41 @@ async function processDeposit(response, netAmount, fee) {
         created_at: new Date().toISOString()
       }]);
     
-    if (transError) throw transError;
+    if (transError) {
+      console.error('Transaction record error:', transError);
+      throw new Error('Failed to record transaction');
+    }
     
-    // Update user balance
-    const newBalance = parseFloat(state.userProfile.balance || 0) + netAmount;
+    // Calculate and update new balance
+    const currentBalance = parseFloat(state.userProfile.balance || 0);
+    const newBalance = currentBalance + netAmount;
+    
     const { error: updateError } = await supa
       .from('profiles')
       .update({ balance: newBalance })
       .eq('id', state.user.id);
     
-    if (updateError) throw updateError;
+    if (updateError) {
+      console.error('Balance update error:', updateError);
+      throw new Error('Failed to update balance');
+    }
     
     // Update local state
     state.userProfile.balance = newBalance;
     
-    showToast(`✅ Deposit successful! ₵${netAmount.toFixed(2)} added to your wallet`);
-    render();
+    // Clear deposit input
+    const amountInput = document.getElementById('deposit-amount');
+    if (amountInput) amountInput.value = '';
+    updateDepositCalculation(0);
+    
+    showToast(`✅ Deposit successful! ₵${netAmount.toFixed(2)} added to your wallet`, 4000, 'success');
+    
+    // Refresh transactions display
+    await fetchUserTransactions();
+    
   } catch (err) {
-    showToast('❌ Error processing deposit: ' + err.message);
+    console.error('Deposit processing error:', err);
+    showToast('❌ Error processing deposit: ' + (err.message || 'Unknown error'), 5000, 'error');
   }
 }
 
@@ -2495,13 +2622,20 @@ function initiateOrder(networkId, bundleId) {
   const bundle = BUNDLES.find(b => b.network === networkId && b.id === bundleId);
   
   if (!bundle) {
-    showToast('❌ Bundle not found');
+    showToast('❌ Bundle not found', 3000, 'error');
     return;
   }
   
   if (!state.user) {
-    showToast('❌ Please login first');
+    showToast('❌ Please login first', 3000, 'error');
     navigateTo('login');
+    return;
+  }
+  
+  // Check if profile is loaded
+  if (!state.userProfile) {
+    showToast('⚠️ Profile loading... Please wait a moment and try again.', 3000, 'error');
+    fetchUserProfile(); // Try to reload profile
     return;
   }
   
@@ -2514,6 +2648,8 @@ function renderOrderForm() {
   
   const { network, bundle } = state.activeOrderData;
   const netInfo = NETWORKS[network];
+  const balance = state.userProfile ? parseFloat(state.userProfile.balance || 0) : 0;
+  const hasSufficientBalance = balance >= bundle.price;
   
   return `
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn">
@@ -2537,7 +2673,7 @@ function renderOrderForm() {
         </div>
         <div class="flex justify-between items-center mb-2">
           <span class="text-sm text-muted-theme">Your Balance</span>
-          <span class="font-bold text-lg ${state.userProfile && state.userProfile.balance >= bundle.price ? 'text-green-600' : 'text-red-500'}">₵${state.userProfile ? parseFloat(state.userProfile.balance || 0).toFixed(2) : '0.00'}</span>
+          <span class="font-bold text-lg ${hasSufficientBalance ? 'text-green-600' : 'text-red-500'}">₵${balance.toFixed(2)}</span>
         </div>
         <div class="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2 flex justify-between items-center">
           <span class="font-bold">Total</span>
@@ -2552,11 +2688,11 @@ function renderOrderForm() {
           <p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p>
         </div>
         
-        <button onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${state.userProfile && state.userProfile.balance >= bundle.price ? '' : 'opacity-50 cursor-not-allowed'}" ${state.userProfile && state.userProfile.balance >= bundle.price ? '' : 'disabled'}>
-          ${state.userProfile && state.userProfile.balance >= bundle.price ? 'Confirm Purchase' : 'Insufficient Balance'}
+        <button onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${hasSufficientBalance ? '' : 'opacity-50 cursor-not-allowed'}" ${hasSufficientBalance ? '' : 'disabled'}>
+          ${hasSufficientBalance ? 'Confirm Purchase' : 'Insufficient Balance'}
         </button>
         
-        ${state.userProfile && state.userProfile.balance < bundle.price ? `
+        ${!hasSufficientBalance ? `
         <button onclick="state.activeOrderData=null; navigateTo('wallet')" class="w-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-2xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all">
           Add Funds to Wallet
         </button>
@@ -2568,12 +2704,14 @@ function renderOrderForm() {
 
 /* ================== ORDER FUNCTIONS ================== */
 async function handleOrderButton(){
-  const phone = document.getElementById('p-num').value.trim();
+  const phoneInput = document.getElementById('p-num');
+  const phone = phoneInput.value.trim();
   
   // Validate Ghana phone number
   const validation = validateGhanaPhone(phone);
   if (!validation.isValid) {
-    showToast('❌ ' + validation.error);
+    showToast('❌ ' + validation.error, 4000, 'error');
+    phoneInput.focus();
     return;
   }
   
@@ -2582,7 +2720,7 @@ async function handleOrderButton(){
   // Check wallet balance
   const balance = parseFloat(state.userProfile?.balance || 0);
   if (balance < bundle.price) {
-    showToast('❌ Insufficient balance. Please deposit funds.');
+    showToast('❌ Insufficient balance. Please deposit funds.', 4000, 'error');
     navigateTo('wallet');
     return;
   }
@@ -2631,14 +2769,15 @@ async function handleOrderButton(){
       // Update local balance
       state.userProfile.balance = newBalance;
       
-      showToast('✅ Direct order created and saved');
+      showToast('✅ Direct order created and saved', 3000, 'success');
       window.open(providerUrl, '_blank');
       
       state.isDirectMode = false;
       state.selectedProvider = 'evnetwork';
       navigateTo('admin-dashboard');
     } catch(err) {
-      showToast('❌ Error creating order: ' + err.message);
+      console.error('Order error:', err);
+      showToast('❌ Error creating order: ' + (err.message || 'Unknown error'), 4000, 'error');
     }
   } else {
     // Regular user order - deduct from wallet
@@ -2679,14 +2818,15 @@ async function handleOrderButton(){
       // Update local balance
       state.userProfile.balance = newBalance;
       
-      showToast('✅ Order placed successfully!');
+      showToast('✅ Order placed successfully!', 3000, 'success');
       navigateTo('success', {
         bundle_name: bundle.size, 
         Phone: phone,
         ref: ref
       });
     } catch (err) {
-      showToast('❌ Error placing order: ' + err.message);
+      console.error('Order error:', err);
+      showToast('❌ Error placing order: ' + (err.message || 'Unknown error'), 4000, 'error');
     }
   }
 }
@@ -2706,10 +2846,10 @@ window.adminAuth=async(e)=>{
         const {data, error} = await supa.auth.signInWithPassword({email, password});
         if(error) throw error;
         state.isAdmin = true;
-        showToast('✅ Login successful');
+        showToast('✅ Login successful', 3000, 'success');
         navigateTo('admin-dashboard');
     } catch(err) {
-        showToast('❌ ' + err.message);
+        showToast('❌ ' + (err.message || 'Login failed'), 4000, 'error');
         btn.innerText = originalText;
         btn.disabled = false;
     }
@@ -2720,22 +2860,90 @@ async function adminLogout() {
         await supa.auth.signOut();
         state.isAdmin = false;
         state.isDirectMode = false;
-        showToast('✅ Logged out successfully');
+        showToast('✅ Logged out successfully', 3000, 'success');
         navigateTo('landing');
     } catch(err) {
-        showToast('❌ Logout failed');
+        showToast('❌ Logout failed', 3000, 'error');
     }
 }
 
+// Replace fetchOrders function:
 async function fetchOrders(){
     try {
-        const {data, error} = await supa.from('orders').select('*').order('created_at',{ascending:false});
+        const {data, error} = await supa.rpc('get_orders');
+        
         if(error) throw error;
+        
         state.orders = data || [];
-        if(state.view==='admin-dashboard') render();
+        
+        if(state.view === 'admin-dashboard') {
+            render();
+        }
     } catch(err) {
         console.error('Fetch error:', err);
-        showToast('❌ Failed to load orders');
+        showToast('❌ Failed to load orders', 3000, 'error');
+    }
+}
+
+// Replace handleOrderButton function:
+async function handleOrderButton(){
+  const phone = document.getElementById('p-num').value.trim();
+  
+  const validation = validateGhanaPhone(phone);
+  if (!validation.isValid) {
+    showToast('❌ ' + validation.error, 4000, 'error');
+    return;
+  }
+  
+  const {bundle} = state.activeOrderData;
+  
+  try {
+    const ref = 'ORD-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+    
+    const { data, error } = await supa.rpc('place_order', {
+      p_ref: ref,
+      p_phone: phone,
+      p_network: bundle.network,
+      p_bundle_name: bundle.size,
+      p_amount: bundle.price,
+      p_user_id: state.user.id
+    });
+    
+    if (error) throw error;
+    
+    if (data && data.success) {
+      state.userProfile.balance = data.new_balance;
+      showToast('✅ Order placed successfully!', 3000, 'success');
+      state.activeOrderData = null;
+      navigateTo('success', {
+        bundle_name: bundle.size,
+        Phone: phone,
+        ref: ref
+      });
+    } else {
+      throw new Error(data?.error || 'Failed to place order');
+    }
+    
+  } catch (err) {
+    console.error('Order error:', err);
+    showToast('❌ ' + err.message, 4000, 'error');
+  }
+}
+
+// Also update fetchAdminStats if you have it, or add this:
+async function fetchAdminStats() {
+    try {
+        const {data, error} = await supa.rpc('get_admin_stats');
+        
+        if(error) throw error;
+        
+        if(data && data.length > 0) {
+            const stats = data[0];
+            // Update your stats display here if needed
+            console.log('Admin stats:', stats);
+        }
+    } catch(err) {
+        console.error('Stats error:', err);
     }
 }
 
@@ -2743,10 +2951,10 @@ async function updateStatus(ref, status){
     try {
         const {error} = await supa.from('orders').update({Status:status, updated_at: new Date().toISOString()}).eq('ref',ref);
         if(error) throw error;
-        showToast(`✅ Order marked as ${status}`);
+        showToast(`✅ Order marked as ${status}`, 3000, 'success');
         fetchOrders();
     } catch(err) {
-        showToast('❌ Update failed: ' + err.message);
+        showToast('❌ Update failed: ' + (err.message || 'Unknown error'), 4000, 'error');
     }
 }
 
@@ -2759,10 +2967,10 @@ async function deleteOrder(ref) {
     try {
         const {error} = await supa.from('orders').delete().eq('ref', ref);
         if(error) throw error;
-        showToast(`✅ Order ${ref} deleted successfully`);
+        showToast(`✅ Order ${ref} deleted successfully`, 3000, 'success');
         fetchOrders();
     } catch(err) {
-        showToast('❌ Delete failed: ' + err.message);
+        showToast('❌ Delete failed: ' + (err.message || 'Unknown error'), 4000, 'error');
     }
 }
 
@@ -3033,6 +3241,10 @@ function render(){
         case 'wallet':
             app.innerHTML = renderWallet();
             extended.innerHTML = '';
+            // Refresh transactions when wallet view is rendered
+            if (state.user) {
+                fetchUserTransactions();
+            }
             break;
         case 'success':
             app.innerHTML = renderSuccessView(state.params);
@@ -3074,10 +3286,20 @@ function render(){
 /* ================== INITIALIZATION ================== */
 document.addEventListener('DOMContentLoaded', async () => {
     // Check for existing session
-    const { data: { session } } = await supa.auth.getSession();
-    if (session) {
-        state.user = session.user;
-        await fetchUserProfile();
+    try {
+        const { data: { session }, error: sessionError } = await supa.auth.getSession();
+        
+        if (sessionError) {
+            console.error('Session error:', sessionError);
+        }
+        
+        if (session) {
+            state.user = session.user;
+            await fetchUserProfile();
+        }
+    } catch (err) {
+        console.error('Initialization error:', err);
+        showToast('⚠️ Connection error. Please check your internet connection.', 5000, 'error');
     }
     
     // Setup admin nav button
@@ -3101,6 +3323,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Handle auth state changes
 supa.auth.onAuthStateChange((event, session) => {
+    console.log('Auth state changed:', event);
+    
     if (event === 'SIGNED_IN') {
         state.user = session.user;
         fetchUserProfile();
@@ -3108,7 +3332,10 @@ supa.auth.onAuthStateChange((event, session) => {
         state.user = null;
         state.userProfile = null;
         state.isAdmin = false;
+    } else if (event === 'USER_UPDATED') {
+        state.user = session.user;
     }
+    
     render();
 });
 </script>
