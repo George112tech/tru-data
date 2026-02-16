@@ -1773,7 +1773,7 @@ function renderLandingPage(){
           Your Platform for Mobile Data Bundle Purchases in Ghana
         </p>
         <p class="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
-          TRU DSTA is a digital platform designed to help users purchase mobile data bundles conveniently. We provide an organized interface that allows users to explore and buy data plans across different mobile networks in Ghana.
+          TRU DATA is a digital platform designed to help users purchase mobile data bundles conveniently. We provide an organized interface that allows users to explore and buy data plans across different mobile networks in Ghana.
         </p>
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
@@ -2121,7 +2121,7 @@ function renderForgotPassword() {
 
 function renderWallet() {
   const balance = state.userProfile ? parseFloat(state.userProfile.balance || 0) : 0;
-  const depositFeePercent = 2.00;
+  const depositFeePercent = 2.50;
   
   return `
   <div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn">
@@ -2191,7 +2191,7 @@ function renderWallet() {
 
 function updateDepositCalculation(amount) {
   const numAmount = parseFloat(amount) || 0;
-  const feePercent = 2.00;
+  const feePercent = 3.50;
   const fee = numAmount * (feePercent / 100);
   const total = numAmount + fee;
   
@@ -2483,7 +2483,7 @@ function initiateDeposit() {
   const amount = parseFloat(amountInput.value);
   
   if (!amount || amount < 5) {
-    showToast('❌ Minimum deposit amount is ₵5.00', 3000, 'error');
+    showToast('❌ Minimum deposit amount is ₵5.00.', 3000, 'error');
     return;
   }
   
@@ -2867,83 +2867,33 @@ async function adminLogout() {
     }
 }
 
-// Replace fetchOrders function:
+// FIXED: Replace fetchOrders function to use direct query instead of RPC
 async function fetchOrders(){
     try {
-        const {data, error} = await supa.rpc('get_orders');
+        console.log('Fetching orders...');
         
-        if(error) throw error;
+        // Use direct table query instead of RPC for better compatibility
+        const {data, error} = await supa
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(1000); // Adjust limit as needed
         
+        if(error) {
+            console.error('Supabase error fetching orders:', error);
+            throw error;
+        }
+        
+        console.log(`Fetched ${data?.length || 0} orders`);
         state.orders = data || [];
         
         if(state.view === 'admin-dashboard') {
             render();
         }
     } catch(err) {
-        console.error('Fetch error:', err);
-        showToast('❌ Failed to load orders', 3000, 'error');
-    }
-}
-
-// Replace handleOrderButton function:
-async function handleOrderButton(){
-  const phone = document.getElementById('p-num').value.trim();
-  
-  const validation = validateGhanaPhone(phone);
-  if (!validation.isValid) {
-    showToast('❌ ' + validation.error, 4000, 'error');
-    return;
-  }
-  
-  const {bundle} = state.activeOrderData;
-  
-  try {
-    const ref = 'ORD-' + Math.random().toString(36).slice(2, 10).toUpperCase();
-    
-    const { data, error } = await supa.rpc('place_order', {
-      p_ref: ref,
-      p_phone: phone,
-      p_network: bundle.network,
-      p_bundle_name: bundle.size,
-      p_amount: bundle.price,
-      p_user_id: state.user.id
-    });
-    
-    if (error) throw error;
-    
-    if (data && data.success) {
-      state.userProfile.balance = data.new_balance;
-      showToast('✅ Order placed successfully!', 3000, 'success');
-      state.activeOrderData = null;
-      navigateTo('success', {
-        bundle_name: bundle.size,
-        Phone: phone,
-        ref: ref
-      });
-    } else {
-      throw new Error(data?.error || 'Failed to place order');
-    }
-    
-  } catch (err) {
-    console.error('Order error:', err);
-    showToast('❌ ' + err.message, 4000, 'error');
-  }
-}
-
-// Also update fetchAdminStats if you have it, or add this:
-async function fetchAdminStats() {
-    try {
-        const {data, error} = await supa.rpc('get_admin_stats');
-        
-        if(error) throw error;
-        
-        if(data && data.length > 0) {
-            const stats = data[0];
-            // Update your stats display here if needed
-            console.log('Admin stats:', stats);
-        }
-    } catch(err) {
-        console.error('Stats error:', err);
+        console.error('Fetch orders error:', err);
+        showToast('❌ Failed to load orders: ' + (err.message || 'Check console for details'), 4000, 'error');
+        state.orders = []; // Ensure orders is at least an empty array
     }
 }
 
