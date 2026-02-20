@@ -1268,9 +1268,20 @@ function validateGhanaPhone(phone) {
   // Remove any spaces or dashes
   phone = phone.replace(/[\s-]/g, '');
   
-  // Check if it starts with valid Ghana prefixes
-  const validPrefixes = ['024', '054', '055', '059', '027', '057', '026', '056', '020', '050', '023', '053', '028', '058'];
-  const startsWithValidPrefix = validPrefixes.some(prefix => phone.startsWith(prefix));
+  // UPDATED: All current Ghana telecom prefixes including 025, 026, 027, etc.
+  const validPrefixes = [
+    // MTN prefixes
+    '024', '054', '055', '059', '025', '053', '063', '077', '057',
+    // Vodafone (Telecel) prefixes
+    '020', '050', '026', '056', '027', '057', '076', '077',
+    // AirtelTigo prefixes
+    '027', '057', '026', '056', '023', '028', '058'
+  ];
+  
+  // Remove duplicates and create unique set
+  const uniquePrefixes = [...new Set(validPrefixes)];
+  
+  const startsWithValidPrefix = uniquePrefixes.some(prefix => phone.startsWith(prefix));
   
   // Must be exactly 10 digits
   const isCorrectLength = phone.length === 10;
@@ -1281,7 +1292,7 @@ function validateGhanaPhone(phone) {
   return {
     isValid: startsWithValidPrefix && isCorrectLength && isOnlyDigits,
     error: !isOnlyDigits ? 'Phone number must contain only digits' :
-           !startsWithValidPrefix ? 'Phone number must start with a valid Ghana prefix (024, 054, 055, etc.)' :
+           !startsWithValidPrefix ? 'Phone number must start with a valid Ghana prefix (020, 024, 025, 026, 027, 028, 050, 053, 054, 055, 056, 057, 058, 059, 076, 077, etc.)' :
            !isCorrectLength ? 'Phone number must be exactly 10 digits' : null
   };
 }
@@ -2121,7 +2132,7 @@ function renderForgotPassword() {
 
 function renderWallet() {
   const balance = state.userProfile ? parseFloat(state.userProfile.balance || 0) : 0;
-  const depositFeePercent = 2.50;
+  const depositFeePercent = 3.50;
   
   return `
   <div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn">
@@ -2162,6 +2173,10 @@ function renderWallet() {
               <span class="text-muted-theme">Deposit Amount:</span>
               <span class="font-bold" id="calc-amount">₵0.00</span>
             </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-muted-theme">Processing Fee (${depositFeePercent}%):</span>
+              <span class="font-bold" id="calc-fee">₵0.00</span>
+            </div>
             <div class="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between">
               <span class="font-bold">Total to Pay:</span>
               <span class="font-black text-lg text-blue-600" id="calc-total">₵0.00</span>
@@ -2169,9 +2184,8 @@ function renderWallet() {
           </div>
           
           <button onclick="initiateDeposit()" id="deposit-btn" disabled
-                  class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-            Deposit Now
+                  class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <span>Deposit Now</span>
           </button>
           
           ${!state.userProfile ? '<p class="text-xs text-red-500 mt-2">⚠️ Cannot process deposits until profile is loaded.</p>' : ''}
@@ -2191,16 +2205,18 @@ function renderWallet() {
 
 function updateDepositCalculation(amount) {
   const numAmount = parseFloat(amount) || 0;
-  const feePercent = 3.50;
+  const feePercent = 3.50; // UPDATED: Changed from 2.00 to 3.50
   const fee = numAmount * (feePercent / 100);
   const total = numAmount + fee;
   
   // Safely update elements if they exist
   const amountEl = document.getElementById('calc-amount');
+  const feeEl = document.getElementById('calc-fee');
   const totalEl = document.getElementById('calc-total');
   const btn = document.getElementById('deposit-btn');
   
   if (amountEl) amountEl.textContent = `₵${numAmount.toFixed(2)}`;
+  if (feeEl) feeEl.textContent = `₵${fee.toFixed(2)}`;
   if (totalEl) totalEl.textContent = `₵${total.toFixed(2)}`;
   if (btn) btn.disabled = numAmount < 5 || !state.userProfile;
 }
@@ -2487,7 +2503,7 @@ function initiateDeposit() {
     return;
   }
   
-  const feePercent = 2.00;
+  const feePercent = 3.50; // UPDATED: Changed from 2.00 to 3.50
   const fee = amount * (feePercent / 100);
   const totalAmount = amount + fee;
   
@@ -2908,18 +2924,24 @@ async function updateStatus(ref, status){
     }
 }
 
+// UPDATED: Delete order function - permanently deletes from Supabase
 async function deleteOrder(ref) {
     // Confirm before deleting
-    if (!confirm(`Are you sure you want to delete order ${ref}? This action cannot be undone.`)) {
+    if (!confirm(`Are you sure you want to permanently delete order ${ref}? This action cannot be undone.`)) {
         return;
     }
     
     try {
         const {error} = await supa.from('orders').delete().eq('ref', ref);
         if(error) throw error;
-        showToast(`✅ Order ${ref} deleted successfully`, 3000, 'success');
-        fetchOrders();
+        
+        // Remove from local state immediately for better UX
+        state.orders = state.orders.filter(o => o.ref !== ref);
+        
+        showToast(`✅ Order ${ref} permanently deleted`, 3000, 'success');
+        render(); // Re-render to show updated list
     } catch(err) {
+        console.error('Delete error:', err);
         showToast('❌ Delete failed: ' + (err.message || 'Unknown error'), 4000, 'error');
     }
 }
@@ -3061,13 +3083,14 @@ function renderAdminDashboard(){
                             <td class="p-4 text-sm">${order.bundle_name}</td>
                             <td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td>
                             <td class="p-4">
-                                <span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status === 'Completed' ? 'bg-green-100 text-green-700' : order.Status === 'Processing' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}">
+                                <span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status === 'Completed' ? 'bg-green-100 text-green-700' : order.Status === 'Processing' ? 'bg-blue-100 text-blue-700' : order.Status === 'Deleted' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">
                                     ${order.Status || 'Pending'}
                                 </span>
                             </td>
                             <td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td>
                             <td class="p-4">
                                 <div class="flex gap-2">
+                                    ${order.Status !== 'Deleted' ? `
                                     <button onclick="showProcessConfirmation('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">
                                         Process
                                     </button>
@@ -3077,6 +3100,7 @@ function renderAdminDashboard(){
                                     <button onclick="deleteOrder('${order.ref}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">
                                         Delete
                                     </button>
+                                    ` : '<span class="text-xs text-red-500 font-bold">DELETED</span>'}
                                 </div>
                             </td>
                         </tr>
