@@ -1300,6 +1300,20 @@ function validateGhanaPhone(phone) {
 /* ================== CORE FUNCTIONS ================== */
 async function navigateTo(view,params=null){
   try {
+    // Check admin-dashboard access
+    if (view === 'admin-dashboard') {
+      if (!state.userProfile) {
+        showToast("⛔ Please login first");
+        navigateTo('login');
+        return;
+      }
+      if (state.userProfile.role !== 'admin') {
+        showToast("⛔ Admin access only");
+        navigateTo('home');
+        return;
+      }
+    }
+
     state.view=view;
     state.params=params;
     if(view==='admin-dashboard') await fetchOrders();
@@ -1427,18 +1441,18 @@ function renderExtendedContent() {
 
     <!-- Ad Container -->
     <div class="max-w-5xl mx-auto px-6 my-12">
-      <div class="ad-container">
+      <div class="ad-container min-h-[90px]">
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-2637582768279029"
              data-ad-slot="5392404731"
-             data-ad-format="auto"
+             data-ad-format="horizontal"
              data-full-width-responsive="true"></ins>
       </div>
     </div>
 
     <section class="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700 animate-gradient py-20 text-white relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'0.05\' fill-rule=\'evenodd\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
         <div class="max-w-5xl mx-auto px-6 text-center relative z-10">
             <h2 class="text-4xl font-black mb-6 animate-slide-up">Your Reliable Data Top-up Service</h2>
             <p class="text-xl opacity-90 mb-10 leading-relaxed max-w-3xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
@@ -2318,22 +2332,48 @@ async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
-  
+
   try {
     const { data, error } = await supa.auth.signInWithPassword({
       email,
       password
     });
-    
-    if (error) throw error;
-    
+
+    if (error) {
+      showToast("Login failed: " + error.message);
+      return;
+    }
+
+    if (!data.user) {
+      showToast("Login failed: No user data");
+      return;
+    }
+
     state.user = data.user;
+    
+    // Use fetchUserProfile to get or create profile
     await fetchUserProfile();
-    showToast('✅ Welcome back!', 3000, 'success');
-    navigateTo('home');
+    
+    if (!state.userProfile) {
+      showToast("Failed to load profile");
+      return;
+    }
+
+    // Set admin flag
+    state.isAdmin = state.userProfile.role === 'admin';
+
+    // 🎯 Redirect based on role
+    if (state.userProfile.role === 'admin') {
+      showToast('✅ Welcome back, Admin!', 3000, 'success');
+      navigateTo('admin-dashboard');
+    } else {
+      showToast('✅ Welcome back!', 3000, 'success');
+      navigateTo('home');
+    }
+    
   } catch (err) {
     console.error('Login error:', err);
-    showToast('❌ ' + (err.message || 'Login failed. Please check your credentials.'), 4000, 'error');
+    showToast('❌ Login error: ' + (err.message || 'Unknown error'), 4000, 'error');
   }
 }
 
@@ -2365,16 +2405,19 @@ async function fetchUserProfile() {
       .single();
     
     if (error) {
-      console.log('Profile fetch error:', error);
+      console.error('Profile fetch error code:', error.code);
+      console.error('Profile fetch error message:', error.message);
+      console.error('Profile fetch error details:', error.details);
       
       // If profile doesn't exist (PGRST116 = no rows), create it
       if (error.code === 'PGRST116') {
         console.log('Profile not found, creating new profile...');
         const newProfile = {
           id: state.user.id,
-          full_name: state.user.user_metadata?.full_name || 'User',
+          full_name: state.user.user_metadata?.full_name || state.user.email?.split('@')[0] || 'User',
           phone: state.user.user_metadata?.phone || '',
           email: state.user.email,
+          role: 'user',
           balance: 0,
           created_at: new Date().toISOString()
         };
@@ -2391,7 +2434,7 @@ async function fetchUserProfile() {
         }
         
         data = createdProfile;
-        showToast('✅ Profile created successfully', 3000, 'success');
+        console.log('Profile created successfully:', data);
       } else {
         throw error;
       }
@@ -2399,16 +2442,18 @@ async function fetchUserProfile() {
     
     if (data) {
       state.userProfile = data;
+      console.log('Profile loaded:', data);
       // Fetch transactions after profile is loaded
       await fetchUserTransactions();
     } else {
-      throw new Error('Failed to load or create profile');
+      throw new Error('Failed to load or create profile - no data returned');
     }
     
   } catch (err) {
     console.error('Error in fetchUserProfile:', err);
+    console.error('Error details:', JSON.stringify(err, null, 2));
     state.userProfile = null;
-    showToast('⚠️ Error loading profile data. Some features may be limited.', 4000, 'error');
+    showToast('⚠️ Error loading profile: ' + (err.message || 'Unknown error'), 4000, 'error');
   }
 }
 
@@ -3229,11 +3274,19 @@ function render(){
             extended.innerHTML = '';
             break;
         case 'admin-dashboard':
-            if(!state.isAdmin){
-                navigateTo('admin-login');
+            if (!state.userProfile || state.userProfile.role !== 'admin') {
+                showToast("⛔ Admin access only");
                 return;
             }
             app.innerHTML = renderAdminDashboard();
+            extended.innerHTML = '';
+            break;
+        case 'user-dashboard':
+            if (!state.userProfile || state.userProfile.role === 'admin') {
+                showToast("⛔ Users only");
+                return;
+            }
+            app.innerHTML = renderUserDashboard();
             extended.innerHTML = '';
             break;
         default:
