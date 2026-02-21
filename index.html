@@ -1302,18 +1302,34 @@ async function navigateTo(view,params=null){
   try {
     // Check admin-dashboard access
     if (view === 'admin-dashboard') {
-      if (!state.userProfile) {
+      // 🎯 CRITICAL FIX: Check both user and profile
+      if (!state.user) {
         showToast("⛔ Please login first");
         navigateTo('login');
         return;
       }
+      
+      // If profile not loaded, try to fetch it first
+      if (!state.userProfile) {
+        console.log("Profile not loaded, attempting to fetch...");
+        await fetchUserProfile();
+      }
+      
+      // Check again after fetch attempt
+      if (!state.userProfile) {
+        showToast("⛔ Profile not found. Please login again.");
+        navigateTo('login');
+        return;
+      }
+      
       if (state.userProfile.role !== 'admin') {
         showToast("⛔ Admin access only");
         navigateTo('home');
         return;
       }
     }
-
+    
+    // Rest of your navigateTo function remains the same...
     state.view=view;
     state.params=params;
     if(view==='admin-dashboard') await fetchOrders();
@@ -2349,23 +2365,75 @@ async function handleLogin(e) {
       return;
     }
 
+    // Set user immediately
     state.user = data.user;
     
-    // Use fetchUserProfile to get or create profile
-    await fetchUserProfile();
+    // 🎯 CRITICAL FIX: Force profile fetch with explicit error handling
+    console.log("Fetching profile for user:", state.user.id);
     
-    if (!state.userProfile) {
-      showToast("Failed to load profile");
+    // Try to get profile directly
+    let profile = null;
+    try {
+      const { data: profileData, error: profileError } = await supa
+        .from('profiles')
+        .select('*')
+        .eq('id', state.user.id)
+        .single();
+      
+      if (profileError) {
+        console.error("Profile fetch error:", profileError);
+        // If no profile exists, create one
+        if (profileError.code === 'PGRST116') {
+          const { data: newProfile, error: createError } = await supa
+            .from('profiles')
+            .insert([{
+              id: state.user.id,
+              full_name: state.user.user_metadata?.full_name || email.split('@')[0],
+              phone: state.user.user_metadata?.phone || '',
+              email: email,
+              role: 'user',
+              balance: 0,
+              created_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+            
+          if (createError) {
+            console.error("Profile creation error:", createError);
+            showToast("Error creating profile. Please contact support.");
+            return;
+          }
+          profile = newProfile;
+        } else {
+          throw profileError;
+        }
+      } else {
+        profile = profileData;
+      }
+    } catch (err) {
+      console.error("Profile error:", err);
+      showToast("Error loading profile. Please try again.");
       return;
     }
-
-    // Set admin flag
-    state.isAdmin = state.userProfile.role === 'admin';
-
-    // 🎯 Redirect based on role
-    if (state.userProfile.role === 'admin') {
+    
+    if (!profile) {
+      showToast("Failed to load profile data.");
+      return;
+    }
+    
+    // Set profile in state
+    state.userProfile = profile;
+    state.isAdmin = profile.role === 'admin';
+    
+    console.log("Profile loaded:", profile);
+    console.log("Is admin:", state.isAdmin);
+    
+    // Navigate based on role
+    if (state.isAdmin) {
       showToast('✅ Welcome back, Admin!', 3000, 'success');
-      navigateTo('admin-dashboard');
+      state.view = 'admin-dashboard'; // Set view directly first
+      await fetchOrders(); // Pre-load orders
+      render();
     } else {
       showToast('✅ Welcome back!', 3000, 'success');
       navigateTo('home');
@@ -2377,39 +2445,42 @@ async function handleLogin(e) {
   }
 }
 
-async function logoutUser() {
-  try {
-    await supa.auth.signOut();
-    state.user = null;
-    state.userProfile = null;
-    state.isAdmin = false;
-    showToast('✅ Logged out successfully', 3000, 'success');
-    navigateTo('landing');
-  } catch (err) {
-    showToast('❌ Logout failed. Please try again.', 3000, 'error');
-  }
-}
-
 async function fetchUserProfile() {
   if (!state.user) {
     console.log('No user logged in, skipping profile fetch');
+    state.userProfile = null;
     return;
   }
   
   try {
-    // Try to fetch existing profile
-    let { data, error } = await supa
-      .from('profiles')
-      .select('*')
-      .eq('id', state.user.id)
-      .single();
+    // Try to fetch existing profile with retry logic
+    let retries = 0;
+    let data = null;
+    let error = null;
+    
+    while (retries < 3 && !data) {
+      const result = await supa
+        .from('profiles')
+        .select('*')
+        .eq('id', state.user.id)
+        .single();
+      
+      data = result.data;
+      error = result.error;
+      
+      if (error && error.code !== 'PGRST116') {
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 500));
+        retries++;
+      } else {
+        break;
+      }
+    }
     
     if (error) {
-      console.error('Profile fetch error code:', error.code);
-      console.error('Profile fetch error message:', error.message);
-      console.error('Profile fetch error details:', error.details);
+      console.error('Profile fetch error after retries:', error);
       
-      // If profile doesn't exist (PGRST116 = no rows), create it
+      // If profile doesn't exist, create it
       if (error.code === 'PGRST116') {
         console.log('Profile not found, creating new profile...');
         const newProfile = {
@@ -2430,13 +2501,15 @@ async function fetchUserProfile() {
           
         if (createError) {
           console.error('Failed to create profile:', createError);
-          throw createError;
+          state.userProfile = null;
+          return;
         }
         
         data = createdProfile;
         console.log('Profile created successfully:', data);
       } else {
-        throw error;
+        state.userProfile = null;
+        return;
       }
     }
     
@@ -2446,16 +2519,15 @@ async function fetchUserProfile() {
       // Fetch transactions after profile is loaded
       await fetchUserTransactions();
     } else {
-      throw new Error('Failed to load or create profile - no data returned');
+      state.userProfile = null;
     }
     
   } catch (err) {
     console.error('Error in fetchUserProfile:', err);
-    console.error('Error details:', JSON.stringify(err, null, 2));
     state.userProfile = null;
-    showToast('⚠️ Error loading profile: ' + (err.message || 'Unknown error'), 4000, 'error');
   }
 }
+
 
 async function fetchUserTransactions() {
   if (!state.user) return;
