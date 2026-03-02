@@ -2453,36 +2453,20 @@ async function fetchUserProfile() {
   }
   
   try {
-    // Try to fetch existing profile with retry logic
-    let retries = 0;
-    let data = null;
-    let error = null;
+    console.log('Fetching profile for user:', state.user.id);
     
-    while (retries < 3 && !data) {
-      const result = await supa
-        .from('profiles')
-        .select('*')
-        .eq('id', state.user.id)
-        .single();
-      
-      data = result.data;
-      error = result.error;
-      
-      if (error && error.code !== 'PGRST116') {
-        // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 500));
-        retries++;
-      } else {
-        break;
-      }
-    }
+    const { data, error } = await supa
+      .from('profiles')
+      .select('*')
+      .eq('id', state.user.id)
+      .single();
     
     if (error) {
-      console.error('Profile fetch error after retries:', error);
+      console.error('Profile fetch error:', error);
       
       // If profile doesn't exist, create it
       if (error.code === 'PGRST116') {
-        console.log('Profile not found, creating new profile...');
+        console.log('Profile not found, creating...');
         const newProfile = {
           id: state.user.id,
           full_name: state.user.user_metadata?.full_name || state.user.email?.split('@')[0] || 'User',
@@ -2500,34 +2484,28 @@ async function fetchUserProfile() {
           .single();
           
         if (createError) {
-          console.error('Failed to create profile:', createError);
+          console.error('Profile creation error:', createError);
           state.userProfile = null;
           return;
         }
         
-        data = createdProfile;
-        console.log('Profile created successfully:', data);
-      } else {
-        state.userProfile = null;
+        state.userProfile = createdProfile;
+        console.log('Profile created:', createdProfile);
         return;
       }
+      
+      state.userProfile = null;
+      return;
     }
     
-    if (data) {
-      state.userProfile = data;
-      console.log('Profile loaded:', data);
-      // Fetch transactions after profile is loaded
-      await fetchUserTransactions();
-    } else {
-      state.userProfile = null;
-    }
+    state.userProfile = data;
+    console.log('Profile loaded:', data);
     
   } catch (err) {
     console.error('Error in fetchUserProfile:', err);
     state.userProfile = null;
   }
 }
-
 
 async function fetchUserTransactions() {
   if (!state.user) return;
@@ -2836,6 +2814,7 @@ function renderOrderForm() {
 }
 
 /* ================== ORDER FUNCTIONS ================== */
+/* ================== ORDER FUNCTIONS ================== */
 async function handleOrderButton(){
   const phoneInput = document.getElementById('p-num');
   const phone = phoneInput.value.trim();
@@ -2850,32 +2829,46 @@ async function handleOrderButton(){
   
   const {bundle} = state.activeOrderData;
   
-  // Check wallet balance
-  const balance = parseFloat(state.userProfile?.balance || 0);
-  if (balance < bundle.price) {
-    showToast('❌ Insufficient balance. Please deposit funds.', 4000, 'error');
-    navigateTo('wallet');
+  // Check if user is logged in
+  if (!state.user) {
+    showToast('❌ Please login first', 3000, 'error');
+    navigateTo('login');
     return;
   }
   
-  if(state.isAdmin && state.isDirectMode){
-    // Direct order with provider selection - save with Processing status and redirect
-    const provider = state.selectedProvider || 'evnetwork';
-    const providerUrl = provider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
-    const ref = 'DIR-' + Math.random().toString(36).slice(2, 10).toUpperCase();
-    
-    try {
+  // Check wallet balance for regular users
+  const balance = parseFloat(state.userProfile?.balance || 0);
+  let newBalance; // Declare newBalance here so it's available in all blocks
+  
+  // Generate reference number
+  const ref = 'ORD-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+  
+  try {
+    // For regular users (non-admin or admin not in direct mode)
+    if (!state.isAdmin || !state.isDirectMode) {
+      // Check balance
+      if (balance < bundle.price) {
+        showToast('❌ Insufficient balance. Please deposit funds.', 4000, 'error');
+        navigateTo('wallet');
+        return;
+      }
+      
+      // Calculate new balance
+      newBalance = balance - bundle.price;
+      
       // Deduct from balance
-      const newBalance = balance - bundle.price;
       const { error: balanceError } = await supa
         .from('profiles')
         .update({ balance: newBalance })
         .eq('id', state.user.id);
       
-      if (balanceError) throw balanceError;
+      if (balanceError) {
+        console.error('Balance update error:', balanceError);
+        throw new Error('Failed to update balance: ' + balanceError.message);
+      }
       
       // Record transaction
-      await supa.from('transactions').insert([{
+      const { error: transError } = await supa.from('transactions').insert([{
         user_id: state.user.id,
         type: 'purchase',
         amount: bundle.price,
@@ -2884,85 +2877,69 @@ async function handleOrderButton(){
         created_at: new Date().toISOString()
       }]);
       
-      // Save order
-      const {error} = await supa.from('orders').insert([{
-        ref: ref,
-        Phone: phone,
-        Network: bundle.network,
-        bundle_name: bundle.size,
-        Amount: bundle.price,
-        Status: 'Processing',
-        provider: provider,
-        user_id: state.user.id,
-        created_at: new Date().toISOString()
-      }]);
-      
-      if(error) throw error;
-      
-      // Update local balance
-      state.userProfile.balance = newBalance;
-      
-      showToast('✅ Direct order created and saved', 3000, 'success');
-      window.open(providerUrl, '_blank');
-      
-      state.isDirectMode = false;
-      state.selectedProvider = 'evnetwork';
-      navigateTo('admin-dashboard');
-    } catch(err) {
-      console.error('Order error:', err);
-      showToast('❌ Error creating order: ' + (err.message || 'Unknown error'), 4000, 'error');
+      if (transError) {
+        console.error('Transaction error:', transError);
+        throw new Error('Failed to record transaction: ' + transError.message);
+      }
     }
-  } else {
-    // Regular user order - deduct from wallet
-    try {
-      // Deduct from balance
-      const newBalance = balance - bundle.price;
-      const { error: balanceError } = await supa
-        .from('profiles')
-        .update({ balance: newBalance })
-        .eq('id', state.user.id);
-      
-      if (balanceError) throw balanceError;
-      
-      const ref = 'ORD-' + Math.random().toString(36).slice(2, 10).toUpperCase();
-      
-      // Record transaction
-      await supa.from('transactions').insert([{
-        user_id: state.user.id,
-        type: 'purchase',
-        amount: bundle.price,
-        reference: ref,
-        status: 'completed',
-        created_at: new Date().toISOString()
-      }]);
-      
-      // Save order
-      await supa.from('orders').insert([{
-        ref: ref,
-        Phone: phone,
-        Network: bundle.network,
-        bundle_name: bundle.size,
-        Amount: bundle.price,
-        Status: 'Pending',
-        user_id: state.user.id,
-        created_at: new Date().toISOString()
-      }]);
-      
-      // Update local balance
+    
+    // Save order - THIS IS THE CRITICAL PART
+    console.log('Saving order with data:', {
+      ref: ref,
+      Phone: phone,
+      Network: bundle.network,
+      bundle_name: bundle.size,
+      Amount: bundle.price,
+      Status: state.isAdmin && state.isDirectMode ? 'Processing' : 'Pending',
+      provider: state.isAdmin && state.isDirectMode ? (state.selectedProvider || 'evnetwork') : null,
+      user_id: state.user.id,
+      created_at: new Date().toISOString()
+    });
+    
+    const { data: orderData, error: orderError } = await supa.from('orders').insert([{
+      ref: ref,
+      Phone: phone,
+      Network: bundle.network,
+      bundle_name: bundle.size,
+      Amount: bundle.price,
+      Status: state.isAdmin && state.isDirectMode ? 'Processing' : 'Pending',
+      provider: state.isAdmin && state.isDirectMode ? (state.selectedProvider || 'evnetwork') : null,
+      user_id: state.user.id,
+      created_at: new Date().toISOString()
+    }]).select(); // Add .select() to return the inserted data
+    
+    if (orderError) {
+      console.error('Order insert error:', orderError);
+      throw new Error('Failed to save order: ' + orderError.message);
+    }
+    
+    console.log('Order saved successfully:', orderData);
+    
+    // Update local balance if regular purchase
+    if (!state.isAdmin || !state.isDirectMode) {
       state.userProfile.balance = newBalance;
-      
       showToast('✅ Order placed successfully!', 3000, 'success');
       navigateTo('success', {
         bundle_name: bundle.size, 
         Phone: phone,
         ref: ref
       });
-    } catch (err) {
-      console.error('Order error:', err);
-      showToast('❌ Error placing order: ' + (err.message || 'Unknown error'), 4000, 'error');
+    } else {
+      // Admin direct mode
+      const providerUrl = state.selectedProvider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
+      window.open(providerUrl, '_blank');
+      showToast('✅ Direct order created', 3000, 'success');
+      state.isDirectMode = false;
+      state.selectedProvider = 'evnetwork';
+      navigateTo('admin-dashboard');
     }
+    
+  } catch (err) {
+    console.error('Order error:', err);
+    showToast('❌ Error: ' + (err.message || 'Unknown error'), 5000, 'error');
   }
 }
+
 
 /* ================== ADMIN FUNCTIONS ================== */
 window.adminAuth=async(e)=>{
@@ -3003,21 +2980,20 @@ async function adminLogout() {
 // FIXED: Replace fetchOrders function to use direct query instead of RPC
 async function fetchOrders(){
     try {
-        console.log('Fetching orders...');
+        console.log('Fetching orders... User:', state.user?.id, 'Profile:', state.userProfile?.role);
         
-        // Use direct table query instead of RPC for better compatibility
         const {data, error} = await supa
             .from('orders')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(1000); // Adjust limit as needed
+            .limit(1000);
         
         if(error) {
             console.error('Supabase error fetching orders:', error);
             throw error;
         }
         
-        console.log(`Fetched ${data?.length || 0} orders`);
+        console.log(`Fetched ${data?.length || 0} orders:`, data);
         state.orders = data || [];
         
         if(state.view === 'admin-dashboard') {
@@ -3026,40 +3002,7 @@ async function fetchOrders(){
     } catch(err) {
         console.error('Fetch orders error:', err);
         showToast('❌ Failed to load orders: ' + (err.message || 'Check console for details'), 4000, 'error');
-        state.orders = []; // Ensure orders is at least an empty array
-    }
-}
-
-async function updateStatus(ref, status){
-    try {
-        const {error} = await supa.from('orders').update({Status:status, updated_at: new Date().toISOString()}).eq('ref',ref);
-        if(error) throw error;
-        showToast(`✅ Order marked as ${status}`, 3000, 'success');
-        fetchOrders();
-    } catch(err) {
-        showToast('❌ Update failed: ' + (err.message || 'Unknown error'), 4000, 'error');
-    }
-}
-
-// UPDATED: Delete order function - permanently deletes from Supabase
-async function deleteOrder(ref) {
-    // Confirm before deleting
-    if (!confirm(`Are you sure you want to permanently delete order ${ref}? This action cannot be undone.`)) {
-        return;
-    }
-    
-    try {
-        const {error} = await supa.from('orders').delete().eq('ref', ref);
-        if(error) throw error;
-        
-        // Remove from local state immediately for better UX
-        state.orders = state.orders.filter(o => o.ref !== ref);
-        
-        showToast(`✅ Order ${ref} permanently deleted`, 3000, 'success');
-        render(); // Re-render to show updated list
-    } catch(err) {
-        console.error('Delete error:', err);
-        showToast('❌ Delete failed: ' + (err.message || 'Unknown error'), 4000, 'error');
+        state.orders = [];
     }
 }
 
@@ -3250,6 +3193,55 @@ function cancelActiveProcess() {
     state.isDirectMode = false;
     state.activeOrderData = null;
 }
+
+window.deleteOrder = async function(ref) {
+    // Confirm before deleting
+    if (!confirm(`Are you sure you want to permanently delete order ${ref}? This action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const {error} = await supa.from('orders').delete().eq('ref', ref);
+        if(error) throw error;
+        
+        // Remove from local state immediately for better UX
+        state.orders = state.orders.filter(o => o.ref !== ref);
+        
+        showToast(`✅ Order ${ref} permanently deleted`, 3000, 'success');
+        render(); // Re-render to show updated list
+    } catch(err) {
+        console.error('Delete error:', err);
+        showToast('❌ Delete failed: ' + (err.message || 'Unknown error'), 4000, 'error');
+    }
+};
+
+// Also ensure other admin functions are attached to window
+window.updateStatus = async function(ref, status) {
+    try {
+        const {error} = await supa.from('orders').update({Status:status, updated_at: new Date().toISOString()}).eq('ref',ref);
+        if(error) throw error;
+        showToast(`✅ Order marked as ${status}`, 3000, 'success');
+        fetchOrders();
+    } catch(err) {
+        showToast('❌ Update failed: ' + (err.message || 'Unknown error'), 4000, 'error');
+    }
+};
+
+window.showProcessConfirmation = function(ref) {
+    const order = state.orders.find(o => o.ref === ref);
+    if (!order) return;
+    
+    state.currentProcessingOrder = order;
+    document.getElementById('confirm-phone').textContent = order.Phone;
+    document.getElementById('confirm-network').textContent = order.Network?.toUpperCase();
+    document.getElementById('confirm-bundle').textContent = order.bundle_name;
+    document.getElementById('confirm-amount').textContent = '₵' + parseFloat(order.Amount).toFixed(2);
+    
+    // Reset provider selection
+    selectConfirmationProvider('evnetwork');
+    
+    document.getElementById('admin-order-confirmation').style.display = 'block';
+};
 
 /* ================== SUCCESS VIEW ================== */
 function renderSuccessView(params) {
