@@ -6,7 +6,6 @@
 <title>TRU Data Network | Buy Data Bundles in Ghana - MTN, Telecel, AirtelTigo</title>
 <meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. Data top up service across Ghana.">
 <meta name="keywords" content="buy data Ghana, MTN data bundles, Telecel data, AirtelTigo data, cheap data Ghana, mobile data Ghana, internet bundles, data top up Ghana, TRU Data Network">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2637582768279029" crossorigin="anonymous"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -25,8 +24,8 @@
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-tertiary: #94a3b8;
-  --accent-primary: #3b82f6;
-  --accent-secondary: #8b5cf6;
+  --accent-primary: #dc2626;
+  --accent-secondary: #ef4444;
   --accent-success: #10b981;
   --accent-warning: #f59e0b;
   --accent-danger: #ef4444;
@@ -35,7 +34,7 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  --shadow-glow: 0 0 40px -10px rgba(59, 130, 246, 0.5);
+  --shadow-glow: 0 0 40px -10px rgba(220, 38, 38, 0.5);
   --glass-bg: rgba(255, 255, 255, 0.8);
 }
 
@@ -48,8 +47,8 @@
   --text-primary: #f8fafc;
   --text-secondary: #a1a1aa;
   --text-tertiary: #71717a;
-  --accent-primary: #60a5fa;
-  --accent-secondary: #a78bfa;
+  --accent-primary: #f87171;
+  --accent-secondary: #fca5a5;
   --accent-success: #34d399;
   --accent-warning: #fbbf24;
   --accent-danger: #f87171;
@@ -58,7 +57,7 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
-  --shadow-glow: 0 0 60px -15px rgba(96, 165, 250, 0.4);
+  --shadow-glow: 0 0 60px -15px rgba(248, 113, 113, 0.4);
   --glass-bg: rgba(22, 22, 34, 0.85);
 }
 
@@ -174,7 +173,7 @@ body {
 }
 
 [data-theme="dark"] .theme-switch { 
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #f87171 0%, #fca5a5 100%);
 }
 
 .theme-circle {
@@ -214,8 +213,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
-  50% { box-shadow: 0 0 60px rgba(59, 130, 246, 0.8); }
+  0%, 100% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.4); }
+  50% { box-shadow: 0 0 60px rgba(220, 38, 38, 0.8); }
 }
 
 @keyframes gradient-shift {
@@ -367,7 +366,7 @@ body {
 }
 
 .table-row:hover {
-  background-color: rgba(59, 130, 246, 0.05);
+  background-color: rgba(220, 38, 38, 0.05);
   transform: scale(1.005);
 }
 
@@ -386,7 +385,7 @@ body {
 
 [data-theme="light"] .glass-enhanced {
   background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(220, 38, 38, 0.2);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
@@ -400,7 +399,7 @@ input, select {
 
 input:focus, select:focus {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
   outline: none;
   background-color: var(--bg-card);
 }
@@ -427,22 +426,6 @@ input:focus, select:focus {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-primary);
-}
-
-/* Ad Container Styling */
-.ad-container {
-  background: var(--bg-secondary);
-  border: 2px dashed var(--border-color);
-  border-radius: 1rem;
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-tertiary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 /* Network Specific Gradients */
@@ -514,7 +497,7 @@ input:focus, select:focus {
   border-radius: 9999px;
   font-weight: 700;
   font-size: 0.875rem;
-  box-shadow: 0 4px 15px -3px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 15px -3px rgba(220, 38, 38, 0.4);
 }
 
 /* Responsive Improvements */
@@ -543,33 +526,6 @@ input:focus, select:focus {
   }
 }
 
-/* Disclaimer Styling */
-.disclaimer-box {
-  background: linear-gradient(135deg, rgba(254, 252, 232, 0.9) 0%, rgba(254, 249, 195, 0.9) 100%);
-  border-left: 4px solid #eab308;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  font-size: 0.875rem;
-  color: #854d0e;
-}
-
-[data-theme="dark"] .disclaimer-box {
-  background: linear-gradient(135deg, rgba(66, 32, 6, 0.9) 0%, rgba(113, 63, 18, 0.9) 100%);
-  color: #fde047;
-  border-left-color: #eab308;
-}
-
-.affiliate-disclosure {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
 /* Admin Order Confirmation Modal Styles */
 #admin-order-confirmation {
   display: none;
@@ -587,7 +543,7 @@ input:focus, select:focus {
   border: 2px solid var(--accent-primary);
   border-radius: 1.5rem;
   padding: 2rem;
-  box-shadow: var(--shadow-xl), 0 0 40px rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-xl), 0 0 40px rgba(220, 38, 38, 0.3);
   animation: slide-up 0.4s ease-out;
 }
 
@@ -720,57 +676,7 @@ input:focus, select:focus {
 
 .btn-confirm-process:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
-}
-
-/* Express Mode Badge */
-.express-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  animation: pulse-glow 2s infinite;
-}
-
-/* Mode Switcher Buttons */
-.mode-switcher {
-  display: flex;
-  gap: 0.5rem;
-  background: var(--bg-tertiary);
-  padding: 0.25rem;
-  border-radius: 1rem;
-}
-
-.mode-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-}
-
-.mode-btn.active {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  color: white;
-  box-shadow: var(--shadow-md);
-}
-
-.mode-btn:hover:not(.active) {
-  background: var(--bg-card);
-  color: var(--text-primary);
+  box-shadow: 0 10px 20px -5px rgba(220, 38, 38, 0.4);
 }
 
 /* Wallet Styles */
@@ -873,7 +779,7 @@ input:focus, select:focus {
 <nav class="sticky top-0 z-[60] glass transition-all duration-300">
   <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
     <div onclick="navigateTo('landing')" class="text-2xl font-extrabold tracking-tighter cursor-pointer flex items-center gap-2 hover:scale-105 transition-transform duration-300">
-      <span class="bg-gradient-to-br from-blue-500 to-purple-600 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span> 
+      <span class="bg-gradient-to-br from-red-600 to-red-500 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span> 
       <span class="dark:text-white font-bold">DATA</span>
     </div>
     
@@ -885,15 +791,15 @@ input:focus, select:focus {
         </div>
       </div>
       
-      <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-blue-600 dark:hover:text-blue-400 hidden md:block transition-colors duration-300">Buy Data</button>
-      <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-blue-600 dark:hover:text-blue-400 hidden md:block transition-colors duration-300">About</button>
+      <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-red-600 dark:hover:text-red-400 hidden md:block transition-colors duration-300">Buy Data</button>
+      <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-red-600 dark:hover:text-red-400 hidden md:block transition-colors duration-300">About</button>
       
       <!-- User Auth Section -->
       <div id="user-auth-section" class="hidden md:flex items-center gap-3">
         <!-- Populated by JS -->
       </div>
       
-      <button id="admin-nav-btn" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-4 py-2.5 rounded-full font-bold text-slate-500 hover:bg-blue-600 hover:text-white transition-all uppercase shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Admin</button>
+      <button id="admin-nav-btn" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-4 py-2.5 rounded-full font-bold text-slate-500 hover:bg-red-600 hover:text-white transition-all uppercase shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Admin</button>
     </div>
   </div>
 </nav>
@@ -935,11 +841,7 @@ input:focus, select:focus {
     <div class="provider-selection">
       <div class="provider-selection-title">Choose Provider Platform</div>
       <div class="provider-buttons">
-        <button class="provider-btn" id="btn-evnetwork-confirm" onclick="selectConfirmationProvider('evnetwork')">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-          EV Network
-        </button>
-        <button class="provider-btn" id="btn-refer2bundle-confirm" onclick="selectConfirmationProvider('refer2bundle')">
+        <button class="provider-btn selected" id="btn-refer2bundle-confirm" onclick="selectConfirmationProvider('refer2bundle')">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
           Refer2Bundle
         </button>
@@ -957,7 +859,7 @@ input:focus, select:focus {
   <div class="max-w-4xl mx-auto px-4">
     <div class="mb-8">
       <span class="text-2xl font-extrabold tracking-tighter inline-flex items-center gap-2">
-        <span class="bg-gradient-to-br from-blue-500 to-purple-600 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span> 
+        <span class="bg-gradient-to-br from-red-600 to-red-500 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span> 
         <span class="dark:text-white">DATA</span>
       </span>
     </div>
@@ -966,24 +868,24 @@ input:focus, select:focus {
       <div>
         <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Quick Links</h4>
         <ul class="space-y-2 text-sm text-muted-theme">
-          <li><button onclick="navigateTo('landing')" class="hover:text-blue-600 transition-colors">Home</button></li>
-          <li><button onclick="navigateTo('home')" class="hover:text-blue-600 transition-colors">Buy Data</button></li>
-          <li><button onclick="navigateTo('about')" class="hover:text-blue-600 transition-colors">About Us</button></li>
+          <li><button onclick="navigateTo('landing')" class="hover:text-red-600 transition-colors">Home</button></li>
+          <li><button onclick="navigateTo('home')" class="hover:text-red-600 transition-colors">Buy Data</button></li>
+          <li><button onclick="navigateTo('about')" class="hover:text-red-600 transition-colors">About Us</button></li>
         </ul>
       </div>
       <div>
         <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Networks</h4>
         <ul class="space-y-2 text-sm text-muted-theme">
-          <li><button onclick="navigateTo('network','mtn')" class="hover:text-blue-600 transition-colors">MTN Ghana</button></li>
-          <li><button onclick="navigateTo('network','telecel')" class="hover:text-blue-600 transition-colors">Telecel</button></li>
-          <li><button onclick="navigateTo('network','airteltigo')" class="hover:text-blue-600 transition-colors">AirtelTigo</button></li>
+          <li><button onclick="navigateTo('network','mtn')" class="hover:text-red-600 transition-colors">MTN Ghana</button></li>
+          <li><button onclick="navigateTo('network','telecel')" class="hover:text-red-600 transition-colors">Telecel</button></li>
+          <li><button onclick="navigateTo('network','airteltigo')" class="hover:text-red-600 transition-colors">AirtelTigo</button></li>
         </ul>
       </div>
       <div>
         <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Contact</h4>
         <ul class="space-y-2 text-sm text-muted-theme">
           <li>WhatsApp: +233 59 757 8538</li>
-          <li>Email: support@trudata.com</li>
+          <li>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0b787e7b7b64797f4b7f797e6f6a7f6a25686466">[email&#160;protected]</a></li>
           <li>Accra, Ghana</li>
         </ul>
       </div>
@@ -999,17 +901,16 @@ input:focus, select:focus {
 
 <div id="admin-actions-bar" class="w-[90%] max-w-lg glass-enhanced text-white p-5 rounded-2xl shadow-2xl flex flex-col gap-4 border animate__animated animate__slideInUp">
   <div class="flex flex-col">
-    <span class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-1">Active Processing</span>
+    <span class="text-[10px] font-black uppercase text-red-400 tracking-widest mb-1">Active Processing</span>
     <span id="active-order-label" class="text-sm font-bold truncate max-w-[250px] text-slate-900 dark:text-white"></span>
   </div>
   
-  <div class="affiliate-disclosure">
-    <p class="text-xs font-semibold mb-2">Select Provider for Direct Order:</p>
+  <div class="bg-slate-100 dark:bg-slate-700/60 rounded-xl p-3">
+    <p class="text-xs font-semibold mb-2 text-slate-700 dark:text-slate-300">Select Provider for Direct Order:</p>
     <div class="flex gap-2 mb-2">
-      <button onclick="selectProvider('evnetwork')" id="btn-evnetwork" class="flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold transition-all">EV Network</button>
-      <button onclick="selectProvider('refer2bundle')" id="btn-refer2bundle" class="flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all">Refer2Bundle</button>
+      <button onclick="selectProvider('refer2bundle')" id="btn-refer2bundle" class="flex-1 py-2 px-3 rounded-lg bg-red-600 text-white text-xs font-bold transition-all">Refer2Bundle</button>
     </div>
-    <p class="text-[10px] opacity-75">You will be redirected to complete the order on the selected platform.</p>
+    <p class="text-[10px] opacity-75 text-slate-600 dark:text-slate-400">You will be redirected to complete the order on Refer2Bundle.</p>
   </div>
   
   <div class="flex gap-3 justify-end">
@@ -1026,7 +927,7 @@ input:focus, select:focus {
   <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-2.32 0-4.519.903-6.16 2.544-1.64 1.64-2.543 3.838-2.543 6.158 0 1.61.439 3.191 1.272 4.578L3.375 23l3.818-1.226c1.328.724 2.822 1.107 4.337 1.107l.001-.001c2.32 0 4.52-.903 6.161-2.544 1.64-1.64 2.544-3.838 2.544-6.159 0-2.32-.904-4.518-2.544-6.159-1.64-1.641-3.839-2.545-6.161-2.545zm5.035 11.031c-.193.543-1.137 1.032-1.571 1.096-.434.064-.91.133-2.736-.605-2.203-.891-3.626-3.134-3.737-3.282-.11-.148-.891-1.185-.891-2.26s.555-1.604.752-1.821c.198-.217.433-.271.577-.271.145 0 .289.001.416.007.133.006.312-.05.488.372.181.434.619 1.506.674 1.617.054.111.091.241.016.39-.075.148-.112.241-.223.37-.111.148-.112.241-.223.37-.111.13-.233.29-.333.388-.111.111-.227.232-.097.455.13.223.578 1.019 1.241 1.604.854.753 1.572 1.018 1.795 1.13.223.111.353.093.483-.056.13-.149.555-.65.703-.872.148-.222.297-.186.5-.111.204.074 1.297.611 1.519.722.222.112.37.167.426.26.055.092.055.536-.138 1.079z"/></svg>
 </a>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ================= THEME LOGIC ================= */
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
@@ -1105,41 +1006,6 @@ const NORMAL_BUNDLES = [
   {id:'t-100',network:'telecel',size:'100GB',price:369.00, validity:'30 Days'}
 ];
 
-// Express Bundles (available 9:00pm to 6:00am)
-const EXPRESS_BUNDLES = [
-  // MTN Express Bundles
-  {id:'m-1',network:'mtn',size:'1GB',price:7, validity:'30 Days'},
-  {id:'m-2',network:'mtn',size:'2GB',price:12, validity:'30 Days'},
-  {id:'m-3',network:'mtn',size:'3GB',price:17, validity:'30 Days'},
-  {id:'m-4',network:'mtn',size:'4GB',price:22, validity:'30 Days'},
-  {id:'m-5',network:'mtn',size:'5GB',price:27, validity:'30 Days'},
-  {id:'m-6',network:'mtn',size:'6GB',price:32, validity:'30 Days'},
-  {id:'m-8',network:'mtn',size:'8GB',price:40, validity:'30 Days'},
-  {id:'m-10',network:'mtn',size:'10GB',price:52, validity:'30 Days'},
-  {id:'m-15',network:'mtn',size:'15GB',price:70, validity:'30 Days'},
-  {id:'m-20',network:'mtn',size:'20GB',price:93, validity:'30 Days'},
-  {id:'m-25',network:'mtn',size:'25GB',price:117, validity:'30 Days'},
-  {id:'m-30',network:'mtn',size:'30GB',price:138, validity:'30 Days'},
-  {id:'m-40',network:'mtn',size:'40GB',price:179, validity:'30 Days'},
-  {id:'m-50',network:'mtn',size:'50GB',price:225, validity:'30 Days'},
-  
-  // AirtelTigo Express Bundles
-  {id:'a-1',network:'airteltigo',size:'1GB',price:7, validity:'30 Days'},
-  {id:'a-2',network:'airteltigo',size:'2GB',price:12, validity:'30 Days'},
-  {id:'a-3',network:'airteltigo',size:'3GB',price:17, validity:'30 Days'},
-  {id:'a-4',network:'airteltigo',size:'4GB',price:22, validity:'30 Days'},
-  {id:'a-5',network:'airteltigo',size:'5GB',price:27, validity:'30 Days'},
-  
-  // Telecel Express Bundles
-  {id:'t-5',network:'telecel',size:'5GB',price:27, validity:'30 Days'},
-  {id:'t-10',network:'telecel',size:'10GB',price:42, validity:'30 Days'},
-  {id:'t-20',network:'telecel',size:'20GB',price:76, validity:'30 Days'},
-  {id:'t-25',network:'telecel',size:'25GB',price:93, validity:'30 Days'},
-  {id:'t-30',network:'telecel',size:'30GB',price:120, validity:'30 Days'},
-  {id:'t-40',network:'telecel',size:'40GB',price:183, validity:'30 Days'},
-  {id:'t-50',network:'telecel',size:'50GB',price:190, validity:'30 Days'},
-  {id:'t-100',network:'telecel',size:'100GB',price:365, validity:'30 Days'}
-];
 
 let state={
   view:'landing',
@@ -1149,11 +1015,9 @@ let state={
   searchQuery:'',
   networkFilter:'all',
   activeOrderData:null,
-  selectedProvider:'evnetwork',
+  selectedProvider:'refer2bundle',
   currentProcessingOrder:null,
-  confirmationSelectedProvider:'evnetwork',
-  isExpressMode:false,
-  expressOverride:null,
+  confirmationSelectedProvider:'refer2bundle',
   // User Auth State
   user: null,
   userProfile: null,
@@ -1184,18 +1048,10 @@ function showToast(message, duration = 3000, type = 'info') {
 
 function selectProvider(provider) {
   state.selectedProvider = provider;
-  document.getElementById('btn-evnetwork').className = provider === 'evnetwork' 
-    ? 'flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold transition-all'
-    : 'flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all';
-  document.getElementById('btn-refer2bundle').className = provider === 'refer2bundle'
-    ? 'flex-1 py-2 px-3 rounded-lg bg-blue-600 text-white text-xs font-bold transition-all'
-    : 'flex-1 py-2 px-3 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all';
 }
 
 function selectConfirmationProvider(provider) {
   state.confirmationSelectedProvider = provider;
-  document.getElementById('btn-evnetwork-confirm').classList.toggle('selected', provider === 'evnetwork');
-  document.getElementById('btn-refer2bundle-confirm').classList.toggle('selected', provider === 'refer2bundle');
 }
 
 function closeAdminConfirmation() {
@@ -1208,7 +1064,7 @@ function confirmProcessOrder() {
   
   const order = state.currentProcessingOrder;
   const provider = state.confirmationSelectedProvider;
-  const providerUrl = provider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
+  const providerUrl = 'https://refer2bundle.com';
   
   // Update order status
   updateStatus(order.ref, 'Processing');
@@ -1218,49 +1074,6 @@ function confirmProcessOrder() {
   
   closeAdminConfirmation();
   showToast('✅ Order marked as Processing. Redirecting...');
-}
-
-/* ================== TIME CHECKING FOR EXPRESS MODE ================== */
-function checkExpressHours() {
-  const now = new Date();
-  const hour = now.getHours();
-  // Express mode: 9:00 PM (21:00) to 6:00 AM (06:00)
-  // Outside this range is normal mode
-  return hour >= 21 || hour < 6;
-}
-
-function getCurrentBundles() {
-  // If admin has manually overridden, use that
-  if (state.expressOverride !== null) {
-    return state.expressOverride ? EXPRESS_BUNDLES : NORMAL_BUNDLES;
-  }
-  // Otherwise use time-based logic
-  return checkExpressHours() ? EXPRESS_BUNDLES : NORMAL_BUNDLES;
-}
-
-function isCurrentlyExpress() {
-  if (state.expressOverride !== null) {
-    return state.expressOverride;
-  }
-  return checkExpressHours();
-}
-
-function switchToExpress() {
-  state.expressOverride = true;
-  showToast('🌙 Switched to Express Mode');
-  render();
-}
-
-function switchToNormal() {
-  state.expressOverride = false;
-  showToast('☀️ Switched to Normal Mode');
-  render();
-}
-
-function resetToAutoMode() {
-  state.expressOverride = null;
-  showToast('🔄 Reset to Auto Mode (Time-based)');
-  render();
 }
 
 /* ================== PHONE VALIDATION ================== */
@@ -1349,7 +1162,7 @@ function updateAuthUI() {
   if (state.user) {
     authSection.innerHTML = `
       <div class="flex items-center gap-3">
-        <button onclick="navigateTo('wallet')" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition-all">
+        <button onclick="navigateTo('wallet')" class="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition-all">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
           Wallet
         </button>
@@ -1361,267 +1174,31 @@ function updateAuthUI() {
   } else {
     authSection.innerHTML = `
       <div class="flex items-center gap-2">
-        <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600 transition-colors">Login</button>
+        <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-red-600 transition-colors">Login</button>
         <span class="text-slate-300">|</span>
-        <button onclick="navigateTo('register')" class="text-xs font-bold bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors">Sign Up</button>
+        <button onclick="navigateTo('register')" class="text-xs font-bold bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors">Sign Up</button>
       </div>
     `;
   }
 }
 
-function renderExtendedContent() {
-    if(state.view !== 'home' && state.view !== 'network' && state.view !== 'landing') {
-        return "";
-    }
-    
-    return `
-    <!-- AdSense Policy Compliant Content Section -->
-    <section class="max-w-7xl mx-auto px-6 py-16 border-t border-slate-200 dark:border-slate-800">
-      <div class="disclaimer-box mb-8">
-        <strong>Important Notice:</strong> TRU Data is an independent platform that facilitates data bundle purchases. We are not directly affiliated with MTN, Telecel, or AirtelTigo. All network names and logos are trademarks of their respective owners. Prices and availability are subject to change based on network provider policies.
-      </div>
-      
-      <div class="grid md:grid-cols-3 gap-8 mb-16">
-        <div class="p-6 card-theme rounded-2xl animate-slide-up">
-          <h3 class="text-xl font-bold mb-3 text-blue-600">Why Choose TRU Data?</h3>
-          <p class="text-sm text-muted-theme leading-relaxed">
-            TRU Data Network provides competitive data bundle prices in Ghana. We partner with authorized vendors to bring you convenient access to data packages, secure payment processing through Paystack, and customer support.
-          </p>
-        </div>
-        <div class="p-6 card-theme rounded-2xl animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-          <h3 class="text-xl font-bold mb-3 text-purple-600">Coverage Across Ghana</h3>
-          <p class="text-sm text-muted-theme leading-relaxed">
-            Our service is available nationwide. Whether you're in Accra, Kumasi, Tamale, Cape Coast, or anywhere in Ghana, you can purchase data bundles through our platform.
-          </p>
-        </div>
-        <div class="p-6 card-theme rounded-2xl animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
-          <h3 class="text-xl font-bold mb-3 text-green-600">Secure & Trusted</h3>
-          <p class="text-sm text-muted-theme leading-relaxed">
-            Your payments are processed securely through Paystack. We do not store your mobile money PIN or card details. All transactions are encrypted for your protection.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="max-w-7xl mx-auto px-6 py-20 border-t border-slate-200 dark:border-slate-800">
-        <div class="grid md:grid-cols-2 gap-16 items-center">
-            <div>
-                <h2 class="text-3xl font-black mb-6 animate-slide-up">How It Works</h2>
-                <div class="space-y-6">
-                    <div class="flex gap-4 animate-slide-up stagger-1 opacity-0" style="animation-fill-mode: forwards;">
-                        <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">1</div>
-                        <div>
-                            <h4 class="font-bold text-lg mb-1">Create Account</h4>
-                            <p class="text-muted-theme text-sm">Sign up for a free TRU Data account to access our services and manage your wallet.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4 animate-slide-up stagger-2 opacity-0" style="animation-fill-mode: forwards;">
-                        <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">2</div>
-                        <div>
-                            <h4 class="font-bold text-lg mb-1">Deposit Funds</h4>
-                            <p class="text-muted-theme text-sm">Add money to your TRU Wallet using Paystack. Funds are credited instantly to your wallet.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4 animate-slide-up stagger-3 opacity-0" style="animation-fill-mode: forwards;">
-                        <div class="h-12 w-12 shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/30 text-lg">3</div>
-                        <div>
-                            <h4 class="font-bold text-lg mb-1">Buy Data Instantly</h4>
-                            <p class="text-muted-theme text-sm">Select your network and bundle, then pay seamlessly from your wallet balance.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-slate-100 dark:bg-slate-800/50 p-8 rounded-[2.5rem] animate-scale-in shadow-2xl border border-slate-200 dark:border-slate-700">
-                <h2 class="text-3xl font-black mb-6">Service Features</h2>
-                <ul class="space-y-4">
-                    <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
-                        <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
-                        Wallet-Based Purchasing
-                    </li>
-                    <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
-                        <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
-                        Verified Paystack Integration
-                    </li>
-                    <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
-                        <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
-                        No Hidden Charges
-                    </li>
-                    <li class="flex items-center gap-3 font-bold p-3 rounded-xl hover:bg-white dark:hover:bg-slate-700 transition-colors cursor-default group">
-                        <svg class="w-6 h-6 text-green-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg> 
-                        Customer Support Available
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Ad Container -->
-    <div class="max-w-5xl mx-auto px-6 my-12">
-      <div class="ad-container min-h-[90px]">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-2637582768279029"
-             data-ad-slot="5392404731"
-             data-ad-format="horizontal"
-             data-full-width-responsive="true"></ins>
-      </div>
-    </div>
-
-    <section class="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700 animate-gradient py-20 text-white relative overflow-hidden">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
-        <div class="max-w-5xl mx-auto px-6 text-center relative z-10">
-            <h2 class="text-4xl font-black mb-6 animate-slide-up">Your Reliable Data Top-up Service</h2>
-            <p class="text-xl opacity-90 mb-10 leading-relaxed max-w-3xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-                TRU Data Network helps Ghanaians stay connected with convenient access to data bundles. Whether for remote work in Accra, streaming in Kumasi, online learning in Tamale, or social media across Ghana, we aim to make data purchases simple and accessible.
-            </p>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div class="animate-scale-in stagger-1 bg-white/10 backdrop-blur-sm rounded-2xl p-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-4xl font-black mb-1">24/7</h3>
-                    <p class="text-xs uppercase font-bold opacity-80">Online Service</p>
-                </div>
-                <div class="animate-scale-in stagger-2 bg-white/10 backdrop-blur-sm rounded-2xl p-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-4xl font-black mb-1">Fast</h3>
-                    <p class="text-xs uppercase font-bold opacity-80">Processing</p>
-                </div>
-                <div class="animate-scale-in stagger-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-4xl font-black mb-1">Secure</h3>
-                    <p class="text-xs uppercase font-bold opacity-80">Payments</p>
-                </div>
-                <div class="animate-scale-in stagger-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-4xl font-black mb-1">Support</h3>
-                    <p class="text-xs uppercase font-bold opacity-80">Available</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SEO Rich Content -->
-    <section class="max-w-4xl mx-auto px-6 py-20">
-        <article class="prose prose-slate dark:prose-invert max-w-none">
-            <h2 class="text-3xl font-black mb-6 text-center animate-slide-up">Understanding Mobile Data in Ghana</h2>
-            
-            <div class="disclaimer-box mb-8">
-              <strong>Disclaimer:</strong> The following information is for educational purposes only. Network coverage, speeds, and availability may vary by location. Please verify current offerings directly with your service provider.
-            </div>
-            
-            <div class="grid md:grid-cols-2 gap-8 text-sm text-muted-theme leading-relaxed">
-                <div class="animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">MTN Ghana Data Services</h3>
-                    <p class="mb-4">
-                        MTN is one of Ghana's largest telecommunications networks, offering extensive coverage across the country. MTN data bundles range from 1GB to 100GB, catering to various user needs. MTN's 4G+ network provides internet speeds suitable for video conferencing, streaming, and file downloads.
-                    </p>
-                </div>
-                <div class="animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">Telecel Data Services</h3>
-                    <p class="mb-4">
-                        Telecel (formerly Vodafone Ghana) offers data packages with various options. Their 4G network covers major cities including Accra, Tema, Kumasi, and Takoradi. Telecel provides different data bundle sizes to match various usage patterns.
-                    </p>
-                </div>
-                <div class="animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">AirtelTigo Data Services</h3>
-                    <p class="mb-4">
-                        AirtelTigo provides data bundles with various pricing options. Their merged network infrastructure offers coverage across Ghana. Users can choose from different data package sizes based on their individual requirements.
-                    </p>
-                </div>
-                <div class="animate-slide-up stagger-4" style="animation-fill-mode: forwards;">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">Choosing a Data Plan</h3>
-                    <p class="mb-4">
-                        When selecting a data bundle, consider your usage patterns. Light users may prefer smaller packages (1-3GB) for messaging and browsing. Moderate users (5-10GB) can handle social media and occasional streaming. Heavy users may require larger packages (20GB+) for work or entertainment purposes.
-                    </p>
-                </div>
-            </div>
-        </article>
-    </section>
-
-    <!-- FAQ Section -->
-    <section class="max-w-4xl mx-auto px-6 py-24">
-        <h2 class="text-3xl font-black text-center mb-4 animate-slide-up">Frequently Asked Questions</h2>
-        <p class="text-center text-muted-theme mb-12 animate-slide-up stagger-1" style="animation-fill-mode: forwards;">Common questions about purchasing data through our platform</p>
-        
-        <div class="space-y-4">
-            <div class="p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-1 opacity-0" style="animation-fill-mode: forwards;">
-                <h4 class="font-bold mb-2 text-lg flex items-center gap-2">
-                    <span class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 text-sm">?</span>
-                    How do I add money to my wallet?
-                </h4>
-                <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    Go to your Wallet page, enter the amount you wish to deposit, and complete the payment via Paystack. Funds are credited instantly to your wallet after payment confirmation.
-                </p>
-            </div>
-            
-            <div class="p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-2 opacity-0" style="animation-fill-mode: forwards;">
-                <h4 class="font-bold mb-2 text-lg flex items-center gap-2">
-                    <span class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center text-purple-600 text-sm">?</span>
-                    What if my data doesn't arrive?
-                </h4>
-                <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    If you experience delays beyond 30 minutes, please contact our support team via WhatsApp with your transaction reference number. We aim to resolve all issues promptly.
-                </p>
-            </div>
-            
-            <div class="p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-3 opacity-0" style="animation-fill-mode: forwards;">
-                <h4 class="font-bold mb-2 text-lg flex items-center gap-2">
-                    <span class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center text-green-600 text-sm">?</span>
-                    Is my payment information safe?
-                </h4>
-                <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    We use Paystack, a leading payment processor in Africa, which is PCI-DSS compliant. We do not store your credit card details or Mobile Money PIN. All transactions are encrypted.
-                </p>
-            </div>
-            
-            <div class="p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-4 opacity-0" style="animation-fill-mode: forwards;">
-                <h4 class="font-bold mb-2 text-lg flex items-center gap-2">
-                    <span class="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center text-orange-600 text-sm">?</span>
-                    Can I buy data for someone else?
-                </h4>
-                <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    Yes. During checkout, enter the recipient's phone number. The data will be credited to their line. This is useful for gifting data to family members or friends.
-                </p>
-            </div>
-            
-            <div class="p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-5 opacity-0" style="animation-fill-mode: forwards;">
-                <h4 class="font-bold mb-2 text-lg flex items-center gap-2">
-                    <span class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center text-red-600 text-sm">?</span>
-                    Do the data bundles expire?
-                </h4>
-                <p class="text-muted-theme text-sm leading-relaxed pl-10">
-                    Data bundles typically come with 30 days validity from the date of purchase. Please check the specific validity period for your selected bundle. Unused data will expire after this period.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Trust Indicators -->
-    <section class="max-w-6xl mx-auto px-6 py-16 border-t border-slate-200 dark:border-slate-800">
-        <div class="text-center mb-12">
-            <h3 class="text-2xl font-bold mb-2">Networks We Support</h3>
-            <p class="text-muted-theme">Compatible with major Ghanaian mobile networks</p>
-        </div>
-        <div class="flex flex-wrap justify-center gap-8 items-center opacity-60">
-            <div class="text-xl font-bold text-slate-400">MTN Ghana</div>
-            <div class="text-xl font-bold text-slate-400">Telecel</div>
-            <div class="text-xl font-bold text-slate-400">AirtelTigo</div>
-        </div>
-    </section>`;
-}
 
 function renderHome(){
-  const isExpress = isCurrentlyExpress();
-  const BUNDLES = getCurrentBundles();
+  const BUNDLES = NORMAL_BUNDLES;
   
   // Check if user is logged in
   if (!state.user) {
     return `
     <div class="min-h-screen flex items-center justify-center px-4">
       <div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in">
-        <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+        <div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-500 rounded-full mx-auto mb-6 flex items-center justify-center">
           <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
         </div>
         <h2 class="text-2xl font-black mb-4">Login Required</h2>
         <p class="text-muted-theme mb-8">Please sign in or create an account to purchase data bundles.</p>
         <div class="flex flex-col gap-3">
           <button onclick="navigateTo('login')" class="cta-button text-white py-4 rounded-2xl font-bold text-lg">Sign In</button>
-          <button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-all">Create Account</button>
+          <button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-red-500 transition-all">Create Account</button>
         </div>
       </div>
     </div>`;
@@ -1632,25 +1209,16 @@ function renderHome(){
   
   return `
   <div class="animate__animated animate__fadeIn">
-    ${state.isDirectMode?'<div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 text-center text-xs font-black uppercase tracking-widest animate-pulse shadow-lg">Direct Order Mode Active</div>':''}
-    
-    ${isExpress ? `
-    <div class="bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 text-center shadow-lg">
-      <div class="flex items-center justify-center gap-2">
-        <svg class="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-        <span class="font-black uppercase tracking-widest text-sm">⚡ Express Mode Active - Special Night Prices (9PM - 6AM)</span>
-      </div>
-    </div>
-    ` : ''}
+    ${state.isDirectMode?'<div class="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 text-center text-xs font-black uppercase tracking-widest animate-pulse shadow-lg">Direct Order Mode Active</div>':''}
     
     <!-- SEO Hero Section -->
     <section class="relative bg-slate-900 text-white py-24 md:py-32 text-center px-4 overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-blue-900/80 via-purple-900/60 to-slate-900/90"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-red-900/80 via-red-800/60 to-slate-900/90"></div>
       <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23ffffff\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'/%3E%3C/svg%3E')] opacity-30"></div>
       
       <div class="relative z-10 max-w-4xl mx-auto">
         <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight animate-slide-up leading-tight">
-            Buy Data Bundles <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">in Ghana</span>
+            Buy Data Bundles <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-300">in Ghana</span>
         </h1>
         <p class="max-w-2xl mx-auto text-slate-300 text-lg md:text-xl mb-8 animate-slide-up stagger-1 leading-relaxed" style="animation-fill-mode: forwards;">
             Convenient access to MTN, Telecel, and AirtelTigo data bundles. Secure Paystack payments. Nationwide service across Ghana.
@@ -1677,7 +1245,7 @@ function renderHome(){
                 Secure Checkout
             </span>
             <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2">
-                <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                 Paystack Verified
             </span>
             <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2">
@@ -1697,14 +1265,6 @@ function renderHome(){
 
     <!-- Ad Container Top -->
     <div class="max-w-5xl mx-auto px-6 my-8">
-      <div class="ad-container min-h-[90px]">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-2637582768279029"
-             data-ad-slot="5392404731"
-             data-ad-format="horizontal"
-             data-full-width-responsive="true"></ins>
-      </div>
     </div>
 
     <section id="networks" class="max-w-7xl mx-auto px-4 py-16">
@@ -1730,24 +1290,11 @@ function renderHome(){
                 </span>
             </div>`).join('')}
         </div>
-        
-        <!-- Inline Ad -->
-        <div class="ad-container mb-16 min-h-[250px]">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-2637582768279029"
-                 data-ad-slot="5392404731"
-                 data-ad-format="rectangle"
-                 data-full-width-responsive="true"></ins>
-        </div>
     </section>
 
     <!-- More Content for SEO -->
     <section class="bg-slate-50 dark:bg-slate-900/50 py-20">
         <div class="max-w-6xl mx-auto px-6">
-            <div class="disclaimer-box mb-8">
-              <strong>Affiliate Disclosure:</strong> TRU Data may receive compensation when you purchase data bundles through our platform. This helps us maintain our service and continue offering competitive prices.
-            </div>
             
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="animate-slide-up">
@@ -1757,25 +1304,25 @@ function renderHome(){
                     </p>
                     <ul class="space-y-3">
                         <li class="flex items-center gap-3 text-sm font-semibold">
-                            <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             Competitive pricing compared to standard rates
                         </li>
                         <li class="flex items-center gap-3 text-sm font-semibold">
-                            <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             Simple ordering process - no complex registration
                         </li>
                         <li class="flex items-center gap-3 text-sm font-semibold">
-                            <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             Customer support via WhatsApp
                         </li>
                         <li class="flex items-center gap-3 text-sm font-semibold">
-                            <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             Compatible with all mobile devices
                         </li>
                     </ul>
                 </div>
                 <div class="relative animate-scale-in stagger-2" style="animation-fill-mode: forwards;">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl blur-2xl opacity-20"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 rounded-3xl blur-2xl opacity-20"></div>
                     <img src="./11.png" alt="TRU Data App Interface" class="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto">
                 </div>
             </div>
@@ -1793,14 +1340,14 @@ function renderLandingPage(){
       <!-- Animated Background Elements -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-float"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-red-400/20 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-400/10 rounded-full blur-3xl animate-pulse"></div>
       </div>
 
       <!-- Center Logo -->
       <div class="relative z-10 mb-12 animate-scale-in">
         <div class="relative group">
-          <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+          <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
           <img src="./11.png" alt="TRU Data Network Logo - Data Bundle Platform" class="hero-logo relative z-10 animate-float">
         </div>
       </div>
@@ -1822,7 +1369,7 @@ function renderLandingPage(){
                 Get Started
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
             </button>
-            <button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
+            <button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-all">
                 Learn More
             </button>
         </div>
@@ -1837,23 +1384,10 @@ function renderLandingPage(){
     <!-- Mission Section -->
     <section class="py-20 px-4 bg-white dark:bg-slate-900">
       <div class="max-w-4xl mx-auto text-center">
-        <div class="disclaimer-box text-left mb-8">
-          <strong>Independent Service Notice:</strong> TruData Network operates as an independent third-party service. We are not owned by or directly affiliated with MTN Ghana, Telecel, or AirtelTigo. All trademarks belong to their respective owners.
-        </div>
         
         <p class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-8 animate-slide-up">
           In today's connected world, internet access is essential for education, business, communication, and entertainment. TruData was created to simplify the process of purchasing mobile data by providing a centralized platform where users can compare and buy data plans from multiple networks.
         </p>
-        
-        <!-- Ad Container -->
-        <div class="ad-container my-12 min-h-[100px]">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-2637582768279029"
-                 data-ad-slot="5392404731"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-        </div>
       </div>
     </section>
 
@@ -1865,13 +1399,13 @@ function renderLandingPage(){
         
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-1" style="animation-fill-mode: forwards;">
-            <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">📱</div>
+            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">📱</div>
             <h3 class="font-bold text-lg mb-2">Easy Access</h3>
             <p class="text-sm text-muted-theme">Browse mobile data bundle options organized by network for convenient comparison</p>
           </div>
           
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-2" style="animation-fill-mode: forwards;">
-            <div class="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">💰</div>
+            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">💰</div>
             <h3 class="font-bold text-lg mb-2">Clear Pricing</h3>
             <p class="text-sm text-muted-theme">Data sizes, pricing, and validity periods displayed transparently</p>
           </div>
@@ -1901,7 +1435,7 @@ function renderLandingPage(){
         
         <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-1 opacity-0" style="animation-fill-mode: forwards;">
-            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-blue-500/30">🎓</div>
+            <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-red-500/30">🎓</div>
             <div>
               <h4 class="font-bold text-lg mb-1">Students</h4>
               <p class="text-sm text-muted-theme">Who need mobile data for online learning, research, and educational resources</p>
@@ -1909,7 +1443,7 @@ function renderLandingPage(){
           </div>
           
           <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-2 opacity-0" style="animation-fill-mode: forwards;">
-            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-purple-500/30">💼</div>
+            <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-red-500/30">💼</div>
             <div>
               <h4 class="font-bold text-lg mb-1">Professionals</h4>
               <p class="text-sm text-muted-theme">And remote workers who need reliable connectivity for work activities</p>
@@ -1948,27 +1482,18 @@ function renderLandingPage(){
           By organizing information clearly and presenting it in a straightforward format, TruData helps users make informed digital decisions and find suitable data options for their needs.
         </p>
         
-        <!-- Ad Container Dark -->
-        <div class="mt-12 ad-container bg-white/5 border-white/10">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-2637582768279029"
-                 data-ad-slot="5392404731"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-        </div>
       </div>
     </section>
 
     <!-- Getting Started CTA -->
-    <section class="py-20 px-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 animate-gradient relative overflow-hidden">
+    <section class="py-20 px-4 bg-gradient-to-r from-red-700 via-red-600 to-red-600 animate-gradient relative overflow-hidden">
       <div class="absolute inset-0 bg-black/10"></div>
       <div class="max-w-4xl mx-auto text-center relative z-10">
         <h2 class="text-3xl md:text-4xl font-black mb-6 text-white animate-slide-up">Ready to Get Started?</h2>
         <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
           Create your free account today and start purchasing data bundles with ease.
         </p>
-        <button onclick="navigateTo('register')" class="bg-white text-blue-600 px-12 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 hover:shadow-white/25 transition-all animate-slide-up stagger-2 flex items-center gap-3 mx-auto" style="animation-fill-mode: forwards;">
+        <button onclick="navigateTo('register')" class="bg-white text-red-600 px-12 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 hover:shadow-white/25 transition-all animate-slide-up stagger-2 flex items-center gap-3 mx-auto" style="animation-fill-mode: forwards;">
           Create Free Account
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
         </button>
@@ -1981,11 +1506,13 @@ function renderAbout(){
     return `
     <div class="animate__animated animate__fadeIn">
         <section class="py-20 px-4 max-w-4xl mx-auto">
-            <h1 class="text-4xl md:text-5xl font-black mb-8 text-center animate-slide-up">About TRU Data Network</h1>
-            
-            <div class="disclaimer-box mb-8">
-              <strong>Company Information:</strong> TRU Data Network is an independent business operating in Ghana. We facilitate the purchase of mobile data bundles through partnerships with authorized vendors. We are not a telecommunications company.
+            <div class="mb-8">
+              <button onclick="navigateTo('landing')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
+                <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to Home
+              </button>
             </div>
+            <h1 class="text-4xl md:text-5xl font-black mb-8 text-center animate-slide-up">About TRU Data Network</h1>
             
             <div class="prose prose-slate dark:prose-invert max-w-none">
                 <p class="text-lg text-muted-theme mb-8 animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
@@ -1994,11 +1521,11 @@ function renderAbout(){
                 
                 <div class="grid md:grid-cols-2 gap-8 mb-12">
                     <div class="p-6 card-theme rounded-2xl animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
-                        <h3 class="text-xl font-bold mb-3 text-blue-600">Our Vision</h3>
+                        <h3 class="text-xl font-bold mb-3 text-red-600">Our Vision</h3>
                         <p class="text-sm text-muted-theme">To become a trusted platform for mobile data purchases in Ghana, providing convenient access to connectivity for all users.</p>
                     </div>
                     <div class="p-6 card-theme rounded-2xl animate-slide-up stagger-3" style="animation-fill-mode: forwards;">
-                        <h3 class="text-xl font-bold mb-3 text-purple-600">Our Mission</h3>
+                        <h3 class="text-xl font-bold mb-3 text-red-600">Our Mission</h3>
                         <p class="text-sm text-muted-theme">To simplify the data purchasing process while maintaining transparency and customer satisfaction.</p>
                     </div>
                 </div>
@@ -2010,15 +1537,6 @@ function renderAbout(){
                 <p class="text-muted-theme mb-6 animate-slide-up stagger-5" style="animation-fill-mode: forwards;">
                     We work with authorized partners to facilitate these purchases. While we strive to offer competitive prices, all data is provided through official network channels.
                 </p>
-                
-                <div class="ad-container my-12 min-h-[250px]">
-                    <ins class="adsbygoogle"
-                         style="display:block"
-                         data-ad-client="ca-pub-2637582768279029"
-                         data-ad-slot="5392404731"
-                         data-ad-format="rectangle"
-                         data-full-width-responsive="true"></ins>
-                </div>
                 
                 <h2 class="text-2xl font-bold mb-4">Our Values</h2>
                 <ul class="space-y-4 mb-12">
@@ -2053,8 +1571,14 @@ function renderLogin() {
   return `
   <div class="min-h-screen flex items-center justify-center px-4 py-20">
     <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
+      <div class="mb-6">
+        <button onclick="navigateTo('landing')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
+          <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Back to Home
+        </button>
+      </div>
       <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
+        <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
         <h2 class="text-2xl font-black">Welcome Back</h2>
         <p class="text-sm text-muted-theme mt-2">Sign in to your account to continue</p>
       </div>
@@ -2062,22 +1586,27 @@ function renderLogin() {
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
-          <input type="email" id="login-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="you@example.com">
+          <input type="email" id="login-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
         </div>
         
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
-          <input type="password" id="login-password" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="••••••••">
+          <input type="password" id="login-password" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
         </div>
         
-        <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">
+        <div class="flex items-center gap-3 mt-2">
+          <input type="checkbox" id="remember-me" style="accent-color:#dc2626; width:16px; height:16px; cursor:pointer;">
+          <label for="remember-me" class="text-sm font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none">Remember me</label>
+        </div>
+        
+        <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-4">
           Sign In
         </button>
       </form>
       
       <div class="mt-6 flex justify-between items-center">
-        <button onclick="navigateTo('register')" class="text-sm text-blue-600 font-bold hover:underline">Create account</button>
-        <button onclick="navigateTo('forgot-password')" class="text-sm text-muted-theme hover:text-blue-600 transition-colors">Forgot password?</button>
+        <button onclick="navigateTo('register')" class="text-sm text-red-600 font-bold hover:underline">Create account</button>
+        <button onclick="navigateTo('forgot-password')" class="text-sm text-muted-theme hover:text-red-600 transition-colors">Forgot password?</button>
       </div>
     </div>
   </div>`;
@@ -2087,8 +1616,14 @@ function renderRegister() {
   return `
   <div class="min-h-screen flex items-center justify-center px-4 py-20">
     <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
+      <div class="mb-6">
+        <button onclick="navigateTo('landing')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
+          <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Back to Home
+        </button>
+      </div>
       <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
+        <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
         <h2 class="text-2xl font-black">Create Account</h2>
         <p class="text-sm text-muted-theme mt-2">Join TRU Data to start purchasing bundles</p>
       </div>
@@ -2096,22 +1631,22 @@ function renderRegister() {
       <form onsubmit="handleRegister(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name</label>
-          <input type="text" id="reg-name" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="John Doe">
+          <input type="text" id="reg-name" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="John Doe">
         </div>
         
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
-          <input type="email" id="reg-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="you@example.com">
+          <input type="email" id="reg-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
         </div>
         
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label>
-          <input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="024xxxxxxx">
+          <input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx">
         </div>
         
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
-          <input type="password" id="reg-password" required minlength="6" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="••••••••">
+          <input type="password" id="reg-password" required minlength="6" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
         </div>
         
         <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">
@@ -2122,7 +1657,7 @@ function renderRegister() {
       <div class="mt-6 text-center">
         <p class="text-sm text-muted-theme">
           Already have an account? 
-          <button onclick="navigateTo('login')" class="text-blue-600 font-bold hover:underline">Sign in</button>
+          <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button>
         </p>
       </div>
     </div>
@@ -2133,8 +1668,14 @@ function renderForgotPassword() {
   return `
   <div class="min-h-screen flex items-center justify-center px-4 py-20">
     <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
+      <div class="mb-6">
+        <button onclick="navigateTo('login')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
+          <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          Back to Login
+        </button>
+      </div>
       <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
+        <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
         <h2 class="text-2xl font-black">Reset Password</h2>
         <p class="text-sm text-muted-theme mt-2">Enter your email to receive reset instructions</p>
       </div>
@@ -2142,7 +1683,7 @@ function renderForgotPassword() {
       <form onsubmit="handleForgotPassword(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
-          <input type="email" id="forgot-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="you@example.com">
+          <input type="email" id="forgot-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
         </div>
         
         <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">
@@ -2153,7 +1694,7 @@ function renderForgotPassword() {
       <div class="mt-6 text-center">
         <p class="text-sm text-muted-theme">
           Remember your password? 
-          <button onclick="navigateTo('login')" class="text-blue-600 font-bold hover:underline">Sign in</button>
+          <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button>
         </p>
       </div>
     </div>
@@ -2167,7 +1708,7 @@ function renderWallet() {
   return `
   <div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn">
     <div class="mb-8">
-      <button onclick="navigateTo('home')" class="font-bold text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 transition-colors flex items-center gap-2 group">
+      <button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
         <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Back to Home
       </button>
@@ -2194,7 +1735,7 @@ function renderWallet() {
             <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label>
             <input type="number" id="deposit-amount" min="5" step="0.01" 
                    oninput="updateDepositCalculation(this.value)"
-                   class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl text-2xl font-black focus:border-blue-600 outline-none transition-all" 
+                   class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" 
                    placeholder="0.00">
           </div>
           
@@ -2209,7 +1750,7 @@ function renderWallet() {
             </div>
             <div class="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between">
               <span class="font-bold">Total to Pay:</span>
-              <span class="font-black text-lg text-blue-600" id="calc-total">₵0.00</span>
+              <span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span>
             </div>
           </div>
           
@@ -2349,6 +1890,8 @@ async function handleLogin(e) {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
 
+  const rememberMe = document.getElementById('remember-me')?.checked || false;
+
   try {
     const { data, error } = await supa.auth.signInWithPassword({
       email,
@@ -2363,6 +1906,13 @@ async function handleLogin(e) {
     if (!data.user) {
       showToast("Login failed: No user data");
       return;
+    }
+
+    // Handle remember me
+    if (rememberMe) {
+      localStorage.setItem('tru-remember-email', email);
+    } else {
+      localStorage.removeItem('tru-remember-email');
     }
 
     // Set user immediately
@@ -2531,7 +2081,7 @@ async function fetchUserTransactions() {
       listEl.innerHTML = data.map(t => `
         <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'deposit' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'deposit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 ${t.type === 'deposit' 
                   ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>'
@@ -2687,13 +2237,11 @@ async function processDeposit(response, netAmount, fee) {
 /* ================== NETWORK VIEW ================== */
 function renderNetworkView(networkId) {
   const network = NETWORKS[networkId];
-  const BUNDLES = getCurrentBundles().filter(b => b.network === networkId);
-  const isExpress = isCurrentlyExpress();
-  
+  const BUNDLES = NORMAL_BUNDLES.filter(b => b.network === networkId);
   return `
   <div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8">
     <div class="mb-8">
-      <button onclick="navigateTo('home')" class="font-bold text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 transition-colors flex items-center gap-2 group">
+      <button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
         <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Back to Networks
       </button>
@@ -2704,15 +2252,14 @@ function renderNetworkView(networkId) {
       <img src="${network.logo}" alt="${network.name}" class="h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10">
       <h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1>
       <p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p>
-      ${isExpress ? '<div class="mt-4 inline-block bg-black/20 px-4 py-1 rounded-full text-xs font-bold animate-pulse">⚡ Express Mode Active</div>' : ''}
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       ${BUNDLES.map((bundle, idx) => `
-        <div class="card-theme p-6 rounded-2xl hover:border-blue-500 transition-all cursor-pointer group animate-slide-up stagger-${(idx % 5) + 1}" style="animation-fill-mode: forwards;" onclick="initiateOrder('${networkId}', '${bundle.id}')">
+        <div class="card-theme p-6 rounded-2xl hover:border-red-500 transition-all cursor-pointer group animate-slide-up stagger-${(idx % 5) + 1}" style="animation-fill-mode: forwards;" onclick="initiateOrder('${networkId}', '${bundle.id}')">
           <div class="flex justify-between items-start mb-4">
             <div>
-              <h3 class="text-2xl font-black text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">${bundle.size}</h3>
+              <h3 class="text-2xl font-black text-slate-900 dark:text-white group-hover:text-red-600 transition-colors">${bundle.size}</h3>
               <p class="text-sm text-muted-theme">${bundle.validity} Validity</p>
             </div>
             <div class="price-tag">₵${bundle.price.toFixed(2)}</div>
@@ -2720,7 +2267,7 @@ function renderNetworkView(networkId) {
           
           <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
             <span class="text-xs font-bold text-slate-500 uppercase">Click to Purchase</span>
-            <svg class="w-5 h-5 text-blue-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            <svg class="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </div>
         </div>
       `).join('')}
@@ -2729,7 +2276,7 @@ function renderNetworkView(networkId) {
 }
 
 function initiateOrder(networkId, bundleId) {
-  const BUNDLES = getCurrentBundles();
+  const BUNDLES = NORMAL_BUNDLES;
   const bundle = BUNDLES.find(b => b.network === networkId && b.id === bundleId);
   
   if (!bundle) {
@@ -2788,14 +2335,14 @@ function renderOrderForm() {
         </div>
         <div class="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2 flex justify-between items-center">
           <span class="font-bold">Total</span>
-          <span class="font-black text-xl text-blue-600">₵${bundle.price.toFixed(2)}</span>
+          <span class="font-black text-xl text-red-600">₵${bundle.price.toFixed(2)}</span>
         </div>
       </div>
       
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label>
-          <input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="024xxxxxxx">
+          <input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx">
           <p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p>
         </div>
         
@@ -2891,7 +2438,7 @@ async function handleOrderButton(){
       bundle_name: bundle.size,
       Amount: bundle.price,
       Status: state.isAdmin && state.isDirectMode ? 'Processing' : 'Pending',
-      provider: state.isAdmin && state.isDirectMode ? (state.selectedProvider || 'evnetwork') : null,
+      provider: state.isAdmin && state.isDirectMode ? (state.selectedProvider || 'refer2bundle') : null,
       user_id: state.user.id,
       created_at: new Date().toISOString()
     });
@@ -2903,7 +2450,7 @@ async function handleOrderButton(){
       bundle_name: bundle.size,
       Amount: bundle.price,
       Status: state.isAdmin && state.isDirectMode ? 'Processing' : 'Pending',
-      provider: state.isAdmin && state.isDirectMode ? (state.selectedProvider || 'evnetwork') : null,
+      provider: state.isAdmin && state.isDirectMode ? (state.selectedProvider || 'refer2bundle') : null,
       user_id: state.user.id,
       created_at: new Date().toISOString()
     }]).select(); // Add .select() to return the inserted data
@@ -2926,11 +2473,11 @@ async function handleOrderButton(){
       });
     } else {
       // Admin direct mode
-      const providerUrl = state.selectedProvider === 'evnetwork' ? 'https://evnetwork.shop' : 'https://refer2bundle.com';
+      const providerUrl = 'https://refer2bundle.com';
       window.open(providerUrl, '_blank');
       showToast('✅ Direct order created', 3000, 'success');
       state.isDirectMode = false;
-      state.selectedProvider = 'evnetwork';
+      state.selectedProvider = 'refer2bundle';
       navigateTo('admin-dashboard');
     }
     
@@ -3019,12 +2566,12 @@ function renderAdminLogin() {
             <form onsubmit="adminAuth(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email</label>
-                    <input type="email" id="adm-u" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="admin@example.com">
+                    <input type="email" id="adm-u" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="admin@example.com">
                 </div>
                 
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
-                    <input type="password" id="adm-p" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all" placeholder="••••••••">
+                    <input type="password" id="adm-p" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
                 </div>
                 
                 <button type="submit" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">
@@ -3033,7 +2580,7 @@ function renderAdminLogin() {
             </form>
             
             <div class="mt-6 text-center">
-                <button onclick="navigateTo('landing')" class="text-sm text-muted-theme hover:text-blue-600 transition-colors">← Back to website</button>
+                <button onclick="navigateTo('landing')" class="text-sm text-muted-theme hover:text-red-600 transition-colors">← Back to website</button>
             </div>
         </div>
     </div>`;
@@ -3063,22 +2610,10 @@ function renderAdminDashboard(){
             </div>
         </div>
         
-        <!-- Mode Switcher -->
-        <div class="mb-8 flex flex-wrap gap-4 items-center animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
-            <div class="mode-switcher">
-                <button class="mode-btn ${state.expressOverride === false ? 'active' : ''}" onclick="switchToNormal()">Normal</button>
-                <button class="mode-btn ${state.expressOverride === null ? 'active' : ''}" onclick="resetToAutoMode()">Auto</button>
-                <button class="mode-btn ${state.expressOverride === true ? 'active' : ''}" onclick="switchToExpress()">Express</button>
-            </div>
-            <span class="text-sm text-muted-theme">
-                Current: ${isCurrentlyExpress() ? '⚡ Express Mode (9PM-6AM)' : '☀️ Normal Mode'}
-            </span>
-        </div>
-        
-        <!-- Stats -->
+                <!-- Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
             <div class="card-theme p-4 rounded-2xl text-center">
-                <div class="text-2xl font-black text-blue-600">${state.orders.length}</div>
+                <div class="text-2xl font-black text-red-600">${state.orders.length}</div>
                 <div class="text-xs font-bold text-muted-theme uppercase">Total Orders</div>
             </div>
             <div class="card-theme p-4 rounded-2xl text-center">
@@ -3090,7 +2625,7 @@ function renderAdminDashboard(){
                 <div class="text-xs font-bold text-muted-theme uppercase">Completed</div>
             </div>
             <div class="card-theme p-4 rounded-2xl text-center">
-                <div class="text-2xl font-black text-purple-600">₵${state.orders.reduce((acc, o) => acc + (parseFloat(o.Amount) || 0), 0).toFixed(2)}</div>
+                <div class="text-2xl font-black text-red-600">₵${state.orders.reduce((acc, o) => acc + (parseFloat(o.Amount) || 0), 0).toFixed(2)}</div>
                 <div class="text-xs font-bold text-muted-theme uppercase">Revenue</div>
             </div>
         </div>
@@ -3100,9 +2635,9 @@ function renderAdminDashboard(){
             <input type="text" placeholder="Search phone or reference..." 
                    value="${state.searchQuery}" 
                    oninput="state.searchQuery=this.value; render();"
-                   class="flex-1 p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all">
+                   class="flex-1 p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all">
             <select onchange="state.networkFilter=this.value; render();" 
-                    class="p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-blue-600 outline-none transition-all md:w-48">
+                    class="p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all md:w-48">
                 <option value="all">All Networks</option>
                 <option value="mtn">MTN</option>
                 <option value="airteltigo">AirtelTigo</option>
@@ -3136,14 +2671,14 @@ function renderAdminDashboard(){
                             <td class="p-4 font-mono text-xs font-bold">${order.ref}</td>
                             <td class="p-4 font-bold">${order.Phone}</td>
                             <td class="p-4">
-                                <span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network === 'mtn' ? 'bg-yellow-100 text-yellow-700' : order.Network === 'airteltigo' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}">
+                                <span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network === 'mtn' ? 'bg-yellow-100 text-yellow-700' : order.Network === 'airteltigo' ? 'bg-red-100 text-red-700' : 'bg-red-100 text-red-700'}">
                                     ${order.Network?.toUpperCase()}
                                 </span>
                             </td>
                             <td class="p-4 text-sm">${order.bundle_name}</td>
                             <td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td>
                             <td class="p-4">
-                                <span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status === 'Completed' ? 'bg-green-100 text-green-700' : order.Status === 'Processing' ? 'bg-blue-100 text-blue-700' : order.Status === 'Deleted' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">
+                                <span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status === 'Completed' ? 'bg-green-100 text-green-700' : order.Status === 'Processing' ? 'bg-red-100 text-red-700' : order.Status === 'Deleted' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">
                                     ${order.Status || 'Pending'}
                                 </span>
                             </td>
@@ -3151,7 +2686,7 @@ function renderAdminDashboard(){
                             <td class="p-4">
                                 <div class="flex gap-2">
                                     ${order.Status !== 'Deleted' ? `
-                                    <button onclick="showProcessConfirmation('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">
+                                    <button onclick="showProcessConfirmation('${order.ref}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">
                                         Process
                                     </button>
                                     <button onclick="updateStatus('${order.ref}', 'Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">
@@ -3183,7 +2718,7 @@ function showProcessConfirmation(ref) {
     document.getElementById('confirm-amount').textContent = '₵' + parseFloat(order.Amount).toFixed(2);
     
     // Reset provider selection
-    selectConfirmationProvider('evnetwork');
+    selectConfirmationProvider('refer2bundle');
     
     document.getElementById('admin-order-confirmation').style.display = 'block';
 }
@@ -3238,7 +2773,7 @@ window.showProcessConfirmation = function(ref) {
     document.getElementById('confirm-amount').textContent = '₵' + parseFloat(order.Amount).toFixed(2);
     
     // Reset provider selection
-    selectConfirmationProvider('evnetwork');
+    selectConfirmationProvider('refer2bundle');
     
     document.getElementById('admin-order-confirmation').style.display = 'block';
 };
@@ -3295,11 +2830,11 @@ function render(){
     switch(state.view){
         case 'landing':
             app.innerHTML = renderLandingPage();
-            extended.innerHTML = renderExtendedContent();
+            extended.innerHTML = '';
             break;
         case 'home':
             app.innerHTML = renderHome();
-            extended.innerHTML = renderExtendedContent();
+            extended.innerHTML = '';
             break;
         case 'network':
             app.innerHTML = renderNetworkView(state.params);
@@ -3312,6 +2847,16 @@ function render(){
         case 'login':
             app.innerHTML = renderLogin();
             extended.innerHTML = '';
+            // Autofill remembered email
+            (function(){
+                var saved = localStorage.getItem('tru-remember-email');
+                if(saved){
+                    var el = document.getElementById('login-email');
+                    var cb = document.getElementById('remember-me');
+                    if(el) el.value = saved;
+                    if(cb) cb.checked = true;
+                }
+            })();
             break;
         case 'register':
             app.innerHTML = renderRegister();
@@ -3362,15 +2907,6 @@ function render(){
         const modal = document.createElement('div');
         modal.innerHTML = renderOrderForm();
         app.appendChild(modal.firstElementChild);
-    }
-    
-    // Initialize Adsense ads if any
-    if (typeof adsbygoogle !== 'undefined') {
-        try {
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        } catch(e) {
-            console.log('AdSense not loaded');
-        }
     }
 }
 
@@ -3423,11 +2959,14 @@ supa.auth.onAuthStateChange((event, session) => {
         state.user = null;
         state.userProfile = null;
         state.isAdmin = false;
-    } else if (event === 'USER_UPDATED') {
-        state.user = session.user;
+        state.isDirectMode = false;
+        state.activeOrderData = null;
+        navigateTo('landing');
+    } else if (event === 'TOKEN_REFRESHED') {
+        if (session) {
+            state.user = session.user;
+        }
     }
-    
-    render();
 });
 </script>
 </body>
