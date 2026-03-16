@@ -38,28 +38,7 @@
   --glass-bg: rgba(255, 255, 255, 0.8);
 }
 
-[data-theme="dark"] {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-tertiary: #1a1a25;
-  --bg-card: #161622;
-  --bg-elevated: #1e1e2e;
-  --text-primary: #f8fafc;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
-  --accent-primary: #f87171;
-  --accent-secondary: #fca5a5;
-  --accent-success: #34d399;
-  --accent-warning: #fbbf24;
-  --accent-danger: #f87171;
-  --border-color: #27273a;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
-  --shadow-glow: 0 0 60px -15px rgba(248, 113, 113, 0.4);
-  --glass-bg: rgba(22, 22, 34, 0.85);
-}
+
 
 body { 
   font-family: 'Inter', 'Plus Jakarta Sans', sans-serif; 
@@ -160,51 +139,9 @@ body {
   70% { box-shadow: 0 0 0 20px rgba(37, 211, 102, 0); }
 }
 
-/* Modern Toggle Switch */
-.theme-switch {
-  position: relative; 
-  width: 56px; 
-  height: 28px;
-  background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
-  border-radius: 50px; 
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-}
 
-[data-theme="dark"] .theme-switch { 
-  background: linear-gradient(135deg, #f87171 0%, #fca5a5 100%);
-}
 
-.theme-circle {
-  position: absolute; 
-  top: 2px; 
-  left: 2px; 
-  width: 24px; 
-  height: 24px;
-  background: white; 
-  border-radius: 50%; 
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-}
 
-.theme-circle::before {
-  content: '☀️';
-  transition: all 0.3s ease;
-}
-
-[data-theme="dark"] .theme-circle { 
-  left: 30px; 
-  transform: rotate(360deg);
-}
-
-[data-theme="dark"] .theme-circle::before {
-  content: '🌙';
-}
 
 /* Advanced Animations */
 @keyframes float {
@@ -374,17 +311,11 @@ body {
   border-bottom: none;
 }
 
-/* Enhanced Dark Mode Glass */
+/* Enhanced Glass */
 .glass-enhanced {
-  background: rgba(22, 22, 34, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-}
-
-[data-theme="light"] .glass-enhanced {
-  background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(220, 38, 38, 0.2);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
@@ -404,10 +335,7 @@ input:focus, select:focus {
   background-color: var(--bg-card);
 }
 
-[data-theme="dark"] input, [data-theme="dark"] select {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
-}
+
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
@@ -743,16 +671,7 @@ input:focus, select:focus {
   border-color: white;
 }
 
-[data-theme="dark"] .view-wallet-btn {
-  background: rgba(30, 30, 46, 0.9);
-  color: white;
-  border-color: rgba(255, 255, 255, 0.2);
-}
 
-[data-theme="dark"] .view-wallet-btn:hover {
-  background: rgba(30, 30, 46, 1);
-  border-color: rgba(255, 255, 255, 0.4);
-}
 
 /* Loading State */
 .loading-shimmer {
@@ -780,26 +699,20 @@ input:focus, select:focus {
   <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
     <div onclick="navigateTo('landing')" class="text-2xl font-extrabold tracking-tighter cursor-pointer flex items-center gap-2 hover:scale-105 transition-transform duration-300">
       <span class="bg-gradient-to-br from-red-600 to-red-500 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span> 
-      <span class="dark:text-white font-bold">DATA</span>
+      <span class="font-bold">DATA</span>
     </div>
     
     <div class="flex gap-4 md:gap-8 items-center">
-      <div class="flex items-center gap-2 mr-4">
-        <span class="text-[10px] font-bold uppercase hidden sm:block text-muted-theme">Theme</span>
-        <div class="theme-switch" onclick="toggleTheme()" role="button" aria-label="Toggle dark mode">
-          <div class="theme-circle"></div>
-        </div>
-      </div>
-      
-      <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-red-600 dark:hover:text-red-400 hidden md:block transition-colors duration-300">Buy Data</button>
-      <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-red-600 dark:hover:text-red-400 hidden md:block transition-colors duration-300">About</button>
+
+      <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-red-600 hidden md:block transition-colors duration-300">Buy Data</button>
+      <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-red-600 hidden md:block transition-colors duration-300">About</button>
       
       <!-- User Auth Section -->
       <div id="user-auth-section" class="hidden md:flex items-center gap-3">
         <!-- Populated by JS -->
       </div>
       
-      <button id="admin-nav-btn" class="text-[10px] bg-slate-100 dark:bg-slate-800 px-4 py-2.5 rounded-full font-bold text-slate-500 hover:bg-red-600 hover:text-white transition-all uppercase shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Admin</button>
+      <button id="admin-nav-btn" class="text-[10px] bg-slate-100 px-4 py-2.5 rounded-full font-bold text-slate-500 hover:bg-red-600 hover:text-white transition-all uppercase shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Admin</button>
     </div>
   </div>
 </nav>
@@ -855,12 +768,12 @@ input:focus, select:focus {
   </div>
 </div>
 
-<footer class="py-16 text-center border-t border-slate-200 dark:border-slate-800 bg-gradient-to-t from-slate-50 to-transparent dark:from-slate-900 dark:to-transparent">
+<footer class="py-16 text-center border-t border-slate-200 bg-gradient-to-t from-slate-50 to-transparent">
   <div class="max-w-4xl mx-auto px-4">
     <div class="mb-8">
       <span class="text-2xl font-extrabold tracking-tighter inline-flex items-center gap-2">
         <span class="bg-gradient-to-br from-red-600 to-red-500 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span> 
-        <span class="dark:text-white">DATA</span>
+        <span class="">DATA</span>
       </span>
     </div>
     
@@ -891,7 +804,7 @@ input:focus, select:focus {
       </div>
     </div>
     
-    <div class="border-t border-slate-200 dark:border-slate-800 pt-8">
+    <div class="border-t border-slate-200 pt-8">
       <p class="text-slate-400 font-semibold text-xs uppercase tracking-widest mb-2">TRU Data is an independent digital service by TRUTECH BUSINESS.</p>
       <p class="text-slate-400 font-semibold text-xs uppercase tracking-widest mb-2">Not affiliated with MTN, Telecel, or AirtelTigo.</p>
       <p class="text-slate-500 font-bold text-xs mt-4">© 2026 TRU DATA. All rights reserved.</p>
@@ -902,19 +815,19 @@ input:focus, select:focus {
 <div id="admin-actions-bar" class="w-[90%] max-w-lg glass-enhanced text-white p-5 rounded-2xl shadow-2xl flex flex-col gap-4 border animate__animated animate__slideInUp">
   <div class="flex flex-col">
     <span class="text-[10px] font-black uppercase text-red-400 tracking-widest mb-1">Active Processing</span>
-    <span id="active-order-label" class="text-sm font-bold truncate max-w-[250px] text-slate-900 dark:text-white"></span>
+    <span id="active-order-label" class="text-sm font-bold truncate max-w-[250px] text-slate-900"></span>
   </div>
   
-  <div class="bg-slate-100 dark:bg-slate-700/60 rounded-xl p-3">
-    <p class="text-xs font-semibold mb-2 text-slate-700 dark:text-slate-300">Select Provider for Direct Order:</p>
+  <div class="bg-slate-100 rounded-xl p-3">
+    <p class="text-xs font-semibold mb-2 text-slate-700">Select Provider for Direct Order:</p>
     <div class="flex gap-2 mb-2">
       <button onclick="selectProvider('refer2bundle')" id="btn-refer2bundle" class="flex-1 py-2 px-3 rounded-lg bg-red-600 text-white text-xs font-bold transition-all">Refer2Bundle</button>
     </div>
-    <p class="text-[10px] opacity-75 text-slate-600 dark:text-slate-400">You will be redirected to complete the order on Refer2Bundle.</p>
+    <p class="text-[10px] opacity-75 text-slate-600">You will be redirected to complete the order on Refer2Bundle.</p>
   </div>
   
   <div class="flex gap-3 justify-end">
-    <button onclick="cancelActiveProcess()" class="admin-btn px-4 py-2.5 text-[11px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-all">
+    <button onclick="cancelActiveProcess()" class="admin-btn px-4 py-2.5 text-[11px] font-bold bg-slate-200 text-slate-700 rounded-xl hover:bg-slate-300 transition-all">
       Dismiss
     </button>
     <button id="global-fulfill-btn" class="admin-btn px-5 py-2.5 text-[11px] font-black bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg hover:shadow-green-500/30 transition-all text-white">
@@ -928,23 +841,6 @@ input:focus, select:focus {
 </a>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-/* ================= THEME LOGIC ================= */
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const target = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', target);
-  localStorage.setItem('tru-theme', target);
-  showToast(`${target === 'dark' ? '🌙' : '☀️'} ${target.charAt(0).toUpperCase() + target.slice(1)} mode activated`);
-}
-
-// Load saved theme
-const savedTheme = localStorage.getItem('tru-theme');
-if (savedTheme) {
-  document.documentElement.setAttribute('data-theme', savedTheme);
-} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-  document.documentElement.setAttribute('data-theme', 'dark');
-}
-
 /* ================= CONFIG ================= */
 const SB_URL = "https://kefcmjfvrqbgtivssdwn.supabase.co";
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNtamZ2cnFiZ3RpdnNzZHduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MDM1NTIsImV4cCI6MjA4NDE3OTU1Mn0.HoXeKRW4-cGfMexGZpdmEvDHK-XXtXDSoMWWWbq4HKw";
@@ -1174,7 +1070,7 @@ function updateAuthUI() {
   } else {
     authSection.innerHTML = `
       <div class="flex items-center gap-2">
-        <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-red-600 transition-colors">Login</button>
+        <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 hover:text-red-600 transition-colors">Login</button>
         <span class="text-slate-300">|</span>
         <button onclick="navigateTo('register')" class="text-xs font-bold bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors">Sign Up</button>
       </div>
@@ -1198,7 +1094,7 @@ function renderHome(){
         <p class="text-muted-theme mb-8">Please sign in or create an account to purchase data bundles.</p>
         <div class="flex flex-col gap-3">
           <button onclick="navigateTo('login')" class="cta-button text-white py-4 rounded-2xl font-bold text-lg">Sign In</button>
-          <button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-red-500 transition-all">Create Account</button>
+          <button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 border-2 border-slate-200 hover:border-red-500 transition-all">Create Account</button>
         </div>
       </div>
     </div>`;
@@ -1278,7 +1174,7 @@ function renderHome(){
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             ${Object.entries(NETWORKS).map(([id,net], index) =>`
             <div onclick="navigateTo('network','${id}')" 
-                 class="${net.color} ${net.text} p-8 rounded-[2rem] shadow-2xl network-card text-center border-4 border-white dark:border-slate-800 relative overflow-hidden group animate-scale-in stagger-${index+1}" 
+                 class="${net.color} ${net.text} p-8 rounded-[2rem] shadow-2xl network-card text-center border-4 border-white relative overflow-hidden group animate-scale-in stagger-${index+1}" 
                  style="animation-fill-mode: forwards;">
                 <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <img src="${net.logo}" alt="${net.name}" class="h-16 mx-auto mb-6 bg-white p-3 rounded-2xl shadow-lg relative z-10">
@@ -1293,7 +1189,7 @@ function renderHome(){
     </section>
 
     <!-- More Content for SEO -->
-    <section class="bg-slate-50 dark:bg-slate-900/50 py-20">
+    <section class="bg-slate-50 py-20">
         <div class="max-w-6xl mx-auto px-6">
             
             <div class="grid md:grid-cols-2 gap-12 items-center">
@@ -1335,7 +1231,7 @@ function renderLandingPage(){
   return `
   <div class="min-h-screen animate__animated animate__fadeIn">
     <!-- Hero Section with Center Logo -->
-    <section class="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-20 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
+    <section class="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-20 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
       
       <!-- Animated Background Elements -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
@@ -1357,10 +1253,10 @@ function renderLandingPage(){
         <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight animate-slide-up leading-tight">
           Welcome to <span class="gradient-text">TruData</span>
         </h1>
-        <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-6 font-semibold animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
+        <p class="text-xl md:text-2xl text-slate-600 mb-6 font-semibold animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
           Your Platform for Mobile Data Bundle Purchases in Ghana
         </p>
-        <p class="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
+        <p class="text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode: forwards;">
           TRU DATA is a digital platform designed to help users purchase mobile data bundles conveniently. We provide an organized interface that allows users to explore and buy data plans across different mobile networks in Ghana.
         </p>
         
@@ -1369,7 +1265,7 @@ function renderLandingPage(){
                 Get Started
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
             </button>
-            <button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-700 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-all">
+            <button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 border-2 border-slate-300 hover:border-red-500 hover:text-red-600 transition-all">
                 Learn More
             </button>
         </div>
@@ -1382,42 +1278,42 @@ function renderLandingPage(){
     </section>
 
     <!-- Mission Section -->
-    <section class="py-20 px-4 bg-white dark:bg-slate-900">
+    <section class="py-20 px-4 bg-white">
       <div class="max-w-4xl mx-auto text-center">
         
-        <p class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-8 animate-slide-up">
+        <p class="text-lg text-slate-600 leading-relaxed mb-8 animate-slide-up">
           In today's connected world, internet access is essential for education, business, communication, and entertainment. TruData was created to simplify the process of purchasing mobile data by providing a centralized platform where users can compare and buy data plans from multiple networks.
         </p>
       </div>
     </section>
 
     <!-- What You Can Do Section -->
-    <section class="py-20 px-4 bg-slate-50 dark:bg-slate-800/30">
+    <section class="py-20 px-4 bg-slate-50">
       <div class="max-w-6xl mx-auto">
         <h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">What You Can Do on TruData</h2>
-        <p class="text-center text-slate-500 dark:text-slate-400 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">TruData provides the following services for mobile data customers:</p>
+        <p class="text-center text-slate-500 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">TruData provides the following services for mobile data customers:</p>
         
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-1" style="animation-fill-mode: forwards;">
-            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">📱</div>
+            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">📱</div>
             <h3 class="font-bold text-lg mb-2">Easy Access</h3>
             <p class="text-sm text-muted-theme">Browse mobile data bundle options organized by network for convenient comparison</p>
           </div>
           
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-2" style="animation-fill-mode: forwards;">
-            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">💰</div>
+            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">💰</div>
             <h3 class="font-bold text-lg mb-2">Clear Pricing</h3>
             <p class="text-sm text-muted-theme">Data sizes, pricing, and validity periods displayed transparently</p>
           </div>
           
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-3" style="animation-fill-mode: forwards;">
-            <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">🌐</div>
+            <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">🌐</div>
             <h3 class="font-bold text-lg mb-2">Network Based</h3>
             <p class="text-sm text-muted-theme">Organized by network provider for faster navigation</p>
           </div>
           
           <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-4" style="animation-fill-mode: forwards;">
-            <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">⚡</div>
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">⚡</div>
             <h3 class="font-bold text-lg mb-2">Simple Interface</h3>
             <p class="text-sm text-muted-theme">Designed for all devices with intuitive navigation</p>
           </div>
@@ -1426,10 +1322,10 @@ function renderLandingPage(){
     </section>
 
     <!-- Who Is It For Section -->
-    <section class="py-20 px-4 bg-white dark:bg-slate-900">
+    <section class="py-20 px-4 bg-white">
       <div class="max-w-6xl mx-auto">
         <h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">Who TruData Is For</h2>
-        <p class="text-center text-slate-600 dark:text-slate-300 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
+        <p class="text-center text-slate-600 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
           TruData serves a wide range of users who need convenient access to mobile data purchasing options.
         </p>
         
@@ -1506,15 +1402,9 @@ function renderAbout(){
     return `
     <div class="animate__animated animate__fadeIn">
         <section class="py-20 px-4 max-w-4xl mx-auto">
-            <div class="mb-8">
-              <button onclick="navigateTo('landing')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
-                <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Back to Home
-              </button>
-            </div>
             <h1 class="text-4xl md:text-5xl font-black mb-8 text-center animate-slide-up">About TRU Data Network</h1>
             
-            <div class="prose prose-slate dark:prose-invert max-w-none">
+            <div class="prose prose-slate max-w-none">
                 <p class="text-lg text-muted-theme mb-8 animate-slide-up stagger-1" style="animation-fill-mode: forwards;">
                     TRU Data Network was established to provide Ghanaians with a convenient way to purchase mobile data bundles online. We recognized that many people were looking for easier ways to buy data without visiting physical stores or navigating complex USSD codes.
                 </p>
@@ -1543,21 +1433,21 @@ function renderAbout(){
                     <li class="flex items-start gap-3">
                         <svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <div>
-                            <strong class="block text-slate-900 dark:text-white">Transparency</strong>
+                            <strong class="block text-slate-900">Transparency</strong>
                             <span class="text-sm text-muted-theme">Clear pricing with no hidden fees. What you see is what you pay.</span>
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
                         <svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <div>
-                            <strong class="block text-slate-900 dark:text-white">Reliability</strong>
+                            <strong class="block text-slate-900">Reliability</strong>
                             <span class="text-sm text-muted-theme">We work to ensure timely processing of all orders.</span>
                         </div>
                     </li>
                     <li class="flex items-start gap-3">
                         <svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         <div>
-                            <strong class="block text-slate-900 dark:text-white">Customer Support</strong>
+                            <strong class="block text-slate-900">Customer Support</strong>
                             <span class="text-sm text-muted-theme">Assistance available via WhatsApp for order inquiries.</span>
                         </div>
                     </li>
@@ -1571,12 +1461,6 @@ function renderLogin() {
   return `
   <div class="min-h-screen flex items-center justify-center px-4 py-20">
     <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
-      <div class="mb-6">
-        <button onclick="navigateTo('landing')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
-          <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-          Back to Home
-        </button>
-      </div>
       <div class="text-center mb-8">
         <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
         <h2 class="text-2xl font-black">Welcome Back</h2>
@@ -1586,17 +1470,17 @@ function renderLogin() {
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
-          <input type="email" id="login-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
+          <input type="email" id="login-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
         </div>
         
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
-          <input type="password" id="login-password" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
+          <input type="password" id="login-password" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
         </div>
         
         <div class="flex items-center gap-3 mt-2">
           <input type="checkbox" id="remember-me" style="accent-color:#dc2626; width:16px; height:16px; cursor:pointer;">
-          <label for="remember-me" class="text-sm font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none">Remember me</label>
+          <label for="remember-me" class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember me</label>
         </div>
         
         <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-4">
@@ -1616,12 +1500,6 @@ function renderRegister() {
   return `
   <div class="min-h-screen flex items-center justify-center px-4 py-20">
     <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
-      <div class="mb-6">
-        <button onclick="navigateTo('landing')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
-          <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-          Back to Home
-        </button>
-      </div>
       <div class="text-center mb-8">
         <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
         <h2 class="text-2xl font-black">Create Account</h2>
@@ -1631,22 +1509,22 @@ function renderRegister() {
       <form onsubmit="handleRegister(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name</label>
-          <input type="text" id="reg-name" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="John Doe">
+          <input type="text" id="reg-name" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="John Doe">
         </div>
         
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
-          <input type="email" id="reg-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
+          <input type="email" id="reg-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
         </div>
         
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label>
-          <input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx">
+          <input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx">
         </div>
         
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
-          <input type="password" id="reg-password" required minlength="6" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
+          <input type="password" id="reg-password" required minlength="6" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
         </div>
         
         <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">
@@ -1668,12 +1546,6 @@ function renderForgotPassword() {
   return `
   <div class="min-h-screen flex items-center justify-center px-4 py-20">
     <div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">
-      <div class="mb-6">
-        <button onclick="navigateTo('login')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
-          <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-          Back to Login
-        </button>
-      </div>
       <div class="text-center mb-8">
         <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div>
         <h2 class="text-2xl font-black">Reset Password</h2>
@@ -1683,7 +1555,7 @@ function renderForgotPassword() {
       <form onsubmit="handleForgotPassword(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label>
-          <input type="email" id="forgot-email" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
+          <input type="email" id="forgot-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com">
         </div>
         
         <button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">
@@ -1708,7 +1580,7 @@ function renderWallet() {
   return `
   <div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn">
     <div class="mb-8">
-      <button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
+      <button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group">
         <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Back to Home
       </button>
@@ -1735,11 +1607,11 @@ function renderWallet() {
             <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label>
             <input type="number" id="deposit-amount" min="5" step="0.01" 
                    oninput="updateDepositCalculation(this.value)"
-                   class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" 
+                   class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" 
                    placeholder="0.00">
           </div>
           
-          <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-2">
+          <div class="bg-slate-50 p-4 rounded-xl space-y-2">
             <div class="flex justify-between text-sm">
               <span class="text-muted-theme">Deposit Amount:</span>
               <span class="font-bold" id="calc-amount">₵0.00</span>
@@ -1748,7 +1620,7 @@ function renderWallet() {
               <span class="text-muted-theme">Processing Fee (${depositFeePercent}%):</span>
               <span class="font-bold" id="calc-fee">₵0.00</span>
             </div>
-            <div class="border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between">
+            <div class="border-t border-slate-200 pt-2 flex justify-between">
               <span class="font-bold">Total to Pay:</span>
               <span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span>
             </div>
@@ -2079,7 +1951,7 @@ async function fetchUserTransactions() {
     
     if (data && data.length > 0) {
       listEl.innerHTML = data.map(t => `
-        <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type === 'deposit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2095,7 +1967,7 @@ async function fetchUserTransactions() {
             </div>
           </div>
           <div class="text-right">
-            <p class="font-bold ${t.type === 'deposit' ? 'text-green-600' : 'text-slate-900 dark:text-white'}">
+            <p class="font-bold ${t.type === 'deposit' ? 'text-green-600' : 'text-slate-900'}">
               ${t.type === 'deposit' ? '+' : '-'}₵${parseFloat(t.amount).toFixed(2)}
             </p>
             <p class="text-xs ${t.status === 'completed' ? 'text-green-600' : 'text-yellow-600'}">${t.status}</p>
@@ -2241,7 +2113,7 @@ function renderNetworkView(networkId) {
   return `
   <div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8">
     <div class="mb-8">
-      <button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition-colors flex items-center gap-2 group">
+      <button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group">
         <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Back to Networks
       </button>
@@ -2259,13 +2131,13 @@ function renderNetworkView(networkId) {
         <div class="card-theme p-6 rounded-2xl hover:border-red-500 transition-all cursor-pointer group animate-slide-up stagger-${(idx % 5) + 1}" style="animation-fill-mode: forwards;" onclick="initiateOrder('${networkId}', '${bundle.id}')">
           <div class="flex justify-between items-start mb-4">
             <div>
-              <h3 class="text-2xl font-black text-slate-900 dark:text-white group-hover:text-red-600 transition-colors">${bundle.size}</h3>
+              <h3 class="text-2xl font-black text-slate-900 group-hover:text-red-600 transition-colors">${bundle.size}</h3>
               <p class="text-sm text-muted-theme">${bundle.validity} Validity</p>
             </div>
             <div class="price-tag">₵${bundle.price.toFixed(2)}</div>
           </div>
           
-          <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200">
             <span class="text-xs font-bold text-slate-500 uppercase">Click to Purchase</span>
             <svg class="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
           </div>
@@ -2312,7 +2184,7 @@ function renderOrderForm() {
   return `
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn">
     <div class="card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in">
-      <button onclick="state.activeOrderData=null; render();" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+      <button onclick="state.activeOrderData=null; render();" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
       
@@ -2324,7 +2196,7 @@ function renderOrderForm() {
         <p class="text-muted-theme text-sm">${netInfo.name} • ${bundle.validity}</p>
       </div>
       
-      <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 mb-6">
+      <div class="bg-slate-50 rounded-2xl p-6 mb-6">
         <div class="flex justify-between items-center mb-2">
           <span class="text-sm text-muted-theme">Bundle Price</span>
           <span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span>
@@ -2333,7 +2205,7 @@ function renderOrderForm() {
           <span class="text-sm text-muted-theme">Your Balance</span>
           <span class="font-bold text-lg ${hasSufficientBalance ? 'text-green-600' : 'text-red-500'}">₵${balance.toFixed(2)}</span>
         </div>
-        <div class="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2 flex justify-between items-center">
+        <div class="border-t border-slate-200 mt-2 pt-2 flex justify-between items-center">
           <span class="font-bold">Total</span>
           <span class="font-black text-xl text-red-600">₵${bundle.price.toFixed(2)}</span>
         </div>
@@ -2342,7 +2214,7 @@ function renderOrderForm() {
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label>
-          <input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx">
+          <input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx">
           <p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p>
         </div>
         
@@ -2351,7 +2223,7 @@ function renderOrderForm() {
         </button>
         
         ${!hasSufficientBalance ? `
-        <button onclick="state.activeOrderData=null; navigateTo('wallet')" class="w-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-2xl font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all">
+        <button onclick="state.activeOrderData=null; navigateTo('wallet')" class="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-300 transition-all">
           Add Funds to Wallet
         </button>
         ` : ''}
@@ -2566,15 +2438,15 @@ function renderAdminLogin() {
             <form onsubmit="adminAuth(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email</label>
-                    <input type="email" id="adm-u" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="admin@example.com">
+                    <input type="email" id="adm-u" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="admin@example.com">
                 </div>
                 
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label>
-                    <input type="password" id="adm-p" required class="w-full p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
+                    <input type="password" id="adm-p" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••">
                 </div>
                 
-                <button type="submit" class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">
+                <button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">
                     Access Dashboard
                 </button>
             </form>
@@ -2598,13 +2470,13 @@ function renderAdminDashboard(){
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-slide-up">
             <div>
                 <h1 class="text-3xl font-black flex items-center gap-3">
-                    <span class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-3 py-1 rounded-lg text-xl">A</span>
+                    <span class="bg-slate-900 text-white px-3 py-1 rounded-lg text-xl">A</span>
                     Admin Dashboard
                 </h1>
                 <p class="text-sm text-muted-theme mt-1">Manage orders and system settings</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="adminLogout()" class="px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all">
+                <button onclick="adminLogout()" class="px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition-all">
                     Logout
                 </button>
             </div>
@@ -2635,9 +2507,9 @@ function renderAdminDashboard(){
             <input type="text" placeholder="Search phone or reference..." 
                    value="${state.searchQuery}" 
                    oninput="state.searchQuery=this.value; render();"
-                   class="flex-1 p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all">
+                   class="flex-1 p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all">
             <select onchange="state.networkFilter=this.value; render();" 
-                    class="p-4 border-2 dark:bg-slate-800 dark:border-slate-700 rounded-2xl font-bold focus:border-red-600 outline-none transition-all md:w-48">
+                    class="p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all md:w-48">
                 <option value="all">All Networks</option>
                 <option value="mtn">MTN</option>
                 <option value="airteltigo">AirtelTigo</option>
@@ -2649,7 +2521,7 @@ function renderAdminDashboard(){
         <div class="card-theme rounded-2xl overflow-hidden animate-slide-up stagger-4" style="animation-fill-mode: forwards;">
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
-                    <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <thead class="bg-slate-50 border-b border-slate-200">
                         <tr>
                             <th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th>
                             <th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th>
@@ -2667,7 +2539,7 @@ function renderAdminDashboard(){
                             <td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td>
                         </tr>
                         ` : filtered.map(order => `
-                        <tr class="table-row border-b border-slate-200 dark:border-slate-700 last:border-0">
+                        <tr class="table-row border-b border-slate-200 last:border-0">
                             <td class="p-4 font-mono text-xs font-bold">${order.ref}</td>
                             <td class="p-4 font-bold">${order.Phone}</td>
                             <td class="p-4">
@@ -2783,14 +2655,14 @@ function renderSuccessView(params) {
     return `
     <div class="min-h-screen flex items-center justify-center px-4 py-20 animate__animated animate__fadeIn">
         <div class="max-w-md w-full card-theme p-8 md:p-12 rounded-3xl text-center animate-scale-in">
-            <div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full mx-auto mb-6 flex items-center justify-center">
+            <div class="w-24 h-24 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center">
                 <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
             
             <h2 class="text-3xl font-black mb-4">Order Confirmed!</h2>
             <p class="text-muted-theme mb-8">Your data bundle has been ordered successfully.</p>
             
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 mb-8 text-left space-y-3">
+            <div class="bg-slate-50 rounded-2xl p-6 mb-8 text-left space-y-3">
                 <div class="flex justify-between">
                     <span class="text-sm text-muted-theme">Reference:</span>
                     <span class="font-bold font-mono text-sm">${params.ref}</span>
@@ -2809,7 +2681,7 @@ function renderSuccessView(params) {
                 <button onclick="navigateTo('home')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">
                     Buy More Data
                 </button>
-                <button onclick="navigateTo('wallet')" class="w-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-4 rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                <button onclick="navigateTo('wallet')" class="w-full bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold hover:bg-slate-200 transition-all">
                     View Wallet
                 </button>
             </div>
