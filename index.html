@@ -110,6 +110,16 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 .order-status-processing{background:#dbeafe;color:#1e40af;}
 .order-status-completed{background:#dcfce7;color:#166534;}
 .order-status-deleted{background:#fee2e2;color:#991b1b;}
+
+/* Announcement banner - attention grabbing */
+.announcement-banner{position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem 1.5rem;margin-bottom:2rem;border-left:6px solid var(--accent-primary);background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);box-shadow:0 10px 40px -10px rgba(220,38,38,.3);animation:pulse-border 2s infinite;}
+@keyframes pulse-border{0%,100%{border-left-color:var(--accent-primary);}50%{border-left-color:#f87171;}}
+.announcement-main{font-size:1.25rem;font-weight:800;margin-bottom:.5rem;color:#991b1b;line-height:1.4;}
+.announcement-sub{font-size:1rem;color:#7f1d1d;opacity:.9;font-weight:600;}
+.announcement-icon{display:inline-flex;margin-right:.5rem;animation:bounce 2s infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+/* Admin message composer */
+.msg-composer{background:var(--bg-secondary);border-radius:1.5rem;padding:1.5rem;margin-bottom:2rem;}
 </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
@@ -221,9 +231,7 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
   </div>
 </div>
 
-<a href="https://wa.me/233597578538" class="wa-float" target="_blank" rel="noopener noreferrer" aria-label="Contact us on WhatsApp">
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-2.32 0-4.519.903-6.16 2.544-1.64 1.64-2.543 3.838-2.543 6.158 0 1.61.439 3.191 1.272 4.578L3.375 23l3.818-1.226c1.328.724 2.822 1.107 4.337 1.107l.001-.001c2.32 0 4.52-.903 6.161-2.544 1.64-1.64 2.544-3.838 2.544-6.159 0-2.32-.904-4.518-2.544-6.159-1.64-1.641-3.839-2.545-6.161-2.545zm5.035 11.031c-.193.543-1.137 1.032-1.571 1.096-.434.064-.91.133-2.736-.605-2.203-.891-3.626-3.134-3.737-3.282-.11-.148-.891-1.185-.891-2.26s.555-1.604.752-1.821c.198-.217.433-.271.577-.271.145 0 .289.001.416.007.133.006.312-.05.488.372.181.434.619 1.506.674 1.617.054.111.091.241.016.39-.075.148-.112.241-.223.37-.111.148-.112.241-.223.37-.111.13-.233.29-.333.388-.111.111-.227.232-.097.455.13.223.578 1.019 1.241 1.604.854.753 1.572 1.018 1.795 1.13.223.111.353.093.483-.056.13-.149.555-.65.703-.872.148-.222.297-.186.5-.111.204.074 1.297.611 1.519.722.222.112.37.167.426.26.055.092.055.536-.138 1.079z"/></svg>
-</a>
+<!-- WhatsApp float removed; users contact via Report Order button -->
 
 <script>
 const SB_URL="https://kefcmjfvrqbgtivssdwn.supabase.co";
@@ -261,7 +269,7 @@ const NORMAL_BUNDLES=[
   {id:'t-50',network:'telecel',size:'50GB',price:183.00,validity:'30 Days'},{id:'t-100',network:'telecel',size:'100GB',price:369.00,validity:'30 Days'}
 ];
 
-let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'refer2bundle',currentProcessingOrder:null,confirmationSelectedProvider:'refer2bundle',user:null,userProfile:null,depositAmount:'',isLoading:false,connectionError:null};
+let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'refer2bundle',currentProcessingOrder:null,confirmationSelectedProvider:'refer2bundle',user:null,userProfile:null,depositAmount:'',isLoading:false,connectionError:null,announcement:null};
 
 /* ===== UTILITIES ===== */
 function showToast(message,duration=3000,type='info'){
@@ -344,6 +352,14 @@ async function navigateTo(view,params=null){
     state.view=view;state.params=params;
     if(view==='admin-dashboard') await fetchOrders();
     if(view==='wallet') await fetchUserProfile();
+    if(view==='landing') {
+      const ann=await fetchAnnouncement();
+      state.announcement=ann;
+    }
+    if(view==='my-orders') {
+      // Clear announcement when leaving landing
+      state.announcement=null;
+    }
     render();window.scrollTo(0,0);
   }catch(err){showToast('Error loading page. Please try again.',3000,'error');}
 }
@@ -417,6 +433,48 @@ function renderMyOrders(){
   </div>`;
 }
 
+/* ===== Report section builder - FIX 3: Syntax error fixed ===== */
+function buildReportSection(o){
+  var WA_SVG='<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-2.32 0-4.519.903-6.16 2.544-1.64 1.64-2.543 3.838-2.543 6.158 0 1.61.439 3.191 1.272 4.578L3.375 23l3.818-1.226c1.328.724 2.822 1.107 4.337 1.107l.001-.001c2.32 0 4.52-.903 6.161-2.544 1.64-1.64 2.544-3.838 2.544-6.159 0-2.32-.904-4.518-2.544-6.159-1.64-1.641-3.839-2.545-6.161-2.545zm5.035 11.031c-.193.543-1.137 1.032-1.571 1.096-.434.064-.91.133-2.736-.605-2.203-.891-3.626-3.134-3.737-3.282-.11-.148-.891-1.185-.891-2.26s.555-1.604.752-1.821c.198-.217.433-.271.577-.271.145 0 .289.001.416.007.133.006.312-.05.488.372.181.434.619 1.506.674 1.617.054.111.091.241.016.39-.075.148-.112.241-.223.37-.111.148-.112.241-.223.37-.111.13-.233.29-.333.388-.111.111-.227.232-.097.455.13.223.578 1.019 1.241 1.604.854.753 1.572 1.018 1.795 1.13.223.111.353.093.483-.056.13-.149.555-.65.703-.872.148-.222.297-.186.5-.111.204.074 1.297.611 1.519.722.222.112.37.167.426.26.055.092.055.536-.138 1.079z"/></svg>';
+  var LOCK_SVG='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>';
+  var BAN_SVG='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>';
+  if(o.Status !== 'Delivered'){
+    return '<div class="mt-3 pt-3 border-t border-slate-100">'
+      +'<button disabled class="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg cursor-not-allowed opacity-60">'
+      +LOCK_SVG+' Report Order (available after delivery)</button></div>';
+  }
+  var deliveredAt=new Date(o.updated_at||o.created_at).getTime();
+  var deadline=deliveredAt+36*60*60*1000;
+  var remaining=deadline-Date.now();
+  if(remaining<=0){
+    return '<div class="mt-3 pt-3 border-t border-slate-100 space-y-1">'
+      +'<div class="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg cursor-not-allowed opacity-50">'
+      +BAN_SVG+'<span>Report Order - ORDER INVALID</span></div>'
+      +'<p class="text-xs text-slate-400 font-semibold">The 36-hour complaint window has expired. This order is no longer disputable.</p></div>';
+  }
+  var hrs=Math.floor(remaining/3600000);
+  var mins=Math.floor((remaining%3600000)/60000);
+  var secs=Math.floor((remaining%60000)/1000);
+  var cdId='cd-'+o.ref.replace(/[^a-z0-9]/gi,'');
+  var isCritical=remaining<2*60*60*1000;
+  var isUrgent=remaining<6*60*60*1000;
+  var badgeCls=isCritical?'bg-red-600 text-white border-red-700 animate-pulse':isUrgent?'bg-orange-500 text-white border-orange-600':'bg-amber-50 text-amber-800 border-amber-300';
+  var warnCls=isCritical?'text-xs font-bold text-red-600 animate-pulse':isUrgent?'text-xs font-bold text-orange-600':'text-xs font-bold text-amber-700';
+  var warnPfx=isCritical?'[!] CRITICAL! ':isUrgent?'[!] WARNING: ':'';
+  var warnBody=isCritical?'Less than 2 hours left to report! Time is running out!':isUrgent?'Window closing soon! Report before time expires!':'Order after countdown is invalid';
+  var pad=function(n){return String(n).padStart(2,'0');};
+  // FIX: Corrected syntax error - changed \u0029 to ] after the ref
+  return '<div class="mt-3 pt-3 border-t border-slate-100 space-y-2">'
+    +'<div class="flex items-center justify-between flex-wrap gap-2">'
+    +'<button onclick="reportOrder(window._orderMap[\''+(o.ref)+'\'])" class="flex items-center gap-2 text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors px-3 py-2 rounded-lg">'
+    +WA_SVG+' Report Order via WhatsApp</button>'
+    +'<span id="'+cdId+'" class="text-xs font-black font-mono px-3 py-1.5 rounded-lg border '+badgeCls+'">'
+    +pad(hrs)+':'+pad(mins)+':'+pad(secs)+'</span>'
+    +'</div>'
+    +'<p class="'+warnCls+'">'+warnPfx+warnBody+'</p>'
+    +'</div>';
+}
+
 async function loadMyOrders(){
   const container=document.getElementById('my-orders-container');
   if(!container||!state.user) return;
@@ -431,11 +489,14 @@ async function loadMyOrders(){
     function customerStatus(raw){
       const s=(raw||'Pending').trim();
       if(s==='Completed') return{label:'Successfully Processed',cls:'order-status-completed',dot:'&#x1F7E2;'};
+      if(s==='Delivered') return{label:'Delivered',cls:'order-status-completed',dot:'&#x2705;'};
       if(s==='Processing') return{label:'Processing',cls:'order-status-processing',dot:'&#x1F535;'};
       if(s==='Deleted')   return{label:'Cancelled',cls:'order-status-deleted',dot:'&#x1F534;'};
       return{label:'Pending',cls:'order-status-pending',dot:'&#x1F7E1;'};
     }
     function netBadge(n){if(n==='mtn') return 'bg-yellow-100 text-yellow-800';if(n==='airteltigo') return 'bg-blue-100 text-blue-800';if(n==='telecel') return 'bg-red-100 text-red-800';return 'bg-slate-100 text-slate-700';}
+    // REMOVED: Announcement fetching from here (moved to landing page)
+    window._orderMap={}; data.forEach(x=>window._orderMap[x.ref]=x);
     container.innerHTML=`<div class="space-y-4 animate-slide-up">
       ${data.map(o=>{
         const st=customerStatus(o.Status);
@@ -458,17 +519,185 @@ async function loadMyOrders(){
               <p class="text-xs text-muted-theme">${new Date(o.created_at).toLocaleTimeString('en-GH',{hour:'2-digit',minute:'2-digit'})}</p>
             </div>
           </div>
+          ${buildReportSection(o)}
         </div>`;
       }).join('')}
     </div>
     <div class="mt-8 text-center"><button onclick="navigateTo('home')" class="cta-button text-white px-8 py-4 rounded-2xl font-bold inline-flex items-center gap-2">Buy More Data<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></button></div>`;
+  // Start live countdown tickers for all delivered orders
+  if(window._cdTimers) window._cdTimers.forEach(t=>clearInterval(t));
+  window._cdTimers=[];
+  data.forEach(o=>{
+    if(o.Status!=='Delivered') return;
+    const deliveredAt=new Date(o.updated_at||o.created_at).getTime();
+    const deadline=deliveredAt+36*60*60*1000;
+    const id='cd-'+o.ref.replace(/[^a-z0-9]/gi,'');
+    const timer=setInterval(()=>{
+      const el=document.getElementById(id);
+      if(!el){clearInterval(timer);return;}
+      const rem=deadline-Date.now();
+      if(rem<=0){
+        clearInterval(timer);
+        // Replace the entire bottom section of this card
+        const card=el.closest('.card-theme');
+        if(card){
+          const bottom=card.querySelector('.border-t.border-slate-100');
+          if(bottom){
+            bottom.innerHTML='<div class="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg cursor-not-allowed opacity-50"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg><span>Report Order — ORDER INVALID</span></div><p class="text-xs text-slate-400 mt-1 font-semibold">⛔ The 36-hour complaint window has expired.</p>';
+          }
+        }
+        return;
+      }
+      const hrs=Math.floor(rem/3600000);
+      const mins=Math.floor((rem%3600000)/60000);
+      const secs=Math.floor((rem%60000)/1000);
+      el.textContent=String(hrs).padStart(2,'0')+':'+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
+      // Escalate styling
+      const isCritical=rem<2*60*60*1000;
+      const isUrgent=rem<6*60*60*1000;
+      el.className=el.className.replace(/bg-\S+|text-\S+|border-\S+|animate-pulse/g,'').trim();
+      if(isCritical){
+        el.className='text-xs font-black font-mono px-3 py-1.5 rounded-lg border bg-red-600 text-white border-red-700 animate-pulse';
+        const warn=el.parentElement?.nextElementSibling;
+        if(warn){warn.className='text-xs font-bold text-red-600 animate-pulse';warn.textContent='🚨 CRITICAL! Less than 2 hours left to report!';}
+      } else if(isUrgent){
+        el.className='text-xs font-black font-mono px-3 py-1.5 rounded-lg border bg-orange-500 text-white border-orange-600';
+        const warn=el.parentElement?.nextElementSibling;
+        if(warn){warn.className='text-xs font-bold text-orange-600';warn.textContent='⚠️ Warning: Window closing soon!';}
+      }
+    },1000);
+    window._cdTimers.push(timer);
+  });
   }catch(err){
     container.innerHTML=`<div class="card-theme rounded-3xl p-12 text-center"><p class="text-red-500 font-bold mb-4">Failed to load orders. Please try again.</p><button onclick="loadMyOrders()" class="bg-slate-100 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-all">Retry</button></div>`;
   }
 }
 
-/* ===== LANDING PAGE ===== */
-function renderLandingPage(){return`<div class="min-h-screen animate__animated animate__fadeIn"><section class="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-20 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50"><div class="absolute inset-0 overflow-hidden pointer-events-none"><div class="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-float"></div><div class="absolute bottom-20 right-10 w-96 h-96 bg-red-400/20 rounded-full blur-3xl animate-float" style="animation-delay:-3s;"></div><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-400/10 rounded-full blur-3xl animate-pulse"></div></div><div class="relative z-10 mb-12 animate-scale-in"><div class="relative group"><div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div><img src="./11.png" alt="TRU Data Network Logo - Data Bundle Platform" class="hero-logo relative z-10 animate-float"></div></div><div class="relative z-10 max-w-3xl mx-auto text-center px-4"><h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight animate-slide-up leading-tight">Welcome to <span class="gradient-text">TruData</span></h1><p class="text-xl md:text-2xl text-slate-600 mb-6 font-semibold animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Your Platform for Mobile Data Bundle Purchases in Ghana</p><p class="text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode:forwards;">TRU DATA is a digital platform designed to help users purchase mobile data bundles conveniently. We provide an organized interface that allows users to explore and buy data plans across different mobile networks in Ghana.</p><div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up stagger-3" style="animation-fill-mode:forwards;"><button onclick="navigateTo('login')" class="cta-button text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-2">Get Started<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></button><button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 border-2 border-slate-300 hover:border-red-500 hover:text-red-600 transition-all">Learn More</button></div></div><div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce"><svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg></div></section><section class="py-20 px-4 bg-white"><div class="max-w-4xl mx-auto text-center"><p class="text-lg text-slate-600 leading-relaxed mb-8 animate-slide-up">In today's connected world, internet access is essential for education, business, communication, and entertainment. TruData was created to simplify the process of purchasing mobile data by providing a centralized platform where users can compare and buy data plans from multiple networks.</p></div></section><section class="py-20 px-4 bg-slate-50"><div class="max-w-6xl mx-auto"><h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">What You Can Do on TruData</h2><p class="text-center text-slate-500 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">TruData provides the following services for mobile data customers:</p><div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6"><div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-1" style="animation-fill-mode:forwards;"><div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">📱</div><h3 class="font-bold text-lg mb-2">Easy Access</h3><p class="text-sm text-muted-theme">Browse mobile data bundle options organized by network for convenient comparison</p></div><div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-2" style="animation-fill-mode:forwards;"><div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">💰</div><h3 class="font-bold text-lg mb-2">Clear Pricing</h3><p class="text-sm text-muted-theme">Data sizes, pricing, and validity periods displayed transparently</p></div><div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-3" style="animation-fill-mode:forwards;"><div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">🌐</div><h3 class="font-bold text-lg mb-2">Network Based</h3><p class="text-sm text-muted-theme">Organized by network provider for faster navigation</p></div><div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-4" style="animation-fill-mode:forwards;"><div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">⚡</div><h3 class="font-bold text-lg mb-2">Simple Interface</h3><p class="text-sm text-muted-theme">Designed for all devices with intuitive navigation</p></div></div></div></section><section class="py-20 px-4 bg-white"><div class="max-w-6xl mx-auto"><h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">Who TruData Is For</h2><p class="text-center text-slate-600 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">TruData serves a wide range of users who need convenient access to mobile data purchasing options.</p><div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto"><div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-1 opacity-0" style="animation-fill-mode:forwards;"><div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-red-500/30">🎓</div><div><h4 class="font-bold text-lg mb-1">Students</h4><p class="text-sm text-muted-theme">Who need mobile data for online learning, research, and educational resources</p></div></div><div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-2 opacity-0" style="animation-fill-mode:forwards;"><div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-red-500/30">💼</div><div><h4 class="font-bold text-lg mb-1">Professionals</h4><p class="text-sm text-muted-theme">And remote workers who need reliable connectivity for work activities</p></div></div><div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-3 opacity-0" style="animation-fill-mode:forwards;"><div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-green-500/30">🏪</div><div><h4 class="font-bold text-lg mb-1">Business Owners</h4><p class="text-sm text-muted-theme">Managing online business activities and digital operations</p></div></div><div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-4 opacity-0" style="animation-fill-mode:forwards;"><div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-orange-500/30">👥</div><div><h4 class="font-bold text-lg mb-1">Everyday Users</h4><p class="text-sm text-muted-theme">Who want convenient options for managing data purchases</p></div></div></div></div></section><section class="py-20 px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden"><div class="max-w-4xl mx-auto text-center relative z-10"><h2 class="text-3xl md:text-4xl font-black mb-8 animate-slide-up">Why TruData Matters</h2><p class="text-lg text-slate-300 mb-8 leading-relaxed animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Many users experience challenges such as unclear pricing, confusing bundle options, or limited explanations when selecting mobile data plans. TruData addresses these challenges by focusing on transparency and accessibility.</p><p class="text-lg text-slate-300 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode:forwards;">By organizing information clearly and presenting it in a straightforward format, TruData helps users make informed digital decisions and find suitable data options for their needs.</p></div></section><section class="py-20 px-4 bg-gradient-to-r from-red-700 via-red-600 to-red-600 animate-gradient relative overflow-hidden"><div class="absolute inset-0 bg-black/10"></div><div class="max-w-4xl mx-auto text-center relative z-10"><h2 class="text-3xl md:text-4xl font-black mb-6 text-white animate-slide-up">Ready to Get Started?</h2><p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Create your free account today and start purchasing data bundles with ease.</p><button onclick="navigateTo('register')" class="bg-white text-red-600 px-12 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 hover:shadow-white/25 transition-all animate-slide-up stagger-2 flex items-center gap-3 mx-auto" style="animation-fill-mode:forwards;">Create Free Account<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></button></div></section></div>`;}
+/* ===== LANDING PAGE - FIX 1: Announcement banner added ===== */
+function renderLandingPage(){
+  const ann=state.announcement;
+  const annHtml=ann?`<div class="max-w-4xl mx-auto px-4 pt-6"><div class="announcement-banner animate-scale-in">
+    <div class="flex items-start gap-3">
+      <span class="announcement-icon text-2xl">📢</span>
+      <div class="flex-1">
+        <div class="announcement-main">${ann.main_message}</div>
+        ${ann.sub_message?`<div class="announcement-sub">${ann.sub_message}</div>`:''}
+      </div>
+    </div>
+  </div></div>`:'';
+  return`<div class="min-h-screen animate__animated animate__fadeIn">
+    ${annHtml}
+    <section class="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-20 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-red-400/20 rounded-full blur-3xl animate-float" style="animation-delay:-3s;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-400/10 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+      <div class="relative z-10 mb-12 animate-scale-in">
+        <div class="relative group">
+          <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+          <img src="./11.png" alt="TRU Data Network Logo - Data Bundle Platform" class="hero-logo relative z-10 animate-float">
+        </div>
+      </div>
+      <div class="relative z-10 max-w-3xl mx-auto text-center px-4">
+        <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight animate-slide-up leading-tight">Welcome to <span class="gradient-text">TruData</span></h1>
+        <p class="text-xl md:text-2xl text-slate-600 mb-6 font-semibold animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Your Platform for Mobile Data Bundle Purchases in Ghana</p>
+        <p class="text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode:forwards;">TRU DATA is a digital platform designed to help users purchase mobile data bundles conveniently. We provide an organized interface that allows users to explore and buy data plans across different mobile networks in Ghana.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up stagger-3" style="animation-fill-mode:forwards;">
+          <button onclick="navigateTo('login')" class="cta-button text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-2">Get Started<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></button>
+          <button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 border-2 border-slate-300 hover:border-red-500 hover:text-red-600 transition-all">Learn More</button>
+        </div>
+      </div>
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-4xl mx-auto text-center">
+        <p class="text-lg text-slate-600 leading-relaxed mb-8 animate-slide-up">In today's connected world, internet access is essential for education, business, communication, and entertainment. TruData was created to simplify the process of purchasing mobile data by providing a centralized platform where users can compare and buy data plans from multiple networks.</p>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-slate-50">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">What You Can Do on TruData</h2>
+        <p class="text-center text-slate-500 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">TruData provides the following services for mobile data customers:</p>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-1" style="animation-fill-mode:forwards;">
+            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">📱</div>
+            <h3 class="font-bold text-lg mb-2">Easy Access</h3>
+            <p class="text-sm text-muted-theme">Browse mobile data bundle options organized by network for convenient comparison</p>
+          </div>
+          <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-2" style="animation-fill-mode:forwards;">
+            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">💰</div>
+            <h3 class="font-bold text-lg mb-2">Clear Pricing</h3>
+            <p class="text-sm text-muted-theme">Data sizes, pricing, and validity periods displayed transparently</p>
+          </div>
+          <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-3" style="animation-fill-mode:forwards;">
+            <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">🌐</div>
+            <h3 class="font-bold text-lg mb-2">Network Based</h3>
+            <p class="text-sm text-muted-theme">Organized by network provider for faster navigation</p>
+          </div>
+          <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-4" style="animation-fill-mode:forwards;">
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">⚡</div>
+            <h3 class="font-bold text-lg mb-2">Simple Interface</h3>
+            <p class="text-sm text-muted-theme">Designed for all devices with intuitive navigation</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">Who TruData Is For</h2>
+        <p class="text-center text-slate-600 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">TruData serves a wide range of users who need convenient access to mobile data purchasing options.</p>
+        <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-1 opacity-0" style="animation-fill-mode:forwards;">
+            <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-red-500/30">🎓</div>
+            <div>
+              <h4 class="font-bold text-lg mb-1">Students</h4>
+              <p class="text-sm text-muted-theme">Who need mobile data for online learning, research, and educational resources</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-2 opacity-0" style="animation-fill-mode:forwards;">
+            <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-red-500/30">💼</div>
+            <div>
+              <h4 class="font-bold text-lg mb-1">Professionals</h4>
+              <p class="text-sm text-muted-theme">And remote workers who need reliable connectivity for work activities</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-3 opacity-0" style="animation-fill-mode:forwards;">
+            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-green-500/30">🏪</div>
+            <div>
+              <h4 class="font-bold text-lg mb-1">Business Owners</h4>
+              <p class="text-sm text-muted-theme">Managing online business activities and digital operations</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-4 opacity-0" style="animation-fill-mode:forwards;">
+            <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl flex items-center justify-center font-bold text-2xl shrink-0 shadow-lg shadow-orange-500/30">👥</div>
+            <div>
+              <h4 class="font-bold text-lg mb-1">Everyday Users</h4>
+              <p class="text-sm text-muted-theme">Who want convenient options for managing data purchases</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+        <h2 class="text-3xl md:text-4xl font-black mb-8 animate-slide-up">Why TruData Matters</h2>
+        <p class="text-lg text-slate-300 mb-8 leading-relaxed animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Many users experience challenges such as unclear pricing, confusing bundle options, or limited explanations when selecting mobile data plans. TruData addresses these challenges by focusing on transparency and accessibility.</p>
+        <p class="text-lg text-slate-300 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode:forwards;">By organizing information clearly and presenting it in a straightforward format, TruData helps users make informed digital decisions and find suitable data options for their needs.</p>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-gradient-to-r from-red-700 via-red-600 to-red-600 animate-gradient relative overflow-hidden">
+      <div class="absolute inset-0 bg-black/10"></div>
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+        <h2 class="text-3xl md:text-4xl font-black mb-6 text-white animate-slide-up">Ready to Get Started?</h2>
+        <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Create your free account today and start purchasing data bundles with ease.</p>
+        <button onclick="navigateTo('register')" class="bg-white text-red-600 px-12 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 hover:shadow-white/25 transition-all animate-slide-up stagger-2 flex items-center gap-3 mx-auto" style="animation-fill-mode:forwards;">Create Free Account<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></button>
+      </div>
+    </section>
+  </div>`;
+}
 
 /* ===== ABOUT ===== */
 function renderAbout(){return`<div class="animate__animated animate__fadeIn"><section class="py-20 px-4 max-w-4xl mx-auto"><h1 class="text-4xl md:text-5xl font-black mb-8 text-center animate-slide-up">About TRU Data Network</h1><div class="prose prose-slate max-w-none"><p class="text-lg text-muted-theme mb-8 animate-slide-up stagger-1" style="animation-fill-mode:forwards;">TRU Data Network was established to provide Ghanaians with a convenient way to purchase mobile data bundles online. We recognized that many people were looking for easier ways to buy data without visiting physical stores or navigating complex USSD codes.</p><div class="grid md:grid-cols-2 gap-8 mb-12"><div class="p-6 card-theme rounded-2xl animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><h3 class="text-xl font-bold mb-3 text-red-600">Our Vision</h3><p class="text-sm text-muted-theme">To become a trusted platform for mobile data purchases in Ghana, providing convenient access to connectivity for all users.</p></div><div class="p-6 card-theme rounded-2xl animate-slide-up stagger-3" style="animation-fill-mode:forwards;"><h3 class="text-xl font-bold mb-3 text-red-600">Our Mission</h3><p class="text-sm text-muted-theme">To simplify the data purchasing process while maintaining transparency and customer satisfaction.</p></div></div><h2 class="text-2xl font-bold mb-4 animate-slide-up stagger-4" style="animation-fill-mode:forwards;">Why We Exist</h2><p class="text-muted-theme mb-6">In today's digital age, internet connectivity is increasingly important for education, work, and communication. TRU Data Network addresses this by providing an online platform where users can browse, compare, and purchase data bundles from major networks.</p><h2 class="text-2xl font-bold mb-4">Our Values</h2><ul class="space-y-4 mb-12"><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Transparency</strong><span class="text-sm text-muted-theme">Clear pricing with no hidden fees. What you see is what you pay.</span></div></li><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Reliability</strong><span class="text-sm text-muted-theme">We work to ensure timely processing of all orders.</span></div></li><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Customer Support</strong><span class="text-sm text-muted-theme">Assistance available via WhatsApp for order inquiries.</span></div></li></ul></div></section></div>`;}
@@ -660,9 +889,13 @@ async function fetchOrders(){
   }catch(err){showToast('❌ Failed to load orders: '+(err.message||'Check console'),4000,'error');state.orders=[];}
 }
 function renderAdminLogin(){return`<div class="min-h-screen flex items-center justify-center p-4"><div class="card-theme max-w-md w-full p-8 rounded-3xl shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black shadow-lg">A</div><h2 class="text-2xl font-black">Admin Access</h2><p class="text-sm text-muted-theme mt-2">Restricted area - Authorized personnel only</p></div><form onsubmit="adminAuth(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email</label><input type="email" id="adm-u" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="admin@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><input type="password" id="adm-p" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"></div><button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">Access Dashboard</button></form><div class="mt-6 text-center"><button onclick="navigateTo('landing')" class="text-sm text-muted-theme hover:text-red-600 transition-colors">&larr; Back to website</button></div></div></div>`;}
+
+/* ===== FIX 2: Delivered counts as Completed ===== */
 function renderAdminDashboard(){
   const filtered=state.orders.filter(o=>{const ms=(o.Phone||'').includes(state.searchQuery)||(o.ref||'').toLowerCase().includes(state.searchQuery.toLowerCase());const mn=state.networkFilter==='all'||o.Network===state.networkFilter;return ms&&mn;});
-  return`<div class="animate__animated animate__fadeIn max-w-7xl mx-auto px-4 py-8"><div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-slide-up"><div><h1 class="text-3xl font-black flex items-center gap-3"><span class="bg-slate-900 text-white px-3 py-1 rounded-lg text-xl">A</span>Admin Dashboard</h1><p class="text-sm text-muted-theme mt-1">Manage orders and system settings</p></div><div class="flex gap-3"><button onclick="adminLogout()" class="px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition-all">Logout</button></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">${state.orders.length}</div><div class="text-xs font-bold text-muted-theme uppercase">Total Orders</div></div><div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-yellow-600">${state.orders.filter(o=>o.Status==='Pending').length}</div><div class="text-xs font-bold text-muted-theme uppercase">Pending</div></div><div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-green-600">${state.orders.filter(o=>o.Status==='Completed').length}</div><div class="text-xs font-bold text-muted-theme uppercase">Completed</div></div><div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">₵${state.orders.reduce((a,o)=>a+(parseFloat(o.Amount)||0),0).toFixed(2)}</div><div class="text-xs font-bold text-muted-theme uppercase">Revenue</div></div></div><div class="flex flex-col md:flex-row gap-4 mb-6 animate-slide-up stagger-3" style="animation-fill-mode:forwards;"><input type="text" placeholder="Search phone or reference..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;render();" class="flex-1 p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all"><select onchange="state.networkFilter=this.value;render();" class="p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all md:w-48"><option value="all">All Networks</option><option value="mtn">MTN</option><option value="airteltigo">AirtelTigo</option><option value="telecel">Telecel</option></select></div><div class="card-theme rounded-2xl overflow-hidden animate-slide-up stagger-4" style="animation-fill-mode:forwards;"><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${filtered.length===0?`<tr><td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:filtered.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0"><td class="p-4 font-mono text-xs font-bold">${order.ref}</td><td class="p-4 font-bold">${order.Phone}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${order.Network?.toUpperCase()}</span></td><td class="p-4 text-sm">${order.bundle_name}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${order.Status||'Pending'}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2">${order.Status!=='Deleted'?`<button onclick="showProcessConfirmation('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button><button onclick="updateStatus('${order.ref}','Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button onclick="deleteOrder('${order.ref}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div></div></div>`;
+  // Count both Completed and Delivered as completed orders
+  const completedCount=state.orders.filter(o=>o.Status==='Completed'||o.Status==='Delivered').length;
+  return`<div class="animate__animated animate__fadeIn max-w-7xl mx-auto px-4 py-8"><div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-slide-up"><div><h1 class="text-3xl font-black flex items-center gap-3"><span class="bg-slate-900 text-white px-3 py-1 rounded-lg text-xl">A</span>Admin Dashboard</h1><p class="text-sm text-muted-theme mt-1">Manage orders and system settings</p></div><div class="flex gap-3"><button onclick="adminLogout()" class="px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition-all">Logout</button></div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">${state.orders.length}</div><div class="text-xs font-bold text-muted-theme uppercase">Total Orders</div></div><div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-yellow-600">${state.orders.filter(o=>o.Status==='Pending').length}</div><div class="text-xs font-bold text-muted-theme uppercase">Pending</div></div><div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-green-600">${completedCount}</div><div class="text-xs font-bold text-muted-theme uppercase">Completed</div></div><div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">₵${state.orders.reduce((a,o)=>a+(parseFloat(o.Amount)||0),0).toFixed(2)}</div><div class="text-xs font-bold text-muted-theme uppercase">Revenue</div></div></div><div class="card-theme rounded-2xl p-6 mb-6 animate-slide-up stagger-3" style="animation-fill-mode:forwards;"><h2 class="text-lg font-black mb-1 flex items-center gap-2"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>Broadcast Message</h2><p class="text-xs text-muted-theme mb-4">Post a message visible to all customers. Replaces any previous message.</p><div class="grid md:grid-cols-2 gap-4 mb-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Main Message <span class="text-red-500">*</span></label><input type="text" id="ann-main" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none transition-all" placeholder="e.g. MTN bundles now available!"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Sub Message (optional)</label><input type="text" id="ann-sub" class="w-full p-3 border-2 rounded-xl font-semibold focus:border-red-600 outline-none transition-all" placeholder="e.g. Prices updated for all packages."></div></div><button onclick="saveAnnouncement()" class="cta-button text-white px-6 py-3 rounded-xl font-bold text-sm inline-flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>Post Announcement</button></div><div class="flex flex-col md:flex-row gap-4 mb-6 animate-slide-up stagger-4" style="animation-fill-mode:forwards;"><input type="text" placeholder="Search phone or reference..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;render();" class="flex-1 p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all"><select onchange="state.networkFilter=this.value;render();" class="p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all md:w-48"><option value="all">All Networks</option><option value="mtn">MTN</option><option value="airteltigo">AirtelTigo</option><option value="telecel">Telecel</option></select></div><div class="card-theme rounded-2xl overflow-hidden animate-slide-up stagger-4" style="animation-fill-mode:forwards;"><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${filtered.length===0?`<tr><td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:filtered.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0"><td class="p-4 font-mono text-xs font-bold">${order.ref}</td><td class="p-4 font-bold">${order.Phone}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${order.Network?.toUpperCase()}</span></td><td class="p-4 text-sm">${order.bundle_name}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${order.Status||'Pending'}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2">${order.Status!=='Deleted'?`<button onclick="showProcessConfirmation('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button><button onclick="updateStatus('${order.ref}','Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button onclick="updateStatus('${order.ref}','Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button onclick="deleteOrder('${order.ref}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div></div></div>`;
 }
 window.showProcessConfirmation=function(ref){
   const order=state.orders.find(o=>o.ref===ref);if(!order) return;
@@ -688,6 +921,51 @@ window.updateStatus=async function(ref,status){
 /* ========== CHANGE 7: renderSuccessView – "View My Orders" as primary CTA ========== */
 function renderSuccessView(params){
   return`<div class="min-h-screen flex items-center justify-center px-4 py-20 animate__animated animate__fadeIn"><div class="max-w-md w-full card-theme p-8 md:p-12 rounded-3xl text-center animate-scale-in"><div class="w-24 h-24 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-3xl font-black mb-4">Order Confirmed!</h2><p class="text-muted-theme mb-8">Your data bundle has been ordered successfully.</p><div class="bg-slate-50 rounded-2xl p-6 mb-8 text-left space-y-3"><div class="flex justify-between"><span class="text-sm text-muted-theme">Reference:</span><span class="font-bold font-mono text-sm">${params.ref}</span></div><div class="flex justify-between"><span class="text-sm text-muted-theme">Bundle:</span><span class="font-bold">${params.bundle_name}</span></div><div class="flex justify-between"><span class="text-sm text-muted-theme">Phone:</span><span class="font-bold">${params.Phone}</span></div></div><div class="space-y-3"><button onclick="navigateTo('my-orders')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">View My Orders</button><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy More Data</button><button onclick="navigateTo('wallet')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">View Wallet</button></div></div></div>`;
+}
+
+
+/* ===== ANNOUNCEMENT / BROADCAST (Supabase table: announcements) ===== */
+// Fetch current active announcement
+async function fetchAnnouncement(){
+  try{
+    const{data,error}=await supa.from('announcements').select('*').order('created_at',{ascending:false}).limit(1).single();
+    if(error&&error.code==='PGRST116') return null; // no rows
+    if(error) throw error;
+    return data;
+  }catch(e){return null;}
+}
+
+// Save announcement (admin)
+async function saveAnnouncement(){
+  const main=document.getElementById('ann-main')?.value.trim();
+  const sub=document.getElementById('ann-sub')?.value.trim();
+  if(!main){showToast('Main message is required',3000,'error');return;}
+  try{
+    // Delete old announcements first, then insert new one
+    await supa.from('announcements').delete().neq('id',0); // clear all
+    const{error}=await supa.from('announcements').insert([{main_message:main,sub_message:sub||'',created_at:new Date().toISOString()}]);
+    if(error) throw error;
+    showToast('✅ Announcement posted!',3000,'success');
+    // Refresh admin view to show preview
+    await fetchOrders();
+  }catch(e){showToast('❌ Failed to post: '+(e.message||'error'),4000,'error');}
+}
+
+/* ===== WHATSAPP REPORT ORDER ===== */
+function reportOrder(order){
+  const wa='233597578538';
+  const msg=
+    'Hello, I would like to report a complaint regarding my order.%0A%0A'+
+    '*Order Details*%0A'+
+    'Reference: '+encodeURIComponent(order.ref)+'%0A'+
+    'Network: '+encodeURIComponent((order.Network||'').toUpperCase())+'%0A'+
+    'Bundle: '+encodeURIComponent(order.bundle_name)+'%0A'+
+    'Phone: '+encodeURIComponent(order.Phone)+'%0A'+
+    'Amount: ₵'+encodeURIComponent(parseFloat(order.Amount).toFixed(2))+'%0A'+
+    'Status: '+encodeURIComponent(order.Status||'Pending')+'%0A'+
+    'Date: '+encodeURIComponent(new Date(order.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'long',year:'numeric'}))+'%0A%0A'+
+    'Please assist me with this issue. Thank you.';
+  window.open('https://wa.me/'+wa+'?text='+msg,'_blank');
 }
 
 /* ========== CHANGE 8: render() – add 'my-orders' case ========== */
