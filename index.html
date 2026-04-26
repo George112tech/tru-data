@@ -1164,8 +1164,8 @@ function showAddAgentPriceForm(){
   const f=document.getElementById('add-agent-price-form');
   if(f) f.style.display=f.style.display==='none'?'block':'none';
 }
-async function loadAdminAgentPricesTable(){
-  await fetchAdminAgentBasePrices();
+async function loadAdminAgentPricesTable(skipFetch=false){
+  if(!skipFetch) await fetchAdminAgentBasePrices();
   const c=document.getElementById('admin-agent-prices-container');
   if(!c) return;
   if(!state.agentBasePrices.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No agent base prices yet. Click "+ Add Price" to create one.<br><span class="text-xs mt-2 block">System prices for normal users remain untouched.</span></div>`;return;}
@@ -1231,11 +1231,16 @@ async function globalToggleAgentPriceLock(){
       }
       showToast('All unlocked agent pricing is now locked. Previously locked rows unchanged.',4000,'success');
     }
-    await fetchAdminAgentBasePrices();
-    // Re-render the tab fully so the global button label updates
+    // Update local state immediately so badge renders correctly before DB re-fetch
+    if(allLocked){
+      state.agentBasePrices=state.agentBasePrices.map(p=>({...p,pricing_locked:false}));
+    }else{
+      state.agentBasePrices=state.agentBasePrices.map(p=>({...p,pricing_locked:true}));
+    }
+    // Re-render the tab fully so the global button label and badges update
     state.adminTab='agent-prices';
+    state._skipAgentPriceFetch=true; // tell render() not to re-fetch from DB
     render();
-    setTimeout(loadAdminAgentPricesTable,50);
   }catch(err){showToast('Lock operation failed: '+err.message,4000,'error');if(btn) btn.disabled=false;}
 }
 async function deleteAgentBasePrice(id){
@@ -1538,7 +1543,7 @@ function render(){
       app.innerHTML=renderAdminDashboard();extended.innerHTML='';
       // Load tab-specific data after render
       setTimeout(()=>{
-        if(state.adminTab==='agent-prices') loadAdminAgentPricesTable();
+        if(state.adminTab==='agent-prices'){const skip=state._skipAgentPriceFetch||false;state._skipAgentPriceFetch=false;loadAdminAgentPricesTable(skip);}
         else if(state.adminTab==='agents') loadAdminAgentsList();
         else if(state.adminTab==='withdrawals') loadAdminWithdrawals();
       },50);
