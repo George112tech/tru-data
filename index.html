@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRU Data Network | Buy Data Bundles in Ghana - MTN, Telecel, AirtelTigo</title>
+<meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. Data top up service across Ghana.">
+<meta name="keywords" content="buy data Ghana, MTN data bundles, Telecel data, AirtelTigo data, cheap data Ghana, mobile data Ghana, internet bundles, data top up Ghana, TRU Data Network">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+  --bg-primary:#ffffff;--bg-secondary:#f1f5f9;--bg-tertiary:#e2e8f0;--bg-card:#ffffff;--bg-elevated:#ffffff;
+  --text-primary:#0f172a;--text-secondary:#475569;--text-tertiary:#94a3b8;
+  --accent-primary:#dc2626;--accent-secondary:#ef4444;--accent-success:#10b981;--accent-warning:#f59e0b;--accent-danger:#ef4444;
+  --border-color:#e2e8f0;--shadow-sm:0 1px 2px 0 rgb(0 0 0/0.05);--shadow-md:0 4px 6px -1px rgb(0 0 0/0.1);
+  --shadow-lg:0 10px 15px -3px rgb(0 0 0/0.1);--shadow-xl:0 20px 25px -5px rgb(0 0 0/0.1);
+  --shadow-glow:0 0 40px -10px rgba(220,38,38,0.5);--glass-bg:rgba(255,255,255,0.8);
+}
+body{font-family:'Inter','Plus Jakarta Sans',sans-serif;scroll-behavior:smooth;overflow-x:hidden;background-color:var(--bg-primary);color:var(--text-primary);transition:background-color .4s cubic-bezier(.4,0,.2,1),color .4s cubic-bezier(.4,0,.2,1);line-height:1.6;}
+.glass{background:var(--glass-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--border-color);}
+.card-theme{background-color:var(--bg-card);border:1px solid var(--border-color);box-shadow:var(--shadow-md);transition:all .3s cubic-bezier(.4,0,.2,1);}
+.card-theme:hover{box-shadow:var(--shadow-xl);border-color:var(--accent-primary);transform:translateY(-4px);}
+.text-muted-theme{color:var(--text-secondary);}
+.network-card{transition:all .4s cubic-bezier(.34,1.56,.64,1);cursor:pointer;position:relative;overflow:hidden;}
+.network-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.3),transparent 70%);opacity:0;transition:opacity .3s ease;}
+.network-card:hover{transform:translateY(-12px) scale(1.02);box-shadow:0 25px 50px -12px rgb(0 0 0/.25);}
+.network-card:hover::before{opacity:1;}
+#admin-actions-bar{display:none;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:100;}
+.wa-float{position:fixed;bottom:30px;right:30px;background:linear-gradient(135deg,#25d366 0%,#128c7e 100%);color:white;border-radius:50%;text-align:center;font-size:28px;box-shadow:0 10px 40px rgba(37,211,102,.4);z-index:100;width:60px;height:60px;display:flex;align-items:center;justify-content:center;transition:all .3s cubic-bezier(.34,1.56,.64,1);animation:pulse-whatsapp 2s infinite;}
+.wa-float:hover{transform:scale(1.1) rotate(10deg);box-shadow:0 15px 50px rgba(37,211,102,.6);}
+@keyframes pulse-whatsapp{0%,100%{box-shadow:0 0 0 0 rgba(37,211,102,.7);}70%{box-shadow:0 0 0 20px rgba(37,211,102,0);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);}}
+@keyframes gradient-shift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+@keyframes slide-up{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+@keyframes scale-in{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+@keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.animate-float{animation:float 6s ease-in-out infinite;}
+.animate-gradient{background-size:200% 200%;animation:gradient-shift 8s ease infinite;}
+.animate-slide-up{animation:slide-up .6s ease-out forwards;}
+.animate-scale-in{animation:scale-in .5s ease-out forwards;}
+.stagger-1{animation-delay:.1s;}.stagger-2{animation-delay:.2s;}.stagger-3{animation-delay:.3s;}.stagger-4{animation-delay:.4s;}.stagger-5{animation-delay:.5s;}
+.hero-logo{max-width:280px;filter:drop-shadow(0 25px 50px rgba(59,130,246,.3));transition:all .6s cubic-bezier(.34,1.56,.64,1);}
+.hero-logo:hover{transform:scale(1.08) rotate(3deg);filter:drop-shadow(0 35px 70px rgba(96,165,250,.5));}
+.gradient-text{background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:gradient-shift 5s ease infinite;}
+.feature-card{transition:all .4s cubic-bezier(.4,0,.2,1);border:1px solid var(--border-color);background:var(--bg-card);}
+.feature-card:hover{transform:translateY(-8px) scale(1.02);border-color:var(--accent-primary);box-shadow:var(--shadow-glow);}
+.cta-button{background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);background-size:200% 200%;transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;border:none;}
+.cta-button::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);transition:left .6s ease;}
+.cta-button:hover::before{left:100%;}
+.cta-button:hover{transform:translateY(-3px) scale(1.02);box-shadow:var(--shadow-glow);}
+.admin-btn{position:relative;overflow:hidden;transition:all .3s cubic-bezier(.4,0,.2,1);border:none;cursor:pointer;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.admin-btn::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,255,255,.4) 0%,transparent 70%);opacity:0;transition:opacity .3s ease;}
+.admin-btn:hover::after{opacity:1;}
+.admin-btn:active{transform:scale(.95);}
+.status-badge{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.65rem;letter-spacing:.05em;}
+.table-row{transition:all .3s ease;border-bottom:1px solid var(--border-color);}
+.table-row:hover{background-color:rgba(220,38,38,.05);}
+.table-row:last-child{border-bottom:none;}
+.glass-enhanced{background:rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(200%);-webkit-backdrop-filter:blur(20px) saturate(200%);border:1px solid rgba(220,38,38,.2);box-shadow:0 25px 50px -12px rgba(0,0,0,.25);}
+input,select{background-color:var(--bg-tertiary);border:2px solid transparent;color:var(--text-primary);transition:all .3s ease;}
+input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px rgba(220,38,38,.1);outline:none;background-color:var(--bg-card);}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:var(--bg-secondary);}
+::-webkit-scrollbar-thumb{background:var(--text-tertiary);border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent-primary);}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg-card);color:var(--text-primary);padding:1rem 2rem;border-radius:1rem;box-shadow:var(--shadow-xl);border:1px solid var(--border-color);z-index:200;opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);font-weight:600;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.spinner{width:20px;height:20px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite;}
+.price-tag{display:inline-flex;align-items:center;padding:.25rem .75rem;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;border-radius:9999px;font-weight:700;font-size:.875rem;box-shadow:0 4px 15px -3px rgba(220,38,38,.4);}
+@media(max-width:768px){.hero-logo{max-width:200px;}.wa-float{width:50px;height:50px;font-size:24px;bottom:20px;right:20px;}}
+@media print{.wa-float,#admin-actions-bar,nav{display:none!important;}}
+#admin-order-confirmation{display:none;position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:150;width:90%;max-width:500px;}
+.admin-confirmation-content{background:var(--bg-card);border:2px solid var(--accent-primary);border-radius:1.5rem;padding:2rem;box-shadow:var(--shadow-xl),0 0 40px rgba(220,38,38,.3);animation:slide-up .4s ease-out;}
+.admin-confirmation-header{text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border-color);}
+.admin-confirmation-title{font-size:1.25rem;font-weight:800;color:var(--text-primary);margin-bottom:.5rem;}
+.admin-confirmation-subtitle{font-size:.875rem;color:var(--text-secondary);}
+.admin-order-details{background:var(--bg-secondary);border-radius:1rem;padding:1rem;margin-bottom:1.5rem;}
+.admin-order-detail-row{display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.875rem;}
+.admin-order-detail-row:last-child{margin-bottom:0;}
+.admin-order-detail-label{color:var(--text-secondary);font-weight:500;}
+.admin-order-detail-value{color:var(--text-primary);font-weight:700;}
+.provider-selection{margin-bottom:1.5rem;}
+.provider-selection-title{font-size:.875rem;font-weight:700;margin-bottom:.75rem;color:var(--text-primary);text-align:center;}
+.provider-buttons{display:flex;gap:1rem;}
+.provider-btn{flex:1;padding:1rem;border:2px solid var(--border-color);border-radius:1rem;background:var(--bg-tertiary);color:var(--text-secondary);font-weight:700;font-size:.875rem;cursor:pointer;transition:all .3s ease;display:flex;flex-direction:column;align-items:center;gap:.5rem;}
+.provider-btn:hover{border-color:var(--accent-primary);color:var(--accent-primary);}
+.provider-btn.selected{border-color:var(--accent-primary);background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;}
+.provider-btn svg{width:24px;height:24px;}
+.admin-confirmation-actions{display:flex;gap:1rem;}
+.admin-confirmation-actions button{flex:1;padding:1rem;border-radius:1rem;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .3s ease;border:none;}
+.btn-cancel-process{background:var(--bg-tertiary);color:var(--text-secondary);}
+.btn-cancel-process:hover{background:var(--border-color);}
+.btn-confirm-process{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;}
+.btn-confirm-process:hover{transform:translateY(-2px);box-shadow:0 10px 20px -5px rgba(220,38,38,.4);}
+.wallet-card{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;border-radius:1.5rem;padding:1.5rem;position:relative;overflow:hidden;box-shadow:var(--shadow-xl);}
+.wallet-card::before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 60%);transform:rotate(45deg);}
+.wallet-balance{font-size:2.5rem;font-weight:800;position:relative;z-index:1;}
+.wallet-label{font-size:.875rem;opacity:.9;text-transform:uppercase;letter-spacing:.05em;position:relative;z-index:1;}
+.view-wallet-btn{background:rgba(255,255,255,.9);color:var(--accent-primary);border:2px solid rgba(255,255,255,.5);box-shadow:0 4px 15px rgba(0,0,0,.2);transition:all .3s ease;position:relative;z-index:10;cursor:pointer;pointer-events:auto;}
+.view-wallet-btn:hover{background:white;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3);border-color:white;}
+.loading-shimmer{background:linear-gradient(90deg,var(--bg-tertiary) 25%,var(--bg-secondary) 50%,var(--bg-tertiary) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:.5rem;}
+.error-message{color:var(--accent-danger);font-size:.875rem;margin-top:.5rem;padding:.5rem;background:rgba(239,68,68,.1);border-radius:.5rem;border-left:3px solid var(--accent-danger);}
+/* My Orders status pills */
+.order-status-pending{background:#fef9c3;color:#854d0e;}
+.order-status-processing{background:#dbeafe;color:#1e40af;}
+.order-status-completed{background:#dcfce7;color:#166534;}
+.order-status-deleted{background:#fee2e2;color:#991b1b;}
+/* ===== AGENT SYSTEM STYLES ===== */
+.agent-banner{background:linear-gradient(135deg,#1e40af 0%,#2563eb 50%,#0284c7 100%);color:white;padding:.65rem 1.5rem;text-align:center;font-size:.78rem;font-weight:800;letter-spacing:.04em;position:relative;overflow:hidden;z-index:55;}
+.agent-banner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.04) 10px,rgba(255,255,255,.04) 20px);}
+.pricing-mode-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .7rem;border-radius:9999px;font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+.pricing-mode-system{background:rgba(16,185,129,.12);color:#059669;border:1px solid rgba(16,185,129,.25);}
+.pricing-mode-agent{background:rgba(37,99,235,.12);color:#1d4ed8;border:1px solid rgba(37,99,235,.25);}
+.agent-price-wrap{display:inline-flex;flex-direction:column;align-items:flex-end;gap:.15rem;}
+.agent-price-final{font-size:1rem;font-weight:800;color:#1e40af;line-height:1;}
+.agent-price-base{font-size:.6rem;color:#94a3b8;text-decoration:line-through;}
+.agent-profit-pill{background:rgba(37,99,235,.1);color:#1d4ed8;font-size:.58rem;padding:.1rem .45rem;border-radius:9999px;font-weight:700;}
+.admin-tab-btn{padding:.55rem 1.1rem;border-radius:.7rem;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .25s ease;border:none;text-transform:uppercase;letter-spacing:.04em;}
+.admin-tab-btn.active{background:linear-gradient(135deg,#dc2626,#ef4444);color:white;box-shadow:0 4px 12px rgba(220,38,38,.3);}
+.admin-tab-btn:not(.active){background:var(--bg-tertiary);color:var(--text-secondary);}
+.admin-tab-btn:not(.active):hover{background:var(--border-color);}
+.become-agent-hero{background:linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f172a 100%);border:1px solid rgba(59,130,246,.25);border-radius:2rem;padding:3rem 2rem;position:relative;overflow:hidden;}
+.become-agent-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 50%,rgba(59,130,246,.12) 0%,transparent 55%),radial-gradient(ellipse at 75% 50%,rgba(99,102,241,.08) 0%,transparent 55%);}
+.agent-stat-card{border-radius:1rem;padding:1rem;text-align:center;}
+.withdrawal-window-open{background:#f0fdf4;border:2px solid #86efac;border-radius:1rem;padding:1rem;color:#166534;}
+.withdrawal-window-closed{background:#fefce8;border:2px solid #fde047;border-radius:1rem;padding:1rem;color:#854d0e;}
+
+/* Announcement banner - attention grabbing */
+.announcement-banner{position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem 1.5rem;margin-bottom:2rem;border-left:6px solid var(--accent-primary);background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);box-shadow:0 10px 40px -10px rgba(220,38,38,.3);animation:pulse-border 2s infinite;}
+@keyframes pulse-border{0%,100%{border-left-color:var(--accent-primary);}50%{border-left-color:#f87171;}}
+.announcement-main{font-size:1.25rem;font-weight:800;margin-bottom:.5rem;color:#991b1b;line-height:1.4;}
+.announcement-sub{font-size:1rem;color:#7f1d1d;opacity:.9;font-weight:600;}
+.announcement-icon{display:inline-flex;margin-right:.5rem;animation:bounce 2s infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+/* Admin message composer */
+.msg-composer{background:var(--bg-secondary);border-radius:1.5rem;padding:1.5rem;margin-bottom:2rem;}
+</style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+<nav class="sticky top-0 z-[60] glass transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
+    <div onclick="navigateTo('landing')" class="text-2xl font-extrabold tracking-tighter cursor-pointer flex items-center gap-2 hover:scale-105 transition-transform duration-300">
+      <span class="bg-gradient-to-br from-red-600 to-red-500 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span>
+      <span class="font-bold">DATA</span>
+    </div>
+    <div class="flex gap-4 md:gap-8 items-center">
+      <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-red-600 hidden md:block transition-colors duration-300">Buy Data</button>
+      <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-red-600 hidden md:block transition-colors duration-300">About</button>
+      <button onclick="navigateTo('agent-portal')" class="font-semibold text-sm hover:text-blue-600 hidden md:block transition-colors duration-300 text-blue-500 font-bold">Agents</button>
+      <div id="user-auth-section" class="hidden md:flex items-center gap-3"></div>
+      <button id="admin-nav-btn" class="text-[10px] bg-slate-100 px-4 py-2.5 rounded-full font-bold text-slate-500 hover:bg-red-600 hover:text-white transition-all uppercase shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Admin</button>
+    </div>
+  </div>
+</nav>
+
+<main id="app-view" class="flex-grow"></main>
+<div id="extended-content"></div>
+<div id="agent-session-banner" style="display:none;" class="agent-banner sticky top-20 z-[55]">
+  <span class="relative z-10 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>Agent Link Active — You are viewing <strong>Agent Pricing</strong>. Agent ID: <span id="agent-banner-id" class="font-mono bg-white/20 px-2 py-0.5 rounded"></span></span>
+</div>
+<div id="toast-container"></div>
+
+<div id="admin-order-confirmation">
+  <div class="admin-confirmation-content">
+    <div class="admin-confirmation-header">
+      <div class="admin-confirmation-title">Process Order</div>
+      <div class="admin-confirmation-subtitle">Select a provider to fulfill this order</div>
+    </div>
+    <div class="admin-order-details">
+      <div class="admin-order-detail-row"><span class="admin-order-detail-label">Phone Number:</span><span class="admin-order-detail-value" id="confirm-phone"></span></div>
+      <div class="admin-order-detail-row"><span class="admin-order-detail-label">Network:</span><span class="admin-order-detail-value" id="confirm-network"></span></div>
+      <div class="admin-order-detail-row"><span class="admin-order-detail-label">Bundle:</span><span class="admin-order-detail-value" id="confirm-bundle"></span></div>
+      <div class="admin-order-detail-row"><span class="admin-order-detail-label">Amount:</span><span class="admin-order-detail-value" id="confirm-amount"></span></div>
+    </div>
+    <div class="provider-selection">
+      <div class="provider-selection-title">Choose Provider Platform</div>
+      <div class="provider-buttons">
+        <button class="provider-btn selected" id="btn-refer2bundle-confirm" onclick="selectConfirmationProvider('refer2bundle')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+          Refer2Bundle
+        </button>
+      </div>
+    </div>
+    <div class="admin-confirmation-actions">
+      <button class="btn-cancel-process" onclick="closeAdminConfirmation()">Cancel</button>
+      <button class="btn-confirm-process" onclick="confirmProcessOrder()">Process Order</button>
+    </div>
+  </div>
+</div>
+
+<footer class="py-16 text-center border-t border-slate-200 bg-gradient-to-t from-slate-50 to-transparent">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="mb-8">
+      <span class="text-2xl font-extrabold tracking-tighter inline-flex items-center gap-2">
+        <span class="bg-gradient-to-br from-red-600 to-red-500 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span>
+        <span class="">DATA</span>
+      </span>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 mb-8 text-left">
+      <div>
+        <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Quick Links</h4>
+        <ul class="space-y-2 text-sm text-muted-theme">
+          <li><button onclick="navigateTo('landing')" class="hover:text-red-600 transition-colors">Home</button></li>
+          <li><button onclick="navigateTo('home')" class="hover:text-red-600 transition-colors">Buy Data</button></li>
+          <li><button onclick="navigateTo('about')" class="hover:text-red-600 transition-colors">About Us</button></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Networks</h4>
+        <ul class="space-y-2 text-sm text-muted-theme">
+          <li><button onclick="navigateTo('network','mtn')" class="hover:text-red-600 transition-colors">MTN Ghana</button></li>
+          <li><button onclick="navigateTo('network','telecel')" class="hover:text-red-600 transition-colors">Telecel</button></li>
+          <li><button onclick="navigateTo('network','airteltigo')" class="hover:text-red-600 transition-colors">AirtelTigo</button></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Contact</h4>
+        <ul class="space-y-2 text-sm text-muted-theme">
+          <li>WhatsApp: +233 59 757 8538</li>
+          <li>Email: kelvinjun12.2003@gmail.com</li>
+          <li>Accra, Ghana</li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-slate-200 pt-8">
+      <p class="text-slate-400 font-semibold text-xs uppercase tracking-widest mb-2">TRU Data is an independent digital service by TRUTECH BUSINESS.</p>
+      <p class="text-slate-400 font-semibold text-xs uppercase tracking-widest mb-2">Not affiliated with MTN, Telecel, or AirtelTigo.</p>
+      <p class="text-slate-500 font-bold text-xs mt-4">&copy; 2026 TRU DATA. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<div id="admin-actions-bar" class="w-[90%] max-w-lg glass-enhanced text-white p-5 rounded-2xl shadow-2xl flex flex-col gap-4 border animate__animated animate__slideInUp">
+  <div class="flex flex-col">
+    <span class="text-[10px] font-black uppercase text-red-400 tracking-widest mb-1">Active Processing</span>
+    <span id="active-order-label" class="text-sm font-bold truncate max-w-[250px] text-slate-900"></span>
+  </div>
+  <div class="bg-slate-100 rounded-xl p-3">
+    <p class="text-xs font-semibold mb-2 text-slate-700">Select Provider for Direct Order:</p>
+    <div class="flex gap-2 mb-2">
+      <button onclick="selectProvider('refer2bundle')" id="btn-refer2bundle" class="flex-1 py-2 px-3 rounded-lg bg-red-600 text-white text-xs font-bold transition-all">Refer2Bundle</button>
+    </div>
+    <p class="text-[10px] opacity-75 text-slate-600">You will be redirected to complete the order on Refer2Bundle.</p>
+  </div>
+  <div class="flex gap-3 justify-end">
+    <button onclick="cancelActiveProcess()" class="admin-btn px-4 py-2.5 text-[11px] font-bold bg-slate-200 text-slate-700 rounded-xl hover:bg-slate-300 transition-all">Dismiss</button>
+    <button id="global-fulfill-btn" class="admin-btn px-5 py-2.5 text-[11px] font-black bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg hover:shadow-green-500/30 transition-all text-white">&#10003; Confirm &amp; Fulfill</button>
+  </div>
+</div>
+
+<!-- WhatsApp float removed; users contact via Report Order button -->
+
+<script>
+const SB_URL="https://kefcmjfvrqbgtivssdwn.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNtamZ2cnFiZ3RpdnNzZHduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MDM1NTIsImV4cCI6MjA4NDE3OTU1Mn0.HoXeKRW4-cGfMexGZpdmEvDHK-XXtXDSoMWWWbq4HKw";
+const PAYSTACK_KEY="pk_live_ea1b78f7fb20ea947f216c78e6ae3adc32d45f1b";
+const supa=supabase.createClient(SB_URL,SB_KEY);
+
+const NETWORKS={
+  mtn:{name:'MTN Ghana',color:'bg-[#FFCC00]',text:'text-black',logo:'./2.png',description:"Ghana's largest network with widest coverage"},
+  airteltigo:{name:'AirtelTigo',color:'bg-[#0077B5]',text:'text-white',logo:'./3.png',description:'Affordable data plans with great value'},
+  telecel:{name:'Telecel',color:'bg-[#E60000]',text:'text-white',logo:'./4.png',description:'Fast 4G internet at competitive prices'}
+};
+
+const NORMAL_BUNDLES=[
+  {id:'m-1',network:'mtn',size:'1GB',price:5.40,validity:'30 Days'},{id:'m-2',network:'mtn',size:'2GB',price:10.00,validity:'30 Days'},
+  {id:'m-3',network:'mtn',size:'3GB',price:15.00,validity:'30 Days'},{id:'m-4',network:'mtn',size:'4GB',price:19.50,validity:'30 Days'},
+  {id:'m-5',network:'mtn',size:'5GB',price:24.50,validity:'30 Days'},{id:'m-6',network:'mtn',size:'6GB',price:28.50,validity:'30 Days'},
+  {id:'m-7',network:'mtn',size:'7GB',price:33.00,validity:'30 Days'},{id:'m-8',network:'mtn',size:'8GB',price:37.50,validity:'30 Days'},
+  {id:'m-10',network:'mtn',size:'10GB',price:45.80,validity:'30 Days'},{id:'m-12',network:'mtn',size:'12GB',price:56.80,validity:'30 Days'},
+  {id:'m-15',network:'mtn',size:'15GB',price:66.50,validity:'30 Days'},{id:'m-20',network:'mtn',size:'20GB',price:83.00,validity:'30 Days'},
+  {id:'m-25',network:'mtn',size:'25GB',price:102.90,validity:'30 Days'},{id:'m-30',network:'mtn',size:'30GB',price:125.00,validity:'30 Days'},
+  {id:'m-40',network:'mtn',size:'40GB',price:165.50,validity:'30 Days'},{id:'m-50',network:'mtn',size:'50GB',price:196.90,validity:'30 Days'},
+  {id:'m-100',network:'mtn',size:'100GB',price:390.90,validity:'30 Days'},
+  {id:'a-1',network:'airteltigo',size:'1GB',price:6.50,validity:'30 Days'},{id:'a-2',network:'airteltigo',size:'2GB',price:11.00,validity:'30 Days'},
+  {id:'a-3',network:'airteltigo',size:'3GB',price:15.50,validity:'30 Days'},{id:'a-4',network:'airteltigo',size:'4GB',price:20.50,validity:'30 Days'},
+  {id:'a-5',network:'airteltigo',size:'5GB',price:23.50,validity:'30 Days'},{id:'a-6',network:'airteltigo',size:'6GB',price:27.00,validity:'30 Days'},
+  {id:'a-7',network:'airteltigo',size:'7GB',price:32.00,validity:'30 Days'},{id:'a-8',network:'airteltigo',size:'8GB',price:34.50,validity:'30 Days'},
+  {id:'a-10',network:'airteltigo',size:'10GB',price:42.50,validity:'30 Days'},{id:'a-15',network:'airteltigo',size:'15GB',price:64.00,validity:'30 Days'},
+  {id:'a-20',network:'airteltigo',size:'20GB',price:82.00,validity:'30 Days'},{id:'a-25',network:'airteltigo',size:'25GB',price:99.90,validity:'30 Days'},
+  {id:'a-30',network:'airteltigo',size:'30GB',price:119.70,validity:'30 Days'},{id:'a-40',network:'airteltigo',size:'40GB',price:163.50,validity:'30 Days'},
+  {id:'a-50',network:'airteltigo',size:'50GB',price:199.90,validity:'30 Days'},
+  {id:'t-10',network:'telecel',size:'10GB',price:42.00,validity:'30 Days'},{id:'t-15',network:'telecel',size:'15GB',price:61.00,validity:'30 Days'},
+  {id:'t-20',network:'telecel',size:'20GB',price:79.00,validity:'30 Days'},{id:'t-25',network:'telecel',size:'25GB',price:99.00,validity:'30 Days'},
+  {id:'t-30',network:'telecel',size:'30GB',price:118.00,validity:'30 Days'},{id:'t-40',network:'telecel',size:'40GB',price:151.00,validity:'30 Days'},
+  {id:'t-50',network:'telecel',size:'50GB',price:187.00,validity:'30 Days'},{id:'t-100',network:'telecel',size:'100GB',price:380.00,validity:'30 Days'}
+];
+
+let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'refer2bundle',currentProcessingOrder:null,confirmationSelectedProvider:'refer2bundle',user:null,userProfile:null,depositAmount:'',isLoading:false,connectionError:null,announcement:null,
+  /* Agent system */
+  agentId:null,agentProfileId:null,agentProfile:null,agentPricingMode:false,agentBasePrices:[],agentPrices:[],adminTab:'orders',agentTab:'dashboard',agentStats:{sales:0,profit:0,pending:0}
+};
+
+/* ===== UTILITIES ===== */
+function showToast(message,duration=3000,type='info'){
+  const container=document.getElementById('toast-container');
+  const toast=document.createElement('div');toast.className='toast';
+  if(type==='error') toast.style.borderLeft='4px solid #ef4444';
+  else if(type==='success') toast.style.borderLeft='4px solid #10b981';
+  toast.textContent=message;container.appendChild(toast);
+  setTimeout(()=>toast.classList.add('show'),10);
+  setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),400);},duration);
+}
+function selectProvider(p){state.selectedProvider=p;}
+function selectConfirmationProvider(p){
+  state.confirmationSelectedProvider=p;
+  document.querySelectorAll('.provider-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('btn-refer2bundle-confirm')?.classList.add('selected');
+}
+function closeAdminConfirmation(){document.getElementById('admin-order-confirmation').style.display='none';state.currentProcessingOrder=null;}
+function confirmProcessOrder(){
+  if(!state.currentProcessingOrder) return;
+  updateStatus(state.currentProcessingOrder.ref,'Processing');
+  window.open('https://refer2bundle.com','_blank');
+  closeAdminConfirmation();
+  showToast('Order marked as Processing. Redirecting...');
+}
+
+/* ===== AGENT SYSTEM UTILITIES ===== */
+async function detectAgentLink(){
+  const params=new URLSearchParams(window.location.search);
+  const agentId=params.get('agent')||sessionStorage.getItem('tru_agent_id');
+  if(!agentId) return;
+  sessionStorage.setItem('tru_agent_id',agentId);
+  state.agentId=agentId;
+  state.agentPricingMode=true;
+  const banner=document.getElementById('agent-session-banner');
+  const bannerIdEl=document.getElementById('agent-banner-id');
+  if(banner) banner.style.display='block';
+  if(bannerIdEl) bannerIdEl.textContent=agentId;
+  // Fetch the agent's profile UUID so orders are linked by UUID (not text agent_id)
+  try{
+    const{data:ap}=await supa.from('agent_profiles').select('id').eq('agent_id',agentId).maybeSingle();
+    if(ap) state.agentProfileId=ap.id;
+    // Also store in sessionStorage so it survives page refreshes within the session
+    if(ap) sessionStorage.setItem('tru_agent_profile_id',ap.id);
+  }catch(e){}
+  // Restore from sessionStorage if fetch failed
+  if(!state.agentProfileId) state.agentProfileId=sessionStorage.getItem('tru_agent_profile_id')||null;
+  await loadAgentBasePrices();
+  await loadAgentPricesForSession();
+}
+async function loadAgentBasePrices(){
+  try{
+    const{data,error}=await supa.from('agent_base_prices').select('*').eq('status','active');
+    if(!error&&data) state.agentBasePrices=data;
+  }catch(e){}
+}
+async function loadAgentPricesForSession(){
+  // Use profile UUID (what saveAgentProfit writes); fall back to agent_id string
+  const agentKey=state.agentProfile?.id||state.agentId;
+  if(!agentKey) return;
+  try{
+    const{data,error}=await supa.from('agent_prices').select('*').eq('agent_id',agentKey).eq('status','approved');
+    if(!error&&data) state.agentPrices=data;
+  }catch(e){}
+}
+async function fetchAgentProfile(){
+  if(!state.user) return;
+  try{
+    const{data,error}=await supa.from('agent_profiles').select('*').eq('user_id',state.user.id).maybeSingle();
+    if(!error&&data){state.agentProfile=data;if(!state.agentId) state.agentId=data.agent_id||data.id;}
+  }catch(e){}
+}
+async function fetchAgentStats(){
+  if(!state.agentProfile) return;
+  try{
+    const{data}=await supa.from('orders').select('Amount,agent_profit,Status').eq('agent_id',state.agentProfile.id);
+    if(data){
+      state.agentStats.sales=data.reduce((a,o)=>a+parseFloat(o.Amount||0),0);
+      state.agentStats.profit=data.reduce((a,o)=>a+parseFloat(o.agent_profit||0),0);
+      state.agentStats.pending=data.filter(o=>o.Status==='Pending'||o.Status==='Processing').length;
+      state.agentStats.completed=data.filter(o=>o.Status==='Completed'||o.Status==='Delivered').length;
+      state.agentStats.totalOrders=data.length;
+    }
+  }catch(e){}
+}
+async function fetchAdminAgentBasePrices(){
+  try{
+    const{data,error}=await supa.from('agent_base_prices').select('*').order('network').order('bundle_name');
+    if(!error) state.agentBasePrices=data||[];
+  }catch(e){state.agentBasePrices=[];}
+}
+function getBundleDisplayPrice(bundle){
+  if(!state.agentPricingMode||!state.agentId) return{price:bundle.price,isAgent:false};
+  const base=state.agentBasePrices.find(b=>b.network===bundle.network&&(b.bundle_name===bundle.size||b.bundle_id===bundle.id));
+  if(!base) return{price:bundle.price,isAgent:false};
+  const agP=state.agentPrices.find(p=>p.bundle_id===base.id||p.bundle_name===bundle.size);
+  const profit=agP?parseFloat(agP.profit||0):0;
+  return{price:parseFloat(base.base_price)+profit,isAgent:true,basePrice:parseFloat(base.base_price),profit,agentBasePriceId:base.id};
+}
+function validateGhanaPhone(phone){
+  phone=phone.replace(/[\s-]/g,'');
+  const prefixes=[...new Set(['024','054','055','059','025','053','063','077','057','020','050','026','056','027','076','023','028','058'])];
+  return{isValid:prefixes.some(p=>phone.startsWith(p))&&phone.length===10&&/^\d+$/.test(phone),
+    error:!/^\d+$/.test(phone)?'Phone number must contain only digits':!prefixes.some(p=>phone.startsWith(p))?'Phone number must start with a valid Ghana prefix':phone.length!==10?'Phone number must be exactly 10 digits':null};
+}
+
+/* ========== CHANGE 1: logoutUser ========== */
+async function logoutUser(){
+  try{
+    await supa.auth.signOut();
+    state.user=null;state.userProfile=null;state.isAdmin=false;state.isDirectMode=false;state.activeOrderData=null;
+    showToast('Logged out successfully',3000,'success');
+    navigateTo('landing');
+  }catch(err){showToast('Logout failed. Please try again.',3000,'error');}
+}
+
+/* ========== CHANGE 2: updateAuthUI with My Orders + Logout ========== */
+function updateAuthUI(){
+  const s=document.getElementById('user-auth-section');
+  if(!s) return;
+  if(state.user){
+    const agentBtn=state.agentProfile?`<button onclick="navigateTo('agent-dashboard')" class="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-xs font-bold hover:bg-blue-200 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent</button>`:'';
+    s.innerHTML=`<div class="flex items-center gap-3">
+      ${agentBtn}
+      <button onclick="navigateTo('my-orders')" class="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-200 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        My Orders
+      </button>
+      <button onclick="navigateTo('wallet')" class="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+        Wallet
+      </button>
+      <button onclick="logoutUser()" class="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-red-500 transition-colors px-2 py-2 rounded-lg hover:bg-red-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        Logout
+      </button>
+    </div>`;
+  }else{
+    s.innerHTML=`<div class="flex items-center gap-2">
+      <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 hover:text-red-600 transition-colors">Login</button>
+      <span class="text-slate-300">|</span>
+      <button onclick="navigateTo('register')" class="text-xs font-bold bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors">Sign Up</button>
+    </div>`;
+  }
+}
+
+/* ===== NAVIGATION ===== */
+async function navigateTo(view,params=null){
+  try{
+    if(view==='admin-dashboard'){
+      if(!state.user){showToast('Please login first');navigateTo('login');return;}
+      if(!state.userProfile) await fetchUserProfile();
+      if(!state.userProfile){showToast('Profile not found. Please login again.');navigateTo('login');return;}
+      if(state.userProfile.role!=='admin'){showToast('Admin access only');navigateTo('home');return;}
+    }
+    if(view==='agent-dashboard'){
+      if(!state.user){showToast('Please login first to access agent dashboard');navigateTo('login');return;}
+      if(!state.agentProfile) await fetchAgentProfile();
+      if(!state.agentProfile){showToast('You are not registered as an agent yet');navigateTo('agent-portal');return;}
+      if(state.agentProfile.status==='pending'){showToast('Your agent application is pending admin approval',4000,'error');navigateTo('agent-portal');return;}
+      if(state.agentProfile.status==='rejected'){showToast('Your agent application was not approved. Contact admin.',5000,'error');navigateTo('agent-portal');return;}
+      await fetchAgentStats();
+    }
+    state.view=view;state.params=params;
+    if(view==='admin-dashboard'){await fetchOrders();await fetchAdminAgentBasePrices();}
+    if(view==='wallet') await fetchUserProfile();
+    if(view==='landing'){const ann=await fetchAnnouncement();state.announcement=ann;}
+    if(view==='my-orders'){state.announcement=null;}
+    render();window.scrollTo(0,0);
+  }catch(err){showToast('Error loading page. Please try again.',3000,'error');}
+}
+
+/* ========== CHANGE 3: renderHome – wallet card with My Orders + Sign Out ========== */
+function renderHome(){
+  if(!state.user) return `<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-500 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><h2 class="text-2xl font-black mb-4">Login Required</h2><p class="text-muted-theme mb-8">Please sign in or create an account to purchase data bundles.</p><div class="flex flex-col gap-3"><button onclick="navigateTo('login')" class="cta-button text-white py-4 rounded-2xl font-bold text-lg">Sign In</button><button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 border-2 border-slate-200 hover:border-red-500 transition-all">Create Account</button></div></div></div>`;
+  const bal=state.userProfile?parseFloat(state.userProfile.balance||0):0;
+  return `<div class="animate__animated animate__fadeIn">
+    ${state.isDirectMode?'<div class="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 text-center text-xs font-black uppercase tracking-widest animate-pulse shadow-lg">Direct Order Mode Active</div>':''}
+    <section class="relative bg-slate-900 text-white py-24 md:py-32 text-center px-4 overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-br from-red-900/80 via-red-800/60 to-slate-900/90"></div>
+      <div class="relative z-10 max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight animate-slide-up leading-tight">Buy Data Bundles <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-300">in Ghana</span></h1>
+        <p class="max-w-2xl mx-auto text-slate-300 text-lg md:text-xl mb-8 animate-slide-up stagger-1 leading-relaxed" style="animation-fill-mode:forwards;">Convenient access to MTN, Telecel, and AirtelTigo data bundles. Secure Paystack payments. Nationwide service across Ghana.</p>
+        <div class="max-w-sm mx-auto mb-8 animate-slide-up stagger-2" style="animation-fill-mode:forwards;">
+          <div class="wallet-card">
+            <div class="wallet-label">Your Wallet Balance</div>
+            <div class="wallet-balance">₵${bal.toFixed(2)}</div>
+            <!-- Wallet + My Orders buttons -->
+            <div class="flex gap-3 mt-6 relative z-10">
+              <button onclick="navigateTo('wallet')" class="view-wallet-btn flex-1 px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                Wallet
+              </button>
+              <button onclick="navigateTo('my-orders')" class="view-wallet-btn flex-1 px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                My Orders
+              </button>
+            </div>
+            <!-- Logout button in hero wallet card -->
+            <button onclick="logoutUser()" class="mt-3 w-full flex items-center justify-center gap-2 text-xs font-bold text-white/80 hover:text-white bg-white/10 hover:bg-white/20 transition-all py-2.5 rounded-xl relative z-10">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-wrap justify-center gap-4 mb-8 animate-slide-up stagger-3" style="animation-fill-mode:forwards;">
+          <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2"><svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Secure Checkout</span>
+          <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2"><svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Paystack Verified</span>
+          <span class="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-semibold flex items-center gap-2"><svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>Competitive Prices</span>
+        </div>
+        <div class="animate-slide-up stagger-4" style="animation-fill-mode:forwards;">
+          <a href="#networks" class="cta-button text-white px-10 py-5 rounded-2xl font-black shadow-2xl inline-flex items-center gap-3 text-lg group">View Data Plans<svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></a>
+        </div>
+      </div>
+    </section>
+    <section id="networks" class="max-w-7xl mx-auto px-4 py-16">
+      <div class="text-center mb-12"><h2 class="text-3xl md:text-4xl font-black mb-4 animate-slide-up">Choose Your Network</h2><p class="text-muted-theme max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Select your mobile network below to view available data bundles. We facilitate purchases for all major networks in Ghana.</p></div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        ${Object.entries(NETWORKS).map(([id,net],i)=>`<div onclick="navigateTo('network','${id}')" class="${net.color} ${net.text} p-8 rounded-[2rem] shadow-2xl network-card text-center border-4 border-white relative overflow-hidden group animate-scale-in stagger-${i+1}" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div><img src="${net.logo}" alt="${net.name}" class="h-16 mx-auto mb-6 bg-white p-3 rounded-2xl shadow-lg relative z-10"><h3 class="text-2xl font-black uppercase mb-2 relative z-10">${net.name}</h3><p class="text-xs font-medium mt-2 opacity-80 relative z-10 mb-4">${net.description}</p><span class="inline-flex items-center gap-2 text-xs font-bold bg-black/20 px-4 py-2 rounded-full relative z-10 group-hover:bg-black/30 transition-colors">View Plans<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span></div>`).join('')}
+      </div>
+    </section>
+    <section class="bg-slate-50 py-20"><div class="max-w-6xl mx-auto px-6"><div class="grid md:grid-cols-2 gap-12 items-center"><div class="animate-slide-up"><h2 class="text-3xl font-black mb-6">Convenient Data Purchases in Ghana</h2><p class="text-muted-theme mb-6 leading-relaxed">TRU Data Network provides a platform for purchasing mobile data bundles. We work to offer competitive pricing and a streamlined purchasing experience for MTN, Telecel, and AirtelTigo customers.</p><ul class="space-y-3"><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Competitive pricing compared to standard rates</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Simple ordering process</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Customer support via WhatsApp</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Compatible with all mobile devices</li></ul></div><div class="relative animate-scale-in stagger-2" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 rounded-3xl blur-2xl opacity-20"></div><img src="./11.png" alt="TRU Data App Interface" class="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto"></div></div></div></section>
+  </div>`;
+}
+
+/* ========== CHANGES 4, 5, 6: My Orders page ========== */
+function renderMyOrders(){
+  if(!state.user) return `<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><h2 class="text-2xl font-black mb-4">Login Required</h2><p class="text-muted-theme mb-6">Please sign in to view your orders.</p><button onclick="navigateTo('login')" class="cta-button text-white py-4 px-8 rounded-2xl font-bold">Sign In</button></div></div>`;
+  return `<div class="max-w-4xl mx-auto px-4 py-12 animate__animated animate__fadeIn">
+    <div class="mb-8 flex items-center gap-4">
+      <button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group">
+        <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back
+      </button>
+      <h1 class="text-2xl font-black">My Orders</h1>
+    </div>
+    <div id="my-orders-container">
+      <div class="flex justify-center py-16"><div class="text-center"><div class="spinner mx-auto mb-4" style="width:32px;height:32px;border-width:3px;border-top-color:#dc2626;"></div><p class="text-muted-theme text-sm font-semibold">Loading your orders...</p></div></div>
+    </div>
+  </div>`;
+}
+
+/* ===== Report section builder - FIX 3: Syntax error fixed ===== */
+function buildReportSection(o){
+  var WA_SVG='<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-2.32 0-4.519.903-6.16 2.544-1.64 1.64-2.543 3.838-2.543 6.158 0 1.61.439 3.191 1.272 4.578L3.375 23l3.818-1.226c1.328.724 2.822 1.107 4.337 1.107l.001-.001c2.32 0 4.52-.903 6.161-2.544 1.64-1.64 2.544-3.838 2.544-6.159 0-2.32-.904-4.518-2.544-6.159-1.64-1.641-3.839-2.545-6.161-2.545zm5.035 11.031c-.193.543-1.137 1.032-1.571 1.096-.434.064-.91.133-2.736-.605-2.203-.891-3.626-3.134-3.737-3.282-.11-.148-.891-1.185-.891-2.26s.555-1.604.752-1.821c.198-.217.433-.271.577-.271.145 0 .289.001.416.007.133.006.312-.05.488.372.181.434.619 1.506.674 1.617.054.111.091.241.016.39-.075.148-.112.241-.223.37-.111.148-.112.241-.223.37-.111.13-.233.29-.333.388-.111.111-.227.232-.097.455.13.223.578 1.019 1.241 1.604.854.753 1.572 1.018 1.795 1.13.223.111.353.093.483-.056.13-.149.555-.65.703-.872.148-.222.297-.186.5-.111.204.074 1.297.611 1.519.722.222.112.37.167.426.26.055.092.055.536-.138 1.079z"/></svg>';
+  var LOCK_SVG='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>';
+  var BAN_SVG='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>';
+  if(o.Status !== 'Delivered'){
+    return '<div class="mt-3 pt-3 border-t border-slate-100">'
+      +'<button disabled class="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg cursor-not-allowed opacity-60">'
+      +LOCK_SVG+' Report Order (available after delivery)</button></div>';
+  }
+  var deliveredAt=new Date(o.updated_at||o.created_at).getTime();
+  var deadline=deliveredAt+36*60*60*1000;
+  var remaining=deadline-Date.now();
+  if(remaining<=0){
+    return '<div class="mt-3 pt-3 border-t border-slate-100 space-y-1">'
+      +'<div class="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg cursor-not-allowed opacity-50">'
+      +BAN_SVG+'<span>Report Order - ORDER INVALID</span></div>'
+      +'<p class="text-xs text-slate-400 font-semibold">The 36-hour complaint window has expired. This order is no longer disputable.</p></div>';
+  }
+  var hrs=Math.floor(remaining/3600000);
+  var mins=Math.floor((remaining%3600000)/60000);
+  var secs=Math.floor((remaining%60000)/1000);
+  var cdId='cd-'+o.ref.replace(/[^a-z0-9]/gi,'');
+  var isCritical=remaining<2*60*60*1000;
+  var isUrgent=remaining<6*60*60*1000;
+  var badgeCls=isCritical?'bg-red-600 text-white border-red-700 animate-pulse':isUrgent?'bg-orange-500 text-white border-orange-600':'bg-amber-50 text-amber-800 border-amber-300';
+  var warnCls=isCritical?'text-xs font-bold text-red-600 animate-pulse':isUrgent?'text-xs font-bold text-orange-600':'text-xs font-bold text-amber-700';
+  var warnPfx=isCritical?'[!] CRITICAL! ':isUrgent?'[!] WARNING: ':'';
+  var warnBody=isCritical?'Less than 2 hours left to report! Time is running out!':isUrgent?'Window closing soon! Report before time expires!':'Order after countdown is invalid';
+  var pad=function(n){return String(n).padStart(2,'0');};
+  // FIX: Corrected syntax error - changed \u0029 to ] after the ref
+  return '<div class="mt-3 pt-3 border-t border-slate-100 space-y-2">'
+    +'<div class="flex items-center justify-between flex-wrap gap-2">'
+    +'<button onclick="reportOrder(window._orderMap[\''+(o.ref)+'\'])" class="flex items-center gap-2 text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors px-3 py-2 rounded-lg">'
+    +WA_SVG+' Report Order via WhatsApp</button>'
+    +'<span id="'+cdId+'" class="text-xs font-black font-mono px-3 py-1.5 rounded-lg border '+badgeCls+'">'
+    +pad(hrs)+':'+pad(mins)+':'+pad(secs)+'</span>'
+    +'</div>'
+    +'<p class="'+warnCls+'">'+warnPfx+warnBody+'</p>'
+    +'</div>';
+}
+
+async function loadMyOrders(){
+  const container=document.getElementById('my-orders-container');
+  if(!container||!state.user) return;
+  try{
+    const{data,error}=await supa.from('orders').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false});
+    if(error) throw error;
+    if(!data||data.length===0){
+      container.innerHTML=`<div class="card-theme rounded-3xl p-16 text-center animate-scale-in"><div class="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></div><h3 class="text-xl font-black mb-2">No Orders Yet</h3><p class="text-muted-theme mb-8">You haven't placed any data bundle orders yet.</p><button onclick="navigateTo('home')" class="cta-button text-white px-8 py-4 rounded-2xl font-bold inline-flex items-center gap-2">Buy Data Now<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></button></div>`;
+      return;
+    }
+    // Status map: admin value -> what the customer sees
+    function customerStatus(raw){
+      const s=(raw||'Pending').trim();
+      if(s==='Completed') return{label:'Successfully Processed',cls:'order-status-completed',dot:'&#x1F7E2;'};
+      if(s==='Delivered') return{label:'Delivered',cls:'order-status-completed',dot:'&#x2705;'};
+      if(s==='Processing') return{label:'Processing',cls:'order-status-processing',dot:'&#x1F535;'};
+      if(s==='Deleted')   return{label:'Cancelled',cls:'order-status-deleted',dot:'&#x1F534;'};
+      return{label:'Pending',cls:'order-status-pending',dot:'&#x1F7E1;'};
+    }
+    function netBadge(n){if(n==='mtn') return 'bg-yellow-100 text-yellow-800';if(n==='airteltigo') return 'bg-blue-100 text-blue-800';if(n==='telecel') return 'bg-red-100 text-red-800';return 'bg-slate-100 text-slate-700';}
+    // REMOVED: Announcement fetching from here (moved to landing page)
+    window._orderMap={}; data.forEach(x=>window._orderMap[x.ref]=x);
+    container.innerHTML=`<div class="space-y-4 animate-slide-up">
+      ${data.map(o=>{
+        const st=customerStatus(o.Status);
+        return `<div class="card-theme p-5 md:p-6 rounded-2xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-3 flex-wrap mb-2">
+                <span class="font-mono text-xs font-bold text-slate-500">${o.ref}</span>
+                <span class="px-2 py-0.5 rounded-lg text-xs font-bold ${netBadge(o.Network)}">${(o.Network||'').toUpperCase()}</span>
+                <span class="status-badge px-2.5 py-1 rounded-full text-xs font-bold ${st.cls}">${st.dot} ${st.label}</span>
+              </div>
+              <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+                <span><span class="text-muted-theme">Bundle:</span> <strong>${o.bundle_name}</strong></span>
+                <span><span class="text-muted-theme">Phone:</span> <strong>${o.Phone}</strong></span>
+                <span><span class="text-muted-theme">Amount:</span> <strong class="text-red-600">₵${parseFloat(o.Amount).toFixed(2)}</strong></span>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="text-xs text-muted-theme">${new Date(o.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric'})}</p>
+              <p class="text-xs text-muted-theme">${new Date(o.created_at).toLocaleTimeString('en-GH',{hour:'2-digit',minute:'2-digit'})}</p>
+            </div>
+          </div>
+          ${buildReportSection(o)}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="mt-8 text-center"><button onclick="navigateTo('home')" class="cta-button text-white px-8 py-4 rounded-2xl font-bold inline-flex items-center gap-2">Buy More Data<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></button></div>`;
+  // Start live countdown tickers for all delivered orders
+  if(window._cdTimers) window._cdTimers.forEach(t=>clearInterval(t));
+  window._cdTimers=[];
+  data.forEach(o=>{
+    if(o.Status!=='Delivered') return;
+    const deliveredAt=new Date(o.updated_at||o.created_at).getTime();
+    const deadline=deliveredAt+36*60*60*1000;
+    const id='cd-'+o.ref.replace(/[^a-z0-9]/gi,'');
+    const timer=setInterval(()=>{
+      const el=document.getElementById(id);
+      if(!el){clearInterval(timer);return;}
+      const rem=deadline-Date.now();
+      if(rem<=0){
+        clearInterval(timer);
+        // Replace the entire bottom section of this card
+        const card=el.closest('.card-theme');
+        if(card){
+          const bottom=card.querySelector('.border-t.border-slate-100');
+          if(bottom){
+            bottom.innerHTML='<div class="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg cursor-not-allowed opacity-50"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg><span>Report Order — ORDER INVALID</span></div><p class="text-xs text-slate-400 mt-1 font-semibold">⛔ The 36-hour complaint window has expired.</p>';
+          }
+        }
+        return;
+      }
+      const hrs=Math.floor(rem/3600000);
+      const mins=Math.floor((rem%3600000)/60000);
+      const secs=Math.floor((rem%60000)/1000);
+      el.textContent=String(hrs).padStart(2,'0')+':'+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
+      // Escalate styling
+      const isCritical=rem<2*60*60*1000;
+      const isUrgent=rem<6*60*60*1000;
+      el.className=el.className.replace(/bg-\S+|text-\S+|border-\S+|animate-pulse/g,'').trim();
+      if(isCritical){
+        el.className='text-xs font-black font-mono px-3 py-1.5 rounded-lg border bg-red-600 text-white border-red-700 animate-pulse';
+        const warn=el.parentElement?.nextElementSibling;
+        if(warn){warn.className='text-xs font-bold text-red-600 animate-pulse';warn.textContent='🚨 CRITICAL! Less than 2 hours left to report!';}
+      } else if(isUrgent){
+        el.className='text-xs font-black font-mono px-3 py-1.5 rounded-lg border bg-orange-500 text-white border-orange-600';
+        const warn=el.parentElement?.nextElementSibling;
+        if(warn){warn.className='text-xs font-bold text-orange-600';warn.textContent='Warning: Window closing soon!';}
+      }
+    },1000);
+    window._cdTimers.push(timer);
+  });
+  }catch(err){
+    container.innerHTML=`<div class="card-theme rounded-3xl p-12 text-center"><p class="text-red-500 font-bold mb-4">Failed to load orders. Please try again.</p><button onclick="loadMyOrders()" class="bg-slate-100 text-slate-700 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-all">Retry</button></div>`;
+  }
+}
+
+/* ===== LANDING PAGE - FIX 1: Announcement banner added ===== */
+function renderLandingPage(){
+  const ann=state.announcement;
+  const annHtml=ann?`<div class="max-w-4xl mx-auto px-4 pt-6"><div class="announcement-banner animate-scale-in">
+    <div class="flex items-start gap-3">
+      <span class="announcement-icon"><svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg></span>
+      <div class="flex-1">
+        <div class="announcement-main">${ann.main_message}</div>
+        ${ann.sub_message?`<div class="announcement-sub">${ann.sub_message}</div>`:''}
+      </div>
+    </div>
+  </div></div>`:'';
+  return`<div class="min-h-screen animate__animated animate__fadeIn">
+    ${annHtml}
+    <section class="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-20 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-red-400/20 rounded-full blur-3xl animate-float" style="animation-delay:-3s;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-400/10 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+      <div class="relative z-10 mb-12 animate-scale-in">
+        <div class="relative group">
+          <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
+          <img src="./11.png" alt="TRU Data Network Logo - Data Bundle Platform" class="hero-logo relative z-10 animate-float">
+        </div>
+      </div>
+      <div class="relative z-10 max-w-3xl mx-auto text-center px-4">
+        <h1 class="text-4xl md:text-6xl font-black mb-6 tracking-tight animate-slide-up leading-tight">Welcome to <span class="gradient-text">TruData</span></h1>
+        <p class="text-xl md:text-2xl text-slate-600 mb-6 font-semibold animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Your Platform for Mobile Data Bundle Purchases in Ghana</p>
+        <p class="text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode:forwards;">TRU DATA is a digital platform designed to help users purchase mobile data bundles conveniently. We provide an organized interface that allows users to explore and buy data plans across different mobile networks in Ghana.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up stagger-3" style="animation-fill-mode:forwards;">
+          <button onclick="navigateTo('login')" class="cta-button text-white px-10 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-2">Get Started<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></button>
+          <button onclick="navigateTo('about')" class="px-10 py-5 rounded-2xl font-bold text-slate-700 border-2 border-slate-300 hover:border-red-500 hover:text-red-600 transition-all">Learn More</button>
+        </div>
+      </div>
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-4xl mx-auto text-center">
+        <p class="text-lg text-slate-600 leading-relaxed mb-8 animate-slide-up">In today's connected world, internet access is essential for education, business, communication, and entertainment. TruData was created to simplify the process of purchasing mobile data by providing a centralized platform where users can compare and buy data plans from multiple networks.</p>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-slate-50">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">What You Can Do on TruData</h2>
+        <p class="text-center text-slate-500 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">TruData provides the following services for mobile data customers:</p>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-1" style="animation-fill-mode:forwards;">
+            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg></div>
+            <h3 class="font-bold text-lg mb-2">Easy Access</h3>
+            <p class="text-sm text-muted-theme">Browse mobile data bundle options organized by network for convenient comparison</p>
+          </div>
+          <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-2" style="animation-fill-mode:forwards;">
+            <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+            <h3 class="font-bold text-lg mb-2">Clear Pricing</h3>
+            <p class="text-sm text-muted-theme">Data sizes, pricing, and validity periods displayed transparently</p>
+          </div>
+          <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-3" style="animation-fill-mode:forwards;">
+            <div class="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+            <h3 class="font-bold text-lg mb-2">Network Based</h3>
+            <p class="text-sm text-muted-theme">Organized by network provider for faster navigation</p>
+          </div>
+          <div class="feature-card p-8 card-theme rounded-3xl text-center animate-scale-in stagger-4" style="animation-fill-mode:forwards;">
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+            <h3 class="font-bold text-lg mb-2">Simple Interface</h3>
+            <p class="text-sm text-muted-theme">Designed for all devices with intuitive navigation</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-black text-center mb-4 animate-slide-up">Who TruData Is For</h2>
+        <p class="text-center text-slate-600 mb-12 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">TruData serves a wide range of users who need convenient access to mobile data purchasing options.</p>
+        <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-1 opacity-0" style="animation-fill-mode:forwards;">
+            <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg></div>
+            <div>
+              <h4 class="font-bold text-lg mb-1">Students</h4>
+              <p class="text-sm text-muted-theme">Who need mobile data for online learning, research, and educational resources</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-2 opacity-0" style="animation-fill-mode:forwards;">
+            <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
+            <div>
+              <h4 class="font-bold text-lg mb-1">Professionals</h4>
+              <p class="text-sm text-muted-theme">And remote workers who need reliable connectivity for work activities</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-3 opacity-0" style="animation-fill-mode:forwards;">
+            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-green-500/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div>
+            <div>
+              <h4 class="font-bold text-lg mb-1">Business Owners</h4>
+              <p class="text-sm text-muted-theme">Managing online business activities and digital operations</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-4 opacity-0" style="animation-fill-mode:forwards;">
+            <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div>
+            <div>
+              <h4 class="font-bold text-lg mb-1">Everyday Users</h4>
+              <p class="text-sm text-muted-theme">Who want convenient options for managing data purchases</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+        <h2 class="text-3xl md:text-4xl font-black mb-8 animate-slide-up">Why TruData Matters</h2>
+        <p class="text-lg text-slate-300 mb-8 leading-relaxed animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Many users experience challenges such as unclear pricing, confusing bundle options, or limited explanations when selecting mobile data plans. TruData addresses these challenges by focusing on transparency and accessibility.</p>
+        <p class="text-lg text-slate-300 leading-relaxed animate-slide-up stagger-2" style="animation-fill-mode:forwards;">By organizing information clearly and presenting it in a straightforward format, TruData helps users make informed digital decisions and find suitable data options for their needs.</p>
+      </div>
+    </section>
+    <section class="py-20 px-4 bg-gradient-to-r from-red-700 via-red-600 to-red-600 animate-gradient relative overflow-hidden">
+      <div class="absolute inset-0 bg-black/10"></div>
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+        <h2 class="text-3xl md:text-4xl font-black mb-6 text-white animate-slide-up">Ready to Get Started?</h2>
+        <p class="text-xl text-blue-100 mb-10 max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Create your free account today and start purchasing data bundles with ease.</p>
+        <button onclick="navigateTo('register')" class="bg-white text-red-600 px-12 py-5 rounded-2xl font-black text-lg shadow-2xl hover:scale-105 hover:shadow-white/25 transition-all animate-slide-up stagger-2 flex items-center gap-3 mx-auto" style="animation-fill-mode:forwards;">Create Free Account<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></button>
+      </div>
+    </section>
+  </div>`;
+}
+
+/* ===== ABOUT ===== */
+function renderAbout(){return`<div class="animate__animated animate__fadeIn"><section class="py-20 px-4 max-w-4xl mx-auto"><h1 class="text-4xl md:text-5xl font-black mb-8 text-center animate-slide-up">About TRU Data Network</h1><div class="prose prose-slate max-w-none"><p class="text-lg text-muted-theme mb-8 animate-slide-up stagger-1" style="animation-fill-mode:forwards;">TRU Data Network was established to provide Ghanaians with a convenient way to purchase mobile data bundles online. We recognized that many people were looking for easier ways to buy data without visiting physical stores or navigating complex USSD codes.</p><div class="grid md:grid-cols-2 gap-8 mb-12"><div class="p-6 card-theme rounded-2xl animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><h3 class="text-xl font-bold mb-3 text-red-600">Our Vision</h3><p class="text-sm text-muted-theme">To become a trusted platform for mobile data purchases in Ghana, providing convenient access to connectivity for all users.</p></div><div class="p-6 card-theme rounded-2xl animate-slide-up stagger-3" style="animation-fill-mode:forwards;"><h3 class="text-xl font-bold mb-3 text-red-600">Our Mission</h3><p class="text-sm text-muted-theme">To simplify the data purchasing process while maintaining transparency and customer satisfaction.</p></div></div><h2 class="text-2xl font-bold mb-4 animate-slide-up stagger-4" style="animation-fill-mode:forwards;">Why We Exist</h2><p class="text-muted-theme mb-6">In today's digital age, internet connectivity is increasingly important for education, work, and communication. TRU Data Network addresses this by providing an online platform where users can browse, compare, and purchase data bundles from major networks.</p><h2 class="text-2xl font-bold mb-4">Our Values</h2><ul class="space-y-4 mb-12"><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Transparency</strong><span class="text-sm text-muted-theme">Clear pricing with no hidden fees. What you see is what you pay.</span></div></li><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Reliability</strong><span class="text-sm text-muted-theme">We work to ensure timely processing of all orders.</span></div></li><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Customer Support</strong><span class="text-sm text-muted-theme">Assistance available via WhatsApp for order inquiries.</span></div></li></ul></div></section></div>`;}
+
+/* ===== AUTH VIEWS ===== */
+function renderLogin(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Welcome Back</h2><p class="text-sm text-muted-theme mt-2">Sign in to your account to continue</p></div><form onsubmit="handleLogin(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="login-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><input type="password" id="login-password" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"></div><div class="flex items-center gap-3 mt-2"><input type="checkbox" id="remember-me" style="accent-color:#dc2626;width:16px;height:16px;cursor:pointer;"><label for="remember-me" class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember me</label></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-4">Sign In</button></form><div class="mt-6 flex justify-between items-center"><button onclick="navigateTo('register')" class="text-sm text-red-600 font-bold hover:underline">Create account</button><button onclick="navigateTo('forgot-password')" class="text-sm text-muted-theme hover:text-red-600 transition-colors">Forgot password?</button></div></div></div>`;}
+function renderRegister(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Create Account</h2><p class="text-sm text-muted-theme mt-2">Join TRU Data to start purchasing bundles</p></div><form onsubmit="handleRegister(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name</label><input type="text" id="reg-name" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="John Doe"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="reg-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><input type="password" id="reg-password" required minlength="6" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Create Account</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Already have an account? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
+function renderForgotPassword(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Reset Password</h2><p class="text-sm text-muted-theme mt-2">Enter your email to receive reset instructions</p></div><form onsubmit="handleForgotPassword(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="forgot-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Send Reset Link</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Remember your password? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
+
+/* ===== WALLET ===== */
+function renderWallet(){
+  const balance=state.userProfile?parseFloat(state.userProfile.balance||0):0;
+  return`<div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn"><div class="mb-8"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Home</button></div><div class="grid md:grid-cols-2 gap-8"><div class="wallet-card animate-scale-in"><div class="wallet-label">Current Balance</div><div class="wallet-balance">₵${balance.toFixed(2)}</div><div class="mt-4 flex items-center gap-2 text-sm opacity-90"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Available for purchases</div>${!state.userProfile?'<div class="mt-4 text-xs bg-red-500/20 px-3 py-2 rounded-lg">Profile not loaded properly. Please refresh.</div>':''}</div><div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Add Funds</h3><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label><input type="number" id="deposit-amount" min="5" step="0.01" oninput="updateDepositCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div><div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Deposit Amount:</span><span class="font-bold" id="calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Processing Fee (3.50%):</span><span class="font-bold" id="calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span></div></div><button onclick="initiateDeposit()" id="deposit-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"><span>Deposit Now</span></button></div></div></div><div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Recent Transactions</h3><div class="space-y-4" id="transaction-list"><p class="text-center text-muted-theme py-8">Loading transactions...</p></div></div></div>`;
+}
+function updateDepositCalculation(amount){
+  const n=parseFloat(amount)||0,fee=n*0.035,total=n+fee;
+  const ae=document.getElementById('calc-amount'),fe=document.getElementById('calc-fee'),te=document.getElementById('calc-total'),btn=document.getElementById('deposit-btn');
+  if(ae) ae.textContent=`₵${n.toFixed(2)}`;
+  if(fe) fe.textContent=`₵${fee.toFixed(2)}`;
+  if(te) te.textContent=`₵${total.toFixed(2)}`;
+  if(btn) btn.disabled=n<5||!state.userProfile;
+}
+
+/* ===== AUTH FUNCTIONS ===== */
+async function handleRegister(e){
+  e.preventDefault();
+  const name=document.getElementById('reg-name').value.trim(),email=document.getElementById('reg-email').value.trim(),phone=document.getElementById('reg-phone').value.trim(),password=document.getElementById('reg-password').value;
+  const pv=validateGhanaPhone(phone);if(!pv.isValid){showToast(''+pv.error,4000,'error');return;}
+  state.isLoading=true;
+  try{
+    const{data:authData,error:authError}=await supa.auth.signUp({email,password,options:{data:{full_name:name,phone}}});
+    if(authError) throw authError;if(!authData.user) throw new Error('Failed to create user account');
+    const{error:pe}=await supa.from('profiles').insert([{id:authData.user.id,full_name:name,phone,email,balance:0,created_at:new Date().toISOString()}]);
+    if(pe&&pe.code==='23505') await supa.from('profiles').update({full_name:name,phone,email}).eq('id',authData.user.id);
+    if(authData.session){state.user=authData.user;await fetchUserProfile();showToast('Account created successfully! Welcome.',4000,'success');navigateTo('home');}
+    else{showToast('Account created! Check your email to confirm.',5000,'success');navigateTo('login');}
+  }catch(err){showToast(''+(err.message||'Registration failed.'),4000,'error');}
+  finally{state.isLoading=false;}
+}
+async function handleLogin(e){
+  e.preventDefault();
+  const email=document.getElementById('login-email').value.trim(),password=document.getElementById('login-password').value,rememberMe=document.getElementById('remember-me')?.checked||false;
+  try{
+    const{data,error}=await supa.auth.signInWithPassword({email,password});
+    if(error){showToast('Login failed: '+error.message);return;}
+    if(!data.user){showToast('Login failed: No user data');return;}
+    if(rememberMe) localStorage.setItem('tru-remember-email',email); else localStorage.removeItem('tru-remember-email');
+    state.user=data.user;
+    let profile=null;
+    try{
+      const{data:pd,error:pe}=await supa.from('profiles').select('*').eq('id',state.user.id).single();
+      if(pe){
+        if(pe.code==='PGRST116'){
+          const{data:np,error:ce}=await supa.from('profiles').insert([{id:state.user.id,full_name:state.user.user_metadata?.full_name||email.split('@')[0],phone:state.user.user_metadata?.phone||'',email,role:'user',balance:0,created_at:new Date().toISOString()}]).select().single();
+          if(ce){showToast('Error creating profile. Please contact support.');return;}
+          profile=np;
+        }else throw pe;
+      }else profile=pd;
+    }catch(err){showToast('Error loading profile. Please try again.');return;}
+    if(!profile){showToast('Failed to load profile data.');return;}
+    state.userProfile=profile;state.isAdmin=profile.role==='admin';
+    if(state.isAdmin){showToast('Welcome back, Admin!',3000,'success');state.view='admin-dashboard';await fetchOrders();render();}
+    else{showToast('Welcome back!',3000,'success');navigateTo('home');}
+  }catch(err){showToast('Login error: '+(err.message||'Unknown error'),4000,'error');}
+}
+async function fetchUserProfile(){
+  if(!state.user){state.userProfile=null;return;}
+  try{
+    const{data,error}=await supa.from('profiles').select('*').eq('id',state.user.id).single();
+    if(error){
+      if(error.code==='PGRST116'){
+        const np={id:state.user.id,full_name:state.user.user_metadata?.full_name||state.user.email?.split('@')[0]||'User',phone:state.user.user_metadata?.phone||'',email:state.user.email,role:'user',balance:0,created_at:new Date().toISOString()};
+        const{data:cp,error:ce}=await supa.from('profiles').insert([np]).select().single();
+        if(ce){state.userProfile=null;return;}
+        state.userProfile=cp;return;
+      }
+      state.userProfile=null;return;
+    }
+    state.userProfile=data;
+  }catch(err){state.userProfile=null;}
+}
+async function fetchUserTransactions(){
+  if(!state.user) return;
+  const listEl=document.getElementById('transaction-list');if(!listEl) return;
+  try{
+    listEl.innerHTML='<div class="flex justify-center py-8"><div class="spinner"></div></div>';
+    const{data,error}=await supa.from('transactions').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(10);
+    if(error) throw error;
+    if(data&&data.length>0){
+      listEl.innerHTML=data.map(t=>`<div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type==='deposit'?'bg-green-100 text-green-600':'bg-red-100 text-red-600'}"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${t.type==='deposit'?'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>':'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'}</svg></div><div><p class="font-bold text-sm">${t.type==='deposit'?'Wallet Deposit':'Data Purchase'}</p><p class="text-xs text-muted-theme">${new Date(t.created_at).toLocaleDateString()} &bull; ${new Date(t.created_at).toLocaleTimeString()}</p></div></div><div class="text-right"><p class="font-bold ${t.type==='deposit'?'text-green-600':'text-slate-900'}">${t.type==='deposit'?'+':'-'}₵${parseFloat(t.amount).toFixed(2)}</p><p class="text-xs ${t.status==='completed'?'text-green-600':'text-yellow-600'}">${t.status}</p></div></div>`).join('');
+    }else{listEl.innerHTML='<div class="text-center py-8 text-muted-theme"><svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>No transactions yet</div>';}
+  }catch(err){if(listEl) listEl.innerHTML='<div class="text-center py-8 text-red-500">Failed to load transactions. Please refresh the page.</div>';}
+}
+async function handleForgotPassword(e){
+  e.preventDefault();const email=document.getElementById('forgot-email').value.trim();
+  try{const{error}=await supa.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/index.html'});if(error) throw error;showToast('Check your email for password reset instructions!',4000,'success');navigateTo('login');}
+  catch(err){showToast(''+(err.message||'Failed to send reset email'),4000,'error');}
+}
+function initiateDeposit(){
+  if(!state.userProfile){showToast('Profile not loaded. Please refresh.',4000,'error');return;}
+  const amount=parseFloat(document.getElementById('deposit-amount').value);
+  if(!amount||amount<5){showToast('Minimum deposit is ₵5.00',3000,'error');return;}
+  const fee=amount*0.035,total=amount+fee;
+  try{
+    const handler=PaystackPop.setup({key:PAYSTACK_KEY,email:state.user.email,amount:Math.round(total*100),currency:'GHS',metadata:{custom_fields:[{display_name:"Deposit Type",variable_name:"deposit_type",value:"wallet_funding"},{display_name:"Net Amount",variable_name:"net_amount",value:amount.toFixed(2)},{display_name:"Fee",variable_name:"fee",value:fee.toFixed(2)}]},callback:(r)=>processDeposit(r,amount,fee),onClose:()=>showToast('Payment window closed',3000,'info')});
+    handler.openIframe();
+  }catch(err){showToast('Payment initialization failed.',4000,'error');}
+}
+async function processDeposit(response,netAmount,fee){
+  if(!state.user||!state.userProfile){showToast('Session error. Please login again.',4000,'error');return;}
+  try{
+    const{error:te}=await supa.from('transactions').insert([{user_id:state.user.id,type:'deposit',amount:netAmount,fee,reference:response.reference,status:'completed',created_at:new Date().toISOString()}]);
+    if(te) throw new Error('Failed to record transaction');
+    const newBal=parseFloat(state.userProfile.balance||0)+netAmount;
+    const{error:ue}=await supa.from('profiles').update({balance:newBal}).eq('id',state.user.id);
+    if(ue) throw new Error('Failed to update balance');
+    state.userProfile.balance=newBal;
+    const ai=document.getElementById('deposit-amount');if(ai) ai.value='';updateDepositCalculation(0);
+    showToast(`Deposit successful! ₵${netAmount.toFixed(2)} added to wallet`,4000,'success');
+    await fetchUserTransactions();
+  }catch(err){showToast('Error processing deposit: '+(err.message||'Unknown error'),5000,'error');}
+}
+
+/* ===== NETWORK VIEW ===== */
+function renderNetworkView(networkId){
+  const network=NETWORKS[networkId],BUNDLES=NORMAL_BUNDLES.filter(b=>b.network===networkId);
+  const isAgentMode=state.agentPricingMode&&state.agentId;
+  const modeBadge=isAgentMode
+    ?`<span class="pricing-mode-badge pricing-mode-agent">Agent Pricing</span>`
+    :`<span class="pricing-mode-badge pricing-mode-system">🟢 Standard Pricing</span>`;
+  const bundleCards=BUNDLES.map((bundle,idx)=>{
+    const dp=getBundleDisplayPrice(bundle);
+    const priceHTML=dp.isAgent
+      ?`<div class="agent-price-wrap"><span class="agent-price-final">₵${dp.price.toFixed(2)}</span></div>`
+      :`<div class="price-tag">₵${bundle.price.toFixed(2)}</div>`;
+    return`<div class="card-theme p-6 rounded-2xl hover:border-red-500 transition-all cursor-pointer group animate-slide-up stagger-${(idx%5)+1}" style="animation-fill-mode:forwards;" onclick="initiateOrder('${networkId}','${bundle.id}')"><div class="flex justify-between items-start mb-4"><div><h3 class="text-2xl font-black text-slate-900 group-hover:text-red-600 transition-colors">${bundle.size}</h3><p class="text-sm text-muted-theme">${bundle.validity} Validity</p></div>${priceHTML}</div><div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200"><span class="text-xs font-bold text-slate-500 uppercase">Click to Purchase</span><svg class="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div></div>`;
+  }).join('');
+  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8"><div class="mb-8 flex items-center justify-between flex-wrap gap-3"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Networks</button>${modeBadge}</div><div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div><img src="${network.logo}" alt="${network.name}" class="h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10"><h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1><p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${bundleCards}</div></div>`;
+}
+function initiateOrder(networkId,bundleId){
+  const bundle=NORMAL_BUNDLES.find(b=>b.network===networkId&&b.id===bundleId);
+  if(!bundle){showToast('Bundle not found',3000,'error');return;}
+  if(!state.user){showToast('Please login first',3000,'error');navigateTo('login');return;}
+  if(!state.userProfile){showToast('Profile loading... Try again shortly.',3000,'error');fetchUserProfile();return;}
+  // Determine effective price based on pricing mode
+  const dp=getBundleDisplayPrice(bundle);
+  const effectiveBundle=dp.isAgent?{...bundle,price:dp.price}:{...bundle};
+  const pricingMode=dp.isAgent?'agent':'system';
+  state.activeOrderData={network:networkId,bundle:effectiveBundle,originalPrice:bundle.price,pricingMode,agentProfit:dp.isAgent?dp.profit:0};
+  render();
+}
+function renderOrderForm(){
+  if(!state.activeOrderData) return '';
+  const{network,bundle}=state.activeOrderData,netInfo=NETWORKS[network],balance=state.userProfile?parseFloat(state.userProfile.balance||0):0,hasBal=balance>=bundle.price;
+  return`<div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn"><div class="card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in"><button onclick="state.activeOrderData=null;render();" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="text-center mb-6"><div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><span class="text-2xl font-black">${netInfo.name.charAt(0)}</span></div><h3 class="text-2xl font-black mb-1">Purchase ${bundle.size}</h3><p class="text-muted-theme text-sm">${netInfo.name} &bull; ${bundle.validity}</p></div><div class="bg-slate-50 rounded-2xl p-6 mb-6"><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Bundle Price</span><span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span></div><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Your Balance</span><span class="font-bold text-lg ${hasBal?'text-green-600':'text-red-500'}">₵${balance.toFixed(2)}</span></div><div class="border-t border-slate-200 mt-2 pt-2 flex justify-between items-center"><span class="font-bold">Total</span><span class="font-black text-xl text-red-600">₵${bundle.price.toFixed(2)}</span></div></div><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"><p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p></div><button onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${hasBal?'':'opacity-50 cursor-not-allowed'}" ${hasBal?'':'disabled'}>${hasBal?'Confirm Purchase':'Insufficient Balance'}</button>${!hasBal?`<button onclick="state.activeOrderData=null;navigateTo('wallet')" class="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-300 transition-all">Add Funds to Wallet</button>`:''}</div></div></div>`;
+}
+
+/* ===== R2B API SERVICE LAYER ===== */
+const R2BService={
+  async getBalance(){
+    return await supa.functions.invoke('r2b-proxy',{body:{action:'balance'}});
+  },
+  async createOrder(network,dataPlan,beneficiary){
+    return await supa.functions.invoke('process-order',{body:{network,dataPlan,beneficiary}});
+  },
+  async checkStatus(apiReference){
+    return await supa.functions.invoke('r2b-proxy',{body:{action:'order-status',payload:{reference:apiReference}}});
+  },
+  async getBundles(network){
+    return await supa.functions.invoke('r2b-proxy',{body:{action:'bundles',payload:{network}}});
+  }
+};
+
+/* ===== ORDER FUNCTIONS ===== */
+async function handleOrderButton(){
+  const phoneInput=document.getElementById('p-num'),phone=phoneInput.value.trim();
+  const v=validateGhanaPhone(phone);if(!v.isValid){showToast(''+v.error,4000,'error');phoneInput.focus();return;}
+  const{bundle}=state.activeOrderData;
+  if(!state.user){showToast('Please login first',3000,'error');navigateTo('login');return;}
+  const balance=parseFloat(state.userProfile?.balance||0);
+  if(balance<bundle.price){showToast('Insufficient balance. Please deposit funds.',4000,'error');navigateTo('wallet');return;}
+  const ref='ORD-'+Math.random().toString(36).slice(2,10).toUpperCase();
+  try{
+    // 1. DEDUCT FROM CUSTOMER WALLET
+    const newBalance=balance-bundle.price;
+    const{error:be}=await supa.from('profiles').update({balance:newBalance}).eq('id',state.user.id);
+    if(be) throw new Error('Failed to update balance: '+be.message);
+    const{error:te}=await supa.from('transactions').insert([{user_id:state.user.id,type:'purchase',amount:bundle.price,reference:ref,status:'completed',created_at:new Date().toISOString()}]);
+    if(te) throw new Error('Failed to record transaction: '+te.message);
+
+    // 2. CALL REFER2BUNDLE API VIA EDGE FUNCTION
+    let apiResult={data:null,error:null};
+    try{
+      const resp=await supa.functions.invoke('process-order',{body:{orderRef:ref,network:bundle.network,dataPlan:bundle.size,beneficiary:phone}});
+      apiResult=resp;
+    }catch(apiErr){apiResult={data:null,error:apiErr?.message||'API call failed'};}
+
+    const apiSuccess=!apiResult.error&&apiResult.data?.success;
+
+    // 3. SAVE ORDER WITH API REFERENCE
+    const orderData={
+      ref,Phone:phone,Network:bundle.network,bundle_name:bundle.size,Amount:bundle.price,
+      Status:apiSuccess?'Processing':'Pending',
+      provider:'refer2bundle',
+      user_id:state.user.id,
+      pricing_mode:state.activeOrderData?.pricingMode||'system',
+      agent_id:state.agentProfileId||state.agentProfile?.id||null,
+      agent_code:state.agentId||null,
+      agent_profit:state.activeOrderData?.agentProfit||0,
+      base_price_used:state.activeOrderData?.originalPrice||bundle.price,
+      api_reference:apiResult.data?.data?.reference||null,
+      api_status:apiSuccess?'submitted':'failed',
+      retry_count:apiSuccess?0:1,
+      processed_by_api:apiSuccess,
+      api_response:apiResult.data||null,
+      created_at:new Date().toISOString()
+    };
+    const{error:oe}=await supa.from('orders').insert([orderData]);
+    if(oe) throw new Error('Failed to save order: '+oe.message);
+
+    // 4. UPDATE UI
+    state.userProfile.balance=newBalance;
+    showToast(apiSuccess?'Order placed! Processing via Refer2Bundle...':'Order saved but API failed. Admin will process manually.',3000,apiSuccess?'success':'warning');
+    navigateTo('success',{bundle_name:bundle.size,Phone:phone,ref});
+  }catch(err){showToast('Error: '+(err.message||'Unknown error'),5000,'error');}
+}
+
+/* ===== ADMIN ===== */
+window.adminAuth=async(e)=>{
+  e.preventDefault();
+  const email=document.getElementById('adm-u').value.trim(),password=document.getElementById('adm-p').value;
+  const btn=e.target.querySelector('button'),ot=btn.innerText;
+  btn.innerHTML='<span class="spinner inline-block mr-2"></span>Signing in...';btn.disabled=true;
+  try{const{data,error}=await supa.auth.signInWithPassword({email,password});if(error) throw error;state.isAdmin=true;showToast('Login successful',3000,'success');navigateTo('admin-dashboard');}
+  catch(err){showToast(''+(err.message||'Login failed'),4000,'error');btn.innerText=ot;btn.disabled=false;}
+};
+async function retryApiOrder(ref){
+  const{data:order}=await supa.from('orders').select('*').eq('ref',ref).single();
+  if(!order) return;
+  showToast('Retrying API call...',2000,'info');
+  let result={data:null,error:null};
+  try{
+    result=await supa.functions.invoke('process-order',{body:{orderRef:ref,network:order.Network,dataPlan:order.bundle_name,beneficiary:order.Phone}});
+  }catch(e){result={data:null,error:e?.message||'API error'};}
+  const success=!result.error&&result.data?.success;
+  if(success){
+    await supa.from('orders').update({api_reference:result.data?.data?.reference||null,api_status:'submitted',Status:'Processing',retry_count:(order.retry_count||0)+1,updated_at:new Date().toISOString()}).eq('ref',ref);
+    showToast('API retry successful!',3000,'success');
+    fetchOrders();
+  }else{
+    showToast('Retry failed: '+(result.error||'Unknown error'),4000,'error');
+  }
+}
+
+async function updatePendingOrderStatuses(){
+  const{data:pendingOrders}=await supa.from('orders').select('*').eq('Status','Processing').not('api_reference','is',null);
+  for(const order of pendingOrders||[]){
+    try{
+      const status=await supa.functions.invoke('r2b-proxy',{body:{action:'order-status',payload:{reference:order.api_reference}}});
+      if(status.data?.status==='success'){
+        await supa.from('orders').update({Status:'Delivered',api_status:'success',updated_at:new Date().toISOString()}).eq('ref',order.ref);
+      }else if(status.data?.status==='failed'){
+        await supa.from('orders').update({Status:'Pending',api_status:'failed',updated_at:new Date().toISOString()}).eq('ref',order.ref);
+      }
+    }catch(e){console.error('Status check failed for order:',order.ref,e);}
+  }
+}
+
+async function adminLogout(){
+  try{await supa.auth.signOut();state.isAdmin=false;state.isDirectMode=false;showToast('Logged out successfully',3000,'success');navigateTo('landing');}
+  catch(err){showToast('Logout failed',3000,'error');}
+}
+async function fetchOrders(){
+  try{
+    const{data,error}=await supa.from('orders').select('*').order('created_at',{ascending:false}).limit(1000);
+    if(error) throw error;
+    state.orders=data||[];
+    if(state.view==='admin-dashboard') render();
+  }catch(err){showToast('Failed to load orders: '+(err.message||'Check console'),4000,'error');state.orders=[];}
+}
+function renderAdminLogin(){return`<div class="min-h-screen flex items-center justify-center p-4"><div class="card-theme max-w-md w-full p-8 rounded-3xl shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black shadow-lg">A</div><h2 class="text-2xl font-black">Admin Access</h2><p class="text-sm text-muted-theme mt-2">Restricted area - Authorized personnel only</p></div><form onsubmit="adminAuth(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email</label><input type="email" id="adm-u" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="admin@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><input type="password" id="adm-p" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"></div><button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">Access Dashboard</button></form><div class="mt-6 text-center"><button onclick="navigateTo('landing')" class="text-sm text-muted-theme hover:text-red-600 transition-colors">&larr; Back to website</button></div></div></div>`;}
+
+/* ===== FIX 2: Delivered counts as Completed ===== */
+function renderAdminDashboard(){
+  const filtered=state.orders.filter(o=>{const ms=(o.Phone||'').includes(state.searchQuery)||(o.ref||'').toLowerCase().includes(state.searchQuery.toLowerCase());const mn=state.networkFilter==='all'||o.Network===state.networkFilter;return ms&&mn;});
+  const completedCount=state.orders.filter(o=>o.Status==='Completed'||o.Status==='Delivered').length;
+  const tab=state.adminTab||'orders';
+  return`<div class="animate__animated animate__fadeIn max-w-7xl mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-slide-up">
+      <div><h1 class="text-3xl font-black flex items-center gap-3"><span class="bg-slate-900 text-white px-3 py-1 rounded-lg text-xl">A</span>Admin Dashboard</h1><p class="text-sm text-muted-theme mt-1">Manage orders, agents, and system settings</p></div>
+      <div class="flex gap-3"><button onclick="adminLogout()" class="px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition-all">Logout</button></div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode:forwards;">
+      <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">${state.orders.length}</div><div class="text-xs font-bold text-muted-theme uppercase">Total Orders</div></div>
+      <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-yellow-600">${state.orders.filter(o=>o.Status==='Pending').length}</div><div class="text-xs font-bold text-muted-theme uppercase">Pending</div></div>
+      <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-green-600">${completedCount}</div><div class="text-xs font-bold text-muted-theme uppercase">Completed</div></div>
+      <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">₵${state.orders.reduce((a,o)=>a+(parseFloat(o.Amount)||0),0).toFixed(2)}</div><div class="text-xs font-bold text-muted-theme uppercase">Revenue</div></div>
+    </div>
+    <!-- Admin Tabs -->
+    <div class="flex gap-2 mb-6 flex-wrap animate-slide-up stagger-3" style="animation-fill-mode:forwards;">
+      <button class="admin-tab-btn ${tab==='orders'?'active':''}" onclick="state.adminTab='orders';render()">Orders</button>
+      <button class="admin-tab-btn ${tab==='broadcast'?'active':''}" onclick="state.adminTab='broadcast';render()">Broadcast</button>
+      <button class="admin-tab-btn ${tab==='agent-prices'?'active':''}" onclick="state.adminTab='agent-prices';render();setTimeout(loadAdminAgentPricesTable,50)">Agent Prices</button>
+      <button class="admin-tab-btn ${tab==='agents'?'active':''}" onclick="state.adminTab='agents';render();setTimeout(loadAdminAgentsList,50)">Agents</button>
+      <button class="admin-tab-btn ${tab==='withdrawals'?'active':''}" onclick="state.adminTab='withdrawals';render();setTimeout(loadAdminWithdrawals,50)">Withdrawals</button>
+    </div>
+    <!-- Tab Content -->
+    <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:forwards;">
+      ${tab==='orders'?renderAdminOrdersTab(filtered):tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='agents'?'<div id="admin-agents-container" class="card-theme rounded-2xl p-8 text-center text-muted-theme"><div class="spinner mx-auto mb-3" style="width:28px;height:28px;border-width:3px;border-top-color:#dc2626;"></div>Loading agents...</div>':'<div id="admin-withdrawals-container" class="card-theme rounded-2xl p-8 text-center text-muted-theme"><div class="spinner mx-auto mb-3" style="width:28px;height:28px;border-width:3px;border-top-color:#dc2626;"></div>Loading withdrawals...</div>'}
+    </div>
+  </div>`;
+}
+
+function renderAdminOrdersTab(filtered){
+  return`<div class="flex flex-col md:flex-row gap-4 mb-6"><input type="text" placeholder="Search phone or reference..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;render();" class="flex-1 p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all"><select onchange="state.networkFilter=this.value;render();" class="p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all md:w-48"><option value="all">All Networks</option><option value="mtn">MTN</option><option value="airteltigo">AirtelTigo</option><option value="telecel">Telecel</option></select></div><div class="card-theme rounded-2xl overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Mode</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${filtered.length===0?`<tr><td colspan="9" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:filtered.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0"><td class="p-4 font-mono text-xs font-bold">${order.ref}</td><td class="p-4 font-bold">${order.Phone}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${order.Network?.toUpperCase()}</span></td><td class="p-4 text-sm">${order.bundle_name}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td><td class="p-4"><span class="pricing-mode-badge ${order.pricing_mode==='agent'?'pricing-mode-agent':'pricing-mode-system'}">${order.pricing_mode==='agent'?'Agent':'System'}</span></td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${order.Status||'Pending'}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference
+  ?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${order.api_reference}</span>
+    <span class="text-xs ${order.api_status==='success'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'} px-2 py-1 rounded-lg font-bold">${order.api_status||'pending'}</span>`
+  :`<button onclick="retryApiOrder('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200">Retry API</button>`
+}
+${order.Status==='Pending'&&!order.api_reference?`<button onclick="showProcessConfirmation('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button>`:''}
+<button onclick="updateStatus('${order.ref}','Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button onclick="updateStatus('${order.ref}','Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button onclick="deleteOrder('${order.ref}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function renderAdminBroadcastTab(){
+  return`<div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1 flex items-center gap-2"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>Broadcast Message</h2><p class="text-xs text-muted-theme mb-6">Post a message visible to all customers on the landing page. Replaces any previous message.</p><div class="grid md:grid-cols-2 gap-4 mb-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Main Message <span class="text-red-500">*</span></label><input type="text" id="ann-main" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none transition-all" placeholder="e.g. MTN bundles now available!"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Sub Message (optional)</label><input type="text" id="ann-sub" class="w-full p-3 border-2 rounded-xl font-semibold focus:border-red-600 outline-none transition-all" placeholder="e.g. Prices updated for all packages."></div></div><button onclick="saveAnnouncement()" class="cta-button text-white px-6 py-3 rounded-xl font-bold text-sm inline-flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>Post Announcement</button></div>`;
+}
+
+function renderAdminAgentPricesTab(){
+  const allLocked=state.agentBasePrices.length>0&&state.agentBasePrices.every(p=>p.pricing_locked);
+  const anyUnlocked=state.agentBasePrices.some(p=>!p.pricing_locked);
+  return`<div class="card-theme rounded-2xl p-6">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <div><h3 class="text-xl font-bold">Agent Base Prices</h3><p class="text-xs text-muted-theme mt-1">Define the cost basis for agents. Agents add their own profit on top. System (normal user) prices are <strong>never affected</strong>.</p></div>
+      <div class="flex gap-2 flex-wrap">
+        <button onclick="globalToggleAgentPriceLock()" id="global-lock-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ${allLocked?'bg-green-100 text-green-700 hover:bg-green-200':'bg-amber-100 text-amber-700 hover:bg-amber-200'}">
+          ${allLocked
+            ?'<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>Unlock All Agent Pricing'
+            :'<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Lock All Agent Pricing'}
+        </button>
+        <button onclick="showAddAgentPriceForm()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all">+ Add Price</button>
+      </div>
+    </div>
+    <div id="admin-agent-prices-container"><div class="flex justify-center py-8"><div class="spinner" style="width:28px;height:28px;border-width:3px;border-top-color:#2563eb;"></div></div></div>
+    <div id="add-agent-price-form" style="display:none;" class="mt-6 bg-blue-50 border border-blue-200 rounded-2xl p-5">
+      <h4 class="font-bold text-blue-800 mb-4">New Agent Base Price</h4>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <select id="abp-network" class="p-3 border-2 rounded-xl font-bold focus:border-blue-500 outline-none bg-white">
+          <option value="mtn">MTN</option><option value="airteltigo">AirtelTigo</option><option value="telecel">Telecel</option>
+        </select>
+        <input type="text" id="abp-bundle" placeholder="Bundle (e.g. 1GB)" class="p-3 border-2 rounded-xl font-bold focus:border-blue-500 outline-none">
+        <input type="number" id="abp-price" placeholder="Agent base price (₵)" step="0.01" min="0.01" class="p-3 border-2 rounded-xl font-bold focus:border-blue-500 outline-none">
+        <button onclick="saveAdminAgentBasePrice()" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">Save</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ===== ADMIN AGENT PRICE ACTIONS ===== */
+function showAddAgentPriceForm(){
+  const f=document.getElementById('add-agent-price-form');
+  if(f) f.style.display=f.style.display==='none'?'block':'none';
+}
+async function loadAdminAgentPricesTable(){
+  await fetchAdminAgentBasePrices();
+  const c=document.getElementById('admin-agent-prices-container');
+  if(!c) return;
+  if(!state.agentBasePrices.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No agent base prices yet. Click "+ Add Price" to create one.<br><span class="text-xs mt-2 block">System prices for normal users remain untouched.</span></div>`;return;}
+  c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Agent Base Price</th><th class="p-3 text-xs font-black uppercase text-slate-500">System Price</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Pricing Lock</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${state.agentBasePrices.map(p=>{const sysBundle=NORMAL_BUNDLES.find(b=>b.network===p.network&&b.size===p.bundle_name);const locked=p.pricing_locked;return`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-bold">${p.network?.toUpperCase()}</td><td class="p-3">${p.bundle_name}</td><td class="p-3 font-bold text-blue-600" id="abp-val-${p.id}">₵${parseFloat(p.base_price).toFixed(2)}</td><td class="p-3 text-muted-theme text-sm">${sysBundle?'₵'+sysBundle.price.toFixed(2):'—'}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${p.status==='active'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${p.status||'active'}</span></td><td class="p-3"><span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${locked?'bg-red-100 text-red-700':'bg-slate-100 text-slate-600'}">${locked?'<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked':'<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>Unlocked'}</span></td><td class="p-3"><div class="flex gap-2 flex-wrap"><button onclick="showEditAgentPriceInline('${p.id}',${p.base_price})" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-all">Edit</button><button onclick="toggleAgentBasePrice('${p.id}','${p.status==='active'?'disabled':'active'}')" class="text-xs ${p.status==='active'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'} px-3 py-1 rounded-lg font-bold hover:opacity-80">${p.status==='active'?'Disable':'Enable'}</button><button onclick="deleteAgentBasePrice('${p.id}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200">Delete</button></div><div id="edit-inline-${p.id}" style="display:none;" class="mt-2 flex gap-2 items-center"><input type="number" id="edit-price-${p.id}" value="${p.base_price}" step="0.01" min="0.01" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none"><button onclick="saveEditAgentPrice('${p.id}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-700">Save</button><button onclick="document.getElementById('edit-inline-${p.id}').style.display='none'" class="bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-300">Cancel</button></div></td></tr>`}).join('')}</tbody></table></div>`;
+}
+async function saveAdminAgentBasePrice(){
+  const network=document.getElementById('abp-network')?.value;
+  const bundle=document.getElementById('abp-bundle')?.value.trim();
+  const price=parseFloat(document.getElementById('abp-price')?.value);
+  if(!network||!bundle||!price||price<=0){showToast('Please fill all fields correctly',3000,'error');return;}
+  const sysBundle=NORMAL_BUNDLES.find(b=>b.network===network&&b.size===bundle);
+  try{
+    const{error}=await supa.from('agent_base_prices').insert([{network,bundle_name:bundle,bundle_id:sysBundle?.id||null,base_price:price,currency:'GHS',status:'active',admin_id:state.user?.id,created_at:new Date().toISOString()}]);
+    if(error) throw error;
+    showToast('Agent base price saved!',3000,'success');
+    document.getElementById('abp-bundle').value='';document.getElementById('abp-price').value='';
+    document.getElementById('add-agent-price-form').style.display='none';
+    await fetchAdminAgentBasePrices();loadAdminAgentPricesTable();
+  }catch(err){showToast(''+( err.message||'Save failed'),4000,'error');}
+}
+async function toggleAgentBasePrice(id,newStatus){
+  try{
+    const{error}=await supa.from('agent_base_prices').update({status:newStatus}).eq('id',id);
+    if(error) throw error;
+    showToast('Status updated',3000,'success');
+    await fetchAdminAgentBasePrices();loadAdminAgentPricesTable();
+  }catch(err){showToast('Update failed',3000,'error');}
+}
+function showEditAgentPriceInline(id,currentPrice){
+  const el=document.getElementById('edit-inline-'+id);
+  if(el) el.style.display=el.style.display==='none'?'flex':'none';
+}
+async function saveEditAgentPrice(id){
+  const input=document.getElementById('edit-price-'+id);
+  const newPrice=parseFloat(input?.value);
+  if(!newPrice||newPrice<=0){showToast('Enter a valid price',3000,'error');return;}
+  try{
+    const{error}=await supa.from('agent_base_prices').update({base_price:newPrice}).eq('id',id);
+    if(error) throw error;
+    showToast('Price updated successfully',3000,'success');
+    await fetchAdminAgentBasePrices();loadAdminAgentPricesTable();
+  }catch(err){showToast('Update failed: '+err.message,4000,'error');}
+}
+async function globalToggleAgentPriceLock(){
+  if(!state.agentBasePrices.length) return;
+  // Determine intent: if all are locked → unlock all locked ones. Otherwise → lock all unlocked ones.
+  const allLocked=state.agentBasePrices.every(p=>p.pricing_locked);
+  const btn=document.getElementById('global-lock-btn');
+  if(btn){btn.disabled=true;btn.textContent='Working...';}
+  try{
+    if(allLocked){
+      // Unlock pass: update only rows that are currently locked
+      const toUnlock=state.agentBasePrices.filter(p=>p.pricing_locked).map(p=>p.id);
+      for(const id of toUnlock){
+        await supa.from('agent_base_prices').update({pricing_locked:false}).eq('id',id);
+      }
+      showToast('All agent pricing unlocked — agents can now edit their profits.',4000,'success');
+    } else {
+      // Lock pass: update only rows that are currently unlocked (already-locked ones stay locked)
+      const tolock=state.agentBasePrices.filter(p=>!p.pricing_locked).map(p=>p.id);
+      for(const id of tolock){
+        await supa.from('agent_base_prices').update({pricing_locked:true}).eq('id',id);
+      }
+      showToast('All unlocked agent pricing is now locked. Previously locked rows unchanged.',4000,'success');
+    }
+    await fetchAdminAgentBasePrices();
+    // Re-render the tab fully so the global button label updates
+    state.adminTab='agent-prices';
+    render();
+    setTimeout(loadAdminAgentPricesTable,50);
+  }catch(err){showToast('Lock operation failed: '+err.message,4000,'error');if(btn) btn.disabled=false;}
+}
+async function deleteAgentBasePrice(id){
+  if(!confirm('Delete this agent base price? Agents using it will fall back to system pricing.')) return;
+  try{
+    const{error}=await supa.from('agent_base_prices').delete().eq('id',id);
+    if(error) throw error;
+    showToast('Deleted',3000,'success');
+    await fetchAdminAgentBasePrices();loadAdminAgentPricesTable();
+  }catch(err){showToast('Delete failed',3000,'error');}
+}
+async function loadAdminAgentsList(){
+  const c=document.getElementById('admin-agents-container');
+  if(!c) return;
+  try{
+    const{data,error}=await supa.from('agent_profiles').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    if(!data||!data.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No agents registered yet.</div>`;return;}
+    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Agent ID</th><th class="p-3 text-xs font-black uppercase text-slate-500">Name</th><th class="p-3 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-3 text-xs font-black uppercase text-slate-500">Business</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Joined</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${data.map(a=>`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs font-bold">${a.agent_id||a.id}</td><td class="p-3 font-bold">${a.name}</td><td class="p-3">${a.phone}</td><td class="p-3 text-muted-theme">${a.business_name||'—'}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${a.status==='active'?'bg-green-100 text-green-700':a.status==='pending'?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700'}">${a.status}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(a.created_at).toLocaleDateString()}</td><td class="p-3"><div class="flex gap-2 flex-wrap">${a.status==='pending'?`<button onclick="updateAgentStatus('${a.id}','active')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-all">Approve</button><button onclick="updateAgentStatus('${a.id}','rejected')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-all">Reject</button>`:a.status==='active'?`<button onclick="updateAgentStatus('${a.id}','suspended')" class="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-lg font-bold hover:bg-amber-200 transition-all">Suspend</button>`:a.status==='rejected'||a.status==='suspended'?`<button onclick="updateAgentStatus('${a.id}','active')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-all">Re-approve</button>`:'—'}</div></td></tr>`).join('')}</tbody></table></div>`;
+  }catch(err){c.innerHTML=`<div class="text-center py-8 text-red-500">Failed to load agents</div>`;}
+}
+async function updateAgentStatus(id,status){
+  try{
+    const{error}=await supa.from('agent_profiles').update({status}).eq('id',id);
+    if(error) throw error;
+    showToast('Agent status updated to '+status,3000,'success');
+    loadAdminAgentsList();
+  }catch(err){showToast('Update failed: '+err.message,4000,'error');}
+}
+async function loadAdminWithdrawals(){
+  const c=document.getElementById('admin-withdrawals-container');
+  if(!c) return;
+  try{
+    const{data,error}=await supa.from('agent_withdrawals').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    if(!data||!data.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No withdrawal requests yet.</div>`;return;}
+    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Agent</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">MoMo #</th><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Requested</th><th class="p-3 text-xs font-black uppercase text-slate-500">Action</th></tr></thead><tbody>${data.map(w=>`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs">${w.agent_id}</td><td class="p-3 font-bold text-blue-600">₵${parseFloat(w.amount).toFixed(2)}</td><td class="p-3 font-bold">${w.phone}</td><td class="p-3">${(w.network||'').toUpperCase()}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${w.status==='paid'?'bg-green-100 text-green-700':w.status==='rejected'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${w.status}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(w.created_at).toLocaleDateString()}</td><td class="p-3">${w.status==='pending'?`<div class="flex gap-2"><button onclick="processWithdrawal('${w.id}','paid')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200">Pay</button><button onclick="processWithdrawal('${w.id}','rejected')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200">Reject</button></div>`:'—'}</td></tr>`).join('')}</tbody></table></div>`;
+  }catch(err){c.innerHTML=`<div class="text-center py-8 text-red-500">Failed to load withdrawals</div>`;}
+}
+async function processWithdrawal(id,status){
+  try{
+    const{error}=await supa.from('agent_withdrawals').update({status,processed_at:new Date().toISOString()}).eq('id',id);
+    if(error) throw error;
+    showToast(`Withdrawal ${status}`,3000,'success');
+    loadAdminWithdrawals();
+  }catch(err){showToast('Failed: '+err.message,4000,'error');}
+}
+
+/* ===== AGENT PORTAL (BECOME AGENT) ===== */
+function renderAgentPortal(){
+  if(state.agentProfile){
+    if(state.agentProfile.status==='pending'){
+      return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-amber-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h2 class="text-2xl font-black mb-3">Application Under Review</h2><p class="text-muted-theme mb-6">Your agent application has been submitted and is awaiting admin approval. You will be able to access your dashboard once approved.</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800 font-semibold">Agent ID: <code class="font-mono bg-amber-100 px-2 py-0.5 rounded">${state.agentProfile.agent_id||state.agentProfile.id}</code></div><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button></div></div>`;
+    }
+    return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-2xl font-black mb-4">You're Already an Agent!</h2><p class="text-muted-theme mb-8">Your agent account is active. Go to your dashboard to manage pricing and track your sales.</p><div class="space-y-3"><button onclick="navigateTo('agent-dashboard')" class="w-full cta-button text-white py-4 rounded-2xl font-bold">Go to Agent Dashboard</button><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button></div></div></div>`;
+  }
+  const formHtml=state.user
+    ?`<div class="relative z-10 max-w-lg mx-auto bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+        <h3 class="text-xl font-bold text-white mb-5 text-center">Apply to Become an Agent</h3>
+        <div class="space-y-4">
+          <div><label class="block text-xs font-bold uppercase text-blue-200 mb-1.5">Full Name *</label><input type="text" id="agent-name" class="w-full p-3.5 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-blue-400" placeholder="Your full name"></div>
+          <div><label class="block text-xs font-bold uppercase text-blue-200 mb-1.5">Phone Number *</label><input type="tel" id="agent-phone" maxlength="10" class="w-full p-3.5 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-blue-400" placeholder="024xxxxxxx"></div>
+          <div><label class="block text-xs font-bold uppercase text-blue-200 mb-1.5">Business Name (Optional)</label><input type="text" id="agent-business" class="w-full p-3.5 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-blue-400" placeholder="e.g. John's Data Hub"></div>
+          <button onclick="registerAsAgent()" class="w-full bg-white text-blue-700 py-4 rounded-xl font-black text-lg hover:bg-blue-50 transition-all">Apply Now — It's Free</button>
+        </div>
+      </div>`
+    :`<div class="relative z-10 max-w-md mx-auto text-center bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+        <p class="text-blue-200 mb-5 text-lg">Login first to register as an agent</p>
+        <button onclick="navigateTo('login')" class="bg-white text-blue-700 px-8 py-4 rounded-xl font-black hover:bg-blue-50 transition-all">Login to Continue</button>
+      </div>`;
+  return`<div class="animate__animated animate__fadeIn"><div class="become-agent-hero max-w-5xl mx-auto m-6">
+    <div class="relative z-10 text-center mb-10"><div class="w-20 h-20 bg-white/15 rounded-2xl flex items-center justify-center mx-auto mb-6"><svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div><h1 class="text-4xl md:text-5xl font-black text-white mb-4">Become a TRU Agent</h1><p class="text-blue-200 text-xl max-w-2xl mx-auto">Earn money selling data bundles to your network. Set your own profit margins and grow your income.</p></div>
+    <div class="grid md:grid-cols-3 gap-5 mb-10 relative z-10">
+      <div class="text-center p-5 bg-white/10 rounded-2xl backdrop-blur-sm"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h3 class="font-bold text-lg text-white mb-2">Set Your Profit</h3><p class="text-blue-200 text-sm">Add your margin on top of admin agent base prices</p></div>
+      <div class="text-center p-5 bg-white/10 rounded-2xl backdrop-blur-sm"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg></div><h3 class="font-bold text-lg text-white mb-2">Unique Agent Link</h3><p class="text-blue-200 text-sm">Share your referral link — customers see your special pricing automatically</p></div>
+      <div class="text-center p-5 bg-white/10 rounded-2xl backdrop-blur-sm"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div><h3 class="font-bold text-lg text-white mb-2">Real-time Dashboard</h3><p class="text-blue-200 text-sm">Track sales, profit, and request withdrawals anytime</p></div>
+    </div>
+    ${formHtml}
+  </div></div>`;
+}
+
+/* ===== AGENT DASHBOARD ===== */
+function renderAgentDashboard(){
+  const ap=state.agentProfile;
+  if(!ap) return`<div class="min-h-screen flex items-center justify-center"><p class="text-muted-theme">Agent profile not found.</p></div>`;
+  const refLink=`${window.location.origin}${window.location.pathname}?agent=${ap.agent_id||ap.id}`;
+  const tab=state.agentTab||'dashboard';
+  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
+      <div><h1 class="text-3xl font-black">Agent Dashboard</h1><p class="text-muted-theme text-sm">Welcome, <strong>${ap.name||'Agent'}</strong> &bull; ID: <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">${ap.agent_id||ap.id}</code></p></div>
+      <button onclick="navigateTo('home')" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">← Back to Store</button>
+    </div>
+    <!-- Referral Link Card -->
+    <div class="mb-8 bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-5 text-white">
+      <p class="text-xs font-bold uppercase text-blue-200 mb-2">Your Agent Referral Link</p>
+      <div class="flex items-center gap-3 flex-wrap">
+        <code class="flex-1 bg-white/15 px-4 py-3 rounded-xl text-sm font-mono truncate min-w-0" id="agent-ref-link">${refLink}</code>
+        <button onclick="copyAgentLink()" class="bg-white text-blue-700 px-4 py-3 rounded-xl font-bold text-sm hover:bg-blue-50 transition-all whitespace-nowrap shrink-0 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>Copy Link</button>
+      </div>
+      <p class="text-blue-200 text-xs mt-2">Customers who open your link will see your special pricing automatically.</p>
+    </div>
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="agent-stat-card bg-green-50 border border-green-200"><div class="text-2xl font-black text-green-700">₵${(state.agentStats.sales||0).toFixed(2)}</div><div class="text-xs font-bold text-green-600 uppercase mt-1">Total Sales</div></div>
+      <div class="agent-stat-card bg-blue-50 border border-blue-200"><div class="text-2xl font-black text-blue-700">₵${(state.agentStats.profit||0).toFixed(2)}</div><div class="text-xs font-bold text-blue-600 uppercase mt-1">Total Profit</div></div>
+      <div class="agent-stat-card bg-yellow-50 border border-yellow-200"><div class="text-2xl font-black text-yellow-700">${state.agentStats.pending||0}</div><div class="text-xs font-bold text-yellow-600 uppercase mt-1">Pending Orders</div></div>
+      <div class="agent-stat-card bg-purple-50 border border-purple-200"><div class="text-2xl font-black text-purple-700">${ap.status||'Active'}</div><div class="text-xs font-bold text-purple-600 uppercase mt-1">Account Status</div></div>
+    </div>
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-6 flex-wrap">
+      <button class="admin-tab-btn ${tab==='dashboard'?'active':''}" onclick="state.agentTab='dashboard';render()">Overview</button>
+      <button class="admin-tab-btn ${tab==='pricing'?'active':''}" onclick="state.agentTab='pricing';render();setTimeout(loadAgentPricingPanel,50)">My Pricing</button>
+      <button class="admin-tab-btn ${tab==='orders'?'active':''}" onclick="state.agentTab='orders';render();setTimeout(loadAgentOrdersPanel,50)">My Orders</button>
+      <button class="admin-tab-btn ${tab==='withdraw'?'active':''}" onclick="state.agentTab='withdraw';render()">Withdraw</button>
+    </div>
+    <div id="agent-tab-content">
+      ${tab==='dashboard'?renderAgentOverviewTab():tab==='pricing'?'<div class="card-theme rounded-2xl p-6"><h3 class="text-xl font-bold mb-4">My Bundle Pricing</h3><p class="text-muted-theme text-sm mb-4">Set your profit margin for each bundle. You only see agent base prices — system prices are hidden.</p><div id="agent-pricing-panel"><div class="flex justify-center py-8"><div class="spinner" style="width:28px;height:28px;border-width:3px;border-top-color:#2563eb;"></div></div></div></div>':tab==='orders'?'<div class="card-theme rounded-2xl p-6"><h3 class="text-xl font-bold mb-4">Orders via My Link</h3><div id="agent-orders-panel"><div class="flex justify-center py-8"><div class="spinner" style="width:28px;height:28px;border-width:3px;border-top-color:#2563eb;"></div></div></div></div>':renderAgentWithdrawTab()}
+    </div>
+  </div>`;
+}
+function renderAgentOverviewTab(){
+  return`<div class="card-theme rounded-2xl p-8 text-center"><div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-6"><svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div><h3 class="text-xl font-bold mb-2">Your Agent Overview</h3><p class="text-muted-theme mb-6">Use the tabs above to manage your pricing, view orders placed through your link, and request withdrawals.</p><div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700 font-semibold max-w-sm mx-auto"><span class="font-black">Withdrawal rules:</span> Minimum ₵10 &bull; Monday–Thursday, 8AM–12PM &bull; 1% fee applies</div></div>`;
+}
+function renderAgentWithdrawTab(){
+  const now=new Date();const h=now.getHours();const d=now.getDay();
+  const open=d>=1&&d<=4&&h>=8&&h<12;
+  return`<div class="card-theme rounded-2xl p-6"><h3 class="text-xl font-bold mb-5">Request Withdrawal</h3><div class="${open?'withdrawal-window-open':'withdrawal-window-closed'} mb-6"><p class="font-bold text-sm">${open?'Withdrawal window is OPEN — Submit your request now':'Withdrawal window is CLOSED — Available: Monday to Thursday, 8AM–12PM only'}</p></div><div class="space-y-4 max-w-md"><div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800 font-semibold"><svg class="w-4 h-4 inline mr-1 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>A <strong>1% processing fee</strong> is deducted from all withdrawals. You receive the amount minus the fee.</div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount (Minimum ₵10)</label><input type="number" id="wd-amount" min="10" step="0.01" oninput="const a=parseFloat(this.value)||0;const fee=a*0.01;const net=a-fee;document.getElementById('wd-fee-preview').textContent=a>=10?'Fee: ₵'+fee.toFixed(2)+' — You receive: ₵'+net.toFixed(2):'';" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none" placeholder="10.00"><p id="wd-fee-preview" class="text-xs text-blue-600 font-bold mt-1.5"></p></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Mobile Money Number</label><input type="tel" id="wd-phone" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Network</label><select id="wd-network" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none"><option value="mtn">MTN MoMo</option><option value="telecel">Telecel Cash</option><option value="airteltigo">AirtelTigo Money</option></select></div><button onclick="submitWithdrawal()" ${!open?'disabled':''} class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">Request Withdrawal</button></div></div>`;
+}
+
+/* ===== AGENT ACTIONS ===== */
+async function registerAsAgent(){
+  const name=document.getElementById('agent-name')?.value.trim();
+  const phone=document.getElementById('agent-phone')?.value.trim();
+  const business=document.getElementById('agent-business')?.value.trim();
+  if(!name||!phone){showToast('Name and phone are required',3000,'error');return;}
+  const v=validateGhanaPhone(phone);if(!v.isValid){showToast(v.error,4000,'error');return;}
+  try{
+    const agentId='AGT-'+Math.random().toString(36).slice(2,8).toUpperCase();
+    const{data,error}=await supa.from('agent_profiles').insert([{user_id:state.user.id,agent_id:agentId,name,phone,business_name:business||null,status:'pending',created_at:new Date().toISOString()}]).select();
+    if(error) throw error;
+    state.agentProfile=data[0];state.agentId=agentId;
+    showToast('Application submitted! Please wait for admin approval before accessing your dashboard.',6000,'success');
+    navigateTo('agent-portal');
+  }catch(err){showToast('Registration failed: '+(err.message||'Unknown error'),5000,'error');}
+}
+function copyAgentLink(){
+  const el=document.getElementById('agent-ref-link');
+  if(!el) return;
+  navigator.clipboard.writeText(el.textContent).then(()=>showToast('Referral link copied!',3000,'success')).catch(()=>showToast('Copy manually: '+el.textContent,6000,'info'));
+}
+async function loadAgentPricingPanel(){
+  await loadAgentBasePrices();
+  await loadAgentPricesForSession();
+  const c=document.getElementById('agent-pricing-panel');
+  if(!c) return;
+  if(!state.agentBasePrices.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No agent base prices have been set by admin yet.<br><span class="text-xs">Check back later or contact admin.</span></div>`;return;}
+  c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Your Base Cost</th><th class="p-3 text-xs font-black uppercase text-slate-500">Your Profit (₵)</th><th class="p-3 text-xs font-black uppercase text-slate-500">Customer Pays</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th></tr></thead><tbody>${state.agentBasePrices.map(bp=>{const ex=state.agentPrices.find(p=>p.bundle_id===bp.id||p.bundle_name===bp.bundle_name);const pr=ex?parseFloat(ex.profit||0):0;const finalPrice=ex?parseFloat(ex.final_price||0):(parseFloat(bp.base_price)+pr);const locked=!!ex;const rowClass=locked?'border-b bg-slate-100 opacity-75':'border-b hover:bg-slate-50';return`<tr class="${rowClass}"><td class="p-3 font-bold ${locked?'text-slate-400':''}">${bp.network?.toUpperCase()}</td><td class="p-3 ${locked?'text-slate-400':''}">${bp.bundle_name}${locked?` <span class="ml-1 text-xs bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-bold">LOCKED</span>`:''}</td><td class="p-3 font-bold ${locked?'text-slate-400':'text-green-600'}">₵${parseFloat(bp.base_price).toFixed(2)}</td><td class="p-3">${locked?`<div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><div class="flex flex-col"><span class="font-black text-green-600 text-sm">₵${pr.toFixed(2)}</span><span class="text-xs text-slate-400 font-semibold">Your profit</span></div></div>`:`<input type="number" min="0" step="0.01" value="${pr.toFixed(2)}" id="pr-${bp.id}" onchange="document.getElementById('tot-${bp.id}').textContent='₵'+(${parseFloat(bp.base_price)}+parseFloat(this.value||0)).toFixed(2)" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none">`}</td><td class="p-3" id="tot-${bp.id}">${locked?`<div class="flex flex-col"><span class="font-black text-blue-500 text-sm">₵${finalPrice.toFixed(2)}</span><span class="text-xs text-slate-400 font-semibold">Fixed price</span></div>`:`<span class="font-bold text-blue-600">₵${(parseFloat(bp.base_price)+pr).toFixed(2)}</span>`}</td><td class="p-3">${locked?`<div class="flex flex-col gap-1"><span class="inline-flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-200 px-2 py-1 rounded-lg"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked</span><span class="text-xs text-slate-400">Contact admin to edit</span></div>`:`<button onclick="saveAgentProfit('${bp.id}','${bp.bundle_name}','${bp.network}',${bp.base_price})" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 transition-all">Save</button>`}</td></tr>`;}).join('')}</tbody></table></div><p class="text-xs text-muted-theme mt-4">Customer pays = Your Base Cost + Your Profit. System base prices are never exposed here. Once you save, your price is locked — contact admin to make changes. <span class="text-slate-400 font-bold">Grayed-out rows are locked and uneditable.</span></p>`;
+}
+async function saveAgentProfit(bundleId,bundleName,network,basePrice){
+  const input=document.getElementById(`pr-${bundleId}`);
+  if(!input||!state.agentProfile) return;
+  const profit=parseFloat(input.value)||0;
+  const confirmed=confirm('Once you save this profit, this bundle price will be locked and you will not be able to edit it until the admin unlocks it. Do you want to proceed?');
+  if(!confirmed) return;
+  try{
+    // Upsert agent price (updates existing row if already saved, inserts if new)
+    const{error}=await supa.from('agent_prices').upsert([{agent_id:state.agentProfile.id,bundle_id:bundleId,bundle_name:bundleName,network,profit,final_price:parseFloat(basePrice)+profit,status:'approved',updated_at:new Date().toISOString()}],{onConflict:'agent_id,bundle_id'});
+    if(error) throw error;
+    // Auto-lock only this specific bundle row in agent_base_prices
+    await supa.from('agent_base_prices').update({pricing_locked:true}).eq('id',bundleId);
+    showToast('Profit saved for '+bundleName+'. This price is now locked. Contact admin to make changes.',5000,'success');
+    await loadAgentBasePrices();
+    await loadAgentPricesForSession();
+    await loadAgentPricingPanel();
+  }catch(err){showToast('Save failed: '+(err.message||'error'),4000,'error');}
+}
+async function loadAgentOrdersPanel(){
+  const c=document.getElementById('agent-orders-panel');
+  if(!c||!state.agentProfile) return;
+  try{
+    const{data,error}=await supa.from('orders').select('*').eq('agent_id',state.agentProfile.id).order('created_at',{ascending:false}).limit(100);
+    if(error) throw error;
+    if(!data||!data.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No orders through your link yet. Share your referral link to get started!</div>`;return;}
+    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">Profit</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Date</th></tr></thead><tbody>${data.map(o=>`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs font-bold">${o.ref}</td><td class="p-3 font-bold">${o.Network?.toUpperCase()}</td><td class="p-3">${o.bundle_name}</td><td class="p-3 font-bold text-blue-600">₵${parseFloat(o.Amount).toFixed(2)}</td><td class="p-3 font-bold text-green-600">₵${parseFloat(o.agent_profit||0).toFixed(2)}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${o.Status==='Completed'||o.Status==='Delivered'?'bg-green-100 text-green-700':o.Status==='Pending'?'bg-yellow-100 text-yellow-700':'bg-blue-100 text-blue-700'}">${o.Status}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(o.created_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
+  }catch(err){c.innerHTML=`<div class="text-center py-8 text-red-500">Failed to load orders</div>`;}
+}
+async function submitWithdrawal(){
+  const amount=parseFloat(document.getElementById('wd-amount')?.value);
+  const phone=document.getElementById('wd-phone')?.value.trim();
+  const network=document.getElementById('wd-network')?.value;
+  if(!amount||amount<10){showToast('Minimum withdrawal is ₵10',3000,'error');return;}
+  if(!phone){showToast('Enter your MoMo number',3000,'error');return;}
+  const v=validateGhanaPhone(phone);if(!v.isValid){showToast(v.error,3000,'error');return;}
+  if(!state.agentProfile){showToast('Agent profile not found',3000,'error');return;}
+  const fee=parseFloat((amount*0.01).toFixed(2));
+  const netAmount=parseFloat((amount-fee).toFixed(2));
+  try{
+    const{error}=await supa.from('agent_withdrawals').insert([{agent_id:state.agentProfile.agent_id||state.agentProfile.id,user_id:state.user.id,amount,fee,net_amount:netAmount,phone,network,status:'pending',created_at:new Date().toISOString()}]);
+    if(error) throw error;
+    showToast('Withdrawal request submitted! Fee: ₵'+fee.toFixed(2)+' — You receive: ₵'+netAmount.toFixed(2),5000,'success');
+    document.getElementById('wd-amount').value='';document.getElementById('wd-phone').value='';document.getElementById('wd-fee-preview').textContent='';
+  }catch(err){showToast('Request failed: '+(err.message||'error'),4000,'error');}
+}
+window.showProcessConfirmation=function(ref){
+  const order=state.orders.find(o=>o.ref===ref);if(!order) return;
+  state.currentProcessingOrder=order;
+  document.getElementById('confirm-phone').textContent=order.Phone;
+  document.getElementById('confirm-network').textContent=order.Network?.toUpperCase();
+  document.getElementById('confirm-bundle').textContent=order.bundle_name;
+  document.getElementById('confirm-amount').textContent='₵'+parseFloat(order.Amount).toFixed(2);
+  selectConfirmationProvider('refer2bundle');
+  document.getElementById('admin-order-confirmation').style.display='block';
+};
+function cancelActiveProcess(){document.getElementById('admin-actions-bar').style.display='none';state.isDirectMode=false;state.activeOrderData=null;}
+window.deleteOrder=async function(ref){
+  if(!confirm(`Are you sure you want to permanently delete order ${ref}?`)) return;
+  try{const{error}=await supa.from('orders').delete().eq('ref',ref);if(error) throw error;state.orders=state.orders.filter(o=>o.ref!==ref);showToast(`Order ${ref} permanently deleted`,3000,'success');render();}
+  catch(err){showToast('Delete failed: '+(err.message||'Unknown error'),4000,'error');}
+};
+window.updateStatus=async function(ref,status){
+  try{const{error}=await supa.from('orders').update({Status:status,updated_at:new Date().toISOString()}).eq('ref',ref);if(error) throw error;showToast(`Order marked as ${status}`,3000,'success');fetchOrders();}
+  catch(err){showToast('Update failed: '+(err.message||'Unknown error'),4000,'error');}
+};
+
+/* ========== CHANGE 7: renderSuccessView – "View My Orders" as primary CTA ========== */
+function renderSuccessView(params){
+  return`<div class="min-h-screen flex items-center justify-center px-4 py-20 animate__animated animate__fadeIn"><div class="max-w-md w-full card-theme p-8 md:p-12 rounded-3xl text-center animate-scale-in"><div class="w-24 h-24 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-3xl font-black mb-4">Order Confirmed!</h2><p class="text-muted-theme mb-8">Your data bundle has been ordered successfully.</p><div class="bg-slate-50 rounded-2xl p-6 mb-8 text-left space-y-3"><div class="flex justify-between"><span class="text-sm text-muted-theme">Reference:</span><span class="font-bold font-mono text-sm">${params.ref}</span></div><div class="flex justify-between"><span class="text-sm text-muted-theme">Bundle:</span><span class="font-bold">${params.bundle_name}</span></div><div class="flex justify-between"><span class="text-sm text-muted-theme">Phone:</span><span class="font-bold">${params.Phone}</span></div></div><div class="space-y-3"><button onclick="navigateTo('my-orders')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">View My Orders</button><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy More Data</button><button onclick="navigateTo('wallet')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">View Wallet</button></div></div></div>`;
+}
+
+
+/* ===== ANNOUNCEMENT / BROADCAST (Supabase table: announcements) ===== */
+// Fetch current active announcement
+async function fetchAnnouncement(){
+  try{
+    const{data,error}=await supa.from('announcements').select('*').order('created_at',{ascending:false}).limit(1).single();
+    if(error&&error.code==='PGRST116') return null; // no rows
+    if(error) throw error;
+    return data;
+  }catch(e){return null;}
+}
+
+// Save announcement (admin)
+async function saveAnnouncement(){
+  const main=document.getElementById('ann-main')?.value.trim();
+  const sub=document.getElementById('ann-sub')?.value.trim();
+  if(!main){showToast('Main message is required',3000,'error');return;}
+  try{
+    // Delete old announcements first, then insert new one
+    await supa.from('announcements').delete().neq('id',0); // clear all
+    const{error}=await supa.from('announcements').insert([{main_message:main,sub_message:sub||'',created_at:new Date().toISOString()}]);
+    if(error) throw error;
+    showToast('Announcement posted!',3000,'success');
+    // Refresh admin view to show preview
+    await fetchOrders();
+  }catch(e){showToast('Failed to post: '+(e.message||'error'),4000,'error');}
+}
+
+/* ===== WHATSAPP REPORT ORDER ===== */
+function reportOrder(order){
+  const wa='233597578538';
+  const msg=
+    'Hello, I would like to report a complaint regarding my order.%0A%0A'+
+    '*Order Details*%0A'+
+    'Reference: '+encodeURIComponent(order.ref)+'%0A'+
+    'Network: '+encodeURIComponent((order.Network||'').toUpperCase())+'%0A'+
+    'Bundle: '+encodeURIComponent(order.bundle_name)+'%0A'+
+    'Phone: '+encodeURIComponent(order.Phone)+'%0A'+
+    'Amount: ₵'+encodeURIComponent(parseFloat(order.Amount).toFixed(2))+'%0A'+
+    'Status: '+encodeURIComponent(order.Status||'Pending')+'%0A'+
+    'Date: '+encodeURIComponent(new Date(order.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'long',year:'numeric'}))+'%0A%0A'+
+    'Please assist me with this issue. Thank you.';
+  window.open('https://wa.me/'+wa+'?text='+msg,'_blank');
+}
+
+/* ========== CHANGE 8: render() – add 'my-orders' case ========== */
+function render(){
+  const app=document.getElementById('app-view'),extended=document.getElementById('extended-content');
+  updateAuthUI();
+  document.getElementById('admin-actions-bar').style.display='none';
+  switch(state.view){
+    case 'landing': app.innerHTML=renderLandingPage();extended.innerHTML='';break;
+    case 'home': app.innerHTML=renderHome();extended.innerHTML='';break;
+    case 'network': app.innerHTML=renderNetworkView(state.params);extended.innerHTML='';break;
+    case 'about': app.innerHTML=renderAbout();extended.innerHTML='';break;
+    case 'login':
+      app.innerHTML=renderLogin();extended.innerHTML='';
+      (function(){var s=localStorage.getItem('tru-remember-email');if(s){var el=document.getElementById('login-email'),cb=document.getElementById('remember-me');if(el) el.value=s;if(cb) cb.checked=true;}})();
+      break;
+    case 'register': app.innerHTML=renderRegister();extended.innerHTML='';break;
+    case 'forgot-password': app.innerHTML=renderForgotPassword();extended.innerHTML='';break;
+    case 'wallet': app.innerHTML=renderWallet();extended.innerHTML='';if(state.user) fetchUserTransactions();break;
+    case 'my-orders':
+      app.innerHTML=renderMyOrders();extended.innerHTML='';
+      setTimeout(()=>loadMyOrders(),0); // load after DOM paint
+      break;
+    case 'success': app.innerHTML=renderSuccessView(state.params);extended.innerHTML='';break;
+    case 'admin-login': app.innerHTML=renderAdminLogin();extended.innerHTML='';break;
+    case 'admin-dashboard':
+      if(!state.userProfile||state.userProfile.role!=='admin'){showToast('Admin access only');return;}
+      app.innerHTML=renderAdminDashboard();extended.innerHTML='';
+      // Load tab-specific data after render
+      setTimeout(()=>{
+        if(state.adminTab==='agent-prices') loadAdminAgentPricesTable();
+        else if(state.adminTab==='agents') loadAdminAgentsList();
+        else if(state.adminTab==='withdrawals') loadAdminWithdrawals();
+      },50);
+      break;
+    case 'agent-portal': app.innerHTML=renderAgentPortal();extended.innerHTML='';break;
+    case 'agent-dashboard': app.innerHTML=renderAgentDashboard();extended.innerHTML='';
+      setTimeout(()=>{
+        if(state.agentTab==='pricing') loadAgentPricingPanel();
+        else if(state.agentTab==='orders') loadAgentOrdersPanel();
+      },50);
+      break;
+    default: navigateTo('landing');
+  }
+  if(state.activeOrderData){const m=document.createElement('div');m.innerHTML=renderOrderForm();app.appendChild(m.firstElementChild);}
+}
+
+/* ===== INIT ===== */
+document.addEventListener('DOMContentLoaded',async()=>{
+  try{
+    const{data:{session},error}=await supa.auth.getSession();
+    if(error) console.error('Session error:',error);
+    if(session){state.user=session.user;await fetchUserProfile();await fetchAgentProfile();}
+  }catch(err){showToast('Connection error. Please check your internet.',5000,'error');}
+  // Detect ?agent= param in URL → activate agent pricing mode
+  await detectAgentLink();
+  // Auto-poll API status for Processing orders every 2 minutes (admin only)
+  setInterval(async()=>{
+    if(state.user&&state.userProfile?.role==='admin'){
+      await updatePendingOrderStatuses();
+    }
+  },2*60*1000);
+  document.getElementById('admin-nav-btn').addEventListener('click',()=>{if(state.isAdmin) navigateTo('admin-dashboard');else navigateTo('admin-login');});
+  document.getElementById('global-fulfill-btn').addEventListener('click',()=>{if(state.activeOrderData) handleOrderButton();});
+  render();
+});
+
+supa.auth.onAuthStateChange((event,session)=>{
+  if(event==='SIGNED_IN'){state.user=session.user;fetchUserProfile();fetchAgentProfile();}
+  else if(event==='SIGNED_OUT'){state.user=null;state.userProfile=null;state.isAdmin=false;state.isDirectMode=false;state.activeOrderData=null;state.agentProfile=null;navigateTo('landing');}
+  else if(event==='TOKEN_REFRESHED'&&session){state.user=session.user;}
+});
+</script>
+</body>
+</html>
