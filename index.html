@@ -144,24 +144,44 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 <body class="min-h-screen flex flex-col antialiased">
 
 <nav class="sticky top-0 z-[60] glass transition-all duration-300">
-  <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
+  <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
     <div onclick="navigateTo('landing')" class="text-2xl font-extrabold tracking-tighter cursor-pointer flex items-center gap-2 hover:scale-105 transition-transform duration-300">
       <span class="bg-gradient-to-br from-red-600 to-red-500 text-white px-3 py-1.5 rounded-xl italic shadow-lg">TRU</span>
       <span class="font-bold">DATA</span>
     </div>
-    <div class="flex gap-4 md:gap-8 items-center">
-      <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-red-600 hidden md:block transition-colors duration-300">Buy Data</button>
-      <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-red-600 hidden md:block transition-colors duration-300">About</button>
-      <button onclick="navigateTo('agent-portal')" class="font-semibold text-sm hover:text-blue-600 hidden md:block transition-colors duration-300 text-blue-500 font-bold">Agents</button>
-      <div id="user-auth-section" class="hidden md:flex items-center gap-3"></div>
+    <!-- Desktop nav -->
+    <div class="hidden md:flex gap-8 items-center">
+      <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-red-600 transition-colors duration-300">Buy Data</button>
+      <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-red-600 transition-colors duration-300">About</button>
+      <button onclick="navigateTo('agent-portal')" class="font-semibold text-sm hover:text-blue-600 transition-colors duration-300 text-blue-500 font-bold">Agents</button>
+      <div id="user-auth-section" class="flex items-center gap-3"></div>
       <button id="admin-nav-btn" class="text-[10px] bg-slate-100 px-4 py-2.5 rounded-full font-bold text-slate-500 hover:bg-red-600 hover:text-white transition-all uppercase shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Admin</button>
+    </div>
+    <!-- Mobile right side: auth + hamburger -->
+    <div class="flex md:hidden items-center gap-2">
+      <div id="user-auth-section-mobile" class="flex items-center gap-2"></div>
+      <button id="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Open menu" class="p-2 rounded-xl bg-slate-100 hover:bg-red-600 hover:text-white transition-all duration-200 flex flex-col justify-center items-center gap-[5px] w-10 h-10">
+        <span class="block w-5 h-0.5 bg-current rounded transition-all duration-300" id="ham-line-1"></span>
+        <span class="block w-5 h-0.5 bg-current rounded transition-all duration-300" id="ham-line-2"></span>
+        <span class="block w-5 h-0.5 bg-current rounded transition-all duration-300" id="ham-line-3"></span>
+      </button>
+    </div>
+  </div>
+  <!-- Mobile dropdown menu -->
+  <div id="mobile-menu" class="md:hidden overflow-hidden max-h-0 transition-all duration-300 ease-in-out border-t border-slate-100" style="max-height:0;">
+    <div class="px-4 py-3 flex flex-col gap-1 bg-white/95 backdrop-blur-md">
+      <button onclick="navigateTo('home');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>Buy Data</button>
+      <button onclick="navigateTo('about');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>About</button>
+      <button onclick="navigateTo('agent-portal');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Agents</button>
+      <div id="user-auth-section-mobile-menu" class="flex flex-col gap-1"></div>
+      <button id="admin-nav-btn-mobile" onclick="document.getElementById('admin-nav-btn').click();closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-[11px] text-slate-500 hover:bg-slate-100 uppercase tracking-widest transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>Admin</button>
     </div>
   </div>
 </nav>
 
 <main id="app-view" class="flex-grow"></main>
 <div id="extended-content"></div>
-<div id="agent-session-banner" style="display:none;" class="agent-banner sticky top-20 z-[55]">
+<div id="agent-session-banner" style="display:none;" class="agent-banner sticky top-16 z-[55]">
   <span class="relative z-10 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>Agent Link Active — You are viewing <strong>Agent Pricing</strong>. Agent ID: <span id="agent-banner-id" class="font-mono bg-white/20 px-2 py-0.5 rounded"></span></span>
 </div>
 <div id="toast-container"></div>
@@ -413,8 +433,31 @@ async function logoutUser(){
 }
 
 /* ========== CHANGE 2: updateAuthUI with My Orders + Logout ========== */
+/* ===== MOBILE MENU ===== */
+function toggleMobileMenu(){
+  const menu=document.getElementById('mobile-menu');
+  const isOpen=menu.style.maxHeight&&menu.style.maxHeight!=='0px'&&menu.style.maxHeight!=='0';
+  if(isOpen){closeMobileMenu();}else{openMobileMenu();}
+}
+function openMobileMenu(){
+  const menu=document.getElementById('mobile-menu');
+  menu.style.maxHeight=menu.scrollHeight+'px';
+  document.getElementById('ham-line-1').style.transform='rotate(45deg) translate(4px,4px)';
+  document.getElementById('ham-line-2').style.opacity='0';
+  document.getElementById('ham-line-3').style.transform='rotate(-45deg) translate(4px,-4px)';
+}
+function closeMobileMenu(){
+  const menu=document.getElementById('mobile-menu');
+  menu.style.maxHeight='0';
+  document.getElementById('ham-line-1').style.transform='';
+  document.getElementById('ham-line-2').style.opacity='1';
+  document.getElementById('ham-line-3').style.transform='';
+}
+
 function updateAuthUI(){
   const s=document.getElementById('user-auth-section');
+  const sm=document.getElementById('user-auth-section-mobile');
+  const smm=document.getElementById('user-auth-section-mobile-menu');
   if(!s) return;
   if(state.user){
     const agentBtn=state.agentProfile?`<button onclick="navigateTo('agent-dashboard')" class="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-xs font-bold hover:bg-blue-200 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent</button>`:'';
@@ -433,17 +476,25 @@ function updateAuthUI(){
         Logout
       </button>
     </div>`;
+    // Mobile top bar: just wallet icon shortcut
+    if(sm) sm.innerHTML=`<button onclick="navigateTo('wallet')" class="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>Wallet</button>`;
+    // Mobile menu: full list
+    const agentMenuBtn=state.agentProfile?`<button onclick="navigateTo('agent-dashboard');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent Dashboard</button>`:'';
+    if(smm) smm.innerHTML=`${agentMenuBtn}<button onclick="navigateTo('my-orders');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>My Orders</button><button onclick="logoutUser();closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>Logout</button>`;
   }else{
     s.innerHTML=`<div class="flex items-center gap-2">
       <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 hover:text-red-600 transition-colors">Login</button>
       <span class="text-slate-300">|</span>
       <button onclick="navigateTo('register')" class="text-xs font-bold bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors">Sign Up</button>
     </div>`;
+    if(sm) sm.innerHTML=`<button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 hover:text-red-600 transition-colors px-2 py-1.5">Login</button>`;
+    if(smm) smm.innerHTML=`<button onclick="navigateTo('login');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>Login</button><button onclick="navigateTo('register');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-red-600 hover:bg-red-50 transition-colors font-bold flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>Sign Up</button>`;
   }
 }
 
 /* ===== NAVIGATION ===== */
 async function navigateTo(view,params=null){
+  closeMobileMenu();
   try{
     if(view==='admin-dashboard'){
       if(!state.user){showToast('Please login first');navigateTo('login');return;}
