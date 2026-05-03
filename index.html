@@ -1111,7 +1111,7 @@ async function handleOrderButton(){
     // 3. SAVE ORDER WITH API REFERENCE
     const orderData={
       ref,Phone:phone,Network:bundle.network,bundle_name:bundle.size,Amount:bundle.price,
-      Status:apiSuccess?'Pending':'Pending','Processing':'Processing','Completed':'Delivered':'Completed',
+      Status:apiSuccess?'Pending':'Pending','Processing':'Processing','Completed':'Completed','Delivered':'Completed',
       provider:'refer2bundle',
       user_id:state.user.id,
       pricing_mode:state.activeOrderData?.pricingMode||'system',
