@@ -390,7 +390,7 @@ async function fetchLatestApkUrl(){
       if(!ver) return;
       if(!bestVer||compareVersions(ver,bestVer)>0){bestVer=ver;best=f.name;}
     });
-    if(best){_latestApkUrl=APK_BASE_URL+best;console.log('Latest APK:',_latestApkUrl);}
+    if(best){_latestApkUrl=APK_BASE_URL+best;}
   }catch(e){console.warn('APK version check failed, using fallback:',e);}
   return _latestApkUrl;
 }
@@ -453,17 +453,18 @@ async function detectAgentLink(){
   const bannerIdEl=document.getElementById('agent-banner-id');
   if(banner) banner.style.display='block';
   if(bannerIdEl) bannerIdEl.textContent=agentId;
-  // Fetch the agent's profile UUID so orders are linked by UUID (not text agent_id)
+  // The server returns this agent's final prices only (no cost prices or other agents' data).
   try{
-    const{data:ap}=await supa.from('agent_profiles').select('id').eq('agent_id',agentId).maybeSingle();
-    if(ap) state.agentProfileId=ap.id;
-    // Also store in sessionStorage so it survives page refreshes within the session
-    if(ap) sessionStorage.setItem('tru_agent_profile_id',ap.id);
-  }catch(e){}
-  // Restore from sessionStorage if fetch failed
-  if(!state.agentProfileId) state.agentProfileId=sessionStorage.getItem('tru_agent_profile_id')||null;
-  await loadAgentBasePrices();
-  await loadAgentPricesForSession();
+    const{data,error}=await supa.rpc('get_agent_link_prices',{p_agent_code:agentId});
+    if(error) throw error;
+    state.agentLinkPrices=Object.fromEntries((data||[]).map(r=>[r.bundle_id,parseFloat(r.price)]));
+  }catch(e){state.agentLinkPrices={};}
+  if(!Object.keys(state.agentLinkPrices).length){
+    // Unknown or inactive agent code: fall back to normal pricing.
+    sessionStorage.removeItem('tru_agent_id');
+    state.agentId=null;state.agentPricingMode=false;
+    if(banner) banner.style.display='none';
+  }
 }
 async function loadAgentBasePrices(){
   try{
@@ -475,7 +476,7 @@ async function loadAgentPricesForSession(){
   // Priority: agentProfileId (UUID fetched during detectAgentLink for customer sessions)
   // Then fall back to agentProfile.id (when the agent themselves is logged in)
   // The agent_prices table stores agent_id as the agent_profiles UUID — never the text agent_id string
-  const agentKey=state.agentProfileId||state.agentProfile?.id;
+  const agentKey=state.agentProfile?.id;
   if(!agentKey) return;
   try{
     const{data,error}=await supa.from('agent_prices').select('*').eq('agent_id',agentKey).eq('status','approved');
@@ -492,7 +493,7 @@ async function fetchAgentProfile(){
 async function fetchAgentStats(){
   if(!state.agentProfile) return;
   try{
-    const{data}=await supa.from('orders').select('Amount,agent_profit,Status').eq('agent_id',state.agentProfile.id);
+    const{data}=await supa.from('orders').select('Amount,agent_profit,Status').eq('agent_id',state.agentProfile.id).neq('Status','Deleted');
     if(data){
       state.agentStats.sales=data.reduce((a,o)=>a+parseFloat(o.Amount||0),0);
       const grossProfit=data.reduce((a,o)=>a+parseFloat(o.agent_profit||0),0);
@@ -515,11 +516,9 @@ async function fetchAdminAgentBasePrices(){
 }
 function getBundleDisplayPrice(bundle){
   if(!state.agentPricingMode||!state.agentId) return{price:bundle.price,isAgent:false};
-  const base=state.agentBasePrices.find(b=>b.network===bundle.network&&(b.bundle_name===bundle.size||b.bundle_id===bundle.id));
-  if(!base) return{price:bundle.price,isAgent:false};
-  const agP=state.agentPrices.find(p=>p.bundle_id===base.id||p.bundle_name===bundle.size);
-  const profit=agP?parseFloat(agP.profit||0):0;
-  return{price:parseFloat(base.base_price)+profit,isAgent:true,basePrice:parseFloat(base.base_price),profit,agentBasePriceId:base.id};
+  const price=state.agentLinkPrices?.[bundle.id];
+  if(price==null) return{price:bundle.price,isAgent:false};
+  return{price,isAgent:true,profit:0};
 }
 function validateGhanaPhone(phone){
   phone=phone.replace(/[\s-]/g,'');
@@ -1037,7 +1036,7 @@ function renderAbout(){return`<div class="animate__animated animate__fadeIn"><se
 
 /* ===== AUTH VIEWS ===== */
 function renderLogin(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Welcome Back</h2><p class="text-sm text-muted-theme mt-2">Sign in to your account to continue</p></div><form onsubmit="handleLogin(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="login-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><div class="relative"><input type="password" id="login-password" required class="w-full p-4 pr-12 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"><button type="button" id="login-eye" onclick="togglePasswordVisibility('login-password','login-eye')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer bg-transparent border-none p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div></div><div class="flex items-center gap-3 mt-2"><input type="checkbox" id="remember-me" style="accent-color:#dc2626;width:16px;height:16px;cursor:pointer;"><label for="remember-me" class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Remember me</label></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-4">Sign In</button></form><div class="mt-6 flex justify-between items-center"><button onclick="navigateTo('register')" class="text-sm text-red-600 font-bold hover:underline">Create account</button><button onclick="navigateTo('forgot-password')" class="text-sm text-muted-theme hover:text-red-600 transition-colors">Forgot password?</button></div></div></div>`;}
-function renderRegister(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Create Account</h2><p class="text-sm text-muted-theme mt-2">Join TRU Data to start purchasing bundles</p></div><form onsubmit="handleRegister(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name</label><input type="text" id="reg-name" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="John Doe"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="reg-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><div class="relative"><input type="password" id="reg-password" required minlength="6" class="w-full p-4 pr-12 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"><button type="button" id="reg-eye" onclick="togglePasswordVisibility('reg-password','reg-eye')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer bg-transparent border-none p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Create Account</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Already have an account? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
+function renderRegister(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Create Account</h2><p class="text-sm text-muted-theme mt-2">Join TRU Data to start purchasing bundles</p></div><form onsubmit="handleRegister(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name</label><input type="text" id="reg-name" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="John Doe"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="reg-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><div class="relative"><input type="password" id="reg-password" required minlength="8" class="w-full p-4 pr-12 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"><button type="button" id="reg-eye" onclick="togglePasswordVisibility('reg-password','reg-eye')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer bg-transparent border-none p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Create Account</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Already have an account? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
 // BUG 3: Helper to toggle password visibility — toggles input type and swaps eye/eye-slash SVG icon
 function togglePasswordVisibility(inputId,iconId){
   const input=document.getElementById(inputId);
@@ -1173,13 +1172,13 @@ async function fetchUserTransactions(){
     const{data,error}=await supa.from('transactions').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(10);
     if(error) throw error;
     if(data&&data.length>0){
-      listEl.innerHTML=data.map(t=>`<div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type==='deposit'?'bg-green-100 text-green-600':'bg-red-100 text-red-600'}"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${t.type==='deposit'?'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>':'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'}</svg></div><div><p class="font-bold text-sm">${t.type==='deposit'?'Wallet Deposit':'Data Purchase'}</p><p class="text-xs text-muted-theme">${new Date(t.created_at).toLocaleDateString()} &bull; ${new Date(t.created_at).toLocaleTimeString()}</p></div></div><div class="text-right"><p class="font-bold ${t.type==='deposit'?'text-green-600':'text-slate-900'}">${t.type==='deposit'?'+':'-'}₵${parseFloat(t.amount).toFixed(2)}</p><p class="text-xs ${t.status==='completed'?'text-green-600':'text-yellow-600'}">${esc(t.status)}</p></div></div>`).join('');
+      listEl.innerHTML=data.map(t=>`<div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type!=='purchase'?'bg-green-100 text-green-600':'bg-red-100 text-red-600'}"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${t.type!=='purchase'?'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>':'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'}</svg></div><div><p class="font-bold text-sm">${t.type==='deposit'?'Wallet Deposit':t.type==='refund'?'Refund':'Data Purchase'}</p><p class="text-xs text-muted-theme">${new Date(t.created_at).toLocaleDateString()} &bull; ${new Date(t.created_at).toLocaleTimeString()}</p></div></div><div class="text-right"><p class="font-bold ${t.type!=='purchase'?'text-green-600':'text-slate-900'}">${t.type!=='purchase'?'+':'-'}₵${parseFloat(t.amount).toFixed(2)}</p><p class="text-xs ${t.status==='completed'?'text-green-600':'text-yellow-600'}">${esc(t.status)}</p></div></div>`).join('');
     }else{listEl.innerHTML='<div class="text-center py-8 text-muted-theme"><svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>No transactions yet</div>';}
   }catch(err){if(listEl) listEl.innerHTML='<div class="text-center py-8 text-red-500">Failed to load transactions. Please refresh the page.</div>';}
 }
 async function handleForgotPassword(e){
   e.preventDefault();const email=document.getElementById('forgot-email').value.trim();
-  try{const{error}=await supa.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/index.html'});if(error) throw error;showToast('Check your email for password reset instructions!',4000,'success');navigateTo('login');}
+  try{const{error}=await supa.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});if(error) throw error;showToast('Check your email for password reset instructions!',4000,'success');navigateTo('login');}
   catch(err){showToast(''+(err.message||'Failed to send reset email'),4000,'error');}
 }
 function initiateDeposit(){
@@ -1323,7 +1322,7 @@ function renderAdminDashboard(){
       <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">${state.orders.length}</div><div class="text-xs font-bold text-muted-theme uppercase">Total Orders</div></div>
       <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-yellow-600">${state.orders.filter(o=>o.Status==='Pending').length}</div><div class="text-xs font-bold text-muted-theme uppercase">Pending</div></div>
       <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-green-600">${completedCount}</div><div class="text-xs font-bold text-muted-theme uppercase">Completed</div></div>
-      <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">₵${state.orders.reduce((a,o)=>a+(parseFloat(o.Amount)||0),0).toFixed(2)}</div><div class="text-xs font-bold text-muted-theme uppercase">Revenue</div></div>
+      <div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black text-red-600">₵${state.orders.filter(o=>o.Status!=='Deleted').reduce((a,o)=>a+(parseFloat(o.Amount)||0),0).toFixed(2)}</div><div class="text-xs font-bold text-muted-theme uppercase">Revenue</div></div>
     </div>
     <!-- Admin Tabs -->
     <div class="flex gap-2 mb-6 flex-wrap animate-slide-up stagger-3" style="animation-fill-mode:forwards;">
