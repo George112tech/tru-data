@@ -7,9 +7,9 @@
 <meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. Data top up service across Ghana.">
 <meta name="keywords" content="buy data Ghana, MTN data bundles, Telecel data, AirtelTigo data, cheap data Ghana, mobile data Ghana, internet bundles, data top up Ghana, TRU Data Network">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap">
+<!-- Fonts are served from this site (fonts/), not Google. -->
+<link rel="preload" href="fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <style>
 :root {
@@ -311,9 +311,9 @@ const MOMO_NAME='GEORGE DANQUAH DORDZIE';
 const supa=supabase.createClient(SB_URL,SB_KEY);
 
 const NETWORKS={
-  mtn:{name:'MTN Ghana',color:'bg-[#FFCC00]',text:'text-black',logo:'./2.png',description:"Ghana's largest network with widest coverage"},
-  airteltigo:{name:'AirtelTigo',color:'bg-[#0077B5]',text:'text-white',logo:'./3.png',description:'Affordable data plans with great value'},
-  telecel:{name:'Telecel',color:'bg-[#E60000]',text:'text-white',logo:'./4.png',description:'Fast 4G internet at competitive prices'}
+  mtn:{name:'MTN Ghana',color:'bg-[#FFCC00]',text:'text-black',logo:'./2.webp',description:"Ghana's largest network with widest coverage"},
+  airteltigo:{name:'AirtelTigo',color:'bg-[#0077B5]',text:'text-white',logo:'./3.webp',description:'Affordable data plans with great value'},
+  telecel:{name:'Telecel',color:'bg-[#E60000]',text:'text-white',logo:'./4.webp',description:'Fast 4G internet at competitive prices'}
 };
 
 const NORMAL_BUNDLES=[
@@ -659,7 +659,7 @@ function renderHome(){
         </div>
         <!-- Right: WiFi SIM image -->
         <div class="shrink-0 flex items-center justify-center animate-float" style="width:160px;height:180px;">
-          <img src="./5.png" alt="WiFi SIM" decoding="async" style="width:160px;height:180px;object-fit:contain;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.4));">
+          <img src="./5.webp" alt="WiFi SIM" decoding="async" style="width:160px;height:180px;object-fit:contain;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.4));">
         </div>
       </div>
     </section>
@@ -751,7 +751,7 @@ function renderHome(){
         ${Object.entries(NETWORKS).map(([id,net],i)=>`<div onclick="navigateTo('network','${id}')" class="${net.color} ${net.text} p-8 rounded-[2rem] shadow-2xl network-card text-center border-4 border-white relative overflow-hidden group animate-scale-in stagger-${i+1}" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div><img src="${net.logo}" alt="${net.name}" loading="lazy" decoding="async" class="h-16 mx-auto mb-6 bg-white p-3 rounded-2xl shadow-lg relative z-10"><h3 class="text-2xl font-black uppercase mb-2 relative z-10">${net.name}</h3><p class="text-xs font-medium mt-2 opacity-80 relative z-10 mb-4">${net.description}</p><span class="inline-flex items-center gap-2 text-xs font-bold bg-black/20 px-4 py-2 rounded-full relative z-10 group-hover:bg-black/30 transition-colors">View Plans<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span></div>`).join('')}
       </div>
     </section>
-    <section class="bg-slate-50 py-20"><div class="max-w-6xl mx-auto px-6"><div class="grid md:grid-cols-2 gap-12 items-center"><div class="animate-slide-up"><h2 class="text-3xl font-black mb-6">Convenient Data Purchases in Ghana</h2><p class="text-muted-theme mb-6 leading-relaxed">TRU Data Network provides a platform for purchasing mobile data bundles. We work to offer competitive pricing and a streamlined purchasing experience for MTN, Telecel, and AirtelTigo customers.</p><ul class="space-y-3"><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Competitive pricing compared to standard rates</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Simple ordering process</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Customer support via WhatsApp</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Compatible with all mobile devices</li></ul></div><div class="relative animate-scale-in stagger-2" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 rounded-3xl blur-2xl opacity-20"></div><img src="./11.png" alt="TRU Data App Interface" loading="lazy" decoding="async" class="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto"></div></div></div></section>
+    <section class="bg-slate-50 py-20"><div class="max-w-6xl mx-auto px-6"><div class="grid md:grid-cols-2 gap-12 items-center"><div class="animate-slide-up"><h2 class="text-3xl font-black mb-6">Convenient Data Purchases in Ghana</h2><p class="text-muted-theme mb-6 leading-relaxed">TRU Data Network provides a platform for purchasing mobile data bundles. We work to offer competitive pricing and a streamlined purchasing experience for MTN, Telecel, and AirtelTigo customers.</p><ul class="space-y-3"><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Competitive pricing compared to standard rates</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Simple ordering process</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Customer support via WhatsApp</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Compatible with all mobile devices</li></ul></div><div class="relative animate-scale-in stagger-2" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 rounded-3xl blur-2xl opacity-20"></div><img src="./11.webp" alt="TRU Data App Interface" loading="lazy" decoding="async" class="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto"></div></div></div></section>
   </div>`;
 }
 
@@ -941,7 +941,7 @@ function renderLandingPage(){
       <div class="relative z-10 mb-12 animate-scale-in">
         <div class="relative group">
           <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-          <img src="./11.png" alt="TRU Data Network Logo - Data Bundle Platform" fetchpriority="high" decoding="async" class="hero-logo relative z-10 animate-float">
+          <img src="./11.webp" alt="TRU Data Network Logo - Data Bundle Platform" fetchpriority="high" decoding="async" class="hero-logo relative z-10 animate-float">
         </div>
       </div>
       <div class="relative z-10 max-w-3xl mx-auto text-center px-4">
