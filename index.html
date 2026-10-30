@@ -8,7 +8,7 @@
 <meta name="keywords" content="buy data Ghana, MTN data bundles, Telecel data, AirtelTigo data, cheap data Ghana, mobile data Ghana, internet bundles, data top up Ghana, TRU Data Network">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -225,9 +225,9 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
     <div class="provider-selection">
       <div class="provider-selection-title">Choose Provider Platform</div>
       <div class="provider-buttons">
-        <button class="provider-btn selected" id="btn-refer2bundle-confirm" onclick="selectConfirmationProvider('refer2bundle')">
+        <button class="provider-btn selected" id="btn-patupaa-confirm" onclick="selectConfirmationProvider('patupaa')">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-          Refer2Bundle
+          Patupaa
         </button>
       </div>
     </div>
@@ -288,9 +288,9 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
   <div class="bg-slate-100 rounded-xl p-3">
     <p class="text-xs font-semibold mb-2 text-slate-700">Select Provider for Direct Order:</p>
     <div class="flex gap-2 mb-2">
-      <button onclick="selectProvider('refer2bundle')" id="btn-refer2bundle" class="flex-1 py-2 px-3 rounded-lg bg-red-600 text-white text-xs font-bold transition-all">Refer2Bundle</button>
+      <button onclick="selectProvider('patupaa')" id="btn-patupaa" class="flex-1 py-2 px-3 rounded-lg bg-red-600 text-white text-xs font-bold transition-all">Patupaa</button>
     </div>
-    <p class="text-[10px] opacity-75 text-slate-600">You will be redirected to complete the order on Refer2Bundle.</p>
+    <p class="text-[10px] opacity-75 text-slate-600">You will be redirected to complete the order on Patupaa.</p>
   </div>
   <div class="flex gap-3 justify-end">
     <button onclick="cancelActiveProcess()" class="admin-btn px-4 py-2.5 text-[11px] font-bold bg-slate-200 text-slate-700 rounded-xl hover:bg-slate-300 transition-all">Dismiss</button>
@@ -303,7 +303,9 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 <script>
 const SB_URL="https://kefcmjfvrqbgtivssdwn.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNtamZ2cnFiZ3RpdnNzZHduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MDM1NTIsImV4cCI6MjA4NDE3OTU1Mn0.HoXeKRW4-cGfMexGZpdmEvDHK-XXtXDSoMWWWbq4HKw";
-const PAYSTACK_KEY="pk_live_ea1b78f7fb20ea947f216c78e6ae3adc32d45f1b";
+// Business Mobile Money account customers send deposits to.
+const MOMO_NUMBER='0505175472';
+const MOMO_NAME='GEORGE DANQUAH DORDZIE';
 const supa=supabase.createClient(SB_URL,SB_KEY);
 
 const NETWORKS={
@@ -336,12 +338,12 @@ const NORMAL_BUNDLES=[
   {id:'t-50',network:'telecel',size:'50GB',price:187.00,validity:'30 Days'},{id:'t-100',network:'telecel',size:'100GB',price:380.00,validity:'30 Days'}
 ];
 
-let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'refer2bundle',currentProcessingOrder:null,confirmationSelectedProvider:'refer2bundle',user:null,userProfile:null,depositAmount:'',isLoading:false,connectionError:null,announcement:null,
+let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'patupaa',currentProcessingOrder:null,confirmationSelectedProvider:'patupaa',user:null,userProfile:null,depositAmount:'',isLoading:false,connectionError:null,announcement:null,
 
   /* Agent system */
   agentId:null,agentProfileId:null,agentProfile:null,agentPricingMode:false,agentBasePrices:[],agentPrices:[],adminTab:'orders',agentTab:'dashboard',agentStats:{sales:0,profit:0,pending:0},
   /* Admin withdrawal override — persists in sessionStorage so it survives re-renders */
-  withdrawalOverride:sessionStorage.getItem('tru_admin_withdrawal_override')==='true'
+  withdrawalOverride:false
 };
 
 
@@ -408,17 +410,33 @@ function showToast(message,duration=3000,type='info'){
   setTimeout(()=>toast.classList.add('show'),10);
   setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>toast.remove(),400);},duration);
 }
+// Everything read from the database must pass through esc() before it goes into innerHTML.
+function esc(v){return String(v??'').replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));}
+// Paystack is switched on and off by the admin (Deposits tab).
+async function loadPaymentSettings(){
+  try{
+    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key']);
+    const m=Object.fromEntries((data||[]).map(r=>[r.key,r.value]));
+    state.paystackEnabled=m.paystack_enabled===true;
+    state.paystackPublicKey=typeof m.paystack_public_key==='string'?m.paystack_public_key:'';
+  }catch(e){state.paystackEnabled=false;}
+}
+function copyText(text,label){
+  const done=()=>showToast((label||'Copied')+' copied',2000,'success');
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done,()=>showToast(text,4000,'info'));
+  else showToast(text,4000,'info');
+}
 function selectProvider(p){state.selectedProvider=p;}
 function selectConfirmationProvider(p){
   state.confirmationSelectedProvider=p;
   document.querySelectorAll('.provider-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('btn-refer2bundle-confirm')?.classList.add('selected');
+  document.getElementById('btn-patupaa-confirm')?.classList.add('selected');
 }
 function closeAdminConfirmation(){document.getElementById('admin-order-confirmation').style.display='none';state.currentProcessingOrder=null;}
 function confirmProcessOrder(){
   if(!state.currentProcessingOrder) return;
   updateStatus(state.currentProcessingOrder.ref,'Processing');
-  window.open('https://refer2bundle.com','_blank');
+  window.open('https://patupaa.com','_blank');
   closeAdminConfirmation();
   showToast('Order marked as Processing. Redirecting...');
 }
@@ -600,7 +618,7 @@ async function navigateTo(view,params=null){
     }
     state.view=view;state.params=params;
     if(view==='admin-dashboard'){await fetchOrders();await fetchAdminAgentBasePrices();}
-    if(view==='wallet') await fetchUserProfile();
+    if(view==='wallet'){await fetchUserProfile();await loadPaymentSettings();}
     if(view==='landing'){const ann=await fetchAnnouncement();state.announcement=ann;}
     if(view==='my-orders'){state.announcement=null;}
     render();window.scrollTo(0,0);
@@ -780,7 +798,7 @@ function buildReportSection(o){
   // FIX: Corrected syntax error - changed \u0029 to ] after the ref
   return '<div class="mt-3 pt-3 border-t border-slate-100 space-y-2">'
     +'<div class="flex items-center justify-between flex-wrap gap-2">'
-    +'<button onclick="reportOrder(window._orderMap[\''+(o.ref)+'\'])" class="flex items-center gap-2 text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors px-3 py-2 rounded-lg">'
+    +'<button data-ref="'+esc(o.ref)+'" onclick="reportOrder(window._orderMap[this.dataset.ref])" class="flex items-center gap-2 text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 transition-colors px-3 py-2 rounded-lg">'
     +WA_SVG+' Report Order via WhatsApp</button>'
     +'<span id="'+cdId+'" class="text-xs font-black font-mono px-3 py-1.5 rounded-lg border '+badgeCls+'">'
     +pad(hrs)+':'+pad(mins)+':'+pad(secs)+'</span>'
@@ -818,13 +836,13 @@ async function loadMyOrders(){
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-3 flex-wrap mb-2">
-                <span class="font-mono text-xs font-bold text-slate-500">${o.ref}</span>
-                <span class="px-2 py-0.5 rounded-lg text-xs font-bold ${netBadge(o.Network)}">${(o.Network||'').toUpperCase()}</span>
+                <span class="font-mono text-xs font-bold text-slate-500">${esc(o.ref)}</span>
+                <span class="px-2 py-0.5 rounded-lg text-xs font-bold ${netBadge(o.Network)}">${esc((o.Network||'').toUpperCase())}</span>
                 <span class="status-badge px-2.5 py-1 rounded-full text-xs font-bold ${st.cls}">${st.dot} ${st.label}</span>
               </div>
               <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                <span><span class="text-muted-theme">Bundle:</span> <strong>${o.bundle_name}</strong></span>
-                <span><span class="text-muted-theme">Phone:</span> <strong>${o.Phone}</strong></span>
+                <span><span class="text-muted-theme">Bundle:</span> <strong>${esc(o.bundle_name)}</strong></span>
+                <span><span class="text-muted-theme">Phone:</span> <strong>${esc(o.Phone)}</strong></span>
                 <span><span class="text-muted-theme">Amount:</span> <strong class="text-red-600">₵${parseFloat(o.Amount).toFixed(2)}</strong></span>
               </div>
             </div>
@@ -894,8 +912,8 @@ function renderLandingPage(){
     <div class="flex items-start gap-3">
       <span class="announcement-icon"><svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg></span>
       <div class="flex-1">
-        <div class="announcement-main">${ann.main_message}</div>
-        ${ann.sub_message?`<div class="announcement-sub">${ann.sub_message}</div>`:''}
+        <div class="announcement-main">${esc(ann.main_message)}</div>
+        ${ann.sub_message?`<div class="announcement-sub">${esc(ann.sub_message)}</div>`:''}
       </div>
     </div>
   </div></div>`:'';
@@ -1032,12 +1050,73 @@ function togglePasswordVisibility(inputId,iconId){
   const eyeSlash=`<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.059 10.059 0 011.574-2.99M9.88 9.88l4.24 4.24m-4.24 0l4.24-4.24M3 3l18 18"/></svg>`;
   icon.innerHTML=isHidden?eyeSlash:eyeOpen;
 }
+function renderResetPassword(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><h2 class="text-2xl font-black">Set New Password</h2><p class="text-sm text-muted-theme mt-2">Choose a new password for your account</p></div><form onsubmit="handleResetPassword(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">New Password</label><input type="password" id="new-password" required minlength="8" autocomplete="new-password" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Update Password</button></form></div></div>`;}
+async function handleResetPassword(e){
+  e.preventDefault();const password=document.getElementById('new-password').value;
+  try{const{error}=await supa.auth.updateUser({password});if(error) throw error;showToast('Password updated',3000,'success');navigateTo('home');}
+  catch(err){showToast(''+(err.message||'Failed to update password'),4000,'error');}
+}
 function renderForgotPassword(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Reset Password</h2><p class="text-sm text-muted-theme mt-2">Enter your email to receive reset instructions</p></div><form onsubmit="handleForgotPassword(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="forgot-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Send Reset Link</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Remember your password? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
 
 /* ===== WALLET ===== */
 function renderWallet(){
   const balance=state.userProfile?parseFloat(state.userProfile.balance||0):0;
-  return`<div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn"><div class="mb-8"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Home</button></div><div class="grid md:grid-cols-2 gap-8"><div class="wallet-card animate-scale-in"><div class="wallet-label">Current Balance</div><div class="wallet-balance">₵${balance.toFixed(2)}</div><div class="mt-4 flex items-center gap-2 text-sm opacity-90"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Available for purchases</div>${!state.userProfile?'<div class="mt-4 text-xs bg-red-500/20 px-3 py-2 rounded-lg">Profile not loaded properly. Please refresh.</div>':''}</div><div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Add Funds</h3><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label><input type="number" id="deposit-amount" min="5" step="0.01" oninput="updateDepositCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div><div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Deposit Amount:</span><span class="font-bold" id="calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Processing Fee (3.50%):</span><span class="font-bold" id="calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span></div></div><button onclick="initiateDeposit()" id="deposit-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"><span>Deposit Now</span></button></div></div></div><div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Recent Transactions</h3><div class="space-y-4" id="transaction-list"><p class="text-center text-muted-theme py-8">Loading transactions...</p></div></div></div>`;
+  const code=state.userProfile?.deposit_code||'';
+  const method=state.paystackEnabled&&state.depositMethod==='paystack'?'paystack':'momo';
+  const methodTabs=state.paystackEnabled?`<div class="flex gap-2 mb-6"><button onclick="state.depositMethod='momo';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='momo'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Mobile Money</button><button onclick="state.depositMethod='paystack';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='paystack'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Card / Paystack</button></div>`:'';
+  const momo=`<div class="space-y-5">
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+      <p class="text-xs font-black uppercase text-amber-700 mb-3">Step 1 · Send Mobile Money to</p>
+      <div class="flex items-center justify-between gap-3 mb-2"><span class="text-2xl font-black tracking-wide">${MOMO_NUMBER}</span><button onclick="copyText(MOMO_NUMBER,'Number')" class="text-xs font-bold bg-white border border-amber-300 px-3 py-1.5 rounded-lg">Copy</button></div>
+      <p class="text-sm">Name that will show: <strong>${MOMO_NAME}</strong></p>
+      <p class="text-xs text-amber-800 mt-1">Check this name appears before you confirm the transfer.</p>
+    </div>
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+      <p class="text-xs font-black uppercase text-blue-700 mb-3">Step 2 · Use this as the reference</p>
+      ${code?`<div class="flex items-center justify-between gap-3"><code class="text-2xl font-black tracking-widest text-blue-800">${esc(code)}</code><button data-code="${esc(code)}" onclick="copyText(this.dataset.code,'Reference')" class="text-xs font-bold bg-white border border-blue-300 px-3 py-1.5 rounded-lg">Copy</button></div><p class="text-xs text-blue-800 mt-2">This is your personal reference. It tells us which account to credit.</p>`:'<p class="text-sm text-blue-800">Loading your reference... please refresh if this does not appear.</p>'}
+    </div>
+    <div class="border border-slate-200 rounded-2xl p-4 space-y-3">
+      <p class="text-xs font-black uppercase text-slate-500">Step 3 · Tell us you have sent it</p>
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Amount sent (₵)</label><input type="number" id="momo-amount" min="5" step="0.01" class="w-full p-3 border-2 rounded-xl text-lg font-black focus:border-red-600 outline-none" placeholder="0.00"></div>
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">MoMo transaction ID (from your SMS)</label><input type="text" id="momo-txn" maxlength="40" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none" placeholder="e.g. 51234567890"></div>
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Number you sent from</label><input type="tel" id="momo-sender" maxlength="10" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none" placeholder="024xxxxxxx"></div>
+      <button id="momo-submit-btn" onclick="submitDepositRequest()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50">I've Sent the Money</button>
+      <p class="text-xs text-muted-theme">Your wallet is credited as soon as we confirm the payment. No processing fee.</p>
+    </div>
+    <div><h4 class="text-sm font-black mb-2">Your deposit requests</h4><div id="deposit-requests-list" class="space-y-2"><p class="text-xs text-muted-theme">Loading...</p></div></div>
+  </div>`;
+  const paystack=`<div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label><input type="number" id="deposit-amount" min="5" step="0.01" oninput="updateDepositCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div><div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Deposit Amount:</span><span class="font-bold" id="calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Processing Fee (3.50%):</span><span class="font-bold" id="calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span></div></div><button onclick="initiateDeposit()" id="deposit-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"><span>Pay with Paystack</span></button><p class="text-xs text-muted-theme">Card and mobile money via Paystack. Credited instantly after payment.</p></div>`;
+  return`<div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn"><div class="mb-8"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Home</button></div><div class="grid md:grid-cols-2 gap-8"><div class="wallet-card animate-scale-in self-start"><div class="wallet-label">Current Balance</div><div class="wallet-balance">₵${balance.toFixed(2)}</div><div class="mt-4 flex items-center gap-2 text-sm opacity-90"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Available for purchases</div>${!state.userProfile?'<div class="mt-4 text-xs bg-red-500/20 px-3 py-2 rounded-lg">Profile not loaded properly. Please refresh.</div>':''}</div><div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Add Funds</h3>${methodTabs}${method==='paystack'?paystack:momo}</div></div><div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Recent Transactions</h3><div class="space-y-4" id="transaction-list"><p class="text-center text-muted-theme py-8">Loading transactions...</p></div></div></div>`;
+}
+async function submitDepositRequest(){
+  if(state.depositInFlight) return;
+  const amount=parseFloat(document.getElementById('momo-amount')?.value);
+  const txn=document.getElementById('momo-txn')?.value.trim();
+  const sender=document.getElementById('momo-sender')?.value.trim();
+  if(!amount||amount<5){showToast('Minimum deposit is ₵5.00',3000,'error');return;}
+  if(!txn){showToast('Enter the MoMo transaction ID from your SMS',3000,'error');return;}
+  if(sender){const v=validateGhanaPhone(sender);if(!v.isValid){showToast(v.error,3000,'error');return;}}
+  const btn=document.getElementById('momo-submit-btn');
+  state.depositInFlight=true;if(btn) btn.disabled=true;
+  try{
+    const{error}=await supa.rpc('submit_deposit_request',{p_amount:amount,p_momo_txn_id:txn,p_sender_phone:sender||null});
+    if(error) throw error;
+    showToast('Thanks! We will credit your wallet once the payment is confirmed.',5000,'success');
+    ['momo-amount','momo-txn','momo-sender'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+    loadMyDepositRequests();
+  }catch(err){showToast(err.message||'Could not submit. Please try again.',5000,'error');}
+  finally{state.depositInFlight=false;if(btn) btn.disabled=false;}
+}
+async function loadMyDepositRequests(){
+  const c=document.getElementById('deposit-requests-list');
+  if(!c||!state.user) return;
+  try{
+    const{data,error}=await supa.from('deposit_requests').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(10);
+    if(error) throw error;
+    if(!data||!data.length){c.innerHTML='<p class="text-xs text-muted-theme">No deposit requests yet.</p>';return;}
+    const badge=st=>st==='approved'?'<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Credited</span>':st==='rejected'?'<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">Not found</span>':'<span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Checking</span>';
+    c.innerHTML=data.map(r=>`<div class="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2 text-sm"><div><span class="font-bold">₵${parseFloat(r.credited_amount??r.amount).toFixed(2)}</span> <span class="text-xs text-muted-theme">${esc(r.momo_txn_id||'')} · ${new Date(r.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'short'})}</span>${r.status==='rejected'&&r.admin_note?`<div class="text-xs text-red-600">${esc(r.admin_note)}</div>`:''}</div>${badge(r.status)}</div>`).join('');
+  }catch(err){c.innerHTML='<p class="text-xs text-red-500">Could not load deposit requests.</p>';}
 }
 function updateDepositCalculation(amount){
   const n=parseFloat(amount)||0,fee=n*0.035,total=n+fee;
@@ -1057,8 +1136,6 @@ async function handleRegister(e){
   try{
     const{data:authData,error:authError}=await supa.auth.signUp({email,password,options:{data:{full_name:name,phone}}});
     if(authError) throw authError;if(!authData.user) throw new Error('Failed to create user account');
-    const{error:pe}=await supa.from('profiles').insert([{id:authData.user.id,full_name:name,phone,email,balance:0,created_at:new Date().toISOString()}]);
-    if(pe&&pe.code==='23505') await supa.from('profiles').update({full_name:name,phone,email}).eq('id',authData.user.id);
     if(authData.session){state.user=authData.user;await fetchUserProfile();showToast('Account created successfully! Welcome.',4000,'success');navigateTo('home');}
     else{showToast('Account created! Check your email to confirm.',5000,'success');navigateTo('login');}
   }catch(err){showToast(''+(err.message||'Registration failed.'),4000,'error');}
@@ -1073,19 +1150,9 @@ async function handleLogin(e){
     if(!data.user){showToast('Login failed: No user data');return;}
     if(rememberMe) localStorage.setItem('tru-remember-email',email); else localStorage.removeItem('tru-remember-email');
     state.user=data.user;
-    let profile=null;
-    try{
-      const{data:pd,error:pe}=await supa.from('profiles').select('*').eq('id',state.user.id).single();
-      if(pe){
-        if(pe.code==='PGRST116'){
-          const{data:np,error:ce}=await supa.from('profiles').insert([{id:state.user.id,full_name:state.user.user_metadata?.full_name||email.split('@')[0],phone:state.user.user_metadata?.phone||'',email,role:'user',balance:0,created_at:new Date().toISOString()}]).select().single();
-          if(ce){showToast('Error creating profile. Please contact support.');return;}
-          profile=np;
-        }else throw pe;
-      }else profile=pd;
-    }catch(err){showToast('Error loading profile. Please try again.');return;}
-    if(!profile){showToast('Failed to load profile data.');return;}
-    state.userProfile=profile;state.isAdmin=profile.role==='admin';
+    await fetchUserProfile();
+    const profile=state.userProfile;
+    if(!profile){showToast('Failed to load profile data. Please contact support.');return;}
     if(state.isAdmin){showToast('Welcome back, Admin!',3000,'success');state.view='admin-dashboard';await fetchOrders();render();}
     else{showToast('Welcome back!',3000,'success');navigateTo('home');}
   }catch(err){showToast('Login error: '+(err.message||'Unknown error'),4000,'error');}
@@ -1094,16 +1161,8 @@ async function fetchUserProfile(){
   if(!state.user){state.userProfile=null;return;}
   try{
     const{data,error}=await supa.from('profiles').select('*').eq('id',state.user.id).single();
-    if(error){
-      if(error.code==='PGRST116'){
-        const np={id:state.user.id,full_name:state.user.user_metadata?.full_name||state.user.email?.split('@')[0]||'User',phone:state.user.user_metadata?.phone||'',email:state.user.email,role:'user',balance:0,created_at:new Date().toISOString()};
-        const{data:cp,error:ce}=await supa.from('profiles').insert([np]).select().single();
-        if(ce){state.userProfile=null;return;}
-        state.userProfile=cp;return;
-      }
-      state.userProfile=null;return;
-    }
-    state.userProfile=data;
+    if(error){state.userProfile=null;return;}
+    state.userProfile=data;state.isAdmin=data.role==='admin';
   }catch(err){state.userProfile=null;}
 }
 async function fetchUserTransactions(){
@@ -1114,7 +1173,7 @@ async function fetchUserTransactions(){
     const{data,error}=await supa.from('transactions').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(10);
     if(error) throw error;
     if(data&&data.length>0){
-      listEl.innerHTML=data.map(t=>`<div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type==='deposit'?'bg-green-100 text-green-600':'bg-red-100 text-red-600'}"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${t.type==='deposit'?'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>':'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'}</svg></div><div><p class="font-bold text-sm">${t.type==='deposit'?'Wallet Deposit':'Data Purchase'}</p><p class="text-xs text-muted-theme">${new Date(t.created_at).toLocaleDateString()} &bull; ${new Date(t.created_at).toLocaleTimeString()}</p></div></div><div class="text-right"><p class="font-bold ${t.type==='deposit'?'text-green-600':'text-slate-900'}">${t.type==='deposit'?'+':'-'}₵${parseFloat(t.amount).toFixed(2)}</p><p class="text-xs ${t.status==='completed'?'text-green-600':'text-yellow-600'}">${t.status}</p></div></div>`).join('');
+      listEl.innerHTML=data.map(t=>`<div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full flex items-center justify-center ${t.type==='deposit'?'bg-green-100 text-green-600':'bg-red-100 text-red-600'}"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${t.type==='deposit'?'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>':'<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'}</svg></div><div><p class="font-bold text-sm">${t.type==='deposit'?'Wallet Deposit':'Data Purchase'}</p><p class="text-xs text-muted-theme">${new Date(t.created_at).toLocaleDateString()} &bull; ${new Date(t.created_at).toLocaleTimeString()}</p></div></div><div class="text-right"><p class="font-bold ${t.type==='deposit'?'text-green-600':'text-slate-900'}">${t.type==='deposit'?'+':'-'}₵${parseFloat(t.amount).toFixed(2)}</p><p class="text-xs ${t.status==='completed'?'text-green-600':'text-yellow-600'}">${esc(t.status)}</p></div></div>`).join('');
     }else{listEl.innerHTML='<div class="text-center py-8 text-muted-theme"><svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>No transactions yet</div>';}
   }catch(err){if(listEl) listEl.innerHTML='<div class="text-center py-8 text-red-500">Failed to load transactions. Please refresh the page.</div>';}
 }
@@ -1124,28 +1183,29 @@ async function handleForgotPassword(e){
   catch(err){showToast(''+(err.message||'Failed to send reset email'),4000,'error');}
 }
 function initiateDeposit(){
+  if(!state.paystackEnabled||!state.paystackPublicKey){showToast('Card payments are currently unavailable. Please pay with Mobile Money.',4000,'error');return;}
   if(!state.userProfile){showToast('Profile not loaded. Please refresh.',4000,'error');return;}
-  const amount=parseFloat(document.getElementById('deposit-amount').value);
+  const amount=parseFloat(document.getElementById('deposit-amount')?.value);
   if(!amount||amount<5){showToast('Minimum deposit is ₵5.00',3000,'error');return;}
   const fee=amount*0.035,total=amount+fee;
   try{
-    const handler=PaystackPop.setup({key:PAYSTACK_KEY,email:state.user.email,amount:Math.round(total*100),currency:'GHS',metadata:{custom_fields:[{display_name:"Deposit Type",variable_name:"deposit_type",value:"wallet_funding"},{display_name:"Net Amount",variable_name:"net_amount",value:amount.toFixed(2)},{display_name:"Fee",variable_name:"fee",value:fee.toFixed(2)}]},callback:(r)=>processDeposit(r,amount,fee),onClose:()=>showToast('Payment window closed',3000,'info')});
+    const handler=PaystackPop.setup({key:state.paystackPublicKey,email:state.user.email,amount:Math.round(total*100),currency:'GHS',metadata:{user_id:state.user.id,custom_fields:[{display_name:"Deposit Type",variable_name:"deposit_type",value:"wallet_funding"},{display_name:"Net Amount",variable_name:"net_amount",value:amount.toFixed(2)},{display_name:"Fee",variable_name:"fee",value:fee.toFixed(2)}]},callback:(r)=>processDeposit(r,amount,fee),onClose:()=>showToast('Payment window closed',3000,'info')});
     handler.openIframe();
   }catch(err){showToast('Payment initialization failed.',4000,'error');}
 }
 async function processDeposit(response,netAmount,fee){
   if(!state.user||!state.userProfile){showToast('Session error. Please login again.',4000,'error');return;}
+  showToast('Payment received. Confirming with Paystack...',3000,'info');
   try{
-    const{error:te}=await supa.from('transactions').insert([{user_id:state.user.id,type:'deposit',amount:netAmount,fee,reference:response.reference,status:'completed',created_at:new Date().toISOString()}]);
-    if(te) throw new Error('Failed to record transaction');
-    const newBal=parseFloat(state.userProfile.balance||0)+netAmount;
-    const{error:ue}=await supa.from('profiles').update({balance:newBal}).eq('id',state.user.id);
-    if(ue) throw new Error('Failed to update balance');
-    state.userProfile.balance=newBal;
+    // The wallet is credited server-side only after Paystack confirms the payment.
+    const{data,error}=await supa.functions.invoke('verify-deposit',{body:{reference:response.reference}});
+    if(error) throw new Error('We received your payment but could not confirm it yet. Contact support with reference '+response.reference);
+    await fetchUserProfile();
     const ai=document.getElementById('deposit-amount');if(ai) ai.value='';updateDepositCalculation(0);
-    showToast(`Deposit successful! ₵${netAmount.toFixed(2)} added to wallet`,4000,'success');
-    await fetchUserTransactions();
-  }catch(err){showToast('Error processing deposit: '+(err.message||'Unknown error'),5000,'error');}
+    if(data.credited) showToast(`Deposit successful! ₵${Number(data.amount).toFixed(2)} added to wallet`,4000,'success');
+    else showToast('This payment has already been added to your wallet.',4000,'info');
+    render();
+  }catch(err){showToast(err.message||'Error processing deposit',8000,'error');}
 }
 
 /* ===== NETWORK VIEW ===== */
@@ -1173,83 +1233,52 @@ function initiateOrder(networkId,bundleId){
   const dp=getBundleDisplayPrice(bundle);
   const effectiveBundle=dp.isAgent?{...bundle,price:dp.price}:{...bundle};
   const pricingMode=dp.isAgent?'agent':'system';
-  state.activeOrderData={network:networkId,bundle:effectiveBundle,originalPrice:bundle.price,pricingMode,agentProfit:dp.isAgent?dp.profit:0};
+  // requestId makes repeated taps on the same form resolve to one order.
+  state.activeOrderData={network:networkId,bundle:effectiveBundle,originalPrice:bundle.price,pricingMode,agentProfit:dp.isAgent?dp.profit:0,requestId:crypto.randomUUID()};
   render();
 }
 function renderOrderForm(){
   if(!state.activeOrderData) return '';
   const{network,bundle}=state.activeOrderData,netInfo=NETWORKS[network],balance=state.userProfile?parseFloat(state.userProfile.balance||0):0,hasBal=balance>=bundle.price;
-  return`<div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn"><div class="card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in"><button onclick="state.activeOrderData=null;render();" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="text-center mb-6"><div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><span class="text-2xl font-black">${netInfo.name.charAt(0)}</span></div><h3 class="text-2xl font-black mb-1">Purchase ${bundle.size}</h3><p class="text-muted-theme text-sm">${netInfo.name} &bull; ${bundle.validity}</p></div><div class="bg-slate-50 rounded-2xl p-6 mb-6"><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Bundle Price</span><span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span></div><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Your Balance</span><span class="font-bold text-lg ${hasBal?'text-green-600':'text-red-500'}">₵${balance.toFixed(2)}</span></div><div class="border-t border-slate-200 mt-2 pt-2 flex justify-between items-center"><span class="font-bold">Total</span><span class="font-black text-xl text-red-600">₵${bundle.price.toFixed(2)}</span></div></div><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"><p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p></div><button onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${hasBal?'':'opacity-50 cursor-not-allowed'}" ${hasBal?'':'disabled'}>${hasBal?'Confirm Purchase':'Insufficient Balance'}</button>${!hasBal?`<button onclick="state.activeOrderData=null;navigateTo('wallet')" class="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-300 transition-all">Add Funds to Wallet</button>`:''}</div></div></div>`;
+  return`<div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn"><div class="card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in"><button onclick="state.activeOrderData=null;render();" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="text-center mb-6"><div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><span class="text-2xl font-black">${netInfo.name.charAt(0)}</span></div><h3 class="text-2xl font-black mb-1">Purchase ${bundle.size}</h3><p class="text-muted-theme text-sm">${netInfo.name} &bull; ${bundle.validity}</p></div><div class="bg-slate-50 rounded-2xl p-6 mb-6"><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Bundle Price</span><span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span></div><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Your Balance</span><span class="font-bold text-lg ${hasBal?'text-green-600':'text-red-500'}">₵${balance.toFixed(2)}</span></div><div class="border-t border-slate-200 mt-2 pt-2 flex justify-between items-center"><span class="font-bold">Total</span><span class="font-black text-xl text-red-600">₵${bundle.price.toFixed(2)}</span></div></div><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"><p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p></div><button id="confirm-purchase-btn" onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${hasBal?'':'opacity-50 cursor-not-allowed'}" ${hasBal?'':'disabled'}>${hasBal?'Confirm Purchase':'Insufficient Balance'}</button>${!hasBal?`<button onclick="state.activeOrderData=null;navigateTo('wallet')" class="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-300 transition-all">Add Funds to Wallet</button>`:''}</div></div></div>`;
 }
-
-/* ===== R2B API SERVICE LAYER ===== */
-const R2BService={
-  async getBalance(){
-    return await supa.functions.invoke('r2b-proxy',{body:{action:'balance'}});
-  },
-  async createOrder(network,dataPlan,beneficiary){
-    return await supa.functions.invoke('process-order',{body:{network,dataPlan,beneficiary}});
-  },
-  async checkStatus(apiReference){
-    return await supa.functions.invoke('r2b-proxy',{body:{action:'order-status',payload:{reference:apiReference}}});
-  },
-  async getBundles(network){
-    return await supa.functions.invoke('r2b-proxy',{body:{action:'bundles',payload:{network}}});
-  }
-};
 
 /* ===== ORDER FUNCTIONS ===== */
 async function handleOrderButton(){
+  if(state.orderInFlight) return;
   const phoneInput=document.getElementById('p-num'),phone=phoneInput.value.trim();
   const v=validateGhanaPhone(phone);if(!v.isValid){showToast(''+v.error,4000,'error');phoneInput.focus();return;}
-  const{bundle}=state.activeOrderData;
+  const{bundle,requestId}=state.activeOrderData;
   if(!state.user){showToast('Please login first',3000,'error');navigateTo('login');return;}
   const balance=parseFloat(state.userProfile?.balance||0);
   if(balance<bundle.price){showToast('Insufficient balance. Please deposit funds.',4000,'error');navigateTo('wallet');return;}
-  const ref='ORD-'+Math.random().toString(36).slice(2,10).toUpperCase();
+  const btn=document.getElementById('confirm-purchase-btn');
+  state.orderInFlight=true;
+  if(btn){btn.disabled=true;btn.textContent='Processing...';}
   try{
-    // 1. DEDUCT FROM CUSTOMER WALLET
-    const newBalance=balance-bundle.price;
-    const{error:be}=await supa.from('profiles').update({balance:newBalance}).eq('id',state.user.id);
-    if(be) throw new Error('Failed to update balance: '+be.message);
-    const{error:te}=await supa.from('transactions').insert([{user_id:state.user.id,type:'purchase',amount:bundle.price,reference:ref,status:'completed',created_at:new Date().toISOString()}]);
-    if(te) throw new Error('Failed to record transaction: '+te.message);
+    // 1. place_order prices the bundle, debits the wallet and saves the order in one step.
+    const{data:res,error}=await supa.rpc('place_order',{
+      p_bundle_id:bundle.id,p_phone:phone,
+      p_agent_code:state.agentPricingMode&&state.agentId?state.agentId:null,
+      p_request_id:requestId
+    });
+    if(error) throw error;
+    state.userProfile.balance=res.new_balance;
+    if(res.duplicate){
+      state.activeOrderData=null;
+      showToast('This order was already placed.',3000,'info');
+      navigateTo('success',{bundle_name:bundle.size,Phone:phone,ref:res.ref});
+      return;
+    }
 
-    // 2. CALL REFER2BUNDLE API VIA EDGE FUNCTION
-    let apiResult={data:null,error:null};
-    try{
-      const resp=await supa.functions.invoke('process-order',{body:{orderRef:ref,network:bundle.network,dataPlan:bundle.size,beneficiary:phone}});
-      apiResult=resp;
-    }catch(apiErr){apiResult={data:null,error:apiErr?.message||'API call failed'};}
-
-    const apiSuccess=!apiResult.error&&apiResult.data?.success;
-
-    // 3. SAVE ORDER WITH API REFERENCE
-    const orderData={
-      ref,Phone:phone,Network:bundle.network,bundle_name:bundle.size,Amount:bundle.price,
-      Status:apiSuccess?'Processing':'Pending',
-      provider:'refer2bundle',
-      user_id:state.user.id,
-      pricing_mode:state.activeOrderData?.pricingMode||'system',
-      agent_id:state.agentProfileId||state.agentProfile?.id||null,
-      agent_code:state.agentId||null,
-      agent_profit:state.activeOrderData?.agentProfit||0,
-      base_price_used:state.activeOrderData?.originalPrice||bundle.price,
-      api_reference:apiResult.data?.data?.reference||null,
-      api_status:apiSuccess?'submitted':'failed',
-      retry_count:apiSuccess?0:1,
-      processed_by_api:apiSuccess,
-      api_response:apiResult.data||null,
-      created_at:new Date().toISOString()
-    };
-    const{error:oe}=await supa.from('orders').insert([orderData]);
-    if(oe) throw new Error('Failed to save order: '+oe.message);
-
-    // 4. UPDATE UI
-    state.userProfile.balance=newBalance;
-    showToast(apiSuccess?'Order placed! Processing via Refer2Bundle...':'Order saved but API failed. Admin will process manually.',3000,apiSuccess?'success':'warning');
-    navigateTo('success',{bundle_name:bundle.size,Phone:phone,ref});
+    state.activeOrderData=null;
+    showToast('Order placed! It will be delivered shortly.',3000,'success');
+    navigateTo('success',{bundle_name:bundle.size,Phone:phone,ref:res.ref});
   }catch(err){showToast('Error: '+(err.message||'Unknown error'),5000,'error');}
+  finally{
+    state.orderInFlight=false;
+    if(btn&&document.body.contains(btn)){btn.disabled=false;btn.textContent='Confirm Purchase';}
+  }
 }
 
 /* ===== ADMIN ===== */
@@ -1258,61 +1287,14 @@ window.adminAuth=async(e)=>{
   const email=document.getElementById('adm-u').value.trim(),password=document.getElementById('adm-p').value;
   const btn=e.target.querySelector('button'),ot=btn.innerText;
   btn.innerHTML='<span class="spinner inline-block mr-2"></span>Signing in...';btn.disabled=true;
-  try{const{data,error}=await supa.auth.signInWithPassword({email,password});if(error) throw error;state.isAdmin=true;showToast('Login successful',3000,'success');navigateTo('admin-dashboard');}
+  try{
+    const{data,error}=await supa.auth.signInWithPassword({email,password});if(error) throw error;
+    state.user=data.user;await fetchUserProfile();
+    if(!state.isAdmin){showToast('This account is not an admin',4000,'error');btn.innerText=ot;btn.disabled=false;navigateTo('home');return;}
+    showToast('Login successful',3000,'success');navigateTo('admin-dashboard');
+  }
   catch(err){showToast(''+(err.message||'Login failed'),4000,'error');btn.innerText=ot;btn.disabled=false;}
 };
-async function retryApiOrder(ref){
-  const{data:order}=await supa.from('orders').select('*').eq('ref',ref).single();
-  if(!order) return;
-  showToast('Retrying API call...',2000,'info');
-  let result={data:null,error:null};
-  try{
-    result=await supa.functions.invoke('process-order',{body:{orderRef:ref,network:order.Network,dataPlan:order.bundle_name,beneficiary:order.Phone}});
-  }catch(e){result={data:null,error:e?.message||'API error'};}
-  const success=!result.error&&result.data?.success;
-  if(success){
-    await supa.from('orders').update({api_reference:result.data?.data?.reference||null,api_status:'submitted',Status:'Processing',retry_count:(order.retry_count||0)+1,updated_at:new Date().toISOString()}).eq('ref',ref);
-    showToast('API retry successful!',3000,'success');
-    fetchOrders();
-  }else{
-    showToast('Retry failed: '+(result.error||'Unknown error'),4000,'error');
-  }
-}
-
-async function updatePendingOrderStatuses(){
-  // Poll both Processing and Pending orders that have an api_reference
-  const{data:pendingOrders}=await supa.from('orders').select('*')
-    .in('Status',['Processing','Pending'])
-    .not('api_reference','is',null);
-  for(const order of pendingOrders||[]){
-    try{
-      const result=await supa.functions.invoke('r2b-proxy',{body:{action:'order-status',payload:{reference:order.api_reference}}});
-      const r2bStatus=(result.data?.data?.status||result.data?.status||'').toLowerCase().trim();
-      console.log(`Order ${order.ref} -- refer2bundle status: "${r2bStatus}"`);
-      // Map refer2bundle status -> TruData status:
-      // pending    -> Pending     (keep in sync)
-      // processing -> Processing  (already matches)
-      // completed  -> Completed   (admin will manually flip to Delivered)
-      // failed/cancelled -> Pending (reset for retry)
-      let newStatus=null;
-      let newApiStatus=null;
-      if(r2bStatus==='pending'){
-        if(order.Status!=='Pending'){newStatus='Pending';newApiStatus='pending';}
-      }else if(r2bStatus==='processing'){
-        if(order.Status!=='Processing'){newStatus='Processing';newApiStatus='processing';}
-      }else if(r2bStatus==='completed'){
-        if(order.Status!=='Completed'&&order.Status!=='Delivered'){newStatus='Completed';newApiStatus='success';}
-      }else if(r2bStatus==='failed'||r2bStatus==='cancelled'||r2bStatus==='canceled'){
-        newStatus='Pending';newApiStatus='failed';
-      }
-      if(newStatus){
-        await supa.from('orders').update({Status:newStatus,api_status:newApiStatus,updated_at:new Date().toISOString()}).eq('ref',order.ref);
-        console.log(`Order ${order.ref} updated: ${order.Status} -> ${newStatus}`);
-      }
-    }catch(e){console.error('Status check failed for order:',order.ref,e);}
-  }
-}
-
 async function adminLogout(){
   try{await supa.auth.signOut();state.isAdmin=false;state.isDirectMode=false;showToast('Logged out successfully',3000,'success');navigateTo('landing');}
   catch(err){showToast('Logout failed',3000,'error');}
@@ -1350,22 +1332,19 @@ function renderAdminDashboard(){
       <button class="admin-tab-btn ${tab==='agent-prices'?'active':''}" onclick="state.adminTab='agent-prices';render();setTimeout(loadAdminAgentPricesTable,50)">Agent Prices</button>
       <button class="admin-tab-btn ${tab==='agents'?'active':''}" onclick="state.adminTab='agents';render();setTimeout(loadAdminAgentsList,50)">Agents</button>
       <button class="admin-tab-btn ${tab==='withdrawals'?'active':''}" onclick="state.adminTab='withdrawals';render();setTimeout(loadAdminWithdrawals,50)">Withdrawals</button>
+      <button class="admin-tab-btn ${tab==='deposits'?'active':''}" onclick="state.adminTab='deposits';render()">Deposits</button>
     </div>
     <!-- Tab Content -->
     <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:forwards;">
-      ${tab==='orders'?renderAdminOrdersTab(filtered):tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='agents'?'<div id="admin-agents-container" class="card-theme rounded-2xl p-8 text-center text-muted-theme"><div class="spinner mx-auto mb-3" style="width:28px;height:28px;border-width:3px;border-top-color:#dc2626;"></div>Loading agents...</div>':renderAdminWithdrawalsTab()}
+      ${tab==='orders'?renderAdminOrdersTab(filtered):tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='agents'?'<div id="admin-agents-container" class="card-theme rounded-2xl p-8 text-center text-muted-theme"><div class="spinner mx-auto mb-3" style="width:28px;height:28px;border-width:3px;border-top-color:#dc2626;"></div>Loading agents...</div>':renderAdminWithdrawalsTab()}
     </div>
   </div>`;
 }
 
 function renderAdminOrdersTab(filtered){
-  return`<div class="flex flex-col md:flex-row gap-4 mb-6"><input type="text" placeholder="Search phone or reference..." value="${state.searchQuery}" oninput="state.searchQuery=this.value;render();" class="flex-1 p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all"><select onchange="state.networkFilter=this.value;render();" class="p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all md:w-48"><option value="all">All Networks</option><option value="mtn">MTN</option><option value="airteltigo">AirtelTigo</option><option value="telecel">Telecel</option></select></div><div class="card-theme rounded-2xl overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Mode</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${filtered.length===0?`<tr><td colspan="9" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:filtered.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0"><td class="p-4 font-mono text-xs font-bold">${order.ref}</td><td class="p-4 font-bold">${order.Phone}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${order.Network?.toUpperCase()}</span></td><td class="p-4 text-sm">${order.bundle_name}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td><td class="p-4"><span class="pricing-mode-badge ${order.pricing_mode==='agent'?'pricing-mode-agent':'pricing-mode-system'}">${order.pricing_mode==='agent'?'Agent':'System'}</span></td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${order.Status||'Pending'}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference
-  ?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${order.api_reference}</span>
-    <span class="text-xs ${order.api_status==='success'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'} px-2 py-1 rounded-lg font-bold">${order.api_status||'pending'}</span>`
-  :`<button onclick="retryApiOrder('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200">Retry API</button>`
-}
-${order.Status==='Pending'&&!order.api_reference?`<button onclick="showProcessConfirmation('${order.ref}')" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button>`:''}
-<button onclick="updateStatus('${order.ref}','Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button onclick="updateStatus('${order.ref}','Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button onclick="deleteOrder('${order.ref}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div></div>`;
+  return`<div class="flex flex-col md:flex-row gap-4 mb-6"><input type="text" placeholder="Search phone or reference..." value="${esc(state.searchQuery)}" oninput="state.searchQuery=this.value;render();" class="flex-1 p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all"><select onchange="state.networkFilter=this.value;render();" class="p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all md:w-48"><option value="all">All Networks</option><option value="mtn">MTN</option><option value="airteltigo">AirtelTigo</option><option value="telecel">Telecel</option></select></div><div class="card-theme rounded-2xl overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Mode</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${filtered.length===0?`<tr><td colspan="9" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:filtered.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td><td class="p-4"><span class="pricing-mode-badge ${order.pricing_mode==='agent'?'pricing-mode-agent':'pricing-mode-system'}">${order.pricing_mode==='agent'?'Agent':'System'}</span></td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
+${order.Status==='Pending'&&!order.api_reference?`<button data-ref="${esc(order.ref)}" onclick="showProcessConfirmation(this.dataset.ref)" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button>`:''}
+<button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button data-ref="${esc(order.ref)}" onclick="deleteOrder(this.dataset.ref)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
 function renderAdminBroadcastTab(){
@@ -1412,7 +1391,7 @@ async function loadAdminAgentPricesTable(){
   const c=document.getElementById('admin-agent-prices-container');
   if(!c) return;
   if(!state.agentBasePrices.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No agent base prices yet. Click "+ Add Price" to create one.<br><span class="text-xs mt-2 block">System prices for normal users remain untouched.</span></div>`;return;}
-  c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Agent Base Price</th><th class="p-3 text-xs font-black uppercase text-slate-500">System Price</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Pricing Lock</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${state.agentBasePrices.map(p=>{const sysBundle=NORMAL_BUNDLES.find(b=>b.network===p.network&&b.size===p.bundle_name);const locked=p.pricing_locked;return`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-bold">${p.network?.toUpperCase()}</td><td class="p-3">${p.bundle_name}</td><td class="p-3 font-bold text-blue-600" id="abp-val-${p.id}">₵${parseFloat(p.base_price).toFixed(2)}</td><td class="p-3 text-muted-theme text-sm">${sysBundle?'₵'+sysBundle.price.toFixed(2):'—'}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${p.status==='active'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${p.status||'active'}</span></td><td class="p-3"><span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${locked?'bg-red-100 text-red-700':'bg-slate-100 text-slate-600'}">${locked?'<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked':'<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>Unlocked'}</span></td><td class="p-3"><div class="flex gap-2 flex-wrap"><button onclick="showEditAgentPriceInline('${p.id}',${p.base_price})" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-all">Edit</button><button onclick="toggleAgentBasePrice('${p.id}','${p.status==='active'?'disabled':'active'}')" class="text-xs ${p.status==='active'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'} px-3 py-1 rounded-lg font-bold hover:opacity-80">${p.status==='active'?'Disable':'Enable'}</button><button onclick="deleteAgentBasePrice('${p.id}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200">Delete</button><button id="row-lock-btn-${p.id}" onclick="toggleRowPriceLock('${p.id}')" class="text-xs ${locked?'bg-green-100 text-green-700 hover:bg-green-200':'bg-orange-100 text-orange-700 hover:bg-orange-200'} px-3 py-1 rounded-lg font-bold transition-all">${locked?'Unlock':'Lock'}</button></div><div id="edit-inline-${p.id}" style="display:none;" class="mt-2 flex gap-2 items-center"><input type="number" id="edit-price-${p.id}" value="${p.base_price}" step="0.01" min="0.01" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none"><button onclick="saveEditAgentPrice('${p.id}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-700">Save</button><button onclick="document.getElementById('edit-inline-${p.id}').style.display='none'" class="bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-300">Cancel</button></div></td></tr>`}).join('')}</tbody></table></div>`;
+  c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Agent Base Price</th><th class="p-3 text-xs font-black uppercase text-slate-500">System Price</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Pricing Lock</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${state.agentBasePrices.map(p=>{const sysBundle=NORMAL_BUNDLES.find(b=>b.network===p.network&&b.size===p.bundle_name);const locked=p.pricing_locked;return`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-bold">${esc(p.network?.toUpperCase())}</td><td class="p-3">${esc(p.bundle_name)}</td><td class="p-3 font-bold text-blue-600" id="abp-val-${esc(p.id)}">₵${parseFloat(p.base_price).toFixed(2)}</td><td class="p-3 text-muted-theme text-sm">${sysBundle?'₵'+sysBundle.price.toFixed(2):'—'}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${p.status==='active'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${esc(p.status||'active')}</span></td><td class="p-3"><span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${locked?'bg-red-100 text-red-700':'bg-slate-100 text-slate-600'}">${locked?'<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked':'<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>Unlocked'}</span></td><td class="p-3"><div class="flex gap-2 flex-wrap"><button onclick="showEditAgentPriceInline('${esc(p.id)}',${esc(p.base_price)})" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-all">Edit</button><button onclick="toggleAgentBasePrice('${esc(p.id)}','${p.status==='active'?'disabled':'active'}')" class="text-xs ${p.status==='active'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'} px-3 py-1 rounded-lg font-bold hover:opacity-80">${p.status==='active'?'Disable':'Enable'}</button><button onclick="deleteAgentBasePrice('${esc(p.id)}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200">Delete</button><button id="row-lock-btn-${esc(p.id)}" onclick="toggleRowPriceLock('${esc(p.id)}')" class="text-xs ${locked?'bg-green-100 text-green-700 hover:bg-green-200':'bg-orange-100 text-orange-700 hover:bg-orange-200'} px-3 py-1 rounded-lg font-bold transition-all">${locked?'Unlock':'Lock'}</button></div><div id="edit-inline-${esc(p.id)}" style="display:none;" class="mt-2 flex gap-2 items-center"><input type="number" id="edit-price-${esc(p.id)}" value="${esc(p.base_price)}" step="0.01" min="0.01" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none"><button onclick="saveEditAgentPrice('${esc(p.id)}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-700">Save</button><button onclick="document.getElementById('edit-inline-${esc(p.id)}').style.display='none'" class="bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-300">Cancel</button></div></td></tr>`}).join('')}</tbody></table></div>`;
 }
 async function saveAdminAgentBasePrice(){
   const network=document.getElementById('abp-network')?.value;
@@ -1514,7 +1493,7 @@ async function loadAdminAgentsList(){
       // BUG 4 FIX: Show "Updated" badge for pending agents who have re-submitted (updated_at differs from created_at)
       const isResubmitted=a.status==='pending'&&a.updated_at&&a.created_at&&a.updated_at!==a.created_at;
       const updatedBadge=isResubmitted?`<span class="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">Updated</span>`:'';
-      return`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs font-bold">${a.agent_id||a.id}</td><td class="p-3 font-bold">${a.name}</td><td class="p-3">${a.phone}</td><td class="p-3 text-muted-theme">${a.business_name||'—'}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${a.status==='active'?'bg-green-100 text-green-700':a.status==='pending'?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700'}">${a.status}</span>${updatedBadge}</td><td class="p-3 text-xs text-muted-theme">${new Date(a.created_at).toLocaleDateString()}</td><td class="p-3"><div class="flex gap-2 flex-wrap">${a.status==='pending'?`<button onclick="updateAgentStatus('${a.id}','active')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-all">Approve</button><button onclick="updateAgentStatus('${a.id}','rejected')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-all">Reject</button>`:a.status==='active'?`<button onclick="updateAgentStatus('${a.id}','suspended')" class="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-lg font-bold hover:bg-amber-200 transition-all">Suspend</button>`:a.status==='rejected'||a.status==='suspended'?`<button onclick="updateAgentStatus('${a.id}','active')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-all">Re-approve</button>`:'—'}</div></td></tr>`;}).join('')}</tbody></table></div>`;
+      return`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs font-bold">${a.agent_id||a.id}</td><td class="p-3 font-bold">${esc(a.name)}</td><td class="p-3">${esc(a.phone)}</td><td class="p-3 text-muted-theme">${esc(a.business_name||'—')}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${a.status==='active'?'bg-green-100 text-green-700':a.status==='pending'?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700'}">${esc(a.status)}</span>${updatedBadge}</td><td class="p-3 text-xs text-muted-theme">${new Date(a.created_at).toLocaleDateString()}</td><td class="p-3"><div class="flex gap-2 flex-wrap">${a.status==='pending'?`<button onclick="updateAgentStatus('${esc(a.id)}','active')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-all">Approve</button><button onclick="updateAgentStatus('${esc(a.id)}','rejected')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-all">Reject</button>`:a.status==='active'?`<button onclick="updateAgentStatus('${esc(a.id)}','suspended')" class="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-lg font-bold hover:bg-amber-200 transition-all">Suspend</button>`:a.status==='rejected'||a.status==='suspended'?`<button onclick="updateAgentStatus('${esc(a.id)}','active')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-all">Re-approve</button>`:'—'}</div></td></tr>`;}).join('')}</tbody></table></div>`;
   }catch(err){c.innerHTML=`<div class="text-center py-8 text-red-500">Failed to load agents</div>`;}
 }
 async function updateAgentStatus(id,status){
@@ -1525,6 +1504,109 @@ async function updateAgentStatus(id,status){
     loadAdminAgentsList();
   }catch(err){showToast('Update failed: '+err.message,4000,'error');}
 }
+/* ===== ADMIN DEPOSITS TAB (MoMo requests, direct credit, Paystack switch) ===== */
+function renderAdminDepositsTab(){
+  return`<div class="space-y-6">
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Mobile Money deposits waiting for review</h2><p class="text-xs text-muted-theme mb-4">Check each one against your MoMo statement for ${MOMO_NUMBER}, then approve to credit the customer's wallet.</p><div id="admin-deposit-requests"><div class="spinner mx-auto"></div></div></div>
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Credit a wallet by reference</h2><p class="text-xs text-muted-theme mb-4">For payments that came in without a request. The reference is the TRU… code the customer used.</p>
+      <div class="grid md:grid-cols-4 gap-3"><input id="cr-code" type="text" maxlength="12" placeholder="TRU4F9A2C" class="p-3 border-2 rounded-xl font-bold uppercase"><input id="cr-amount" type="number" min="0.01" step="0.01" placeholder="Amount (₵)" class="p-3 border-2 rounded-xl font-bold"><input id="cr-txn" type="text" maxlength="40" placeholder="MoMo transaction ID" class="p-3 border-2 rounded-xl font-bold"><button id="cr-btn" onclick="adminCreditWallet()" class="bg-green-600 text-white rounded-xl font-black py-3">Credit Wallet</button></div>
+      <p class="text-xs text-muted-theme mt-2">The same MoMo transaction ID can only be credited once.</p></div>
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Paystack</h2><p class="text-xs text-muted-theme mb-4">When on, customers also see a "Card / Paystack" option on their wallet page.</p><div id="admin-paystack-settings"><div class="spinner mx-auto"></div></div></div>
+  </div>`;
+}
+async function loadAdminDepositsTab(){
+  loadAdminDepositRequests();
+  loadAdminPaystackSettings();
+}
+async function loadAdminDepositRequests(){
+  const c=document.getElementById('admin-deposit-requests');
+  if(!c) return;
+  try{
+    const{data,error}=await supa.from('deposit_requests').select('*, profiles(full_name,email,deposit_code)').eq('status','pending').order('created_at',{ascending:true});
+    if(error) throw error;
+    if(!data||!data.length){c.innerHTML='<div class="text-center py-6 text-muted-theme">No deposits waiting for review.</div>';return;}
+    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Date</th><th class="p-3 text-xs font-black uppercase text-slate-500">Customer</th><th class="p-3 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">MoMo Txn ID</th><th class="p-3 text-xs font-black uppercase text-slate-500">Sent From</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${data.map(r=>`<tr class="border-b"><td class="p-3 text-xs whitespace-nowrap">${new Date(r.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3"><div class="font-bold">${esc(r.profiles?.full_name||'')}</div><div class="text-xs text-muted-theme">${esc(r.profiles?.email||'')}</div></td><td class="p-3 font-mono font-bold">${esc(r.profiles?.deposit_code||'')}</td><td class="p-3 font-black">₵${parseFloat(r.amount).toFixed(2)}</td><td class="p-3 font-mono">${esc(r.momo_txn_id||'—')}</td><td class="p-3 font-mono">${esc(r.sender_phone||'—')}</td><td class="p-3"><div class="flex gap-2"><button data-id="${esc(r.id)}" data-amount="${esc(r.amount)}" onclick="adminApproveDeposit(this.dataset.id,this.dataset.amount)" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold">Approve</button><button data-id="${esc(r.id)}" onclick="adminRejectDeposit(this.dataset.id)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold">Reject</button></div></td></tr>`).join('')}</tbody></table></div>`;
+  }catch(err){c.innerHTML='<div class="text-center py-6 text-red-500">Failed to load deposit requests</div>';}
+}
+async function adminApproveDeposit(id,amount){
+  const input=prompt('Amount received on MoMo (₵). Change it if the customer sent a different amount:',parseFloat(amount).toFixed(2));
+  if(input===null) return;
+  const value=parseFloat(input);
+  if(!value||value<=0){showToast('Enter a valid amount',3000,'error');return;}
+  try{
+    const{data,error}=await supa.rpc('approve_deposit_request',{p_id:id,p_amount:value});
+    if(error) throw error;
+    showToast(`Credited ₵${Number(data.credited).toFixed(2)}`,3000,'success');
+    loadAdminDepositRequests();
+  }catch(err){showToast('Approve failed: '+(err.message||'error'),5000,'error');}
+}
+async function adminRejectDeposit(id){
+  const note=prompt('Reason shown to the customer (optional):','Payment not found on our MoMo statement');
+  if(note===null) return;
+  try{
+    const{error}=await supa.rpc('reject_deposit_request',{p_id:id,p_note:note});
+    if(error) throw error;
+    showToast('Request rejected',3000,'info');
+    loadAdminDepositRequests();
+  }catch(err){showToast('Reject failed: '+(err.message||'error'),5000,'error');}
+}
+async function adminCreditWallet(){
+  const code=document.getElementById('cr-code')?.value.trim().toUpperCase();
+  const amount=parseFloat(document.getElementById('cr-amount')?.value);
+  const txn=document.getElementById('cr-txn')?.value.trim();
+  if(!code){showToast('Enter the customer reference',3000,'error');return;}
+  if(!amount||amount<=0){showToast('Enter the amount',3000,'error');return;}
+  if(!confirm(`Credit ₵${amount.toFixed(2)} to ${code}?`)) return;
+  const btn=document.getElementById('cr-btn');if(btn) btn.disabled=true;
+  try{
+    const{data,error}=await supa.rpc('admin_credit_wallet',{p_deposit_code:code,p_amount:amount,p_momo_txn_id:txn||null});
+    if(error) throw error;
+    showToast(`Credited ₵${Number(data.credited).toFixed(2)} to ${data.name||data.email}. New balance ₵${Number(data.new_balance).toFixed(2)}`,6000,'success');
+    ['cr-code','cr-amount','cr-txn'].forEach(i=>{const el=document.getElementById(i);if(el) el.value='';});
+    loadAdminDepositRequests();
+  }catch(err){showToast('Credit failed: '+(err.message||'error'),5000,'error');}
+  finally{if(btn) btn.disabled=false;}
+}
+async function loadAdminPaystackSettings(){
+  const c=document.getElementById('admin-paystack-settings');
+  if(!c) return;
+  await loadPaymentSettings();
+  let status={set:false};
+  try{const{data}=await supa.rpc('paystack_secret_key_status');if(data) status=data;}catch(e){}
+  const on=state.paystackEnabled;
+  c.innerHTML=`<div class="space-y-4">
+    <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4"><div><div class="font-black">Paystack payments are ${on?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${on?'Customers can pay by card / Paystack.':'Customers only see Mobile Money instructions.'}</div></div><button onclick="adminTogglePaystack()" class="px-5 py-2.5 rounded-xl font-black text-white ${on?'bg-slate-600':'bg-green-600'}">${on?'Turn Off':'Turn On'}</button></div>
+    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Public key</label><div class="flex gap-2"><input id="ps-public" type="text" value="${esc(state.paystackPublicKey||'')}" placeholder="pk_live_..." class="flex-1 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSavePaystackPublicKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div></div>
+    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Secret key</label><div class="flex gap-2"><input id="ps-secret" type="password" autocomplete="off" placeholder="${status.set?'Saved (ends in '+esc(status.last4)+'). Paste a new one to replace it':'sk_live_...'}" class="flex-1 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSavePaystackSecretKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">${status.set?`Secret key saved (${esc(status.mode)} mode, ends in ${esc(status.last4)}).`:'No secret key saved yet. Paystack deposits cannot be confirmed until you add one.'} It is stored privately and never shown again.</p></div>
+  </div>`;
+}
+async function adminTogglePaystack(){
+  const next=!state.paystackEnabled;
+  if(next&&!/^pk_(live|test)_/.test(state.paystackPublicKey||'')){showToast('Save the Paystack public key first',4000,'error');return;}
+  const{error}=await supa.from('app_settings').upsert({key:'paystack_enabled',value:next,updated_at:new Date().toISOString()});
+  if(error){showToast('Could not change Paystack: '+error.message,4000,'error');return;}
+  showToast(next?'Paystack is ON':'Paystack is OFF',3000,'success');
+  loadAdminPaystackSettings();
+}
+async function adminSavePaystackPublicKey(){
+  const key=document.getElementById('ps-public')?.value.trim();
+  if(!/^pk_(live|test)_[A-Za-z0-9]{20,}$/.test(key||'')){showToast('That does not look like a Paystack public key (pk_live_...)',4000,'error');return;}
+  const{error}=await supa.from('app_settings').upsert({key:'paystack_public_key',value:key,updated_at:new Date().toISOString()});
+  if(error){showToast('Save failed: '+error.message,4000,'error');return;}
+  showToast('Public key saved',3000,'success');
+  loadAdminPaystackSettings();
+}
+async function adminSavePaystackSecretKey(){
+  const input=document.getElementById('ps-secret');
+  const key=input?.value.trim();
+  if(!key){showToast('Paste the secret key first',3000,'error');return;}
+  const{error}=await supa.rpc('set_paystack_secret_key',{p_secret:key});
+  if(input) input.value='';
+  if(error){showToast('Save failed: '+error.message,5000,'error');return;}
+  showToast('Secret key saved',3000,'success');
+  loadAdminPaystackSettings();
+}
+
 /* ===== ADMIN WITHDRAWALS TAB ===== */
 function renderAdminWithdrawalsTab(){
   const isOverride=state.withdrawalOverride;
@@ -1551,7 +1633,7 @@ async function loadAdminWithdrawals(){
     const{data,error}=await supa.from('agent_withdrawals').select('*').order('created_at',{ascending:false});
     if(error) throw error;
     if(!data||!data.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No withdrawal requests yet.</div>`;return;}
-    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Agent</th><th class="p-3 text-xs font-black uppercase text-slate-500">Payout Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">MoMo #</th><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Requested</th><th class="p-3 text-xs font-black uppercase text-slate-500">Action</th></tr></thead><tbody>${data.map(w=>{const netAmt=parseFloat(w.net_amount||w.amount||0);const reqAmt=parseFloat(w.requested_amount||0);const fee=parseFloat(w.fee||0);return`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs">${w.agent_id}</td><td class="p-3"><div class="flex flex-col"><span class="font-black text-green-600 text-sm">&#8373;${netAmt.toFixed(2)}</span>${reqAmt>0?`<span class="text-xs text-slate-400 font-semibold">Requested: &#8373;${reqAmt.toFixed(2)} &bull; Fee: &#8373;${fee.toFixed(2)}</span>`:`<span class="text-xs text-slate-400 font-semibold">Fee: &#8373;${fee.toFixed(2)}</span>`}</div></td><td class="p-3 font-bold">${w.phone}</td><td class="p-3">${(w.network||'').toUpperCase()}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${w.status==='paid'?'bg-green-100 text-green-700':w.status==='rejected'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${w.status}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(w.created_at).toLocaleDateString()}</td><td class="p-3">${w.status==='pending'?`<div class="flex gap-2"><button onclick="processWithdrawal('${w.id}','paid')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200">Pay</button><button onclick="processWithdrawal('${w.id}','rejected')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200">Reject</button></div>`:'—'}</td></tr>`}).join('')}</tbody></table></div>`;
+    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Agent</th><th class="p-3 text-xs font-black uppercase text-slate-500">Payout Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">MoMo #</th><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Requested</th><th class="p-3 text-xs font-black uppercase text-slate-500">Action</th></tr></thead><tbody>${data.map(w=>{const netAmt=parseFloat(w.net_amount||w.amount||0);const reqAmt=parseFloat(w.requested_amount||0);const fee=parseFloat(w.fee||0);return`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs">${esc(w.agent_id)}</td><td class="p-3"><div class="flex flex-col"><span class="font-black text-green-600 text-sm">&#8373;${netAmt.toFixed(2)}</span>${reqAmt>0?`<span class="text-xs text-slate-400 font-semibold">Requested: &#8373;${reqAmt.toFixed(2)} &bull; Fee: &#8373;${fee.toFixed(2)}</span>`:`<span class="text-xs text-slate-400 font-semibold">Fee: &#8373;${fee.toFixed(2)}</span>`}</div></td><td class="p-3 font-bold">${esc(w.phone)}</td><td class="p-3">${esc((w.network||'').toUpperCase())}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${w.status==='paid'?'bg-green-100 text-green-700':w.status==='rejected'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(w.status)}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(w.created_at).toLocaleDateString()}</td><td class="p-3">${w.status==='pending'?`<div class="flex gap-2"><button onclick="processWithdrawal('${esc(w.id)}','paid')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200">Pay</button><button onclick="processWithdrawal('${esc(w.id)}','rejected')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200">Reject</button></div>`:'—'}</td></tr>`}).join('')}</tbody></table></div>`;
   }catch(err){c.innerHTML=`<div class="text-center py-8 text-red-500">Failed to load withdrawals</div>`;}
 }
 async function processWithdrawal(id,status){
@@ -1560,25 +1642,7 @@ async function processWithdrawal(id,status){
     const{error:we}=await supa.from('agent_withdrawals').update({status,processed_at:new Date().toISOString()}).eq('id',id);
     if(we) throw we;
 
-    // 2. If PAID — deduct the withdrawn amount from the agent's total_withdrawn tally in agent_profiles
-    if(status==='paid'){
-      // Fetch the withdrawal record to get agent_id and amount
-      const{data:wd,error:fe}=await supa.from('agent_withdrawals').select('agent_id,amount').eq('id',id).single();
-      if(fe) throw fe;
-      const withdrawnAmount=parseFloat(wd.amount||0);
-
-      // Find the agent_profiles row using agent_id (text code like AGT-xxx) or UUID
-      const{data:ap,error:ae}=await supa.from('agent_profiles')
-        .select('id,total_withdrawn')
-        .or(`agent_id.eq.${wd.agent_id},id.eq.${wd.agent_id}`)
-        .maybeSingle();
-      if(ae) throw ae;
-      if(ap){
-        const newTotal=parseFloat(ap.total_withdrawn||0)+withdrawnAmount;
-        const{error:ue}=await supa.from('agent_profiles').update({total_withdrawn:newTotal}).eq('id',ap.id);
-        if(ue) throw ue;
-      }
-    }
+    // total_withdrawn is recalculated by the database trigger on agent_withdrawals.
 
     showToast(`Withdrawal ${status==='paid'?'approved & amount deducted from agent balance':status}`,4000,'success');
     loadAdminWithdrawals();
@@ -1586,16 +1650,19 @@ async function processWithdrawal(id,status){
 }
 
 /* ===== ADMIN WITHDRAWAL WINDOW OVERRIDE ===== */
-function adminToggleWithdrawalOverride(){
-  state.withdrawalOverride=!state.withdrawalOverride;
-  // Persist override in sessionStorage so it survives re-renders during this session
-  if(state.withdrawalOverride){
-    sessionStorage.setItem('tru_admin_withdrawal_override','true');
-    showToast('Withdrawal window OPENED for all agents — override is active.',4000,'success');
-  }else{
-    sessionStorage.removeItem('tru_admin_withdrawal_override');
-    showToast('Withdrawal window override removed — normal schedule applies.',4000,'info');
-  }
+async function loadWithdrawalOverride(){
+  try{
+    const{data}=await supa.from('app_settings').select('value').eq('key','withdrawal_override').maybeSingle();
+    state.withdrawalOverride=data?.value===true;
+  }catch(e){}
+}
+async function adminToggleWithdrawalOverride(){
+  const next=!state.withdrawalOverride;
+  const{error}=await supa.from('app_settings').upsert({key:'withdrawal_override',value:next,updated_at:new Date().toISOString()});
+  if(error){showToast('Could not change the withdrawal window: '+error.message,4000,'error');return;}
+  state.withdrawalOverride=next;
+  if(next) showToast('Withdrawal window OPENED for all agents — override is active.',4000,'success');
+  else showToast('Withdrawal window override removed — normal schedule applies.',4000,'info');
   // Re-render withdrawals tab to update the button state
   state.adminTab='withdrawals';
   render();
@@ -1606,11 +1673,11 @@ function adminToggleWithdrawalOverride(){
 function renderAgentPortal(){
   if(state.agentProfile){
     if(state.agentProfile.status==='pending'){
-      return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-amber-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h2 class="text-2xl font-black mb-3">Application Under Review</h2><p class="text-muted-theme mb-6">Your agent application has been submitted and is awaiting admin approval. You will be able to access your dashboard once approved.</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800 font-semibold">Agent ID: <code class="font-mono bg-amber-100 px-2 py-0.5 rounded">${state.agentProfile.agent_id||state.agentProfile.id}</code></div><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button></div></div>`;
+      return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-amber-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h2 class="text-2xl font-black mb-3">Application Under Review</h2><p class="text-muted-theme mb-6">Your agent application has been submitted and is awaiting admin approval. You will be able to access your dashboard once approved.</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800 font-semibold">Agent ID: <code class="font-mono bg-amber-100 px-2 py-0.5 rounded">${esc(state.agentProfile.agent_id||state.agentProfile.id)}</code></div><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button></div></div>`;
     }
     // BUG 4 FIX: Rejected agents get a pre-filled edit form to update and re-submit their application
     if(state.agentProfile.status==='rejected'){
-      return`<div class="min-h-screen flex items-center justify-center px-4 py-12"><div class="max-w-md w-full card-theme p-8 rounded-3xl animate-scale-in"><div class="w-20 h-20 bg-red-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h2 class="text-2xl font-black mb-2 text-center">Your Application Was Not Approved</h2><p class="text-muted-theme text-sm text-center mb-6">You can update your details below and re-submit for review.</p><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name *</label><input type="text" id="agent-name" value="${state.agentProfile.name||''}" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="Your full name"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number *</label><input type="tel" id="agent-phone" value="${state.agentProfile.phone||''}" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Business Name (Optional)</label><input type="text" id="agent-business" value="${state.agentProfile.business_name||''}" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="e.g. John's Data Hub"></div><button onclick="reapplyAsAgent()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-2">Re-submit Application</button><p class="text-xs text-muted-theme text-center">This will update your existing application. Admin will review your updated details.</p></div></div></div>`;
+      return`<div class="min-h-screen flex items-center justify-center px-4 py-12"><div class="max-w-md w-full card-theme p-8 rounded-3xl animate-scale-in"><div class="w-20 h-20 bg-red-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h2 class="text-2xl font-black mb-2 text-center">Your Application Was Not Approved</h2><p class="text-muted-theme text-sm text-center mb-6">You can update your details below and re-submit for review.</p><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name *</label><input type="text" id="agent-name" value="${esc(state.agentProfile.name||'')}" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="Your full name"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number *</label><input type="tel" id="agent-phone" value="${esc(state.agentProfile.phone||'')}" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Business Name (Optional)</label><input type="text" id="agent-business" value="${esc(state.agentProfile.business_name||'')}" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="e.g. John's Data Hub"></div><button onclick="reapplyAsAgent()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-2">Re-submit Application</button><p class="text-xs text-muted-theme text-center">This will update your existing application. Admin will review your updated details.</p></div></div></div>`;
     }
     return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-2xl font-black mb-4">You're Already an Agent!</h2><p class="text-muted-theme mb-8">Your agent account is active. Go to your dashboard to manage pricing and track your sales.</p><div class="space-y-3"><button onclick="navigateTo('agent-dashboard')" class="w-full cta-button text-white py-4 rounded-2xl font-bold">Go to Agent Dashboard</button><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button></div></div></div>`;
   }
@@ -1643,18 +1710,18 @@ function renderAgentPortal(){
 function renderAgentDashboard(){
   const ap=state.agentProfile;
   if(!ap) return`<div class="min-h-screen flex items-center justify-center"><p class="text-muted-theme">Agent profile not found.</p></div>`;
-  const refLink=`${window.location.origin}${window.location.pathname}?agent=${ap.agent_id||ap.id}`;
+  const refLink=`${window.location.origin}${window.location.pathname}?agent=${esc(ap.agent_id||ap.id)}`;
   const tab=state.agentTab||'dashboard';
   return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
-      <div><h1 class="text-3xl font-black">Agent Dashboard</h1><p class="text-muted-theme text-sm">Welcome, <strong>${ap.name||'Agent'}</strong> &bull; ID: <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">${ap.agent_id||ap.id}</code></p></div>
+      <div><h1 class="text-3xl font-black">Agent Dashboard</h1><p class="text-muted-theme text-sm">Welcome, <strong>${esc(ap.name||'Agent')}</strong> &bull; ID: <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">${esc(ap.agent_id||ap.id)}</code></p></div>
       <button onclick="navigateTo('home')" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">← Back to Store</button>
     </div>
     <!-- Referral Link Card -->
     <div class="mb-8 bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-5 text-white">
       <p class="text-xs font-bold uppercase text-blue-200 mb-2">Your Agent Referral Link</p>
       <div class="flex items-center gap-3 flex-wrap">
-        <code class="flex-1 bg-white/15 px-4 py-3 rounded-xl text-sm font-mono truncate min-w-0" id="agent-ref-link">${refLink}</code>
+        <code class="flex-1 bg-white/15 px-4 py-3 rounded-xl text-sm font-mono truncate min-w-0" id="agent-ref-link">${esc(refLink)}</code>
         <button onclick="copyAgentLink()" class="bg-white text-blue-700 px-4 py-3 rounded-xl font-bold text-sm hover:bg-blue-50 transition-all whitespace-nowrap shrink-0 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>Copy Link</button>
       </div>
       <p class="text-blue-200 text-xs mt-2">Customers who open your link will see your special pricing automatically.</p>
@@ -1664,7 +1731,7 @@ function renderAgentDashboard(){
       <div class="agent-stat-card bg-green-50 border border-green-200"><div class="text-2xl font-black text-green-700">₵${(state.agentStats.sales||0).toFixed(2)}</div><div class="text-xs font-bold text-green-600 uppercase mt-1">Total Sales</div></div>
       <div class="agent-stat-card bg-blue-50 border border-blue-200"><div class="text-2xl font-black text-blue-700">₵${(state.agentStats.profit||0).toFixed(2)}</div><div class="text-xs font-bold text-blue-600 uppercase mt-1">Available Profit</div>${(state.agentStats.totalWithdrawn||0)>0?`<div class="text-xs text-slate-400 mt-0.5">Gross: ₵${(state.agentStats.grossProfit||0).toFixed(2)}</div>`:''}</div>
       <div class="agent-stat-card bg-amber-50 border border-amber-200"><div class="text-2xl font-black text-amber-700">₵${(state.agentStats.totalWithdrawn||0).toFixed(2)}</div><div class="text-xs font-bold text-amber-600 uppercase mt-1">Total Withdrawn</div></div>
-      <div class="agent-stat-card bg-purple-50 border border-purple-200"><div class="text-2xl font-black text-purple-700">${ap.status||'Active'}</div><div class="text-xs font-bold text-purple-600 uppercase mt-1">Account Status</div></div>
+      <div class="agent-stat-card bg-purple-50 border border-purple-200"><div class="text-2xl font-black text-purple-700">${esc(ap.status||'Active')}</div><div class="text-xs font-bold text-purple-600 uppercase mt-1">Account Status</div></div>
     </div>
     <!-- Tabs -->
     <div class="flex gap-2 mb-6 flex-wrap">
@@ -1768,21 +1835,24 @@ async function loadAgentPricingPanel(){
     // Lock state is driven SOLELY by bp.pricing_locked from agent_base_prices.
     // When agent saves a profit, saveAgentProfit() sets pricing_locked=true in agent_base_prices.
     // When admin unlocks (all or per-row), pricing_locked becomes false — agent row unlocks too.
-    const locked=bp.pricing_locked===true;
+    const locked=bp.pricing_locked===true||!!(ex&&ex.locked);
     const agentSaved=!!ex;
     // adminOnlyLocked: admin locked this row but agent has not yet saved a profit for it
     const adminOnlyLocked=locked&&!agentSaved;
     const rowClass=locked?'border-b bg-slate-100 opacity-75':'border-b hover:bg-slate-50';
-    return`<tr class="${rowClass}"><td class="p-3 font-bold ${locked?'text-slate-400':''}">${bp.network?.toUpperCase()}</td><td class="p-3 ${locked?'text-slate-400':''}">${bp.bundle_name}${locked?` <span class="ml-1 text-xs bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-bold">LOCKED</span>`:''}</td><td class="p-3 font-bold ${locked?'text-slate-400':'text-green-600'}">₵${parseFloat(bp.base_price).toFixed(2)}</td><td class="p-3">${adminOnlyLocked
+    return`<tr class="${rowClass}"><td class="p-3 font-bold ${locked?'text-slate-400':''}">${esc(bp.network?.toUpperCase())}</td><td class="p-3 ${locked?'text-slate-400':''}">${esc(bp.bundle_name)}${locked?` <span class="ml-1 text-xs bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-bold">LOCKED</span>`:''}</td><td class="p-3 font-bold ${locked?'text-slate-400':'text-green-600'}">₵${parseFloat(bp.base_price).toFixed(2)}</td><td class="p-3">${adminOnlyLocked
       // Admin locked but no saved price yet — show "Locked by admin" message
       ?`<div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><span class="text-xs text-slate-500 font-bold">🔒 Locked by admin</span></div>`
       :locked
       // Agent has saved price — show their profit
       ?`<div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><div class="flex flex-col"><span class="font-black text-green-600 text-sm">₵${pr.toFixed(2)}</span><span class="text-xs text-slate-400 font-semibold">Your profit</span></div></div>`
       // Not locked — editable input
-      :`<input type="number" min="0" step="0.01" value="${pr.toFixed(2)}" id="pr-${bp.id}" onchange="document.getElementById('tot-${bp.id}').textContent='₵'+(${parseFloat(bp.base_price)}+parseFloat(this.value||0)).toFixed(2)" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none">`}</td><td class="p-3" id="tot-${bp.id}">${locked?`<div class="flex flex-col"><span class="font-black text-blue-500 text-sm">₵${finalPrice.toFixed(2)}</span><span class="text-xs text-slate-400 font-semibold">Fixed price</span></div>`:`<span class="font-bold text-blue-600">₵${(parseFloat(bp.base_price)+pr).toFixed(2)}</span>`}</td><td class="p-3">${locked?`<div class="flex flex-col gap-1"><span class="inline-flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-200 px-2 py-1 rounded-lg"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked</span><span class="text-xs text-slate-400">Contact admin to edit</span></div>`:`<button onclick="saveAgentProfit('${bp.id}','${bp.bundle_name}','${bp.network}',${bp.base_price})" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 transition-all">Save</button>`}</td></tr>`;}).join('')}</tbody></table></div><p class="text-xs text-muted-theme mt-4">Customer pays = Your Base Cost + Your Profit. System base prices are never exposed here. Once you save, your price is locked — contact admin to make changes. <span class="text-slate-400 font-bold">Grayed-out rows are locked and uneditable.</span></p>`;
+      :`<input type="number" min="0" step="0.01" value="${pr.toFixed(2)}" id="pr-${esc(bp.id)}" onchange="document.getElementById('tot-${esc(bp.id)}').textContent='₵'+(${parseFloat(bp.base_price)}+parseFloat(this.value||0)).toFixed(2)" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none">`}</td><td class="p-3" id="tot-${esc(bp.id)}">${locked?`<div class="flex flex-col"><span class="font-black text-blue-500 text-sm">₵${finalPrice.toFixed(2)}</span><span class="text-xs text-slate-400 font-semibold">Fixed price</span></div>`:`<span class="font-bold text-blue-600">₵${(parseFloat(bp.base_price)+pr).toFixed(2)}</span>`}</td><td class="p-3">${locked?`<div class="flex flex-col gap-1"><span class="inline-flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-200 px-2 py-1 rounded-lg"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked</span><span class="text-xs text-slate-400">Contact admin to edit</span></div>`:`<button onclick="saveAgentProfit('${esc(bp.id)}')" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 transition-all">Save</button>`}</td></tr>`;}).join('')}</tbody></table></div><p class="text-xs text-muted-theme mt-4">Customer pays = Your Base Cost + Your Profit. System base prices are never exposed here. Once you save, your price is locked — contact admin to make changes. <span class="text-slate-400 font-bold">Grayed-out rows are locked and uneditable.</span></p>`;
 }
-async function saveAgentProfit(bundleId,bundleName,network,basePrice){
+async function saveAgentProfit(bundleId){
+  const bp=state.agentBasePrices.find(b=>b.id===bundleId);
+  if(!bp) return;
+  const bundleName=bp.bundle_name,network=bp.network,basePrice=bp.base_price;
   const input=document.getElementById(`pr-${bundleId}`);
   if(!input||!state.agentProfile) return;
   const profit=parseFloat(input.value)||0;
@@ -1792,11 +1862,8 @@ async function saveAgentProfit(bundleId,bundleName,network,basePrice){
     // BUG 2 FIX: Upsert uses only bundleId (UUID) — bundle_name is stored for reference only, not for matching
     const{error}=await supa.from('agent_prices').upsert([{agent_id:state.agentProfile.id,bundle_id:bundleId,bundle_name:bundleName,network,profit,final_price:parseFloat(basePrice)+profit,status:'approved',updated_at:new Date().toISOString()}],{onConflict:'agent_id,bundle_id'});
     if(error) throw error;
-    // Lock this specific bundle row in agent_base_prices so agent cannot edit until admin unlocks
-    await supa.from('agent_base_prices').update({pricing_locked:true}).eq('id',bundleId);
-    // Immediately update local state so UI reflects locked state without a full reload
-    const bpEntry=state.agentBasePrices.find(b=>b.id===bundleId);
-    if(bpEntry) bpEntry.pricing_locked=true;
+    // The database locks this agent's own price for this bundle (other agents are unaffected).
+    await loadAgentPricesForSession();
     showToast('Profit saved for '+bundleName+'. This price is now locked. Contact admin to make changes.',5000,'success');
     await loadAgentBasePrices();
     await loadAgentPricesForSession();
@@ -1810,7 +1877,7 @@ async function loadAgentOrdersPanel(){
     const{data,error}=await supa.from('orders').select('*').eq('agent_id',state.agentProfile.id).order('created_at',{ascending:false}).limit(100);
     if(error) throw error;
     if(!data||!data.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No orders through your link yet. Share your referral link to get started!</div>`;return;}
-    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">Profit</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Date</th></tr></thead><tbody>${data.map(o=>`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs font-bold">${o.ref}</td><td class="p-3 font-bold">${o.Network?.toUpperCase()}</td><td class="p-3">${o.bundle_name}</td><td class="p-3 font-bold text-blue-600">₵${parseFloat(o.Amount).toFixed(2)}</td><td class="p-3 font-bold text-green-600">₵${parseFloat(o.agent_profit||0).toFixed(2)}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${o.Status==='Completed'||o.Status==='Delivered'?'bg-green-100 text-green-700':o.Status==='Pending'?'bg-yellow-100 text-yellow-700':'bg-blue-100 text-blue-700'}">${o.Status}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(o.created_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
+    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">Profit</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Date</th></tr></thead><tbody>${data.map(o=>`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs font-bold">${esc(o.ref)}</td><td class="p-3 font-bold">${esc(o.Network?.toUpperCase())}</td><td class="p-3">${esc(o.bundle_name)}</td><td class="p-3 font-bold text-blue-600">₵${parseFloat(o.Amount).toFixed(2)}</td><td class="p-3 font-bold text-green-600">₵${parseFloat(o.agent_profit||0).toFixed(2)}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${o.Status==='Completed'||o.Status==='Delivered'?'bg-green-100 text-green-700':o.Status==='Pending'?'bg-yellow-100 text-yellow-700':'bg-blue-100 text-blue-700'}">${esc(o.Status)}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(o.created_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
   }catch(err){c.innerHTML=`<div class="text-center py-8 text-red-500">Failed to load orders</div>`;}
 }
 async function submitWithdrawal(){
@@ -1828,12 +1895,11 @@ async function submitWithdrawal(){
     showToast('Insufficient balance. Your available profit is \u20b5'+availableProfit.toFixed(2)+' but you requested \u20b5'+amount.toFixed(2)+'.',5000,'error');
     return;
   }
-  const fee=parseFloat((amount*0.01).toFixed(2));
-  const netAmount=parseFloat((amount-fee).toFixed(2));
   try{
-    const{error}=await supa.from('agent_withdrawals').insert([{agent_id:state.agentProfile.agent_id||state.agentProfile.id,user_id:state.user.id,requested_amount:amount,amount:netAmount,fee,net_amount:netAmount,phone,network,status:'pending',created_at:new Date().toISOString()}]);
+    // The server re-checks the window, available profit and pending requests.
+    const{data:wd,error}=await supa.rpc('request_agent_withdrawal',{p_amount:amount,p_phone:phone,p_network:network});
     if(error) throw error;
-    showToast('Withdrawal request submitted! Fee: \u20b5'+fee.toFixed(2)+' \u2014 Admin will pay you: \u20b5'+netAmount.toFixed(2),5000,'success');
+    showToast('Withdrawal request submitted! Fee: \u20b5'+Number(wd.fee).toFixed(2)+' \u2014 Admin will pay you: \u20b5'+Number(wd.net).toFixed(2),5000,'success');
     document.getElementById('wd-amount').value='';document.getElementById('wd-phone').value='';document.getElementById('wd-fee-preview').textContent='';
     await loadAgentWithdrawalHistory();
   }catch(err){showToast('Request failed: '+(err.message||'error'),4000,'error');}
@@ -1890,8 +1956,8 @@ async function loadAgentWithdrawalHistory(){
             <td class="p-3 font-bold text-slate-800">&#8373;${displayReq.toFixed(2)}</td>
             <td class="p-3 text-sm text-amber-600 font-semibold">&#8373;${fee.toFixed(2)}</td>
             <td class="p-3 font-bold text-blue-600">&#8373;${netAmt.toFixed(2)}</td>
-            <td class="p-3 font-mono text-sm">${w.phone}</td>
-            <td class="p-3 text-sm">${(w.network||'').toUpperCase()}</td>
+            <td class="p-3 font-mono text-sm">${esc(w.phone)}</td>
+            <td class="p-3 text-sm">${esc((w.network||'').toUpperCase())}</td>
             <td class="p-3">${statusBadge(w.status)}</td>
             <td class="p-3 text-xs text-muted-theme whitespace-nowrap">${w.processed_at?new Date(w.processed_at).toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric'}):'—'}</td>
           </tr>`;}).join('')}
@@ -1909,14 +1975,23 @@ window.showProcessConfirmation=function(ref){
   document.getElementById('confirm-network').textContent=order.Network?.toUpperCase();
   document.getElementById('confirm-bundle').textContent=order.bundle_name;
   document.getElementById('confirm-amount').textContent='₵'+parseFloat(order.Amount).toFixed(2);
-  selectConfirmationProvider('refer2bundle');
+  selectConfirmationProvider('patupaa');
   document.getElementById('admin-order-confirmation').style.display='block';
 };
 function cancelActiveProcess(){document.getElementById('admin-actions-bar').style.display='none';state.isDirectMode=false;state.activeOrderData=null;}
 window.deleteOrder=async function(ref){
-  if(!confirm(`Are you sure you want to permanently delete order ${ref}?`)) return;
-  try{const{error}=await supa.from('orders').delete().eq('ref',ref);if(error) throw error;state.orders=state.orders.filter(o=>o.ref!==ref);showToast(`Order ${ref} permanently deleted`,3000,'success');render();}
-  catch(err){showToast('Delete failed: '+(err.message||'Unknown error'),4000,'error');}
+  // Cancelling keeps the record and, unless the data was delivered, refunds the customer's wallet.
+  const order=state.orders.find(o=>o.ref===ref);
+  if(!confirm(`Cancel order ${ref}?`)) return;
+  const delivered=order&&(order.Status==='Delivered'||order.Status==='Completed');
+  const refund=confirm(delivered
+    ?`This order is marked ${order.Status}. Refund ₵${parseFloat(order.Amount||0).toFixed(2)} to the customer anyway? (Cancel = no refund)`
+    :`Refund ₵${parseFloat(order?.Amount||0).toFixed(2)} to the customer's wallet? (Cancel = no refund)`);
+  try{
+    const{data,error}=await supa.rpc('cancel_order',{p_ref:ref,p_refund:refund});if(error) throw error;
+    showToast(data.refunded?`Order ${ref} cancelled and ₵${Number(data.amount).toFixed(2)} refunded`:`Order ${ref} cancelled`,3000,'success');
+    fetchOrders();
+  }catch(err){showToast('Cancel failed: '+(err.message||'Unknown error'),4000,'error');}
 };
 window.updateStatus=async function(ref,status){
   try{const{error}=await supa.from('orders').update({Status:status,updated_at:new Date().toISOString()}).eq('ref',ref);if(error) throw error;showToast(`Order marked as ${status}`,3000,'success');fetchOrders();}
@@ -1925,7 +2000,7 @@ window.updateStatus=async function(ref,status){
 
 /* ========== CHANGE 7: renderSuccessView – "View My Orders" as primary CTA ========== */
 function renderSuccessView(params){
-  return`<div class="min-h-screen flex items-center justify-center px-4 py-20 animate__animated animate__fadeIn"><div class="max-w-md w-full card-theme p-8 md:p-12 rounded-3xl text-center animate-scale-in"><div class="w-24 h-24 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-3xl font-black mb-4">Order Confirmed!</h2><p class="text-muted-theme mb-8">Your data bundle has been ordered successfully.</p><div class="bg-slate-50 rounded-2xl p-6 mb-8 text-left space-y-3"><div class="flex justify-between"><span class="text-sm text-muted-theme">Reference:</span><span class="font-bold font-mono text-sm">${params.ref}</span></div><div class="flex justify-between"><span class="text-sm text-muted-theme">Bundle:</span><span class="font-bold">${params.bundle_name}</span></div><div class="flex justify-between"><span class="text-sm text-muted-theme">Phone:</span><span class="font-bold">${params.Phone}</span></div></div><div class="space-y-3"><button onclick="navigateTo('my-orders')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">View My Orders</button><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy More Data</button><button onclick="navigateTo('wallet')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">View Wallet</button></div></div></div>`;
+  return`<div class="min-h-screen flex items-center justify-center px-4 py-20 animate__animated animate__fadeIn"><div class="max-w-md w-full card-theme p-8 md:p-12 rounded-3xl text-center animate-scale-in"><div class="w-24 h-24 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-3xl font-black mb-4">Order Confirmed!</h2><p class="text-muted-theme mb-8">Your data bundle has been ordered successfully.</p><div class="bg-slate-50 rounded-2xl p-6 mb-8 text-left space-y-3"><div class="flex justify-between"><span class="text-sm text-muted-theme">Reference:</span><span class="font-bold font-mono text-sm">${esc(params.ref)}</span></div><div class="flex justify-between"><span class="text-sm text-muted-theme">Bundle:</span><span class="font-bold">${esc(params.bundle_name)}</span></div><div class="flex justify-between"><span class="text-sm text-muted-theme">Phone:</span><span class="font-bold">${esc(params.Phone)}</span></div></div><div class="space-y-3"><button onclick="navigateTo('my-orders')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">View My Orders</button><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy More Data</button><button onclick="navigateTo('wallet')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">View Wallet</button></div></div></div>`;
 }
 
 
@@ -1947,7 +2022,8 @@ async function saveAnnouncement(){
   if(!main){showToast('Main message is required',3000,'error');return;}
   try{
     // Delete old announcements first, then insert new one
-    await supa.from('announcements').delete().neq('id',0); // clear all
+    const{error:de}=await supa.from('announcements').delete().not('id','is',null); // clear all
+    if(de) throw de;
     const{error}=await supa.from('announcements').insert([{main_message:main,sub_message:sub||'',created_at:new Date().toISOString()}]);
     if(error) throw error;
     showToast('Announcement posted!',3000,'success');
@@ -1989,7 +2065,8 @@ function render(){
       break;
     case 'register': app.innerHTML=renderRegister();extended.innerHTML='';break;
     case 'forgot-password': app.innerHTML=renderForgotPassword();extended.innerHTML='';break;
-    case 'wallet': app.innerHTML=renderWallet();extended.innerHTML='';if(state.user) fetchUserTransactions();break;
+    case 'reset-password': app.innerHTML=renderResetPassword();extended.innerHTML='';break;
+    case 'wallet': app.innerHTML=renderWallet();extended.innerHTML='';if(state.user){fetchUserTransactions();loadMyDepositRequests();}break;
     case 'my-orders':
       app.innerHTML=renderMyOrders();extended.innerHTML='';
       setTimeout(()=>loadMyOrders(),0); // load after DOM paint
@@ -2004,6 +2081,7 @@ function render(){
         if(state.adminTab==='agent-prices') loadAdminAgentPricesTable();
         else if(state.adminTab==='agents') loadAdminAgentsList();
         else if(state.adminTab==='withdrawals') loadAdminWithdrawals();
+        else if(state.adminTab==='deposits') loadAdminDepositsTab();
       },50);
       break;
     case 'agent-portal': app.innerHTML=renderAgentPortal();extended.innerHTML='';break;
@@ -2011,7 +2089,11 @@ function render(){
       setTimeout(()=>{
         if(state.agentTab==='pricing') loadAgentPricingPanel();
         else if(state.agentTab==='orders') loadAgentOrdersPanel();
-        else if(state.agentTab==='withdraw') loadAgentWithdrawalHistory();
+        else if(state.agentTab==='withdraw'){
+          const was=state.withdrawalOverride;
+          loadWithdrawalOverride().then(()=>{if(state.withdrawalOverride!==was&&state.view==='agent-dashboard'&&state.agentTab==='withdraw') render();});
+          loadAgentWithdrawalHistory();
+        }
       },50);
       break;
     default: navigateTo('landing');
@@ -2028,19 +2110,15 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }catch(err){showToast('Connection error. Please check your internet.',5000,'error');}
   // Detect ?agent= param in URL → activate agent pricing mode
   await detectAgentLink();
-  // Auto-poll API status for Processing orders every 2 minutes (admin only)
-  setInterval(async()=>{
-    if(state.user&&state.userProfile?.role==='admin'){
-      await updatePendingOrderStatuses();
-    }
-  },2*60*1000);
+  await loadPaymentSettings();
   document.getElementById('admin-nav-btn').addEventListener('click',()=>{if(state.isAdmin) navigateTo('admin-dashboard');else navigateTo('admin-login');});
   document.getElementById('global-fulfill-btn').addEventListener('click',()=>{if(state.activeOrderData) handleOrderButton();});
   render();
 });
 
 supa.auth.onAuthStateChange((event,session)=>{
-  if(event==='SIGNED_IN'){state.user=session.user;fetchUserProfile();fetchAgentProfile();}
+  if(event==='PASSWORD_RECOVERY'){state.user=session.user;state.view='reset-password';render();}
+  else if(event==='SIGNED_IN'){state.user=session.user;fetchUserProfile();fetchAgentProfile();}
   else if(event==='SIGNED_OUT'){state.user=null;state.userProfile=null;state.isAdmin=false;state.isDirectMode=false;state.activeOrderData=null;state.agentProfile=null;navigateTo('landing');}
   else if(event==='TOKEN_REFRESHED'&&session){state.user=session.user;}
 });
