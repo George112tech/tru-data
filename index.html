@@ -2121,7 +2121,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
 supa.auth.onAuthStateChange((event,session)=>{
   if(event==='PASSWORD_RECOVERY'){state.user=session.user;state.view='reset-password';render();}
-  else if(event==='SIGNED_IN'){state.user=session.user;fetchUserProfile();fetchAgentProfile();}
+  // Link prices depend on who is logged in (agents see normal prices on their own link).
+  else if(event==='SIGNED_IN'){state.user=session.user;fetchUserProfile();fetchAgentProfile();detectAgentLink().then(()=>{if(state.view==='network') render();});}
   else if(event==='SIGNED_OUT'){state.user=null;state.userProfile=null;state.isAdmin=false;state.isDirectMode=false;state.activeOrderData=null;state.agentProfile=null;navigateTo('landing');}
   else if(event==='TOKEN_REFRESHED'&&session){state.user=session.user;}
 });
