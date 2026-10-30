@@ -68,6 +68,16 @@ orders, if there is no profile phone, the text goes to the number the bundle
 was sent to. The API key is stored in a private table that browsers can't
 read.
 
+## Live updates
+
+The page subscribes to database changes through Supabase Realtime, so new
+orders, status changes, wallet credits and the admin's decisions appear for
+everyone without refreshing. Run
+`supabase/migrations/20261030200000_realtime_updates.sql` once in the SQL
+Editor to switch it on. Each person only receives rows that row level security
+already lets them read. Until it is run, or if the connection drops, the page
+checks for changes every 30 seconds and whenever it comes back into view.
+
 ## What changed
 
 | Area | Before | After |
