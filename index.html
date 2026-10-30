@@ -303,7 +303,9 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 <script>
 const SB_URL="https://kefcmjfvrqbgtivssdwn.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNtamZ2cnFiZ3RpdnNzZHduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MDM1NTIsImV4cCI6MjA4NDE3OTU1Mn0.HoXeKRW4-cGfMexGZpdmEvDHK-XXtXDSoMWWWbq4HKw";
-const PAYSTACK_KEY="pk_live_ea1b78f7fb20ea947f216c78e6ae3adc32d45f1b";
+// Business Mobile Money account customers send deposits to.
+const MOMO_NUMBER='0505175472';
+const MOMO_NAME='GEORGE DANQUAH DORDZIE';
 const supa=supabase.createClient(SB_URL,SB_KEY);
 
 const NETWORKS={
@@ -410,6 +412,20 @@ function showToast(message,duration=3000,type='info'){
 }
 // Everything read from the database must pass through esc() before it goes into innerHTML.
 function esc(v){return String(v??'').replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));}
+// Paystack is switched on and off by the admin (Deposits tab).
+async function loadPaymentSettings(){
+  try{
+    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key']);
+    const m=Object.fromEntries((data||[]).map(r=>[r.key,r.value]));
+    state.paystackEnabled=m.paystack_enabled===true;
+    state.paystackPublicKey=typeof m.paystack_public_key==='string'?m.paystack_public_key:'';
+  }catch(e){state.paystackEnabled=false;}
+}
+function copyText(text,label){
+  const done=()=>showToast((label||'Copied')+' copied',2000,'success');
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done,()=>showToast(text,4000,'info'));
+  else showToast(text,4000,'info');
+}
 function selectProvider(p){state.selectedProvider=p;}
 function selectConfirmationProvider(p){
   state.confirmationSelectedProvider=p;
@@ -602,7 +618,7 @@ async function navigateTo(view,params=null){
     }
     state.view=view;state.params=params;
     if(view==='admin-dashboard'){await fetchOrders();await fetchAdminAgentBasePrices();}
-    if(view==='wallet') await fetchUserProfile();
+    if(view==='wallet'){await fetchUserProfile();await loadPaymentSettings();}
     if(view==='landing'){const ann=await fetchAnnouncement();state.announcement=ann;}
     if(view==='my-orders'){state.announcement=null;}
     render();window.scrollTo(0,0);
@@ -1045,7 +1061,62 @@ function renderForgotPassword(){return`<div class="min-h-screen flex items-cente
 /* ===== WALLET ===== */
 function renderWallet(){
   const balance=state.userProfile?parseFloat(state.userProfile.balance||0):0;
-  return`<div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn"><div class="mb-8"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Home</button></div><div class="grid md:grid-cols-2 gap-8"><div class="wallet-card animate-scale-in"><div class="wallet-label">Current Balance</div><div class="wallet-balance">₵${balance.toFixed(2)}</div><div class="mt-4 flex items-center gap-2 text-sm opacity-90"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Available for purchases</div>${!state.userProfile?'<div class="mt-4 text-xs bg-red-500/20 px-3 py-2 rounded-lg">Profile not loaded properly. Please refresh.</div>':''}</div><div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Add Funds</h3><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label><input type="number" id="deposit-amount" min="5" step="0.01" oninput="updateDepositCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div><div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Deposit Amount:</span><span class="font-bold" id="calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Processing Fee (3.50%):</span><span class="font-bold" id="calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span></div></div><button onclick="initiateDeposit()" id="deposit-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"><span>Deposit Now</span></button></div></div></div><div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Recent Transactions</h3><div class="space-y-4" id="transaction-list"><p class="text-center text-muted-theme py-8">Loading transactions...</p></div></div></div>`;
+  const code=state.userProfile?.deposit_code||'';
+  const method=state.paystackEnabled&&state.depositMethod==='paystack'?'paystack':'momo';
+  const methodTabs=state.paystackEnabled?`<div class="flex gap-2 mb-6"><button onclick="state.depositMethod='momo';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='momo'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Mobile Money</button><button onclick="state.depositMethod='paystack';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='paystack'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Card / Paystack</button></div>`:'';
+  const momo=`<div class="space-y-5">
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+      <p class="text-xs font-black uppercase text-amber-700 mb-3">Step 1 · Send Mobile Money to</p>
+      <div class="flex items-center justify-between gap-3 mb-2"><span class="text-2xl font-black tracking-wide">${MOMO_NUMBER}</span><button onclick="copyText(MOMO_NUMBER,'Number')" class="text-xs font-bold bg-white border border-amber-300 px-3 py-1.5 rounded-lg">Copy</button></div>
+      <p class="text-sm">Name that will show: <strong>${MOMO_NAME}</strong></p>
+      <p class="text-xs text-amber-800 mt-1">Check this name appears before you confirm the transfer.</p>
+    </div>
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+      <p class="text-xs font-black uppercase text-blue-700 mb-3">Step 2 · Use this as the reference</p>
+      ${code?`<div class="flex items-center justify-between gap-3"><code class="text-2xl font-black tracking-widest text-blue-800">${esc(code)}</code><button data-code="${esc(code)}" onclick="copyText(this.dataset.code,'Reference')" class="text-xs font-bold bg-white border border-blue-300 px-3 py-1.5 rounded-lg">Copy</button></div><p class="text-xs text-blue-800 mt-2">This is your personal reference. It tells us which account to credit.</p>`:'<p class="text-sm text-blue-800">Loading your reference... please refresh if this does not appear.</p>'}
+    </div>
+    <div class="border border-slate-200 rounded-2xl p-4 space-y-3">
+      <p class="text-xs font-black uppercase text-slate-500">Step 3 · Tell us you have sent it</p>
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Amount sent (₵)</label><input type="number" id="momo-amount" min="5" step="0.01" class="w-full p-3 border-2 rounded-xl text-lg font-black focus:border-red-600 outline-none" placeholder="0.00"></div>
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">MoMo transaction ID (from your SMS)</label><input type="text" id="momo-txn" maxlength="40" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none" placeholder="e.g. 51234567890"></div>
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Number you sent from</label><input type="tel" id="momo-sender" maxlength="10" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none" placeholder="024xxxxxxx"></div>
+      <button id="momo-submit-btn" onclick="submitDepositRequest()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50">I've Sent the Money</button>
+      <p class="text-xs text-muted-theme">Your wallet is credited as soon as we confirm the payment. No processing fee.</p>
+    </div>
+    <div><h4 class="text-sm font-black mb-2">Your deposit requests</h4><div id="deposit-requests-list" class="space-y-2"><p class="text-xs text-muted-theme">Loading...</p></div></div>
+  </div>`;
+  const paystack=`<div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label><input type="number" id="deposit-amount" min="5" step="0.01" oninput="updateDepositCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div><div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Deposit Amount:</span><span class="font-bold" id="calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Processing Fee (3.50%):</span><span class="font-bold" id="calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span></div></div><button onclick="initiateDeposit()" id="deposit-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"><span>Pay with Paystack</span></button><p class="text-xs text-muted-theme">Card and mobile money via Paystack. Credited instantly after payment.</p></div>`;
+  return`<div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn"><div class="mb-8"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Home</button></div><div class="grid md:grid-cols-2 gap-8"><div class="wallet-card animate-scale-in self-start"><div class="wallet-label">Current Balance</div><div class="wallet-balance">₵${balance.toFixed(2)}</div><div class="mt-4 flex items-center gap-2 text-sm opacity-90"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Available for purchases</div>${!state.userProfile?'<div class="mt-4 text-xs bg-red-500/20 px-3 py-2 rounded-lg">Profile not loaded properly. Please refresh.</div>':''}</div><div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Add Funds</h3>${methodTabs}${method==='paystack'?paystack:momo}</div></div><div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode:forwards;"><h3 class="text-xl font-black mb-6">Recent Transactions</h3><div class="space-y-4" id="transaction-list"><p class="text-center text-muted-theme py-8">Loading transactions...</p></div></div></div>`;
+}
+async function submitDepositRequest(){
+  if(state.depositInFlight) return;
+  const amount=parseFloat(document.getElementById('momo-amount')?.value);
+  const txn=document.getElementById('momo-txn')?.value.trim();
+  const sender=document.getElementById('momo-sender')?.value.trim();
+  if(!amount||amount<5){showToast('Minimum deposit is ₵5.00',3000,'error');return;}
+  if(!txn){showToast('Enter the MoMo transaction ID from your SMS',3000,'error');return;}
+  if(sender){const v=validateGhanaPhone(sender);if(!v.isValid){showToast(v.error,3000,'error');return;}}
+  const btn=document.getElementById('momo-submit-btn');
+  state.depositInFlight=true;if(btn) btn.disabled=true;
+  try{
+    const{error}=await supa.rpc('submit_deposit_request',{p_amount:amount,p_momo_txn_id:txn,p_sender_phone:sender||null});
+    if(error) throw error;
+    showToast('Thanks! We will credit your wallet once the payment is confirmed.',5000,'success');
+    ['momo-amount','momo-txn','momo-sender'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+    loadMyDepositRequests();
+  }catch(err){showToast(err.message||'Could not submit. Please try again.',5000,'error');}
+  finally{state.depositInFlight=false;if(btn) btn.disabled=false;}
+}
+async function loadMyDepositRequests(){
+  const c=document.getElementById('deposit-requests-list');
+  if(!c||!state.user) return;
+  try{
+    const{data,error}=await supa.from('deposit_requests').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(10);
+    if(error) throw error;
+    if(!data||!data.length){c.innerHTML='<p class="text-xs text-muted-theme">No deposit requests yet.</p>';return;}
+    const badge=st=>st==='approved'?'<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Credited</span>':st==='rejected'?'<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">Not found</span>':'<span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Checking</span>';
+    c.innerHTML=data.map(r=>`<div class="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2 text-sm"><div><span class="font-bold">₵${parseFloat(r.credited_amount??r.amount).toFixed(2)}</span> <span class="text-xs text-muted-theme">${esc(r.momo_txn_id||'')} · ${new Date(r.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'short'})}</span>${r.status==='rejected'&&r.admin_note?`<div class="text-xs text-red-600">${esc(r.admin_note)}</div>`:''}</div>${badge(r.status)}</div>`).join('');
+  }catch(err){c.innerHTML='<p class="text-xs text-red-500">Could not load deposit requests.</p>';}
 }
 function updateDepositCalculation(amount){
   const n=parseFloat(amount)||0,fee=n*0.035,total=n+fee;
@@ -1112,12 +1183,13 @@ async function handleForgotPassword(e){
   catch(err){showToast(''+(err.message||'Failed to send reset email'),4000,'error');}
 }
 function initiateDeposit(){
+  if(!state.paystackEnabled||!state.paystackPublicKey){showToast('Card payments are currently unavailable. Please pay with Mobile Money.',4000,'error');return;}
   if(!state.userProfile){showToast('Profile not loaded. Please refresh.',4000,'error');return;}
-  const amount=parseFloat(document.getElementById('deposit-amount').value);
+  const amount=parseFloat(document.getElementById('deposit-amount')?.value);
   if(!amount||amount<5){showToast('Minimum deposit is ₵5.00',3000,'error');return;}
   const fee=amount*0.035,total=amount+fee;
   try{
-    const handler=PaystackPop.setup({key:PAYSTACK_KEY,email:state.user.email,amount:Math.round(total*100),currency:'GHS',metadata:{user_id:state.user.id,custom_fields:[{display_name:"Deposit Type",variable_name:"deposit_type",value:"wallet_funding"},{display_name:"Net Amount",variable_name:"net_amount",value:amount.toFixed(2)},{display_name:"Fee",variable_name:"fee",value:fee.toFixed(2)}]},callback:(r)=>processDeposit(r,amount,fee),onClose:()=>showToast('Payment window closed',3000,'info')});
+    const handler=PaystackPop.setup({key:state.paystackPublicKey,email:state.user.email,amount:Math.round(total*100),currency:'GHS',metadata:{user_id:state.user.id,custom_fields:[{display_name:"Deposit Type",variable_name:"deposit_type",value:"wallet_funding"},{display_name:"Net Amount",variable_name:"net_amount",value:amount.toFixed(2)},{display_name:"Fee",variable_name:"fee",value:fee.toFixed(2)}]},callback:(r)=>processDeposit(r,amount,fee),onClose:()=>showToast('Payment window closed',3000,'info')});
     handler.openIframe();
   }catch(err){showToast('Payment initialization failed.',4000,'error');}
 }
@@ -1328,10 +1400,11 @@ function renderAdminDashboard(){
       <button class="admin-tab-btn ${tab==='agent-prices'?'active':''}" onclick="state.adminTab='agent-prices';render();setTimeout(loadAdminAgentPricesTable,50)">Agent Prices</button>
       <button class="admin-tab-btn ${tab==='agents'?'active':''}" onclick="state.adminTab='agents';render();setTimeout(loadAdminAgentsList,50)">Agents</button>
       <button class="admin-tab-btn ${tab==='withdrawals'?'active':''}" onclick="state.adminTab='withdrawals';render();setTimeout(loadAdminWithdrawals,50)">Withdrawals</button>
+      <button class="admin-tab-btn ${tab==='deposits'?'active':''}" onclick="state.adminTab='deposits';render()">Deposits</button>
     </div>
     <!-- Tab Content -->
     <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:forwards;">
-      ${tab==='orders'?renderAdminOrdersTab(filtered):tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='agents'?'<div id="admin-agents-container" class="card-theme rounded-2xl p-8 text-center text-muted-theme"><div class="spinner mx-auto mb-3" style="width:28px;height:28px;border-width:3px;border-top-color:#dc2626;"></div>Loading agents...</div>':renderAdminWithdrawalsTab()}
+      ${tab==='orders'?renderAdminOrdersTab(filtered):tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='agents'?'<div id="admin-agents-container" class="card-theme rounded-2xl p-8 text-center text-muted-theme"><div class="spinner mx-auto mb-3" style="width:28px;height:28px;border-width:3px;border-top-color:#dc2626;"></div>Loading agents...</div>':renderAdminWithdrawalsTab()}
     </div>
   </div>`;
 }
@@ -1503,6 +1576,109 @@ async function updateAgentStatus(id,status){
     loadAdminAgentsList();
   }catch(err){showToast('Update failed: '+err.message,4000,'error');}
 }
+/* ===== ADMIN DEPOSITS TAB (MoMo requests, direct credit, Paystack switch) ===== */
+function renderAdminDepositsTab(){
+  return`<div class="space-y-6">
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Mobile Money deposits waiting for review</h2><p class="text-xs text-muted-theme mb-4">Check each one against your MoMo statement for ${MOMO_NUMBER}, then approve to credit the customer's wallet.</p><div id="admin-deposit-requests"><div class="spinner mx-auto"></div></div></div>
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Credit a wallet by reference</h2><p class="text-xs text-muted-theme mb-4">For payments that came in without a request. The reference is the TRU… code the customer used.</p>
+      <div class="grid md:grid-cols-4 gap-3"><input id="cr-code" type="text" maxlength="12" placeholder="TRU4F9A2C" class="p-3 border-2 rounded-xl font-bold uppercase"><input id="cr-amount" type="number" min="0.01" step="0.01" placeholder="Amount (₵)" class="p-3 border-2 rounded-xl font-bold"><input id="cr-txn" type="text" maxlength="40" placeholder="MoMo transaction ID" class="p-3 border-2 rounded-xl font-bold"><button id="cr-btn" onclick="adminCreditWallet()" class="bg-green-600 text-white rounded-xl font-black py-3">Credit Wallet</button></div>
+      <p class="text-xs text-muted-theme mt-2">The same MoMo transaction ID can only be credited once.</p></div>
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Paystack</h2><p class="text-xs text-muted-theme mb-4">When on, customers also see a "Card / Paystack" option on their wallet page.</p><div id="admin-paystack-settings"><div class="spinner mx-auto"></div></div></div>
+  </div>`;
+}
+async function loadAdminDepositsTab(){
+  loadAdminDepositRequests();
+  loadAdminPaystackSettings();
+}
+async function loadAdminDepositRequests(){
+  const c=document.getElementById('admin-deposit-requests');
+  if(!c) return;
+  try{
+    const{data,error}=await supa.from('deposit_requests').select('*, profiles(full_name,email,deposit_code)').eq('status','pending').order('created_at',{ascending:true});
+    if(error) throw error;
+    if(!data||!data.length){c.innerHTML='<div class="text-center py-6 text-muted-theme">No deposits waiting for review.</div>';return;}
+    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Date</th><th class="p-3 text-xs font-black uppercase text-slate-500">Customer</th><th class="p-3 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">MoMo Txn ID</th><th class="p-3 text-xs font-black uppercase text-slate-500">Sent From</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${data.map(r=>`<tr class="border-b"><td class="p-3 text-xs whitespace-nowrap">${new Date(r.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3"><div class="font-bold">${esc(r.profiles?.full_name||'')}</div><div class="text-xs text-muted-theme">${esc(r.profiles?.email||'')}</div></td><td class="p-3 font-mono font-bold">${esc(r.profiles?.deposit_code||'')}</td><td class="p-3 font-black">₵${parseFloat(r.amount).toFixed(2)}</td><td class="p-3 font-mono">${esc(r.momo_txn_id||'—')}</td><td class="p-3 font-mono">${esc(r.sender_phone||'—')}</td><td class="p-3"><div class="flex gap-2"><button data-id="${esc(r.id)}" data-amount="${esc(r.amount)}" onclick="adminApproveDeposit(this.dataset.id,this.dataset.amount)" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold">Approve</button><button data-id="${esc(r.id)}" onclick="adminRejectDeposit(this.dataset.id)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold">Reject</button></div></td></tr>`).join('')}</tbody></table></div>`;
+  }catch(err){c.innerHTML='<div class="text-center py-6 text-red-500">Failed to load deposit requests</div>';}
+}
+async function adminApproveDeposit(id,amount){
+  const input=prompt('Amount received on MoMo (₵). Change it if the customer sent a different amount:',parseFloat(amount).toFixed(2));
+  if(input===null) return;
+  const value=parseFloat(input);
+  if(!value||value<=0){showToast('Enter a valid amount',3000,'error');return;}
+  try{
+    const{data,error}=await supa.rpc('approve_deposit_request',{p_id:id,p_amount:value});
+    if(error) throw error;
+    showToast(`Credited ₵${Number(data.credited).toFixed(2)}`,3000,'success');
+    loadAdminDepositRequests();
+  }catch(err){showToast('Approve failed: '+(err.message||'error'),5000,'error');}
+}
+async function adminRejectDeposit(id){
+  const note=prompt('Reason shown to the customer (optional):','Payment not found on our MoMo statement');
+  if(note===null) return;
+  try{
+    const{error}=await supa.rpc('reject_deposit_request',{p_id:id,p_note:note});
+    if(error) throw error;
+    showToast('Request rejected',3000,'info');
+    loadAdminDepositRequests();
+  }catch(err){showToast('Reject failed: '+(err.message||'error'),5000,'error');}
+}
+async function adminCreditWallet(){
+  const code=document.getElementById('cr-code')?.value.trim().toUpperCase();
+  const amount=parseFloat(document.getElementById('cr-amount')?.value);
+  const txn=document.getElementById('cr-txn')?.value.trim();
+  if(!code){showToast('Enter the customer reference',3000,'error');return;}
+  if(!amount||amount<=0){showToast('Enter the amount',3000,'error');return;}
+  if(!confirm(`Credit ₵${amount.toFixed(2)} to ${code}?`)) return;
+  const btn=document.getElementById('cr-btn');if(btn) btn.disabled=true;
+  try{
+    const{data,error}=await supa.rpc('admin_credit_wallet',{p_deposit_code:code,p_amount:amount,p_momo_txn_id:txn||null});
+    if(error) throw error;
+    showToast(`Credited ₵${Number(data.credited).toFixed(2)} to ${data.name||data.email}. New balance ₵${Number(data.new_balance).toFixed(2)}`,6000,'success');
+    ['cr-code','cr-amount','cr-txn'].forEach(i=>{const el=document.getElementById(i);if(el) el.value='';});
+    loadAdminDepositRequests();
+  }catch(err){showToast('Credit failed: '+(err.message||'error'),5000,'error');}
+  finally{if(btn) btn.disabled=false;}
+}
+async function loadAdminPaystackSettings(){
+  const c=document.getElementById('admin-paystack-settings');
+  if(!c) return;
+  await loadPaymentSettings();
+  let status={set:false};
+  try{const{data}=await supa.rpc('paystack_secret_key_status');if(data) status=data;}catch(e){}
+  const on=state.paystackEnabled;
+  c.innerHTML=`<div class="space-y-4">
+    <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4"><div><div class="font-black">Paystack payments are ${on?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${on?'Customers can pay by card / Paystack.':'Customers only see Mobile Money instructions.'}</div></div><button onclick="adminTogglePaystack()" class="px-5 py-2.5 rounded-xl font-black text-white ${on?'bg-slate-600':'bg-green-600'}">${on?'Turn Off':'Turn On'}</button></div>
+    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Public key</label><div class="flex gap-2"><input id="ps-public" type="text" value="${esc(state.paystackPublicKey||'')}" placeholder="pk_live_..." class="flex-1 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSavePaystackPublicKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div></div>
+    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Secret key</label><div class="flex gap-2"><input id="ps-secret" type="password" autocomplete="off" placeholder="${status.set?'Saved (ends in '+esc(status.last4)+'). Paste a new one to replace it':'sk_live_...'}" class="flex-1 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSavePaystackSecretKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">${status.set?`Secret key saved (${esc(status.mode)} mode, ends in ${esc(status.last4)}).`:'No secret key saved yet. Paystack deposits cannot be confirmed until you add one.'} It is stored privately and never shown again.</p></div>
+  </div>`;
+}
+async function adminTogglePaystack(){
+  const next=!state.paystackEnabled;
+  if(next&&!/^pk_(live|test)_/.test(state.paystackPublicKey||'')){showToast('Save the Paystack public key first',4000,'error');return;}
+  const{error}=await supa.from('app_settings').upsert({key:'paystack_enabled',value:next,updated_at:new Date().toISOString()});
+  if(error){showToast('Could not change Paystack: '+error.message,4000,'error');return;}
+  showToast(next?'Paystack is ON':'Paystack is OFF',3000,'success');
+  loadAdminPaystackSettings();
+}
+async function adminSavePaystackPublicKey(){
+  const key=document.getElementById('ps-public')?.value.trim();
+  if(!/^pk_(live|test)_[A-Za-z0-9]{20,}$/.test(key||'')){showToast('That does not look like a Paystack public key (pk_live_...)',4000,'error');return;}
+  const{error}=await supa.from('app_settings').upsert({key:'paystack_public_key',value:key,updated_at:new Date().toISOString()});
+  if(error){showToast('Save failed: '+error.message,4000,'error');return;}
+  showToast('Public key saved',3000,'success');
+  loadAdminPaystackSettings();
+}
+async function adminSavePaystackSecretKey(){
+  const input=document.getElementById('ps-secret');
+  const key=input?.value.trim();
+  if(!key){showToast('Paste the secret key first',3000,'error');return;}
+  const{error}=await supa.rpc('set_paystack_secret_key',{p_secret:key});
+  if(input) input.value='';
+  if(error){showToast('Save failed: '+error.message,5000,'error');return;}
+  showToast('Secret key saved',3000,'success');
+  loadAdminPaystackSettings();
+}
+
 /* ===== ADMIN WITHDRAWALS TAB ===== */
 function renderAdminWithdrawalsTab(){
   const isOverride=state.withdrawalOverride;
@@ -1962,7 +2138,7 @@ function render(){
     case 'register': app.innerHTML=renderRegister();extended.innerHTML='';break;
     case 'forgot-password': app.innerHTML=renderForgotPassword();extended.innerHTML='';break;
     case 'reset-password': app.innerHTML=renderResetPassword();extended.innerHTML='';break;
-    case 'wallet': app.innerHTML=renderWallet();extended.innerHTML='';if(state.user) fetchUserTransactions();break;
+    case 'wallet': app.innerHTML=renderWallet();extended.innerHTML='';if(state.user){fetchUserTransactions();loadMyDepositRequests();}break;
     case 'my-orders':
       app.innerHTML=renderMyOrders();extended.innerHTML='';
       setTimeout(()=>loadMyOrders(),0); // load after DOM paint
@@ -1977,6 +2153,7 @@ function render(){
         if(state.adminTab==='agent-prices') loadAdminAgentPricesTable();
         else if(state.adminTab==='agents') loadAdminAgentsList();
         else if(state.adminTab==='withdrawals') loadAdminWithdrawals();
+        else if(state.adminTab==='deposits') loadAdminDepositsTab();
       },50);
       break;
     case 'agent-portal': app.innerHTML=renderAgentPortal();extended.innerHTML='';break;
@@ -2005,6 +2182,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }catch(err){showToast('Connection error. Please check your internet.',5000,'error');}
   // Detect ?agent= param in URL → activate agent pricing mode
   await detectAgentLink();
+  await loadPaymentSettings();
   // Auto-poll API status for Processing orders every 2 minutes (admin only)
   setInterval(async()=>{
     if(state.user&&state.userProfile?.role==='admin'){

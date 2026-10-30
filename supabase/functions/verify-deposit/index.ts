@@ -3,10 +3,13 @@
 // The browser only sends the Paystack reference. The amount credited is what
 // Paystack says was actually paid, never what the browser claims.
 //
-// Deploy:  supabase functions deploy verify-deposit
-// Secrets: supabase secrets set PAYSTACK_SECRET_KEY=sk_live_...
-//          (SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are
-//          provided automatically.)
+// The Paystack secret key is the one the admin saved on the dashboard
+// (Deposits tab); the PAYSTACK_SECRET_KEY function secret is the fallback.
+// SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided
+// automatically.
+//
+// Payments are still credited when the admin has switched Paystack off, so a
+// customer who paid just before the switch is not left out.
 
 import { createClient } from "jsr:@supabase/supabase-js@2.45.4";
 
@@ -42,9 +45,17 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid reference" }, 400);
   }
 
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+  const { data: savedKey } = await admin.rpc("get_paystack_secret_key");
+  const secretKey = savedKey || Deno.env.get("PAYSTACK_SECRET_KEY");
+  if (!secretKey) return json({ error: "Paystack is not configured" }, 503);
+
   const res = await fetch(
     `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
-    { headers: { Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}` } },
+    { headers: { Authorization: `Bearer ${secretKey}` } },
   );
   if (!res.ok) return json({ error: "Could not verify payment" }, 502);
   const { data: tx } = await res.json();
@@ -62,10 +73,6 @@ Deno.serve(async (req) => {
   const fee = Math.round((paid - net) * 100) / 100;
   if (net < MIN_DEPOSIT) return json({ error: "Below minimum deposit" }, 400);
 
-  const admin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
   const { data: credited, error } = await admin.rpc("credit_deposit", {
     p_user: user.id,
     p_reference: reference,
