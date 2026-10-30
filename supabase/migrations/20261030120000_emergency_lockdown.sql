@@ -10,7 +10,8 @@
 --   * six agent tables had RLS disabled; any signed-in user could edit
 --     announcements.
 --
--- Side effect: the current live frontend can no longer deposit or purchase.
+-- Side effect: the current live frontend can no longer deposit or purchase
+-- (agent applications, markups and withdrawal requests keep working).
 -- That stays paused until the server-side flow (place_order(text,text) +
 -- verify-deposit Edge Function) and the fixed index.html are deployed.
 
@@ -29,6 +30,9 @@ revoke execute on function public.process_deposit(uuid, numeric, numeric, text) 
 revoke execute on function public.process_purchase(uuid, text, text, text, numeric, text) from public, anon, authenticated;
 revoke execute on function public.place_order(text, text, text, text, numeric, uuid) from public, anon, authenticated;
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
+grant execute on function public.process_deposit(uuid, numeric, numeric, text) to service_role;
+grant execute on function public.process_purchase(uuid, text, text, text, numeric, text) to service_role;
+grant execute on function public.place_order(text, text, text, text, numeric, uuid) to service_role;
 alter function public.process_deposit(uuid, numeric, numeric, text) set search_path = public;
 alter function public.process_purchase(uuid, text, text, text, numeric, text) set search_path = public;
 alter function public.place_order(text, text, text, text, numeric, uuid) set search_path = public;
@@ -78,10 +82,58 @@ alter table public.agent_withdrawals enable row level security;
 alter table public.agent_earnings    enable row level security;
 alter table public.failed_orders     enable row level security;
 
+-- Agents: admins manage everything; agents can apply, edit their own
+-- application, set markups and request withdrawals, nothing more.
 create policy "Admins manage agent_profiles" on public.agent_profiles
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "Agents view own profile" on public.agent_profiles
   for select to authenticated using (user_id = auth.uid());
+-- The customer-facing agent link (?agent=AGT-xxx) looks up active agents.
+create policy "Active agents are visible" on public.agent_profiles
+  for select to anon, authenticated using (status = 'active');
+create policy "Users apply as agent" on public.agent_profiles
+  for insert to authenticated
+  with check (
+    user_id = auth.uid() and status = 'pending'
+    and coalesce(total_sales, 0) = 0 and coalesce(agent_profit, 0) = 0
+    and coalesce(total_withdrawn, 0) = 0
+    and coalesce(can_edit_prices, false) = false
+    and coalesce(pricing_locked, false) = false
+  );
+create policy "Agents edit own application" on public.agent_profiles
+  for update to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- Non-admin clients may only change their contact details and re-submit
+-- (status -> pending). Totals, approval and pricing flags are server-only.
+-- SECURITY DEFINER callers (current_user = owner) and admins pass through.
+create or replace function public.guard_agent_profile_update()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if current_user not in ('anon', 'authenticated') or public.is_admin() then
+    return new;
+  end if;
+  if new.user_id         is distinct from old.user_id
+  or new.agent_id        is distinct from old.agent_id
+  or new.agent_code      is distinct from old.agent_code
+  or new.total_sales     is distinct from old.total_sales
+  or new.agent_profit    is distinct from old.agent_profit
+  or new.total_withdrawn is distinct from old.total_withdrawn
+  or new.can_edit_prices is distinct from old.can_edit_prices
+  or new.pricing_locked  is distinct from old.pricing_locked
+  or (new.status is distinct from old.status and new.status <> 'pending') then
+    raise exception 'Only an admin can change these agent fields';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists guard_agent_profile_update on public.agent_profiles;
+create trigger guard_agent_profile_update
+  before update on public.agent_profiles
+  for each row execute function public.guard_agent_profile_update();
 
 create policy "Admins manage agent_base_prices" on public.agent_base_prices
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
@@ -92,11 +144,28 @@ create policy "Admins manage agent_prices" on public.agent_prices
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "Prices are readable" on public.agent_prices
   for select to anon, authenticated using (true);
+create policy "Active agents set own markup" on public.agent_prices
+  for insert to authenticated
+  with check (agent_id in (select id from public.agent_profiles where user_id = auth.uid() and status = 'active'));
+create policy "Active agents update own markup" on public.agent_prices
+  for update to authenticated
+  using (agent_id in (select id from public.agent_profiles where user_id = auth.uid() and status = 'active'))
+  with check (agent_id in (select id from public.agent_profiles where user_id = auth.uid() and status = 'active'));
 
 create policy "Admins manage agent_withdrawals" on public.agent_withdrawals
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "Agents view own withdrawals" on public.agent_withdrawals
   for select to authenticated using (user_id = auth.uid());
+create policy "Active agents request withdrawals" on public.agent_withdrawals
+  for insert to authenticated
+  with check (
+    user_id = auth.uid() and status = 'pending' and processed_at is null
+    and exists (
+      select 1 from public.agent_profiles a
+      where a.user_id = auth.uid() and a.status = 'active'
+        and agent_withdrawals.agent_id in (a.agent_id, a.id::text)
+    )
+  );
 
 create policy "Admins manage agent_earnings" on public.agent_earnings
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
