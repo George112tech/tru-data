@@ -44,6 +44,30 @@ your public key (`pk_live_...`) and secret key (`sk_live_...`), then press
 read; only the `verify-deposit` function uses it. Payments made just before
 you switch Paystack off are still credited.
 
+## SMS notifications (httpSMS)
+
+Customers, agents and the admin get text messages for orders, deposits,
+withdrawals, agent applications and price-change requests. They are sent
+through [httpSMS](https://httpsms.com), which sends each text from an Android
+phone running the httpSMS app, using that phone's SIM.
+
+1. Run `supabase/migrations/20261030190000_sms_notifications.sql` in the SQL
+   Editor. It turns on the `pg_net` extension.
+2. Deploy the `send-sms` Edge Function with **Verify JWT turned off**. The
+   database calls it with its own secret header.
+3. On the Android phone, install the httpSMS app from httpsms.com and sign in.
+   Copy your API key from httpsms.com → Settings.
+4. In the admin dashboard, open **SMS**. Paste the API key, enter the sending
+   phone's number and your admin alert number, tick the events you want, turn
+   SMS on and save. Then use **Send a test SMS**.
+
+Texts are queued in `sms_outbox`. The SMS tab shows the last 50, with a
+**Retry** button on failed ones. If texting fails, the order, deposit or other
+action still goes through. Customers get texts at their profile phone; for
+orders, if there is no profile phone, the text goes to the number the bundle
+was sent to. The API key is stored in a private table that browsers can't
+read.
+
 ## What changed
 
 | Area | Before | After |

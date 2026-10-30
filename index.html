@@ -1549,10 +1549,11 @@ function renderAdminDashboard(){
       <button class="admin-tab-btn ${tab==='agents'?'active':''}" onclick="state.adminTab='agents';render();setTimeout(loadAdminAgentsList,50)">Agents</button>
       <button class="admin-tab-btn ${tab==='withdrawals'?'active':''}" onclick="state.adminTab='withdrawals';render();setTimeout(loadAdminWithdrawals,50)">Withdrawals</button>
       <button class="admin-tab-btn ${tab==='deposits'?'active':''}" onclick="state.adminTab='deposits';render()">Deposits</button>
+      <button class="admin-tab-btn ${tab==='sms'?'active':''}" onclick="state.adminTab='sms';render()">SMS</button>
     </div>
     <!-- Tab Content -->
     <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:forwards;">
-      ${tab==='orders'?renderAdminOrdersTab(filtered):tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='agents'?'<div id="admin-agents-container" class="card-theme rounded-2xl p-8 text-center text-muted-theme"><div class="spinner mx-auto mb-3" style="width:28px;height:28px;border-width:3px;border-top-color:#dc2626;"></div>Loading agents...</div>':renderAdminWithdrawalsTab()}
+      ${tab==='orders'?renderAdminOrdersTab(filtered):tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='sms'?renderAdminSmsTab():tab==='agents'?'<div id="admin-agents-container" class="card-theme rounded-2xl p-8 text-center text-muted-theme"><div class="spinner mx-auto mb-3" style="width:28px;height:28px;border-width:3px;border-top-color:#dc2626;"></div>Loading agents...</div>':renderAdminWithdrawalsTab()}
     </div>
   </div>`;
 }
@@ -1775,6 +1776,100 @@ function renderAdminDepositsTab(){
       <p class="text-xs text-muted-theme mt-2">The same MoMo transaction ID can only be credited once.</p></div>
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Paystack</h2><p class="text-xs text-muted-theme mb-4">When on, customers also see a "Card / Paystack" option on their wallet page.</p><div id="admin-paystack-settings"><div class="spinner mx-auto"></div></div></div>
   </div>`;
+}
+/* ===== ADMIN: SMS NOTIFICATIONS (httpSMS) ===== */
+const SMS_EVENTS=[
+  ['Customers','order_placed','Order received'],
+  ['Customers','order_delivered','Order delivered'],
+  ['Customers','order_cancelled','Order cancelled / refunded'],
+  ['Customers','deposit_credited','Wallet credited'],
+  ['Customers','deposit_rejected','Deposit not confirmed'],
+  ['Agents','agent_status','Application approved / rejected / suspended'],
+  ['Agents','withdrawal_update','Withdrawal paid / rejected'],
+  ['Agents','price_unlock_update','Price-change request answered'],
+  ['Admin alerts','admin_new_order','New order'],
+  ['Admin alerts','admin_new_deposit','Customer says they sent MoMo'],
+  ['Admin alerts','admin_new_withdrawal','Agent withdrawal request'],
+  ['Admin alerts','admin_new_agent','New agent application'],
+  ['Admin alerts','admin_price_request','Agent price-change request'],
+];
+function renderAdminSmsTab(){
+  return`<div class="space-y-6">
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">SMS notifications</h2><p class="text-xs text-muted-theme mb-4">Texts go out through <a href="https://httpsms.com" target="_blank" rel="noopener" class="underline">httpSMS</a> from the Android phone running the httpSMS app, using that phone's SIM airtime.</p><div id="admin-sms-settings"><div class="spinner mx-auto"></div></div></div>
+    <div class="card-theme rounded-2xl p-6"><div class="flex items-center justify-between mb-4"><h2 class="text-lg font-black">Recent messages</h2><button onclick="loadAdminSmsLog()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold">Refresh</button></div><div id="admin-sms-log"><div class="spinner mx-auto"></div></div></div>
+  </div>`;
+}
+async function loadAdminSmsTab(){
+  loadAdminSmsSettings();
+  loadAdminSmsLog();
+}
+async function loadAdminSmsSettings(){
+  const c=document.getElementById('admin-sms-settings');
+  if(!c) return;
+  let s;
+  try{const{data,error}=await supa.rpc('get_sms_settings');if(error) throw error;s=data;}
+  catch(err){c.innerHTML=`<p class="text-sm text-red-500">Could not load SMS settings: ${esc(err.message||'error')}</p>`;return;}
+  const local=p=>p?'0'+String(p).replace(/^\+233/,''):'';
+  const ev=s.events||{};
+  const groups=[...new Set(SMS_EVENTS.map(e=>e[0]))];
+  c.innerHTML=`<div class="space-y-4">
+    <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4"><div><div class="font-black">SMS notifications are ${s.enabled?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${s.enabled?'Texts are sent for the events ticked below.':'No texts are sent.'}</div></div><label class="flex items-center gap-2 font-bold text-sm"><input id="sms-enabled" type="checkbox" class="w-5 h-5" ${s.enabled?'checked':''}> On</label></div>
+    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">httpSMS API key</label><input id="sms-api-key" type="password" autocomplete="off" placeholder="${s.api_key_set?'Saved (ends in '+esc(s.api_key_last4)+'). Paste a new one to replace it':'From httpsms.com → Settings → API Key'}" class="w-full p-3 border-2 rounded-xl font-mono text-sm"></div>
+    <div class="grid md:grid-cols-2 gap-3">
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Sending phone (has the httpSMS app)</label><input id="sms-from" type="tel" maxlength="16" value="${esc(local(s.from_number))}" placeholder="0505175472" class="w-full p-3 border-2 rounded-xl font-bold"></div>
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Admin alert phone</label><input id="sms-admin" type="tel" maxlength="16" value="${esc(local(s.admin_phone))}" placeholder="Where admin alerts go" class="w-full p-3 border-2 rounded-xl font-bold"></div>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">${groups.map(g=>`<div><p class="text-xs font-black uppercase text-slate-500 mb-2">${g}</p>${SMS_EVENTS.filter(e=>e[0]===g).map(e=>`<label class="flex items-start gap-2 text-sm mb-1.5"><input type="checkbox" class="sms-event mt-0.5" data-event="${e[1]}" ${ev[e[1]]===false?'':'checked'}> <span>${e[2]}</span></label>`).join('')}</div>`).join('')}</div>
+    <button id="sms-save-btn" onclick="adminSaveSmsSettings()" class="w-full bg-slate-900 text-white py-3 rounded-xl font-black">Save SMS settings</button>
+    <div class="border-t pt-4"><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Send a test SMS</label><div class="flex gap-2"><input id="sms-test-to" type="tel" maxlength="16" placeholder="0241234567" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-bold"><button onclick="adminSendTestSms()" class="px-4 whitespace-nowrap rounded-xl bg-green-600 text-white font-bold text-sm">Send test</button></div></div>
+  </div>`;
+}
+async function adminSaveSmsSettings(){
+  const events={};
+  document.querySelectorAll('.sms-event').forEach(i=>{events[i.dataset.event]=i.checked;});
+  const btn=document.getElementById('sms-save-btn');if(btn) btn.disabled=true;
+  try{
+    const{error}=await supa.rpc('save_sms_settings',{
+      p_enabled:document.getElementById('sms-enabled').checked,
+      p_from_number:document.getElementById('sms-from').value.trim(),
+      p_admin_phone:document.getElementById('sms-admin').value.trim(),
+      p_events:events,
+      p_api_key:document.getElementById('sms-api-key').value.trim()||null
+    });
+    if(error) throw error;
+    showToast('SMS settings saved',3000,'success');
+    loadAdminSmsSettings();
+  }catch(err){showToast(err.message||'Save failed',5000,'error');}
+  finally{if(btn) btn.disabled=false;}
+}
+async function adminSendTestSms(){
+  const to=document.getElementById('sms-test-to')?.value.trim();
+  if(!to){showToast('Enter a phone number',3000,'error');return;}
+  try{
+    const{error}=await supa.rpc('send_test_sms',{p_to:to});
+    if(error) throw error;
+    showToast('Test SMS queued. It should arrive within a minute.',4000,'success');
+    setTimeout(loadAdminSmsLog,4000);
+  }catch(err){showToast(err.message||'Could not send',5000,'error');}
+}
+async function loadAdminSmsLog(){
+  const c=document.getElementById('admin-sms-log');
+  if(!c) return;
+  try{
+    const{data,error}=await supa.from('sms_outbox').select('id,event,to_phone,content,status,attempts,error,created_at').order('created_at',{ascending:false}).limit(50);
+    if(error) throw error;
+    if(!data||!data.length){c.innerHTML='<p class="text-sm text-muted-theme text-center py-4">No messages yet.</p>';return;}
+    const badge={sent:'bg-green-100 text-green-700',failed:'bg-red-100 text-red-700',pending:'bg-amber-100 text-amber-700',sending:'bg-blue-100 text-blue-700',skipped:'bg-slate-100 text-slate-600'};
+    c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Time</th><th class="p-3 text-xs font-black uppercase text-slate-500">To</th><th class="p-3 text-xs font-black uppercase text-slate-500">Message</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th></tr></thead><tbody>${data.map(m=>`<tr class="border-b align-top"><td class="p-3 text-xs whitespace-nowrap">${new Date(m.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3 font-mono text-xs whitespace-nowrap">${esc(m.to_phone)}</td><td class="p-3 text-xs">${esc(m.content)}${m.error?`<div class="text-red-500 mt-1">${esc(m.error)}</div>`:''}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${badge[m.status]||''}">${esc(m.status)}</span>${m.status==='failed'||(m.status==='pending'&&m.attempts>0)?`<button data-id="${esc(m.id)}" onclick="adminRetrySms(this.dataset.id)" class="block mt-1 text-xs underline font-bold">Retry</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+  }catch(err){c.innerHTML='<p class="text-sm text-red-500">Failed to load messages</p>';}
+}
+async function adminRetrySms(id){
+  try{
+    const{error}=await supa.rpc('retry_sms',{p_id:id});
+    if(error) throw error;
+    showToast('Retrying…',2000,'info');
+    setTimeout(loadAdminSmsLog,4000);
+  }catch(err){showToast(err.message||'Retry failed',4000,'error');}
 }
 async function loadAdminDepositsTab(){
   loadAdminDepositRequests();
@@ -2368,6 +2463,7 @@ function render(){
         else if(state.adminTab==='agents') loadAdminAgentsList();
         else if(state.adminTab==='withdrawals') loadAdminWithdrawals();
         else if(state.adminTab==='deposits') loadAdminDepositsTab();
+        else if(state.adminTab==='sms') loadAdminSmsTab();
       },50);
       break;
     case 'agent-portal': app.innerHTML=renderAgentPortal();extended.innerHTML='';break;
