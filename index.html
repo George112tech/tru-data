@@ -369,6 +369,7 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
 #toast-container{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center;gap:8px;width:max-content;max-width:calc(100vw - 32px);pointer-events:none;}
 #toast-container .toast{position:relative;bottom:auto;left:auto;transform:translateY(24px);pointer-events:auto;max-width:100%;}
 #toast-container .toast.show{transform:translateY(0);}
+.admin-mode .cust-only{display:none!important;}
 .live-dot{width:8px;height:8px;border-radius:9999px;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2);display:inline-block;}
 </style>
 <!-- Built from index.html by `npm run build:css`. Rebuild after adding Tailwind classes. -->
@@ -384,10 +385,10 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
     </div>
     <!-- Desktop nav -->
     <div class="hidden md:flex gap-8 items-center">
-      <button onclick="navigateTo('home')" class="font-semibold text-sm hover:text-red-600 transition-colors duration-300">Buy Data</button>
-      <button onclick="navigateTo('about')" class="font-semibold text-sm hover:text-red-600 transition-colors duration-300">About</button>
-      <button onclick="navigateTo('agent-portal')" class="font-semibold text-sm hover:text-blue-600 transition-colors duration-300 text-blue-500 font-bold">Agents</button>
-      <a href="#" onclick="downloadLatestApk(event)" class="nav-apk-btn"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Get Android App</a>
+      <button onclick="navigateTo('home')" class="cust-only font-semibold text-sm hover:text-red-600 transition-colors duration-300">Buy Data</button>
+      <button onclick="navigateTo('about')" class="cust-only font-semibold text-sm hover:text-red-600 transition-colors duration-300">About</button>
+      <button onclick="navigateTo('agent-portal')" class="cust-only font-semibold text-sm hover:text-blue-600 transition-colors duration-300 text-blue-500 font-bold">Agents</button>
+      <a href="#" onclick="downloadLatestApk(event)" class="nav-apk-btn cust-only"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Get Android App</a>
       <div id="user-auth-section" class="flex items-center gap-3"></div>
     </div>
     <!-- Mobile right side: auth + hamburger -->
@@ -403,10 +404,10 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
   <!-- Mobile dropdown menu -->
   <div id="mobile-menu" class="md:hidden overflow-hidden max-h-0 transition-all duration-300 ease-in-out border-t border-slate-100" style="max-height:0;">
     <div class="px-4 py-3 flex flex-col gap-1 bg-white/95 backdrop-blur-md">
-      <button onclick="navigateTo('home');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>Buy Data</button>
-      <button onclick="navigateTo('about');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>About</button>
-      <button onclick="navigateTo('agent-portal');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Agents</button>
-      <a href="#" onclick="downloadLatestApk(event);closeMobileMenu()" class="mobile-apk-btn mx-1"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Download Android App (APK)</a>
+      <button onclick="navigateTo('home');closeMobileMenu()" class="cust-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>Buy Data</button>
+      <button onclick="navigateTo('about');closeMobileMenu()" class="cust-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>About</button>
+      <button onclick="navigateTo('agent-portal');closeMobileMenu()" class="cust-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Agents</button>
+      <a href="#" onclick="downloadLatestApk(event);closeMobileMenu()" class="mobile-apk-btn mx-1 cust-only"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Download Android App (APK)</a>
       <div id="user-auth-section-mobile-menu" class="flex flex-col gap-1"></div>
     </div>
   </div>
@@ -414,13 +415,13 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
 
 <main id="app-view" class="flex-grow min-h-screen"><div class="max-w-6xl mx-auto px-4 py-10" role="status" aria-busy="true" aria-label="Loading"><div class="skel mb-6" style="height:220px;border-radius:1.5rem"></div><div class="skel mx-auto mb-4" style="height:28px;width:60%"></div><div class="skel mx-auto mb-10" style="height:16px;width:40%"></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="skel" style="height:180px;border-radius:2rem"></div><div class="skel" style="height:180px;border-radius:2rem"></div><div class="skel" style="height:180px;border-radius:2rem"></div></div></div></main>
 <div id="extended-content"></div>
-<div id="agent-session-banner" style="display:none;" class="agent-banner sticky top-16 z-[55]">
+<div id="agent-session-banner" style="display:none;" class="cust-only agent-banner sticky top-16 z-[55]">
   <span class="relative z-10 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>Agent Link Active — You are viewing <strong>Agent Pricing</strong>. Agent ID: <span id="agent-banner-id" class="font-mono bg-white/20 px-2 py-0.5 rounded"></span></span>
 </div>
 <div id="toast-container"></div>
 
 <!-- Floating APK Download Button -->
-<div class="apk-float" title="Download TruData Android App">
+<div class="apk-float cust-only" title="Download TruData Android App">
   <a href="#" onclick="downloadLatestApk(event)" class="apk-float-btn" aria-label="Download TruData Android APK">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>
     <span>App</span>
@@ -456,7 +457,7 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
   </div>
 </div>
 
-<footer class="py-16 text-center border-t border-slate-200 bg-gradient-to-t from-slate-50 to-transparent">
+<footer class="cust-only py-16 text-center border-t border-slate-200 bg-gradient-to-t from-slate-50 to-transparent">
   <div class="max-w-4xl mx-auto px-4">
     <div class="mb-8">
       <span class="text-2xl font-extrabold tracking-tighter inline-flex items-center gap-2">
@@ -957,6 +958,14 @@ function updateAuthUI(){
   // The Admin button is only ever shown to the admin.
   const adminBtn=state.isAdmin?`<button onclick="navigateTo('admin-dashboard')" class="text-[10px] bg-slate-900 text-white px-4 py-2.5 rounded-full font-bold uppercase shadow-md">Admin</button>`:'';
   const adminMenuBtn=state.isAdmin?`<button onclick="navigateTo('admin-dashboard');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-slate-100 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>Admin Dashboard</button>`:'';
+  document.body.classList.toggle('admin-mode',!!state.isAdmin);
+  if(state.user&&state.isAdmin){
+    const logoutIcon='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>';
+    paintHtml(s,`<div class="flex items-center gap-3">${adminBtn}<button onclick="logoutUser()" class="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-red-500 transition-colors px-2 py-2 rounded-lg hover:bg-red-50">${logoutIcon}Logout</button></div>`);
+    if(sm) paintHtml(sm,adminBtn);
+    if(smm) paintHtml(smm,`${adminMenuBtn}<button onclick="logoutUser();closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3">${logoutIcon}Logout</button>`);
+    return;
+  }
   if(state.user){
     const agentBtn=state.agentProfile?`<button onclick="navigateTo('agent-dashboard')" class="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-xs font-bold hover:bg-blue-200 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent</button>`:'';
     paintHtml(s,`<div class="flex items-center gap-3">
@@ -973,13 +982,12 @@ function updateAuthUI(){
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
         Logout
       </button>
-      ${adminBtn}
     </div>`);
     // Mobile top bar: just wallet icon shortcut
     if(sm) paintHtml(sm,`<button onclick="navigateTo('wallet')" class="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>Wallet</button>`);
     // Mobile menu: full list
     const agentMenuBtn=state.agentProfile?`<button onclick="navigateTo('agent-dashboard');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent Dashboard</button>`:'';
-    if(smm) paintHtml(smm,`${agentMenuBtn}<button onclick="navigateTo('my-orders');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>My Orders</button>${adminMenuBtn}<button onclick="logoutUser();closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>Logout</button>`);
+    if(smm) paintHtml(smm,`${agentMenuBtn}<button onclick="navigateTo('my-orders');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>My Orders</button><button onclick="logoutUser();closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>Logout</button>`);
   }else{
     paintHtml(s,`<div class="flex items-center gap-2">
       <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 hover:text-red-600 transition-colors">Login</button>
@@ -1027,6 +1035,8 @@ async function navigateTo(view,params=null,opts={}){
   closeMobileMenu();
   const app=document.getElementById('app-view');
   try{
+    // The admin only uses the admin dashboard (and setting a new password).
+    if(state.isAdmin&&view!=='admin-dashboard'&&view!=='reset-password'){view='admin-dashboard';params=null;opts={...opts,replace:true};}
     // The admin pages are never mentioned to anyone else.
     if(view==='admin-dashboard'&&!state.isAdmin){
       if(state.user&&!state.userProfile){app.innerHTML=pageSkeleton();await fetchUserProfile();}
@@ -1597,9 +1607,10 @@ async function handleLogin(e){
     state.user=data.user;
     await Promise.all([fetchUserProfile(),fetchAgentProfile()]);
     if(!state.userProfile){showToast('Failed to load profile data. Please contact support.',4000,'error');return;}
+    // Admin accounts sign in on the admin login only.
+    if(state.isAdmin){await refuseSignIn('This account cannot sign in here.');return;}
     cacheUserState();startLive();
-    if(state.isAdmin){showToast('Welcome back, Admin!',3000,'success');navigateTo('admin-dashboard');}
-    else{showToast('Welcome back!',3000,'success');navigateTo('home');}
+    showToast('Welcome back!',3000,'success');navigateTo('home');
     prefetchUserData();
     // Link prices depend on who is logged in (agents see normal prices on their own link).
     detectAgentLink().then(()=>{if(state.view==='network') render();});
@@ -1674,6 +1685,7 @@ function renderNetworkView(networkId){
   return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8"><div class="mb-8 flex items-center justify-between flex-wrap gap-3"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Networks</button>${modeBadge}</div><div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div><img src="${network.logo}" alt="${network.name}" width="${network.logoW}" height="${network.logoH}" decoding="async" class="w-auto h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10"><h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1><p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${bundleCards}</div></div>`;
 }
 function initiateOrder(networkId,bundleId){
+  if(state.isAdmin) return;
   const bundle=NORMAL_BUNDLES.find(b=>b.network===networkId&&b.id===bundleId);
   if(!bundle){showToast('Bundle not found',3000,'error');return;}
   if(!state.user){showToast('Please login first',3000,'error');navigateTo('login');return;}
@@ -1748,13 +1760,20 @@ window.adminAuth=async(e)=>{
   try{
     const{data,error}=await supa.auth.signInWithPassword({email,password});if(error) throw error;
     state.user=data.user;await fetchUserProfile();
-    if(!state.isAdmin){showToast('Signed in',3000,'success');cacheUserState();startLive();navigateTo('home');return;}
+    if(!state.isAdmin){await refuseSignIn('This account is not an admin.');return;}
     cacheUserState();startLive();
     showToast('Login successful',3000,'success');navigateTo('admin-dashboard');
   }
   catch(err){showToast(''+(err.message||'Login failed'),4000,'error');}
 };
 async function adminLogout(){logoutUser();}
+// Signs straight back out of an account used on the wrong login page.
+async function refuseSignIn(msg){
+  try{await supa.auth.signOut();}catch(e){}
+  state.user=null;state.userProfile=null;state.isAdmin=false;state.agentProfile=null;
+  store.clearUser();viewCache.clear();updateAuthUI();
+  showToast(msg,5000,'error');
+}
 // The admin's order list. Only the columns the dashboard shows are fetched.
 async function fetchOrders(){
   try{
@@ -2959,6 +2978,8 @@ function startLive(){
   on('app_settings',null,p=>onSettingChange(p.new));
   if(uid){
     on('profiles','id=eq.'+uid,p=>onMyProfile(p.new));
+  }
+  if(uid&&!admin){
     on('orders','user_id=eq.'+uid,p=>{remember('orders',[p.new],'Status');soon('my-orders',loadMyOrders,400);});
     on('transactions','user_id=eq.'+uid,()=>soon('tx',fetchUserTransactions,400));
     on('deposit_requests','user_id=eq.'+uid,p=>{remember('deposit_requests',[p.new],'status');soon('my-deposits',loadMyDepositRequests,400);});
@@ -3008,7 +3029,7 @@ function fetchAgentRequestsQuiet(){
   }).catch(()=>{});
 }
 function prefetchUserData(){
-  if(!state.user) return;
+  if(!state.user||state.isAdmin) return;
   const idle=window.requestIdleCallback||(f=>setTimeout(f,400));
   idle(()=>{
     if(!state.user) return;
