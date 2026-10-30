@@ -6,12 +6,207 @@
 <title>TRU Data Network | Buy Data Bundles in Ghana - MTN, Telecel, AirtelTigo</title>
 <meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. Data top up service across Ghana.">
 <meta name="keywords" content="buy data Ghana, MTN data bundles, Telecel data, AirtelTigo data, cheap data Ghana, mobile data Ghana, internet bundles, data top up Ghana, TRU Data Network">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Fonts are served from this site (fonts/), not Google. -->
 <link rel="preload" href="fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="fonts.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="preload" href="fonts/inter-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="11.webp" as="image" fetchpriority="high">
+<link rel="preconnect" href="https://kefcmjfvrqbgtivssdwn.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <style>
+/* Self-hosted copies of Inter and Plus Jakarta Sans (from Fontsource, SIL Open Font License). */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fonts/inter-latin-ext-300-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fonts/inter-latin-300-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fonts/inter-latin-ext-400-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fonts/inter-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fonts/inter-latin-ext-500-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fonts/inter-latin-500-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fonts/inter-latin-ext-600-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fonts/inter-latin-600-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fonts/inter-latin-ext-700-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fonts/inter-latin-700-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fonts/plus-jakarta-sans-latin-ext-300-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url(fonts/plus-jakarta-sans-latin-300-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fonts/plus-jakarta-sans-latin-ext-400-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fonts/plus-jakarta-sans-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fonts/plus-jakarta-sans-latin-ext-500-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(fonts/plus-jakarta-sans-latin-500-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fonts/plus-jakarta-sans-latin-ext-600-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fonts/plus-jakarta-sans-latin-600-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fonts/plus-jakarta-sans-latin-ext-700-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fonts/plus-jakarta-sans-latin-700-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fonts/plus-jakarta-sans-latin-ext-800-normal.woff2) format('woff2');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fonts/plus-jakarta-sans-latin-800-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+/* Arial adjusted to Inter's metrics, shown until Inter loads, so text doesn't move. */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  ascent-override: 90.49%;
+  descent-override: 22.56%;
+  line-gap-override: 0%;
+  size-adjust: 107.06%;
+}
+/* The two animate.css 4.1.1 animations this site uses (MIT licence). */
+.animate__animated{animation-duration:1s;animation-fill-mode:both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.animate__fadeIn{animation-name:fadeIn}
+@keyframes slideInUp{from{transform:translate3d(0,100%,0);visibility:visible}to{transform:translate3d(0,0,0)}}
+.animate__slideInUp{animation-name:slideInUp}
+@media print,(prefers-reduced-motion:reduce){.animate__animated{animation-duration:1ms!important;transition-duration:1ms!important;animation-iteration-count:1!important}}
 :root {
   --bg-primary:#ffffff;--bg-secondary:#f1f5f9;--bg-tertiary:#e2e8f0;--bg-card:#ffffff;--bg-elevated:#ffffff;
   --text-primary:#0f172a;--text-secondary:#475569;--text-tertiary:#94a3b8;
@@ -20,7 +215,9 @@
   --shadow-lg:0 10px 15px -3px rgb(0 0 0/0.1);--shadow-xl:0 20px 25px -5px rgb(0 0 0/0.1);
   --shadow-glow:0 0 40px -10px rgba(220,38,38,0.5);--glass-bg:rgba(255,255,255,0.8);
 }
-body{font-family:'Inter','Plus Jakarta Sans',sans-serif;scroll-behavior:smooth;overflow-x:hidden;background-color:var(--bg-primary);color:var(--text-primary);transition:background-color .4s cubic-bezier(.4,0,.2,1),color .4s cubic-bezier(.4,0,.2,1);line-height:1.6;}
+/* Keep the footer below the fold until the page is drawn (this rule doesn't wait for tailwind.css). */
+#app-view{min-height:100vh;}
+body{font-family:'Inter','Inter Fallback','Plus Jakarta Sans',sans-serif;scroll-behavior:smooth;overflow-x:hidden;background-color:var(--bg-primary);color:var(--text-primary);transition:background-color .4s cubic-bezier(.4,0,.2,1),color .4s cubic-bezier(.4,0,.2,1);line-height:1.6;}
 .glass{background:var(--glass-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--border-color);}
 .card-theme{background-color:var(--bg-card);border:1px solid var(--border-color);box-shadow:var(--shadow-md);transition:all .3s cubic-bezier(.4,0,.2,1);}
 .card-theme:hover{box-shadow:var(--shadow-xl);border-color:var(--accent-primary);transform:translateY(-4px);}
@@ -196,7 +393,7 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
   </div>
 </nav>
 
-<main id="app-view" class="flex-grow"></main>
+<main id="app-view" class="flex-grow min-h-screen"></main>
 <div id="extended-content"></div>
 <div id="agent-session-banner" style="display:none;" class="agent-banner sticky top-16 z-[55]">
   <span class="relative z-10 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>Agent Link Active — You are viewing <strong>Agent Pricing</strong>. Agent ID: <span id="agent-banner-id" class="font-mono bg-white/20 px-2 py-0.5 rounded"></span></span>
@@ -250,7 +447,7 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
     </div>
     <div class="grid md:grid-cols-3 gap-8 mb-8 text-left">
       <div>
-        <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Quick Links</h4>
+        <h2 class="font-bold mb-4 text-sm uppercase tracking-wider">Quick Links</h2>
         <ul class="space-y-2 text-sm text-muted-theme">
           <li><button onclick="navigateTo('landing')" class="hover:text-red-600 transition-colors">Home</button></li>
           <li><button onclick="navigateTo('home')" class="hover:text-red-600 transition-colors">Buy Data</button></li>
@@ -258,7 +455,7 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
         </ul>
       </div>
       <div>
-        <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Networks</h4>
+        <h2 class="font-bold mb-4 text-sm uppercase tracking-wider">Networks</h2>
         <ul class="space-y-2 text-sm text-muted-theme">
           <li><button onclick="navigateTo('network','mtn')" class="hover:text-red-600 transition-colors">MTN Ghana</button></li>
           <li><button onclick="navigateTo('network','telecel')" class="hover:text-red-600 transition-colors">Telecel</button></li>
@@ -266,7 +463,7 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
         </ul>
       </div>
       <div>
-        <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Contact</h4>
+        <h2 class="font-bold mb-4 text-sm uppercase tracking-wider">Contact</h2>
         <ul class="space-y-2 text-sm text-muted-theme">
           <li>WhatsApp: +233 59 757 8538</li>
           <li>Email: kelvinjun12.2003@gmail.com</li>
@@ -302,6 +499,7 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 
 <!-- WhatsApp float removed; users contact via Report Order button -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 const SB_URL="https://kefcmjfvrqbgtivssdwn.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNtamZ2cnFiZ3RpdnNzZHduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MDM1NTIsImV4cCI6MjA4NDE3OTU1Mn0.HoXeKRW4-cGfMexGZpdmEvDHK-XXtXDSoMWWWbq4HKw";
@@ -311,9 +509,9 @@ const MOMO_NAME='GEORGE DANQUAH DORDZIE';
 const supa=supabase.createClient(SB_URL,SB_KEY);
 
 const NETWORKS={
-  mtn:{name:'MTN Ghana',color:'bg-[#FFCC00]',text:'text-black',logo:'./2.webp',description:"Ghana's largest network with widest coverage"},
-  airteltigo:{name:'AirtelTigo',color:'bg-[#0077B5]',text:'text-white',logo:'./3.webp',description:'Affordable data plans with great value'},
-  telecel:{name:'Telecel',color:'bg-[#E60000]',text:'text-white',logo:'./4.webp',description:'Fast 4G internet at competitive prices'}
+  mtn:{name:'MTN Ghana',color:'bg-[#FFCC00]',text:'text-black',logo:'./2.webp',logoW:576,logoH:324,description:"Ghana's largest network with widest coverage"},
+  airteltigo:{name:'AirtelTigo',color:'bg-[#0077B5]',text:'text-white',logo:'./3.webp',logoW:256,logoH:256,description:'Affordable data plans with great value'},
+  telecel:{name:'Telecel',color:'bg-[#E60000]',text:'text-white',logo:'./4.webp',logoW:256,logoH:256,description:'Fast 4G internet at competitive prices'}
 };
 
 const NORMAL_BUNDLES=[
@@ -659,7 +857,7 @@ function renderHome(){
         </div>
         <!-- Right: WiFi SIM image -->
         <div class="shrink-0 flex items-center justify-center animate-float" style="width:160px;height:180px;">
-          <img src="./5.webp" alt="WiFi SIM" decoding="async" style="width:160px;height:180px;object-fit:contain;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.4));">
+          <img src="./5.webp" alt="WiFi SIM" width="160" height="180" decoding="async" style="width:160px;height:180px;object-fit:contain;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.4));">
         </div>
       </div>
     </section>
@@ -748,10 +946,10 @@ function renderHome(){
     <section id="networks" class="max-w-7xl mx-auto px-4 py-16">
       <div class="text-center mb-12"><h2 class="text-3xl md:text-4xl font-black mb-4 animate-slide-up">Choose Your Network</h2><p class="text-muted-theme max-w-2xl mx-auto animate-slide-up stagger-1" style="animation-fill-mode:forwards;">Select your mobile network below to view available data bundles. We facilitate purchases for all major networks in Ghana.</p></div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-        ${Object.entries(NETWORKS).map(([id,net],i)=>`<div onclick="navigateTo('network','${id}')" class="${net.color} ${net.text} p-8 rounded-[2rem] shadow-2xl network-card text-center border-4 border-white relative overflow-hidden group animate-scale-in stagger-${i+1}" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div><img src="${net.logo}" alt="${net.name}" loading="lazy" decoding="async" class="h-16 mx-auto mb-6 bg-white p-3 rounded-2xl shadow-lg relative z-10"><h3 class="text-2xl font-black uppercase mb-2 relative z-10">${net.name}</h3><p class="text-xs font-medium mt-2 opacity-80 relative z-10 mb-4">${net.description}</p><span class="inline-flex items-center gap-2 text-xs font-bold bg-black/20 px-4 py-2 rounded-full relative z-10 group-hover:bg-black/30 transition-colors">View Plans<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span></div>`).join('')}
+        ${Object.entries(NETWORKS).map(([id,net],i)=>`<div onclick="navigateTo('network','${id}')" class="${net.color} ${net.text} p-8 rounded-[2rem] shadow-2xl network-card text-center border-4 border-white relative overflow-hidden group animate-scale-in stagger-${i+1}" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div><img src="${net.logo}" alt="${net.name}" width="${net.logoW}" height="${net.logoH}" loading="lazy" decoding="async" class="w-auto h-16 mx-auto mb-6 bg-white p-3 rounded-2xl shadow-lg relative z-10"><h3 class="text-2xl font-black uppercase mb-2 relative z-10">${net.name}</h3><p class="text-xs font-medium mt-2 opacity-80 relative z-10 mb-4">${net.description}</p><span class="inline-flex items-center gap-2 text-xs font-bold bg-black/20 px-4 py-2 rounded-full relative z-10 group-hover:bg-black/30 transition-colors">View Plans<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span></div>`).join('')}
       </div>
     </section>
-    <section class="bg-slate-50 py-20"><div class="max-w-6xl mx-auto px-6"><div class="grid md:grid-cols-2 gap-12 items-center"><div class="animate-slide-up"><h2 class="text-3xl font-black mb-6">Convenient Data Purchases in Ghana</h2><p class="text-muted-theme mb-6 leading-relaxed">TRU Data Network provides a platform for purchasing mobile data bundles. We work to offer competitive pricing and a streamlined purchasing experience for MTN, Telecel, and AirtelTigo customers.</p><ul class="space-y-3"><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Competitive pricing compared to standard rates</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Simple ordering process</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Customer support via WhatsApp</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Compatible with all mobile devices</li></ul></div><div class="relative animate-scale-in stagger-2" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 rounded-3xl blur-2xl opacity-20"></div><img src="./11.webp" alt="TRU Data App Interface" loading="lazy" decoding="async" class="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto"></div></div></div></section>
+    <section class="bg-slate-50 py-20"><div class="max-w-6xl mx-auto px-6"><div class="grid md:grid-cols-2 gap-12 items-center"><div class="animate-slide-up"><h2 class="text-3xl font-black mb-6">Convenient Data Purchases in Ghana</h2><p class="text-muted-theme mb-6 leading-relaxed">TRU Data Network provides a platform for purchasing mobile data bundles. We work to offer competitive pricing and a streamlined purchasing experience for MTN, Telecel, and AirtelTigo customers.</p><ul class="space-y-3"><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Competitive pricing compared to standard rates</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Simple ordering process</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Customer support via WhatsApp</li><li class="flex items-center gap-3 text-sm font-semibold"><svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Compatible with all mobile devices</li></ul></div><div class="relative animate-scale-in stagger-2" style="animation-fill-mode:forwards;"><div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 rounded-3xl blur-2xl opacity-20"></div><img src="./11.webp" alt="TRU Data App Interface" width="448" height="448" loading="lazy" decoding="async" class="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto"></div></div></div></section>
   </div>`;
 }
 
@@ -941,7 +1139,7 @@ function renderLandingPage(){
       <div class="relative z-10 mb-12 animate-scale-in">
         <div class="relative group">
           <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-          <img src="./11.webp" alt="TRU Data Network Logo - Data Bundle Platform" fetchpriority="high" decoding="async" class="hero-logo relative z-10 animate-float">
+          <img src="./11.webp" alt="TRU Data Network Logo - Data Bundle Platform" width="280" height="280" fetchpriority="high" class="hero-logo relative z-10 animate-float">
         </div>
       </div>
       <div class="relative z-10 max-w-3xl mx-auto text-center px-4">
@@ -999,28 +1197,28 @@ function renderLandingPage(){
           <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-1 opacity-0" style="animation-fill-mode:forwards;">
             <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg></div>
             <div>
-              <h4 class="font-bold text-lg mb-1">Students</h4>
+              <h3 class="font-bold text-lg mb-1">Students</h3>
               <p class="text-sm text-muted-theme">Who need mobile data for online learning, research, and educational resources</p>
             </div>
           </div>
           <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-2 opacity-0" style="animation-fill-mode:forwards;">
             <div class="w-14 h-14 bg-gradient-to-br from-red-600 to-red-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-red-500/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
             <div>
-              <h4 class="font-bold text-lg mb-1">Professionals</h4>
+              <h3 class="font-bold text-lg mb-1">Professionals</h3>
               <p class="text-sm text-muted-theme">And remote workers who need reliable connectivity for work activities</p>
             </div>
           </div>
           <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-3 opacity-0" style="animation-fill-mode:forwards;">
             <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-green-500/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div>
             <div>
-              <h4 class="font-bold text-lg mb-1">Business Owners</h4>
+              <h3 class="font-bold text-lg mb-1">Business Owners</h3>
               <p class="text-sm text-muted-theme">Managing online business activities and digital operations</p>
             </div>
           </div>
           <div class="flex items-start gap-4 p-6 card-theme rounded-2xl feature-card animate-slide-up stagger-4 opacity-0" style="animation-fill-mode:forwards;">
             <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/30"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div>
             <div>
-              <h4 class="font-bold text-lg mb-1">Everyday Users</h4>
+              <h3 class="font-bold text-lg mb-1">Everyday Users</h3>
               <p class="text-sm text-muted-theme">Who want convenient options for managing data purchases</p>
             </div>
           </div>
@@ -1240,7 +1438,7 @@ function renderNetworkView(networkId){
       :`<div class="price-tag">₵${bundle.price.toFixed(2)}</div>`;
     return`<div class="card-theme p-6 rounded-2xl hover:border-red-500 transition-all cursor-pointer group animate-slide-up stagger-${(idx%5)+1}" style="animation-fill-mode:forwards;" onclick="initiateOrder('${networkId}','${bundle.id}')"><div class="flex justify-between items-start mb-4"><div><h3 class="text-2xl font-black text-slate-900 group-hover:text-red-600 transition-colors">${bundle.size}</h3><p class="text-sm text-muted-theme">${bundle.validity} Validity</p></div>${priceHTML}</div><div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200"><span class="text-xs font-bold text-slate-500 uppercase">Click to Purchase</span><svg class="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div></div>`;
   }).join('');
-  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8"><div class="mb-8 flex items-center justify-between flex-wrap gap-3"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Networks</button>${modeBadge}</div><div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div><img src="${network.logo}" alt="${network.name}" decoding="async" class="h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10"><h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1><p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${bundleCards}</div></div>`;
+  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8"><div class="mb-8 flex items-center justify-between flex-wrap gap-3"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Networks</button>${modeBadge}</div><div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div><img src="${network.logo}" alt="${network.name}" width="${network.logoW}" height="${network.logoH}" decoding="async" class="w-auto h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10"><h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1><p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${bundleCards}</div></div>`;
 }
 function initiateOrder(networkId,bundleId){
   const bundle=NORMAL_BUNDLES.find(b=>b.network===networkId&&b.id===bundleId);
@@ -2191,6 +2389,8 @@ function render(){
 
 /* ===== INIT ===== */
 document.addEventListener('DOMContentLoaded',async()=>{
+  // Draw the page right away; it is drawn again once the session is known.
+  render();
   try{
     const{data:{session},error}=await supa.auth.getSession();
     if(error) console.error('Session error:',error);
