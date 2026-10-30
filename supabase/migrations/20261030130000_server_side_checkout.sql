@@ -165,7 +165,7 @@ begin
     pricing_mode, agent_id, agent_code, agent_profit, base_price_used,
     api_status, retry_count, processed_by_api, client_request_id, created_at, updated_at
   ) values (
-    v_ref, p_phone, v_bundle.network, v_bundle.size, v_price, 'Pending', 'refer2bundle', v_uid,
+    v_ref, p_phone, v_bundle.network, v_bundle.size, v_price, 'Pending', 'patupaa', v_uid,
     v_mode, v_agent_id, case when v_agent_id is null then null else p_agent_code end,
     v_profit, v_bundle.price, 'pending', 0, false, p_request_id, now(), now()
   );
@@ -177,32 +177,6 @@ $$;
 
 revoke execute on function public.place_order(text, text, text, uuid) from public, anon;
 grant execute on function public.place_order(text, text, text, uuid) to authenticated, service_role;
-
--- ---------------------------------------------------------------------------
--- claim_order_for_api: the process-order Edge Function claims an order before
--- calling Refer2Bundle, so a double tap or two admins pressing "Retry" can
--- never send the same order twice. A claim older than 2 minutes (function
--- crashed mid-call) can be retried.
--- ---------------------------------------------------------------------------
-
-create or replace function public.claim_order_for_api(p_ref text)
-returns setof public.orders
-language sql
-security definer
-set search_path = public
-as $$
-  update public.orders
-  set api_status = 'submitting', updated_at = now()
-  where ref = p_ref
-    and "Status" = 'Pending'
-    and api_reference is null
-    and (coalesce(api_status, 'pending') in ('pending', 'failed')
-         or (api_status = 'submitting' and updated_at < now() - interval '2 minutes'))
-  returning *;
-$$;
-
-revoke execute on function public.claim_order_for_api(text) from public, anon, authenticated;
-grant execute on function public.claim_order_for_api(text) to service_role;
 
 -- ---------------------------------------------------------------------------
 -- credit_deposit: only the verify-deposit Edge Function (service role) calls

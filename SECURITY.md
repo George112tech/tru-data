@@ -19,8 +19,9 @@ credited automatically: check the Paystack dashboard afterwards.
    - `supabase/migrations/20261030140000_momo_deposits_and_paystack_toggle.sql`
 3. **Deploy the Edge Functions**:
    - `verify-deposit` (new): confirms Paystack deposits
-   - `process-order` (updated): only sends paid orders, each one once
-   - `r2b-proxy` (updated): admin only
+   - `process-order` and `r2b-proxy`: replaced with disabled stubs (the
+     Refer2Bundle API is no longer used). Delete them from the dashboard and
+     remove the `REFER2BUNDLE_API_KEY` secret when convenient.
 4. **Publish the new `index.html`**: merge this branch into `main` and point
    GitHub Pages at `main` (Settings → Pages → Branch: `main`, `/ (root)`).
 
@@ -50,7 +51,7 @@ you switch Paystack off are still credited.
 | Wallet balance, role | Any user could set their own (profiles had no RLS) | Only server functions change them |
 | Deposits | Browser recorded the deposit itself | Mobile Money with admin approval; optional Paystack checked server-side; each payment credited once |
 | Purchases | Browser debited itself, then saved the order; repeated taps charged repeatedly | `place_order()` prices, debits and saves in one step; repeated taps return the same order |
-| Refer2Bundle | Any signed-in user could order any data for free | `process-order` reads the paid order; owner or admin only; once per order |
+| Refer2Bundle API | Any signed-in user could order any data for free | Removed. Orders stay Pending; the admin fulfils them on patupaa.com |
 | Order delete | Deleted the row, no refund | Cancels and refunds the wallet (admin chooses) |
 | Agent approval and totals | Agents could approve themselves and edit totals | Admin only (database trigger) |
 | Agent markups | One agent saving a price locked it for every agent | Each agent's lock is their own; admin lock or unlock applies to all |
