@@ -1357,7 +1357,7 @@ function renderAdminBroadcastTab(){
 function renderAdminAgentPricesTab(){
   const allLocked=state.agentBasePrices.length>0&&state.agentBasePrices.every(p=>p.pricing_locked);
   const anyUnlocked=state.agentBasePrices.some(p=>!p.pricing_locked);
-  return`<div class="card-theme rounded-2xl p-6">
+  return`<div class="card-theme rounded-2xl p-6 mb-6"><h3 class="text-xl font-bold mb-1">Price-change requests</h3><p class="text-xs text-muted-theme mb-4">Approving opens pricing for that agent only. Every other agent stays locked.</p><div id="admin-price-unlock-requests"><div class="spinner mx-auto"></div></div></div><div class="card-theme rounded-2xl p-6">
     <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
       <div><h3 class="text-xl font-bold">Agent Base Prices</h3><p class="text-xs text-muted-theme mt-1">Define the cost basis for agents. Agents add their own profit on top. System (normal user) prices are <strong>never affected</strong>.</p></div>
       <div class="flex gap-2 flex-wrap">
@@ -1389,7 +1389,53 @@ function showAddAgentPriceForm(){
   const f=document.getElementById('add-agent-price-form');
   if(f) f.style.display=f.style.display==='none'?'block':'none';
 }
+async function loadAdminPriceUnlockRequests(){
+  const c=document.getElementById('admin-price-unlock-requests');
+  if(!c) return;
+  try{
+    const[{data:reqs,error:re},{data:open,error:oe}]=await Promise.all([
+      supa.from('price_unlock_requests').select('id,note,created_at,agent_profiles(name,agent_id)').eq('status','pending').order('created_at',{ascending:true}),
+      supa.from('agent_profiles').select('id,name,agent_id,price_unlock_until').gt('price_unlock_until',new Date().toISOString())
+    ]);
+    if(re) throw re;if(oe) throw oe;
+    const fmt=d=>new Date(d).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    const reqRows=(reqs||[]).map(r=>`<tr class="border-b"><td class="p-3 text-xs whitespace-nowrap">${fmt(r.created_at)}</td><td class="p-3"><div class="font-bold">${esc(r.agent_profiles?.name||'')}</div><div class="text-xs font-mono text-muted-theme">${esc(r.agent_profiles?.agent_id||'')}</div></td><td class="p-3 text-sm">${esc(r.note||'—')}</td><td class="p-3"><div class="flex gap-2"><button data-id="${esc(r.id)}" onclick="adminApprovePriceUnlock(this.dataset.id)" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold">Approve</button><button data-id="${esc(r.id)}" onclick="adminRejectPriceUnlock(this.dataset.id)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold">Reject</button></div></td></tr>`).join('');
+    const openRows=(open||[]).map(a=>`<div class="flex items-center justify-between gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-2"><span class="text-sm"><strong>${esc(a.name||'')}</strong> <span class="font-mono text-xs">${esc(a.agent_id||'')}</span> — open until ${fmt(a.price_unlock_until)}</span><button data-id="${esc(a.id)}" onclick="adminLockAgentPricing(this.dataset.id)" class="text-xs bg-slate-700 text-white px-3 py-1 rounded-lg font-bold">Lock now</button></div>`).join('');
+    c.innerHTML=(reqRows?`<div class="overflow-x-auto mb-4"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Requested</th><th class="p-3 text-xs font-black uppercase text-slate-500">Agent</th><th class="p-3 text-xs font-black uppercase text-slate-500">Reason</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${reqRows}</tbody></table></div>`:'<p class="text-sm text-muted-theme mb-4">No requests waiting.</p>')
+      +(openRows?`<div class="space-y-2"><p class="text-xs font-black uppercase text-slate-500">Open right now</p>${openRows}</div>`:'');
+  }catch(err){c.innerHTML='<p class="text-sm text-red-500">Failed to load price-change requests</p>';}
+}
+async function adminApprovePriceUnlock(id){
+  const input=prompt('Open this agent\'s pricing for how many hours? (1-168)','24');
+  if(input===null) return;
+  const hours=parseInt(input,10);
+  if(!hours||hours<1||hours>168){showToast('Enter between 1 and 168 hours',3000,'error');return;}
+  try{
+    const{data,error}=await supa.rpc('approve_price_unlock',{p_id:id,p_hours:hours});
+    if(error) throw error;
+    showToast('Pricing opened until '+new Date(data).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),4000,'success');
+    loadAdminPriceUnlockRequests();
+  }catch(err){showToast('Approve failed: '+(err.message||'error'),5000,'error');}
+}
+async function adminRejectPriceUnlock(id){
+  if(!confirm('Reject this price-change request?')) return;
+  try{
+    const{error}=await supa.rpc('reject_price_unlock',{p_id:id});
+    if(error) throw error;
+    showToast('Request rejected',3000,'info');
+    loadAdminPriceUnlockRequests();
+  }catch(err){showToast('Reject failed: '+(err.message||'error'),5000,'error');}
+}
+async function adminLockAgentPricing(agentProfileId){
+  try{
+    const{error}=await supa.rpc('lock_agent_pricing',{p_agent_profile_id:agentProfileId});
+    if(error) throw error;
+    showToast('Agent pricing locked',3000,'success');
+    loadAdminPriceUnlockRequests();
+  }catch(err){showToast('Lock failed: '+(err.message||'error'),5000,'error');}
+}
 async function loadAdminAgentPricesTable(){
+  loadAdminPriceUnlockRequests();
   await fetchAdminAgentBasePrices();
   const c=document.getElementById('admin-agent-prices-container');
   if(!c) return;
@@ -1825,12 +1871,26 @@ function copyAgentLink(){
 }
 async function loadAgentPricingPanel(){
   // BUG 1 FIX: Always refresh agentBasePrices so admin's pricing_locked flag is current
+  await fetchAgentProfile();
   await loadAgentBasePrices();
   await loadAgentPricesForSession();
   const c=document.getElementById('agent-pricing-panel');
   if(!c) return;
+  // Pricing opens for this agent only when the admin approves a price-change request.
+  const openUntil=state.agentProfile?.price_unlock_until?new Date(state.agentProfile.price_unlock_until):null;
+  const pricingOpen=!!openUntil&&openUntil>new Date();
+  state.agentPricingOpen=pricingOpen;
+  let pendingRequest=false;
+  if(!pricingOpen){
+    try{const{data:reqs}=await supa.from('price_unlock_requests').select('id').eq('status','pending').limit(1);pendingRequest=!!(reqs&&reqs.length);}catch(e){}
+  }
+  const unlockBar=pricingOpen
+    ?`<div class="mb-4 bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800 font-semibold">🔓 Your pricing is open until <strong>${openUntil.toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</strong>. Change any markup you need; your prices lock again when this closes.</div>`
+    :pendingRequest
+    ?`<div class="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 font-semibold">⏳ Your price-change request is waiting for admin approval.</div>`
+    :`<div class="mb-4 bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap"><span class="text-sm text-slate-600 font-semibold">Need to change a locked price? Ask the admin to open your pricing.</span><button onclick="requestPriceUnlock()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-700">Request price change</button></div>`;
   if(!state.agentBasePrices.length){c.innerHTML=`<div class="text-center py-8 text-muted-theme">No agent base prices have been set by admin yet.<br><span class="text-xs">Check back later or contact admin.</span></div>`;return;}
-  c.innerHTML=`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Your Base Cost</th><th class="p-3 text-xs font-black uppercase text-slate-500">Your Profit (₵)</th><th class="p-3 text-xs font-black uppercase text-slate-500">Customer Pays</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th></tr></thead><tbody>${state.agentBasePrices.map(bp=>{
+  c.innerHTML=unlockBar+`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Your Base Cost</th><th class="p-3 text-xs font-black uppercase text-slate-500">Your Profit (₵)</th><th class="p-3 text-xs font-black uppercase text-slate-500">Customer Pays</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th></tr></thead><tbody>${state.agentBasePrices.map(bp=>{
     // BUG 2 FIX: Match ONLY by bundle_id — removed || p.bundle_name === bp.bundle_name which caused cross-network lock bleed
     const ex=state.agentPrices.find(p=>p.bundle_id===bp.id);
     const pr=ex?parseFloat(ex.profit||0):0;
@@ -1838,7 +1898,7 @@ async function loadAgentPricingPanel(){
     // Lock state is driven SOLELY by bp.pricing_locked from agent_base_prices.
     // When agent saves a profit, saveAgentProfit() sets pricing_locked=true in agent_base_prices.
     // When admin unlocks (all or per-row), pricing_locked becomes false — agent row unlocks too.
-    const locked=bp.pricing_locked===true||!!(ex&&ex.locked);
+    const locked=!pricingOpen&&(bp.pricing_locked===true||!!(ex&&ex.locked));
     const agentSaved=!!ex;
     // adminOnlyLocked: admin locked this row but agent has not yet saved a profit for it
     const adminOnlyLocked=locked&&!agentSaved;
@@ -1852,6 +1912,16 @@ async function loadAgentPricingPanel(){
       // Not locked — editable input
       :`<input type="number" min="0" step="0.01" value="${pr.toFixed(2)}" id="pr-${esc(bp.id)}" onchange="document.getElementById('tot-${esc(bp.id)}').textContent='₵'+(${parseFloat(bp.base_price)}+parseFloat(this.value||0)).toFixed(2)" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none">`}</td><td class="p-3" id="tot-${esc(bp.id)}">${locked?`<div class="flex flex-col"><span class="font-black text-blue-500 text-sm">₵${finalPrice.toFixed(2)}</span><span class="text-xs text-slate-400 font-semibold">Fixed price</span></div>`:`<span class="font-bold text-blue-600">₵${(parseFloat(bp.base_price)+pr).toFixed(2)}</span>`}</td><td class="p-3">${locked?`<div class="flex flex-col gap-1"><span class="inline-flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-200 px-2 py-1 rounded-lg"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked</span><span class="text-xs text-slate-400">Contact admin to edit</span></div>`:`<button onclick="saveAgentProfit('${esc(bp.id)}')" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 transition-all">Save</button>`}</td></tr>`;}).join('')}</tbody></table></div><p class="text-xs text-muted-theme mt-4">Customer pays = Your Base Cost + Your Profit. System base prices are never exposed here. Once you save, your price is locked — contact admin to make changes. <span class="text-slate-400 font-bold">Grayed-out rows are locked and uneditable.</span></p>`;
 }
+async function requestPriceUnlock(){
+  const note=prompt('Why do you need to change your prices? (optional)','');
+  if(note===null) return;
+  try{
+    const{error}=await supa.rpc('request_price_unlock',{p_note:note});
+    if(error) throw error;
+    showToast('Request sent. You will be able to edit your prices once the admin approves it.',5000,'success');
+    loadAgentPricingPanel();
+  }catch(err){showToast(err.message||'Could not send request',5000,'error');}
+}
 async function saveAgentProfit(bundleId){
   const bp=state.agentBasePrices.find(b=>b.id===bundleId);
   if(!bp) return;
@@ -1859,7 +1929,7 @@ async function saveAgentProfit(bundleId){
   const input=document.getElementById(`pr-${bundleId}`);
   if(!input||!state.agentProfile) return;
   const profit=parseFloat(input.value)||0;
-  const confirmed=confirm('Once you save this profit, this bundle price will be locked and you will not be able to edit it until the admin unlocks it. Do you want to proceed?');
+  const confirmed=confirm(state.agentPricingOpen?'Save this price? You can keep changing prices until your open window closes.':'Once you save this profit, this bundle price will be locked. To change it later, use "Request price change". Do you want to proceed?');
   if(!confirmed) return;
   try{
     // BUG 2 FIX: Upsert uses only bundleId (UUID) — bundle_name is stored for reference only, not for matching
@@ -1867,7 +1937,7 @@ async function saveAgentProfit(bundleId){
     if(error) throw error;
     // The database locks this agent's own price for this bundle (other agents are unaffected).
     await loadAgentPricesForSession();
-    showToast('Profit saved for '+bundleName+'. This price is now locked. Contact admin to make changes.',5000,'success');
+    showToast(state.agentPricingOpen?'Profit saved for '+bundleName+'.':'Profit saved for '+bundleName+'. This price is now locked.',5000,'success');
     await loadAgentBasePrices();
     await loadAgentPricesForSession();
     await loadAgentPricingPanel();
