@@ -78,6 +78,9 @@ public class MainActivity extends Activity {
     private long lastBackPress = 0;
     private boolean showingOffline = false;
     private View splash;
+    private android.animation.ValueAnimator heartbeat;
+    private long splashShownAt = 0;
+    private static final long SPLASH_MIN_MS = 1200; // long enough to see the heartbeat
     private boolean adsStarted = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -111,13 +114,11 @@ public class MainActivity extends Activity {
         }, 4000);
     }
 
-    // White TRU DATA screen shown instantly at launch, faded out as soon as
-    // the site has drawn something (or after 8 seconds at most).
+    // Bright red launch screen with the white TRU DATA logo beating like a
+    // heart, faded out as soon as the site has drawn something (8 s at most).
     private void showSplash() {
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setGravity(Gravity.CENTER);
-        box.setBackgroundColor(Color.WHITE);
+        FrameLayout box = new FrameLayout(this);
+        box.setBackgroundColor(BRAND_RED);
         box.setClickable(true);
 
         LinearLayout logo = new LinearLayout(this);
@@ -125,28 +126,27 @@ public class MainActivity extends Activity {
         logo.setGravity(Gravity.CENTER_VERTICAL);
         TextView tru = new TextView(this);
         tru.setText("TRU");
-        tru.setTextColor(Color.WHITE);
-        tru.setTextSize(28);
+        tru.setTextColor(BRAND_RED);
+        tru.setTextSize(34);
         tru.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC));
-        tru.setBackgroundColor(BRAND_RED);
-        tru.setPadding(dp(14), dp(4), dp(14), dp(4));
+        android.graphics.drawable.GradientDrawable pill = new android.graphics.drawable.GradientDrawable();
+        pill.setColor(Color.WHITE);
+        pill.setCornerRadius(dp(12));
+        tru.setBackground(pill);
+        tru.setPadding(dp(16), dp(4), dp(16), dp(6));
         TextView data = new TextView(this);
-        data.setText(" DATA");
-        data.setTextColor(Color.parseColor("#0F172A"));
-        data.setTextSize(28);
+        data.setText("  DATA");
+        data.setTextColor(Color.WHITE);
+        data.setTextSize(34);
         data.setTypeface(Typeface.DEFAULT_BOLD);
         logo.addView(tru);
         logo.addView(data);
-        box.addView(logo);
-
-        ProgressBar spinner = new ProgressBar(this);
-        if (Build.VERSION.SDK_INT >= 21) spinner.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(BRAND_RED));
-        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(dp(36), dp(36));
-        sp.topMargin = dp(28);
-        box.addView(spinner, sp);
+        box.addView(logo, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 
         splash = box;
+        splashShownAt = System.currentTimeMillis();
         addContentView(splash, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        startHeartbeat(logo);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -155,13 +155,47 @@ public class MainActivity extends Activity {
         }, 8000);
     }
 
+    // Two quick beats (big, then a little smaller), a rest, and again.
+    private void startHeartbeat(final View logo) {
+        heartbeat = android.animation.ValueAnimator.ofFloat(0f, 1f);
+        heartbeat.setDuration(1100);
+        heartbeat.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        heartbeat.setInterpolator(new android.view.animation.LinearInterpolator());
+        heartbeat.addUpdateListener(new android.animation.ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(android.animation.ValueAnimator a) {
+                float t = (float) a.getAnimatedValue();
+                float scale;
+                if (t < 0.12f) scale = 1f + 0.18f * (t / 0.12f);
+                else if (t < 0.24f) scale = 1.18f - 0.18f * ((t - 0.12f) / 0.12f);
+                else if (t < 0.36f) scale = 1f + 0.12f * ((t - 0.24f) / 0.12f);
+                else if (t < 0.50f) scale = 1.12f - 0.12f * ((t - 0.36f) / 0.14f);
+                else scale = 1f;
+                logo.setScaleX(scale);
+                logo.setScaleY(scale);
+            }
+        });
+        heartbeat.start();
+    }
+
     private void hideSplash() {
         if (splash == null) return;
+        long shown = System.currentTimeMillis() - splashShownAt;
+        if (shown < SPLASH_MIN_MS) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    hideSplash();
+                }
+            }, SPLASH_MIN_MS - shown);
+            return;
+        }
         final View v = splash;
         splash = null;
-        v.animate().alpha(0f).setDuration(250).withEndAction(new Runnable() {
+        v.animate().alpha(0f).setDuration(350).withEndAction(new Runnable() {
             @Override
             public void run() {
+                if (heartbeat != null) heartbeat.cancel();
                 ((ViewGroup) v.getParent()).removeView(v);
             }
         });
@@ -424,6 +458,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         handler.removeCallbacksAndMessages(null);
+        if (heartbeat != null) heartbeat.cancel();
         if (bannerAd != null) bannerAd.destroy();
         webView.destroy();
         super.onDestroy();
