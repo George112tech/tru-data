@@ -547,7 +547,22 @@ const authStorage={
   setItem(k,v){try{if(keepSignedIn()){localStorage.setItem(k,v);sessionStorage.removeItem(k);}else{sessionStorage.setItem(k,v);localStorage.removeItem(k);}}catch(e){}},
   removeItem(k){try{localStorage.removeItem(k);sessionStorage.removeItem(k);}catch(e){}}
 };
-const supa=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage}});
+// Supabase normally guards the session with a browser-wide lock. On some phone
+// browsers that lock can stay stuck (for example after signing out and in on
+// the same page), and every request then waits forever without being sent.
+// This lock only queues work inside this page, so it can never get stuck.
+const authLocks={};
+function pageLock(name,acquireTimeout,fn){
+  const prev=authLocks[name]||Promise.resolve();
+  const run=prev.catch(()=>{}).then(()=>fn());
+  authLocks[name]=run.catch(()=>{});
+  return run;
+}
+const supa=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,lock:pageLock}});
+// A request that gets no answer is treated as failed, so nothing waits forever.
+function withTimeout(promise,ms,what){
+  return Promise.race([Promise.resolve(promise),new Promise((_,rej)=>setTimeout(()=>rej(new Error((what||'The server')+' did not answer. Check your connection and try again.')),ms))]);
+}
 
 /* ===== LOCAL CACHE =====
    The profile (wallet balance), agent profile and agent stats are kept on the
@@ -2052,7 +2067,7 @@ async function optimisticBasePrices(change,run,okMsg,failMsg){
   const before=viewCache.get('admin-base-prices');
   if(before){viewCache.set('admin-base-prices',change(JSON.parse(JSON.stringify(before))));paintBasePrices();}
   try{
-    const{error}=await run();if(error) throw error;
+    const{error}=await withTimeout(run(),15000);if(error) throw error;
     const now=viewCache.get('admin-base-prices');
     if(now){viewCache.set('admin-base-prices',now.map(p=>({...p,_pending:false})));paintBasePrices();state.agentBasePrices=viewCache.get('admin-base-prices');}
     if(okMsg) showToast(okMsg,3000,'success');
@@ -2172,7 +2187,9 @@ async function loadAdminBundles(){
 async function optimisticBundles(change,run,okMsg,failMsg){
   const undo=mutate('admin-bundles',change);
   try{
-    const{error}=await run();if(error) throw error;
+    const{data,error}=await withTimeout(run(),15000);if(error) throw error;
+    // The database answers with the rows it changed; none means nothing was saved.
+    if(Array.isArray(data)&&!data.length) throw new Error('nothing was changed. Please sign in to the admin account again');
     const now=(viewCache.get('admin-bundles')||[]).map(b=>({...b,_pending:false}));
     viewCache.set('admin-bundles',now);repaint('admin-bundles');setBundles(now);
     if(okMsg) showToast(okMsg,2500,'success');
@@ -2191,23 +2208,23 @@ async function adminAddBundle(){
   if((viewCache.get('admin-bundles')||NORMAL_BUNDLES).some(b=>b.network===network&&b.size.toLowerCase()===f.size.toLowerCase())&&!confirm(`${NET_LABEL[network]} already has a ${f.size} bundle. Add another one?`)) return;
   const row={id:network.charAt(0)+'-'+Date.now().toString(36),network,size:f.size,price:f.price,validity:f.validity,sort_order:bundleSortKey(f.size),active:true};
   ['nb-size','nb-price'].forEach(i=>{document.getElementById(i).value='';});
-  await optimisticBundles(list=>[...list,{...row,_pending:true}],()=>supa.from('bundles').insert([row]),`${NET_LABEL[network]} ${f.size} added at ₵${f.price.toFixed(2)}`,'Could not add bundle');
+  await optimisticBundles(list=>[...list,{...row,_pending:true}],()=>supa.from('bundles').insert([row]).select('id'),`${NET_LABEL[network]} ${f.size} added at ₵${f.price.toFixed(2)}`,'Could not add bundle');
 }
 async function adminSaveBundle(id){
   const f=readBundleFields(document.getElementById('bd-size-'+id)?.value,document.getElementById('bd-price-'+id)?.value,document.getElementById('bd-val-'+id)?.value);
   if(!f) return;
   const patch={size:f.size,price:f.price,validity:f.validity,sort_order:bundleSortKey(f.size)};
-  await optimisticBundles(list=>list.map(b=>b.id===id?{...b,...patch,_pending:true}:b),()=>supa.from('bundles').update(patch).eq('id',id),`Saved ${f.size} at ₵${f.price.toFixed(2)}`,'Could not save');
+  await optimisticBundles(list=>list.map(b=>b.id===id?{...b,...patch,_pending:true}:b),()=>supa.from('bundles').update(patch).eq('id',id).select('id'),`Saved ${f.size} at ₵${f.price.toFixed(2)}`,'Could not save');
 }
 async function adminToggleBundle(id){
   const b=(viewCache.get('admin-bundles')||[]).find(x=>x.id===id);if(!b) return;
   const active=b.active===false;
-  await optimisticBundles(list=>list.map(x=>x.id===id?{...x,active,_pending:true}:x),()=>supa.from('bundles').update({active}).eq('id',id),active?`${b.size} is back in the shop`:`${b.size} hidden from the shop`,'Could not change');
+  await optimisticBundles(list=>list.map(x=>x.id===id?{...x,active,_pending:true}:x),()=>supa.from('bundles').update({active}).eq('id',id).select('id'),active?`${b.size} is back in the shop`:`${b.size} hidden from the shop`,'Could not change');
 }
 async function adminDeleteBundle(id){
   const b=(viewCache.get('admin-bundles')||[]).find(x=>x.id===id);if(!b) return;
   if(!confirm(`Delete the ${NET_LABEL[b.network]} ${b.size} bundle? Past orders are kept. To take it out of the shop for now, use Hide instead.`)) return;
-  await optimisticBundles(list=>list.filter(x=>x.id!==id),()=>supa.from('bundles').delete().eq('id',id),`${b.size} deleted`,'Could not delete');
+  await optimisticBundles(list=>list.filter(x=>x.id!==id),()=>supa.from('bundles').delete().eq('id',id).select('id'),`${b.size} deleted`,'Could not delete');
 }
 
 /* ===== ADMIN: SMS NOTIFICATIONS (httpSMS) ===== */
