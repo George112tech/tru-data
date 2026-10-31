@@ -1,14 +1,16 @@
-// TRU Data Android app: a thin shell around the live website, with an AdMob banner.
-//
-// The app shows https://trudata.rvhssystems.com, so every change merged on
-// GitHub (and published by GitHub Pages) is in the app the next time it opens.
-// A new APK is only needed to change this file, the manifest or the ads.
-//
-// AIDE: keep the package line the same as your app's package (com.trudata.app),
-// and put your banner ad unit ID in BANNER_AD_UNIT_ID below.
 package com.trudata.app;
 
-import android.annotation.SuppressLint;
+// TRU Data Android app: a thin shell around the live website, with AdMob ads.
+//
+// The app shows https://trudata.rvhssystems.com instead of the copy of the
+// site that used to be packed in assets/www, so every change merged on GitHub
+// is in the app the next time it opens. A new APK is only needed to change
+// this file, the layout, the manifest or the ads.
+//
+// Uses the app's existing layout (res/layout/activity_main.xml with
+// @id/webview and @id/ad_container) and the existing AdMob SDK
+// (InterstitialAd with isLoaded()).
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -18,10 +20,10 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
@@ -29,7 +31,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -37,13 +38,16 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 
 public class MainActivity extends Activity {
 
-    // Your AdMob banner ad unit ID (AdMob → Apps → TRU Data → Ad units).
-    // It looks like ca-app-pub-8934706810849620/1234567890 (a slash, not a ~).
-    private static final String BANNER_AD_UNIT_ID = "ca-app-pub-8934706810849620/REPLACE_WITH_BANNER_ID";
+    private static final String BANNER_AD_UNIT_ID =
+            "ca-app-pub-8934706810849620/7330461846";
+
+    private static final String INTERSTITIAL_AD_UNIT_ID =
+            "ca-app-pub-8934706810849620/6017380172";
 
     // The live site. Its pages and the Paystack checkout open in the app;
     // everything else (WhatsApp, Patupaa, phone calls, downloads) opens outside it.
@@ -52,83 +56,78 @@ public class MainActivity extends Activity {
     private static final String[] IN_APP_HOSTS = {SITE_HOST, "checkout.paystack.com", "standard.paystack.co", "js.paystack.co"};
     private static final int BRAND_RED = Color.parseColor("#DC2626");
 
-    private WebView web;
-    private ProgressBar progress;
-    private AdView banner;
-    private boolean showingOffline = false;
-    private long lastBackPress = 0;
+    // Full-screen ad: every 3rd Back press, and never more than once a minute.
+    private static final int INTERSTITIAL_EVERY = 3;
+    private static final long INTERSTITIAL_MIN_GAP_MS = 60 * 1000;
 
-    @SuppressLint("SetJavaScriptEnabled")
+    private WebView webView;
+    private AdView bannerAd;
+    private FrameLayout adContainer;
+    private InterstitialAd interstitialAd;
+    private ProgressBar progress;
+    private int navigationCount = 0;
+    private long lastInterstitialAt = 0;
+    private long lastBackPress = 0;
+    private boolean showingOffline = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= 21) {
-            Window w = getWindow();
-            w.setStatusBarColor(BRAND_RED);
-        }
+        setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT >= 21) getWindow().setStatusBarColor(BRAND_RED);
 
-        // Page on top, a thin loading bar over it, the banner at the bottom.
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.WHITE);
+        MobileAds.initialize(this);
 
-        FrameLayout page = new FrameLayout(this);
-        web = new WebView(this);
-        web.setBackgroundColor(Color.WHITE);
-        page.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        webView = findViewById(R.id.webview);
+        adContainer = findViewById(R.id.ad_container);
+        addProgressBar();
+
+        setupWebView();
+        setupAds();
+
+        if (savedInstanceState != null) webView.restoreState(savedInstanceState);
+        else loadWebApp(getIntent());
+    }
+
+    // Thin red bar across the top while a page loads.
+    private void addProgressBar() {
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setMax(100);
         if (Build.VERSION.SDK_INT >= 21) progress.setProgressTintList(android.content.res.ColorStateList.valueOf(BRAND_RED));
-        page.addView(progress, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3)));
-        root.addView(page, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-
-        banner = new AdView(this);
-        banner.setAdSize(AdSize.BANNER);
-        banner.setAdUnitId(BANNER_AD_UNIT_ID);
-        banner.setVisibility(View.GONE); // shown once an ad has loaded, so there is no empty gap
-        LinearLayout.LayoutParams adParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        adParams.gravity = android.view.Gravity.CENTER_HORIZONTAL;
-        root.addView(banner, adParams);
-        setContentView(root);
-
-        setUpWebView();
-        setUpAds();
-
-        if (savedInstanceState != null) web.restoreState(savedInstanceState);
-        else web.loadUrl(startUrl(getIntent()));
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3), Gravity.TOP);
+        addContentView(progress, lp);
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private void setUpWebView() {
-        WebSettings s = web.getSettings();
-        s.setJavaScriptEnabled(true);
+    private void setupWebView() {
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
         // Keeps people signed in after the app is closed (the site stores the session here).
-        s.setDomStorageEnabled(true);
-        s.setDatabaseEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
         // Fresh pages when online; the saved copy when the network is down.
-        s.setCacheMode(isOnline() ? WebSettings.LOAD_DEFAULT : WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        s.setLoadWithOverviewMode(true);
-        s.setUseWideViewPort(true);
-        s.setSupportZoom(false);
-        s.setTextZoom(100); // the phone's font size setting does not break the layout
-        s.setMediaPlaybackRequiresUserGesture(true);
+        settings.setCacheMode(isOnline() ? WebSettings.LOAD_DEFAULT : WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setSupportZoom(false);
+        settings.setTextZoom(100); // the phone's font size setting does not break the layout
         // window.open() (WhatsApp report, Patupaa) goes through shouldOverrideUrlLoading below.
-        s.setSupportMultipleWindows(false);
-        s.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setSupportMultipleWindows(false);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
         // The site hides its "Download the app" buttons when it sees this.
-        s.setUserAgentString(s.getUserAgentString() + " TruDataApp/2.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " TruDataApp/2.0");
 
         CookieManager.getInstance().setAcceptCookie(true);
-        if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().setAcceptThirdPartyCookies(web, true);
+        if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
 
-        web.setWebChromeClient(new WebChromeClient() {
+        webView.setBackgroundColor(Color.WHITE);
+        webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 progress.setProgress(newProgress);
                 progress.setVisibility(newProgress < 100 ? View.VISIBLE : View.GONE);
             }
         });
-        web.setWebViewClient(new WebViewClient() {
+        webView.setWebViewClient(new WebViewClient() {
             @Override
             @SuppressWarnings("deprecation")
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -148,7 +147,7 @@ public class MainActivity extends Activity {
             }
         });
         // Anything the site offers as a download (the APK) is handed to the browser.
-        web.setDownloadListener(new DownloadListener() {
+        webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long length) {
                 openExternal(Uri.parse(url));
@@ -156,28 +155,55 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void setUpAds() {
-        MobileAds.initialize(this);
-        banner.setAdListener(new AdListener() {
+    private void setupAds() {
+        bannerAd = new AdView(this);
+        bannerAd.setAdUnitId(BANNER_AD_UNIT_ID);
+        bannerAd.setAdSize(AdSize.SMART_BANNER);
+        // The banner area stays hidden until an ad has loaded, so there is no empty gap.
+        adContainer.setVisibility(View.GONE);
+        bannerAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
-                banner.setVisibility(View.VISIBLE);
+                adContainer.setVisibility(View.VISIBLE);
             }
         });
-        banner.loadAd(new AdRequest.Builder().build());
+        adContainer.addView(bannerAd);
+        bannerAd.loadAd(new AdRequest.Builder().build());
+
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setAdUnitId(INTERSTITIAL_AD_UNIT_ID);
+        interstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                interstitialAd.loadAd(new AdRequest.Builder().build());
+            }
+        });
+        interstitialAd.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void showInterstitial() {
+        navigationCount++;
+        long now = System.currentTimeMillis();
+        if (navigationCount % INTERSTITIAL_EVERY == 0
+                && now - lastInterstitialAt > INTERSTITIAL_MIN_GAP_MS
+                && interstitialAd != null
+                && interstitialAd.isLoaded()) {
+            lastInterstitialAt = now;
+            interstitialAd.show();
+        }
     }
 
     // Links like https://trudata.rvhssystems.com/?agent=AGT-123 open in the app.
-    private String startUrl(Intent intent) {
+    private void loadWebApp(Intent intent) {
         Uri data = intent != null ? intent.getData() : null;
-        if (data != null && SITE_HOST.equals(data.getHost())) return data.toString();
-        return HOME;
+        if (data != null && SITE_HOST.equals(data.getHost())) webView.loadUrl(data.toString());
+        else webView.loadUrl(HOME);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        web.loadUrl(startUrl(intent));
+        loadWebApp(intent);
     }
 
     private boolean openOutsideIfNeeded(Uri uri) {
@@ -210,7 +236,7 @@ public class MainActivity extends Activity {
                 + "<div style='padding:24px'><div style='font-size:48px'>&#128246;</div><h2>No internet connection</h2>"
                 + "<p style='color:#64748b'>Check your mobile data or Wi-Fi, then try again.</p>"
                 + "<a href='" + HOME + "' style='display:inline-block;margin-top:12px;background:#dc2626;color:#fff;padding:14px 28px;border-radius:14px;text-decoration:none;font-weight:bold'>Try again</a></div></body></html>";
-        web.loadDataWithBaseURL(HOME, html, "text/html", "utf-8", null);
+        webView.loadDataWithBaseURL(HOME, html, "text/html", "utf-8", null);
     }
 
     private boolean isOnline() {
@@ -223,12 +249,14 @@ public class MainActivity extends Activity {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
-    // Back goes back a page in the site; on the first page, press twice to leave.
+    // Back goes back a page in the site (sometimes showing the full-screen ad);
+    // on the first page, press twice to leave.
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (!showingOffline && web.canGoBack()) {
-                web.goBack();
+            if (!showingOffline && webView.canGoBack()) {
+                webView.goBack();
+                showInterstitial();
                 return true;
             }
             long now = System.currentTimeMillis();
@@ -244,28 +272,28 @@ public class MainActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        web.saveState(outState);
+        webView.saveState(outState);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        web.onResume();
-        banner.resume();
+        webView.onResume();
+        if (bannerAd != null) bannerAd.resume();
     }
 
     @Override
     protected void onPause() {
-        banner.pause();
-        web.onPause();
+        if (bannerAd != null) bannerAd.pause();
+        webView.onPause();
         if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().flush();
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
-        banner.destroy();
-        web.destroy();
+        if (bannerAd != null) bannerAd.destroy();
+        webView.destroy();
         super.onDestroy();
     }
 }
