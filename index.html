@@ -870,6 +870,43 @@ function openLegal(kind){
   document.body.appendChild(m);
 }
 function closeLegal(){document.getElementById('legal-modal')?.remove();}
+/* Customers and agents agree to the current Terms and Privacy Policy once.
+   Anyone signed in who has not (including accounts made before the terms
+   existed, or after they change) sees them and must agree or log out. The
+   agreement is saved with the account (terms_version in the user metadata). */
+function hasAcceptedTerms(){
+  if(!state.user||state.isAdmin) return true;
+  const md=state.user.user_metadata||{};
+  if(md.terms_version===LEGAL_VERSION) return true;
+  try{return localStorage.getItem('tru:terms:'+state.user.id)===LEGAL_VERSION;}catch(e){return false;}
+}
+function ensureTermsAccepted(){
+  if(hasAcceptedTerms()||document.getElementById('terms-gate')) return;
+  const g=document.createElement('div');g.id='terms-gate';
+  g.className='fixed inset-0 bg-black/60 backdrop-blur-sm z-[1001] flex items-center justify-center p-4';
+  g.innerHTML=`<div class="card-theme max-w-2xl w-full rounded-3xl flex flex-col" style="max-height:90vh" role="dialog" aria-modal="true" aria-labelledby="terms-gate-title"><div class="p-5 border-b border-slate-200"><h2 id="terms-gate-title" class="text-xl font-black">Our Terms and Privacy Policy</h2><p class="text-sm text-muted-theme mt-1">Please read and agree to continue using TRU Data.</p><div class="flex gap-2 mt-4"><button type="button" data-doc="terms" onclick="termsGateShow('terms')" class="tg-tab flex-1 py-2 rounded-xl text-sm font-bold">Terms of Service</button><button type="button" data-doc="privacy" onclick="termsGateShow('privacy')" class="tg-tab flex-1 py-2 rounded-xl text-sm font-bold">Privacy Policy</button></div></div><div id="terms-gate-body" class="p-5 md:p-7 overflow-y-auto"></div><div class="p-4 border-t border-slate-200 space-y-3"><label class="flex items-start gap-3 text-sm font-semibold text-slate-700 cursor-pointer"><input type="checkbox" id="terms-gate-check" onchange="document.getElementById('terms-gate-agree').disabled=!this.checked" style="accent-color:#dc2626;width:18px;height:18px;margin-top:1px;flex-shrink:0;"><span>I have read and agree to the Terms of Service and Privacy Policy.</span></label><button id="terms-gate-agree" onclick="acceptTerms()" disabled class="w-full cta-button text-white py-3 rounded-2xl font-black disabled:opacity-50 disabled:cursor-not-allowed">I Agree</button><button onclick="document.getElementById('terms-gate')?.remove();logoutUser()" class="w-full text-sm font-bold text-slate-500 py-1">Log out instead</button></div></div>`;
+  document.body.appendChild(g);
+  termsGateShow('terms');
+}
+function termsGateShow(kind){
+  const body=document.getElementById('terms-gate-body');if(!body) return;
+  body.innerHTML=legalBodyHtml(kind);body.scrollTop=0;
+  document.querySelectorAll('#terms-gate .tg-tab').forEach(b=>{const on=b.dataset.doc===kind;b.className='tg-tab flex-1 py-2 rounded-xl text-sm font-bold '+(on?'bg-red-600 text-white':'bg-slate-100 text-slate-600');});
+}
+async function acceptTerms(){
+  if(!state.user) return;
+  const uid=state.user.id;
+  // Close at once; the agreement is saved with the account in the background.
+  try{localStorage.setItem('tru:terms:'+uid,LEGAL_VERSION);}catch(e){}
+  state.user={...state.user,user_metadata:{...(state.user.user_metadata||{}),terms_version:LEGAL_VERSION}};
+  document.getElementById('terms-gate')?.remove();
+  showToast('Thank you!',2000,'success');
+  try{
+    const{data,error}=await withTimeout(supa.auth.updateUser({data:{terms_version:LEGAL_VERSION,terms_accepted_at:new Date().toISOString()}}),15000);
+    if(error) throw error;
+    if(data?.user&&state.user?.id===uid) state.user=data.user;
+  }catch(e){/* kept on this device; saved with the account next time it is shown */}
+}
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLegal();});
 
 /* ===== UTILITIES ===== */
@@ -1031,6 +1068,7 @@ async function logoutUser(){
   try{await supa.auth.signOut();}catch(err){}
 }
 function resetUserState(){
+  document.getElementById('terms-gate')?.remove();
   state.user=null;state.userProfile=null;state.isAdmin=false;state.isDirectMode=false;state.activeOrderData=null;
   state.agentProfile=null;state.agentStats={sales:0,profit:0,pending:0};state.orders=[];state.ordersLoaded=false;
   store.clearUser();viewCache.clear();seenStatus.clear();
@@ -1721,6 +1759,7 @@ async function handleLogin(e){
     if(state.isAdmin){await refuseSignIn('This account cannot sign in here.');return;}
     cacheUserState();startLive();
     showToast('Welcome back!',3000,'success');navigateTo('home');
+    ensureTermsAccepted();
     prefetchUserData();
     // Link prices depend on who is logged in (agents see normal prices on their own link).
     detectAgentLink().then(()=>{if(state.view==='network') render();});
@@ -3317,6 +3356,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     if(userSig()!==before) navigateTo(state.view,state.params,{replace:true,keepScroll:true});
     else{updateAuthUI();paintBalance();}
   }
+  if(!recovering) ensureTermsAccepted();
   prefetchUserData();
   (window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>checkLatestApk());
 });
@@ -3329,7 +3369,7 @@ supa.auth.onAuthStateChange((event,session)=>{
       if(state.user){resetUserState();navigateTo('landing',null,{replace:true});}
       return;
     }
-    if(event==='TOKEN_REFRESHED'&&session){state.user=session.user;return;}
+    if((event==='TOKEN_REFRESHED'||event==='USER_UPDATED')&&session){state.user=session.user;return;}
     if(event==='SIGNED_IN'&&session){
       const changed=state.user?.id!==session.user.id;
       state.user=session.user;
@@ -3340,7 +3380,7 @@ supa.auth.onAuthStateChange((event,session)=>{
         cacheUserState();startLive();
         // Link prices depend on who is logged in (agents see normal prices on their own link).
         return detectAgentLink();
-      }).then(()=>navigateTo(state.view,state.params,{replace:true,keepScroll:true}));
+      }).then(()=>{navigateTo(state.view,state.params,{replace:true,keepScroll:true});ensureTermsAccepted();});
     }
   },0);
 });
