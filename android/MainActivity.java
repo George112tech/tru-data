@@ -8,8 +8,8 @@ package com.trudata.app;
 // this file, the layout, the manifest or the ads.
 //
 // Uses the app's existing layout (res/layout/activity_main.xml with
-// @id/webview and @id/ad_container) and the existing AdMob SDK
-// (InterstitialAd with isLoaded()).
+// @id/swipe_refresh, @id/webview, @id/progress_bar and @id/ad_container) and
+// the existing AdMob SDK (InterstitialAd with isLoaded()).
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -20,6 +20,9 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.graphics.Typeface;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -31,8 +34,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -65,10 +72,14 @@ public class MainActivity extends Activity {
     private FrameLayout adContainer;
     private InterstitialAd interstitialAd;
     private ProgressBar progress;
+    private SwipeRefreshLayout swipe;
     private int navigationCount = 0;
     private long lastInterstitialAt = 0;
     private long lastBackPress = 0;
     private boolean showingOffline = false;
+    private View splash;
+    private boolean adsStarted = false;
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,26 +87,96 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         if (Build.VERSION.SDK_INT >= 21) getWindow().setStatusBarColor(BRAND_RED);
 
-        MobileAds.initialize(this);
-
         webView = findViewById(R.id.webview);
         adContainer = findViewById(R.id.ad_container);
-        addProgressBar();
+        swipe = findViewById(R.id.swipe_refresh);
+        progress = findViewById(R.id.progress_bar);
+        if (Build.VERSION.SDK_INT >= 21) progress.setProgressTintList(android.content.res.ColorStateList.valueOf(BRAND_RED));
+        progress.setMax(100);
 
         setupWebView();
-        setupAds();
+        setupPullToRefresh();
 
+        // Start loading the site first; everything else waits so it does not slow it down.
         if (savedInstanceState != null) webView.restoreState(savedInstanceState);
         else loadWebApp(getIntent());
+        showSplash();
+
+        // Ads start once the page is up (or after 4 seconds at most).
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startAds();
+            }
+        }, 4000);
     }
 
-    // Thin red bar across the top while a page loads.
-    private void addProgressBar() {
-        progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progress.setMax(100);
-        if (Build.VERSION.SDK_INT >= 21) progress.setProgressTintList(android.content.res.ColorStateList.valueOf(BRAND_RED));
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3), Gravity.TOP);
-        addContentView(progress, lp);
+    // White TRU DATA screen shown instantly at launch, faded out as soon as
+    // the site has drawn something (or after 8 seconds at most).
+    private void showSplash() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setGravity(Gravity.CENTER);
+        box.setBackgroundColor(Color.WHITE);
+        box.setClickable(true);
+
+        LinearLayout logo = new LinearLayout(this);
+        logo.setOrientation(LinearLayout.HORIZONTAL);
+        logo.setGravity(Gravity.CENTER_VERTICAL);
+        TextView tru = new TextView(this);
+        tru.setText("TRU");
+        tru.setTextColor(Color.WHITE);
+        tru.setTextSize(28);
+        tru.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD_ITALIC));
+        tru.setBackgroundColor(BRAND_RED);
+        tru.setPadding(dp(14), dp(4), dp(14), dp(4));
+        TextView data = new TextView(this);
+        data.setText(" DATA");
+        data.setTextColor(Color.parseColor("#0F172A"));
+        data.setTextSize(28);
+        data.setTypeface(Typeface.DEFAULT_BOLD);
+        logo.addView(tru);
+        logo.addView(data);
+        box.addView(logo);
+
+        ProgressBar spinner = new ProgressBar(this);
+        if (Build.VERSION.SDK_INT >= 21) spinner.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(BRAND_RED));
+        LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(dp(36), dp(36));
+        sp.topMargin = dp(28);
+        box.addView(spinner, sp);
+
+        splash = box;
+        addContentView(splash, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideSplash();
+            }
+        }, 8000);
+    }
+
+    private void hideSplash() {
+        if (splash == null) return;
+        final View v = splash;
+        splash = null;
+        v.animate().alpha(0f).setDuration(250).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                ((ViewGroup) v.getParent()).removeView(v);
+            }
+        });
+        startAds();
+    }
+
+    private void startAds() {
+        if (adsStarted || isFinishing()) return;
+        adsStarted = true;
+        MobileAds.initialize(this);
+        setupAds();
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void setupWebView() {
@@ -125,6 +206,9 @@ public class MainActivity extends Activity {
             public void onProgressChanged(WebView view, int newProgress) {
                 progress.setProgress(newProgress);
                 progress.setVisibility(newProgress < 100 ? View.VISIBLE : View.GONE);
+                if (newProgress >= 100) doneRefreshing();
+                // The site draws its own loading screen early, so the splash can go.
+                if (newProgress >= 60) hideSplash();
             }
         });
         webView.setWebViewClient(new WebViewClient() {
@@ -136,6 +220,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                doneRefreshing();
+                hideSplash();
                 // Save the sign-in cookie straight away, not only when the app closes.
                 if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().flush();
             }
@@ -143,6 +229,8 @@ public class MainActivity extends Activity {
             @Override
             @SuppressWarnings("deprecation")
             public void onReceivedError(WebView view, int code, String description, String failingUrl) {
+                doneRefreshing();
+                hideSplash();
                 if (failingUrl != null && failingUrl.startsWith(HOME)) showOffline();
             }
         });
@@ -153,6 +241,52 @@ public class MainActivity extends Activity {
                 openExternal(Uri.parse(url));
             }
         });
+    }
+
+    // Pull down at the top of a page to reload it. The spinner always stops:
+    // when the page has loaded, when it fails, or after 15 seconds at most.
+    private final Runnable stopRefreshing = new Runnable() {
+        @Override
+        public void run() {
+            if (swipe != null) swipe.setRefreshing(false);
+        }
+    };
+
+    private void setupPullToRefresh() {
+        swipe.setColorSchemeColors(BRAND_RED);
+        // Only pull-to-refresh when the page is scrolled to the very top.
+        swipe.setOnChildScrollUpCallback(new SwipeRefreshLayout.OnChildScrollUpCallback() {
+            @Override
+            public boolean canChildScrollUp(SwipeRefreshLayout parent, View child) {
+                return webView.getScrollY() > 0;
+            }
+        });
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateCacheMode();
+                if (showingOffline) {
+                    showingOffline = false;
+                    webView.loadUrl(HOME);
+                } else {
+                    webView.reload();
+                }
+                swipe.removeCallbacks(stopRefreshing);
+                swipe.postDelayed(stopRefreshing, 15000);
+            }
+        });
+    }
+
+    private void doneRefreshing() {
+        if (swipe != null) {
+            swipe.removeCallbacks(stopRefreshing);
+            swipe.setRefreshing(false);
+        }
+    }
+
+    // Fresh pages when online; the saved copy only when the network is down.
+    private void updateCacheMode() {
+        webView.getSettings().setCacheMode(isOnline() ? WebSettings.LOAD_DEFAULT : WebSettings.LOAD_CACHE_ELSE_NETWORK);
     }
 
     private void setupAds() {
@@ -245,10 +379,6 @@ public class MainActivity extends Activity {
         return n != null && n.isConnected();
     }
 
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
-    }
-
     // Back goes back a page in the site (sometimes showing the full-screen ad);
     // on the first page, press twice to leave.
     @Override
@@ -278,6 +408,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        updateCacheMode();
         webView.onResume();
         if (bannerAd != null) bannerAd.resume();
     }
@@ -292,6 +423,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        handler.removeCallbacksAndMessages(null);
         if (bannerAd != null) bannerAd.destroy();
         webView.destroy();
         super.onDestroy();

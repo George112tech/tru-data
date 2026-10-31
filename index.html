@@ -683,7 +683,9 @@ const NETWORKS={
   telecel:{name:'Telecel',color:'bg-[#E60000]',text:'text-white',logo:'./4.webp',logoW:256,logoH:256,description:'Fast 4G internet at competitive prices'}
 };
 
-const NORMAL_BUNDLES=[
+// Bundles are managed in the admin dashboard (Bundles tab) and loaded from the
+// database; this list is only used until the first load on a new device.
+let NORMAL_BUNDLES=[
   {id:'m-1',network:'mtn',size:'1GB',price:5.40,validity:'30 Days'},{id:'m-2',network:'mtn',size:'2GB',price:10.00,validity:'30 Days'},
   {id:'m-3',network:'mtn',size:'3GB',price:15.00,validity:'30 Days'},{id:'m-4',network:'mtn',size:'4GB',price:19.50,validity:'30 Days'},
   {id:'m-5',network:'mtn',size:'5GB',price:24.50,validity:'30 Days'},{id:'m-6',network:'mtn',size:'6GB',price:28.50,validity:'30 Days'},
@@ -706,6 +708,27 @@ const NORMAL_BUNDLES=[
   {id:'t-30',network:'telecel',size:'30GB',price:118.00,validity:'30 Days'},{id:'t-40',network:'telecel',size:'40GB',price:151.00,validity:'30 Days'},
   {id:'t-50',network:'telecel',size:'50GB',price:187.00,validity:'30 Days'},{id:'t-100',network:'telecel',size:'100GB',price:380.00,validity:'30 Days'}
 ];
+NORMAL_BUNDLES=NORMAL_BUNDLES.map((b,i)=>({...b,sort_order:i,active:true}));
+(function(){const saved=store.get('bundles');if(Array.isArray(saved)&&saved.length) NORMAL_BUNDLES=saved;})();
+function setBundles(rows){
+  NORMAL_BUNDLES=(rows||[]).map(b=>({id:b.id,network:b.network,size:b.size,price:Number(b.price),validity:b.validity||'30 Days',sort_order:b.sort_order||0,active:b.active!==false}));
+  store.set('bundles',NORMAL_BUNDLES);
+}
+// Latest bundles and prices. Customers receive active bundles only (database rules).
+async function refreshBundles(force){
+  if(!stale('bundles',60000,force)) return;
+  try{
+    const{data,error}=await supa.from('bundles').select('id,network,size,price,validity,sort_order,active').order('network').order('sort_order').order('price');
+    // An empty answer for a customer means something is wrong, not an empty shop.
+    if(error||!data||(!data.length&&!state.isAdmin)) return;
+    const before=JSON.stringify(NORMAL_BUNDLES);
+    setBundles(data);
+    // Redraw the shop if prices changed, but never under an open purchase form.
+    if(JSON.stringify(NORMAL_BUNDLES)!==before&&state.view==='network'&&!state.activeOrderData) render();
+    repaint('admin-bundles');
+  }catch(e){}
+}
+
 
 let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'patupaa',currentProcessingOrder:null,confirmationSelectedProvider:'patupaa',user:null,userProfile:null,depositAmount:'',isLoading:false,connectionError:null,announcement:null,
 
@@ -1742,7 +1765,7 @@ async function processDeposit(response,netAmount,fee){
 
 /* ===== NETWORK VIEW ===== */
 function renderNetworkView(networkId){
-  const network=NETWORKS[networkId],BUNDLES=NORMAL_BUNDLES.filter(b=>b.network===networkId);
+  const network=NETWORKS[networkId],BUNDLES=NORMAL_BUNDLES.filter(b=>b.network===networkId&&b.active!==false);
   const isAgentMode=state.agentPricingMode&&state.agentId;
   const modeBadge=isAgentMode
     ?`<span class="pricing-mode-badge pricing-mode-agent">Agent Pricing</span>`
@@ -1758,7 +1781,7 @@ function renderNetworkView(networkId){
 }
 function initiateOrder(networkId,bundleId){
   if(state.isAdmin) return;
-  const bundle=NORMAL_BUNDLES.find(b=>b.network===networkId&&b.id===bundleId);
+  const bundle=NORMAL_BUNDLES.find(b=>b.network===networkId&&b.id===bundleId&&b.active!==false);
   if(!bundle){showToast('Bundle not found',3000,'error');return;}
   if(!state.user){showToast('Please login first',3000,'error');navigateTo('login');return;}
   if(!state.userProfile){showToast('Profile loading... Try again shortly.',3000,'error');fetchUserProfile();return;}
@@ -1896,11 +1919,11 @@ function renderAdminDashboard(){
     <div id="admin-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode:both;">${adminStatsHtml()}</div>
     <!-- Admin Tabs -->
     <div class="flex gap-2 mb-6 flex-wrap animate-slide-up stagger-3" style="animation-fill-mode:both;">
-      ${tabBtn('orders','Orders')}${tabBtn('broadcast','Broadcast')}${tabBtn('agent-prices','Agent Prices')}${tabBtn('agents','Agents')}${tabBtn('withdrawals','Withdrawals')}${tabBtn('deposits','Deposits')}${tabBtn('sms','SMS')}
+      ${tabBtn('orders','Orders')}${tabBtn('broadcast','Broadcast')}${tabBtn('agent-prices','Agent Prices')}${tabBtn('agents','Agents')}${tabBtn('withdrawals','Withdrawals')}${tabBtn('deposits','Deposits')}${tabBtn('bundles','Bundles')}${tabBtn('sms','SMS')}
     </div>
     <!-- Tab Content -->
     <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:both;">
-      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='sms'?renderAdminSmsTab():tab==='agents'?`<div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
+      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='sms'?renderAdminSmsTab():tab==='agents'?`<div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
     </div>
   </div>`;
 }
@@ -2117,6 +2140,76 @@ function renderAdminDepositsTab(){
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Paystack</h2><p class="text-xs text-muted-theme mb-4">When on, customers also see a "Card / Paystack" option on their wallet page.</p><div id="admin-paystack-settings">${SK.form(3)}</div></div>
   </div>`;
 }
+/* ===== ADMIN: BUNDLES AND PRICES =====
+   Add, edit, hide or delete the bundles customers can buy. Prices here are the
+   prices place_order charges; changes show on every open shop page at once. */
+const NET_LABEL={mtn:'MTN',telecel:'Telecel',airteltigo:'AirtelTigo'};
+function bundleSortKey(size){const n=parseFloat(String(size||'').replace(/[^0-9.]/g,''));return isFinite(n)?Math.round(n*10):0;}
+function renderAdminBundlesTab(){
+  return`<div class="space-y-6">
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Add a bundle</h2><p class="text-xs text-muted-theme mb-4">It appears in the shop straight away. Bundles are listed by size.</p>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3"><select id="nb-network" class="p-3 border-2 rounded-xl font-bold"><option value="mtn">MTN</option><option value="telecel">Telecel</option><option value="airteltigo">AirtelTigo</option></select><input id="nb-size" type="text" maxlength="20" placeholder="Size (e.g. 1GB)" class="p-3 border-2 rounded-xl font-bold"><input id="nb-price" type="number" min="0.01" step="0.01" placeholder="Price (₵)" class="p-3 border-2 rounded-xl font-bold"><input id="nb-validity" type="text" maxlength="30" value="30 Days" placeholder="Validity" class="p-3 border-2 rounded-xl font-bold"><button onclick="adminAddBundle()" class="col-span-2 md:col-span-1 bg-green-600 text-white rounded-xl font-black py-3">Add Bundle</button></div>
+    </div>
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Bundles and prices</h2><p class="text-xs text-muted-theme mb-4">Change a size, price or validity and press <strong>Save</strong>. <strong>Hide</strong> takes a bundle out of the shop without deleting it.</p><div id="admin-bundles">${SK.table(5,6)}</div></div>
+  </div>`;
+}
+function adminBundlesHtml(list){
+  if(!list||!list.length) return'<p class="text-sm text-muted-theme text-center py-6">No bundles yet. Add one above.</p>';
+  return['mtn','telecel','airteltigo'].map(net=>{
+    const rows=list.filter(b=>b.network===net).sort((a,b)=>(a.sort_order-b.sort_order)||(a.price-b.price));
+    return`<div class="mb-6"><h3 class="font-black mb-2">${NET_LABEL[net]} <span class="text-xs font-bold text-muted-theme">${rows.filter(b=>b.active!==false).length} in the shop</span></h3>${rows.length?`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-2 text-xs font-black uppercase text-slate-500">Size</th><th class="p-2 text-xs font-black uppercase text-slate-500">Price (₵)</th><th class="p-2 text-xs font-black uppercase text-slate-500">Validity</th><th class="p-2 text-xs font-black uppercase text-slate-500">Shop</th><th class="p-2 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${rows.map(b=>{const id=esc(b.id);return`<tr class="border-b ${b._pending?'row-pending':''} ${b.active===false?'bg-slate-50':''}"><td class="p-2"><input id="bd-size-${id}" value="${esc(b.size)}" maxlength="20" class="w-24 p-2 border-2 rounded-lg font-bold"></td><td class="p-2"><input id="bd-price-${id}" type="number" min="0.01" step="0.01" value="${Number(b.price).toFixed(2)}" class="w-24 p-2 border-2 rounded-lg font-bold"></td><td class="p-2"><input id="bd-val-${id}" value="${esc(b.validity||'')}" maxlength="30" class="w-28 p-2 border-2 rounded-lg"></td><td class="p-2"><span class="px-2 py-1 rounded-full text-xs font-bold ${b.active===false?'bg-slate-200 text-slate-600':'bg-green-100 text-green-700'}">${b.active===false?'Hidden':'Showing'}</span></td><td class="p-2"><div class="flex gap-2 flex-wrap"><button data-id="${id}" onclick="adminSaveBundle(this.dataset.id)" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-bold">Save</button><button data-id="${id}" onclick="adminToggleBundle(this.dataset.id)" class="text-xs ${b.active===false?'bg-green-100 text-green-700':'bg-amber-100 text-amber-700'} px-3 py-1.5 rounded-lg font-bold">${b.active===false?'Show':'Hide'}</button><button data-id="${id}" onclick="adminDeleteBundle(this.dataset.id)" class="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete</button></div></td></tr>`;}).join('')}</tbody></table></div>`:'<p class="text-sm text-muted-theme">No bundles for this network.</p>'}</div>`;
+  }).join('');
+}
+async function loadAdminBundles(){
+  await paint('admin-bundles','admin-bundles',async()=>{
+    const{data,error}=await supa.from('bundles').select('id,network,size,price,validity,sort_order,active').order('network').order('sort_order').order('price');
+    if(error) throw error;
+    setBundles(data);
+    return NORMAL_BUNDLES.slice();
+  },adminBundlesHtml,SK.table(5,6),()=>errorBox('Could not load bundles','loadAdminBundles()'));
+}
+// Apply a change to the bundle list now; put it back if the database refuses.
+async function optimisticBundles(change,run,okMsg,failMsg){
+  const undo=mutate('admin-bundles',change);
+  try{
+    const{error}=await run();if(error) throw error;
+    const now=(viewCache.get('admin-bundles')||[]).map(b=>({...b,_pending:false}));
+    viewCache.set('admin-bundles',now);repaint('admin-bundles');setBundles(now);
+    if(okMsg) showToast(okMsg,2500,'success');
+  }catch(err){undo();showToast(failMsg+': '+(err.message||'error'),5000,'error');}
+}
+function readBundleFields(size,price,validity){
+  size=(size||'').trim();validity=(validity||'').trim()||'30 Days';price=parseFloat(price);
+  if(!size){showToast('Enter the bundle size, e.g. 1GB',3000,'error');return null;}
+  if(!price||price<=0||price>=10000){showToast('Enter a price between ₵0.01 and ₵9,999',3000,'error');return null;}
+  return{size,price:Math.round(price*100)/100,validity};
+}
+async function adminAddBundle(){
+  const network=document.getElementById('nb-network').value;
+  const f=readBundleFields(document.getElementById('nb-size').value,document.getElementById('nb-price').value,document.getElementById('nb-validity').value);
+  if(!f) return;
+  if((viewCache.get('admin-bundles')||NORMAL_BUNDLES).some(b=>b.network===network&&b.size.toLowerCase()===f.size.toLowerCase())&&!confirm(`${NET_LABEL[network]} already has a ${f.size} bundle. Add another one?`)) return;
+  const row={id:network.charAt(0)+'-'+Date.now().toString(36),network,size:f.size,price:f.price,validity:f.validity,sort_order:bundleSortKey(f.size),active:true};
+  ['nb-size','nb-price'].forEach(i=>{document.getElementById(i).value='';});
+  await optimisticBundles(list=>[...list,{...row,_pending:true}],()=>supa.from('bundles').insert([row]),`${NET_LABEL[network]} ${f.size} added at ₵${f.price.toFixed(2)}`,'Could not add bundle');
+}
+async function adminSaveBundle(id){
+  const f=readBundleFields(document.getElementById('bd-size-'+id)?.value,document.getElementById('bd-price-'+id)?.value,document.getElementById('bd-val-'+id)?.value);
+  if(!f) return;
+  const patch={size:f.size,price:f.price,validity:f.validity,sort_order:bundleSortKey(f.size)};
+  await optimisticBundles(list=>list.map(b=>b.id===id?{...b,...patch,_pending:true}:b),()=>supa.from('bundles').update(patch).eq('id',id),`Saved ${f.size} at ₵${f.price.toFixed(2)}`,'Could not save');
+}
+async function adminToggleBundle(id){
+  const b=(viewCache.get('admin-bundles')||[]).find(x=>x.id===id);if(!b) return;
+  const active=b.active===false;
+  await optimisticBundles(list=>list.map(x=>x.id===id?{...x,active,_pending:true}:x),()=>supa.from('bundles').update({active}).eq('id',id),active?`${b.size} is back in the shop`:`${b.size} hidden from the shop`,'Could not change');
+}
+async function adminDeleteBundle(id){
+  const b=(viewCache.get('admin-bundles')||[]).find(x=>x.id===id);if(!b) return;
+  if(!confirm(`Delete the ${NET_LABEL[b.network]} ${b.size} bundle? Past orders are kept. To take it out of the shop for now, use Hide instead.`)) return;
+  await optimisticBundles(list=>list.filter(x=>x.id!==id),()=>supa.from('bundles').delete().eq('id',id),`${b.size} deleted`,'Could not delete');
+}
+
 /* ===== ADMIN: SMS NOTIFICATIONS (httpSMS) ===== */
 const SMS_EVENTS=[
   ['Customers','order_placed','Order received'],
@@ -2943,7 +3036,8 @@ async function refreshPaymentSettings(force){
 function loadViewData(force){
   const v=state.view;
   if(v==='landing') loadAnnouncement();
-  else if(v==='home'||v==='success') refreshProfile(force);
+  else if(v==='home'||v==='success'){refreshProfile(force);refreshBundles(force);}
+  else if(v==='network') refreshBundles(force);
   else if(v==='wallet'){refreshProfile(force);refreshPaymentSettings(force);fetchUserTransactions();loadMyDepositRequests();}
   else if(v==='my-orders') loadMyOrders();
   else if(v==='agent-portal') refreshAgentProfile(force);
@@ -2963,6 +3057,7 @@ function loadViewData(force){
     else if(t==='withdrawals'){loadWithdrawalOverride();loadAdminWithdrawals();}
     else if(t==='deposits') loadAdminDepositsTab();
     else if(t==='sms') loadAdminSmsTab();
+    else if(t==='bundles') loadAdminBundles();
   }
 }
 
@@ -3048,6 +3143,7 @@ function startLive(){
   const ch=supa.channel('tru-live-'+(uid||'guest')+'-'+Date.now());
   const on=(table,filter,fn)=>ch.on('postgres_changes',Object.assign({event:'*',schema:'public',table},filter?{filter}:{}),p=>{try{fn(p);}catch(e){console.warn('live update',e);}});
   on('announcements',null,()=>soon('ann',loadAnnouncement));
+  on('bundles',null,()=>soon('bundles',()=>refreshBundles(true),400));
   on('app_settings',null,p=>onSettingChange(p.new));
   if(uid){
     on('profiles','id=eq.'+uid,p=>onMyProfile(p.new));
@@ -3154,7 +3250,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
  'adminToggleWithdrawalOverride','saveAnnouncement','saveAdminAgentBasePrice','saveEditAgentPrice','globalToggleAgentPriceLock','toggleRowPriceLock',
  'toggleAgentBasePrice','deleteAgentBasePrice','registerAsAgent','reapplyAsAgent','requestPriceUnlock','saveAgentProfit','submitWithdrawal',
  'adminApproveDeposit','adminRejectDeposit','adminApprovePriceUnlock','adminRejectPriceUnlock','adminLockAgentPricing','processWithdrawal',
- 'updateAgentStatus','adminAuth','updateStatus','deleteOrder','handleOrderButton'
+ 'updateAgentStatus','adminAuth','updateStatus','deleteOrder','handleOrderButton','adminAddBundle','adminSaveBundle','adminToggleBundle','adminDeleteBundle'
 ].forEach(n=>{if(typeof window[n]==='function') window[n]=action(window[n]);});
 
 /* ===== INIT =====
@@ -3198,7 +3294,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     }
   }catch(err){showToast('Connection problem. Showing your last saved details.',5000,'error');}
   // Detect ?agent= param in URL → activate agent pricing mode
-  await Promise.all([detectAgentLink(),loadPaymentSettings()]);
+  await Promise.all([detectAgentLink(),loadPaymentSettings(),refreshBundles(true)]);
   startLive();
   if(!recovering){
     if(userSig()!==before) navigateTo(state.view,state.params,{replace:true,keepScroll:true});
