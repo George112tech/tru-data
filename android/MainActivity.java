@@ -87,6 +87,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Red window from the start, so there is no white flash before the launch screen.
+        getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(BRAND_RED));
         setContentView(R.layout.activity_main);
         if (Build.VERSION.SDK_INT >= 21) getWindow().setStatusBarColor(BRAND_RED);
 

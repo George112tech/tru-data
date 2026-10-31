@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Red from the moment the app opens, so there is no white flash before
-         the TRU DATA launch screen. The page itself is white. -->
-    <style name="TruTheme" parent="@android:style/Theme.Light.NoTitleBar">
-        <item name="android:windowBackground">@color/tru_red</item>
-        <item name="android:statusBarColor">@color/tru_red</item>
-    </style>
-</resources>
