@@ -472,6 +472,8 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
           <li><button onclick="navigateTo('landing')" class="hover:text-red-600 transition-colors">Home</button></li>
           <li><button onclick="navigateTo('home')" class="hover:text-red-600 transition-colors">Buy Data</button></li>
           <li><button onclick="navigateTo('about')" class="hover:text-red-600 transition-colors">About Us</button></li>
+          <li><button onclick="navigateTo('terms')" class="hover:text-red-600 transition-colors">Terms of Service</button></li>
+          <li><button onclick="navigateTo('privacy')" class="hover:text-red-600 transition-colors">Privacy Policy</button></li>
         </ul>
       </div>
       <div>
@@ -494,7 +496,7 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
     <div class="border-t border-slate-200 pt-8">
       <p class="text-slate-400 font-semibold text-xs uppercase tracking-widest mb-2">TRU Data is an independent digital service by TRUTECH BUSINESS.</p>
       <p class="text-slate-400 font-semibold text-xs uppercase tracking-widest mb-2">Not affiliated with MTN, Telecel, or AirtelTigo.</p>
-      <p class="text-slate-500 font-bold text-xs mt-4">&copy; 2026 TRU DATA. All rights reserved.</p>
+      <p class="text-slate-500 font-bold text-xs mt-4">&copy; 2026 TRU DATA. All rights reserved. · <button onclick="navigateTo('terms')" class="underline hover:text-red-600">Terms</button> · <button onclick="navigateTo('privacy')" class="underline hover:text-red-600">Privacy</button></p>
     </div>
   </div>
 </footer>
@@ -724,44 +726,109 @@ let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery
    UPDATE agent_base_prices SET pricing_locked = false WHERE pricing_locked IS NULL;
    ===================================================================== */
 
-/* ===== APK SMART VERSION CHECK ===== */
-const APK_BASE_URL = 'https://kefcmjfvrqbgtivssdwn.supabase.co/storage/v1/object/public/app-updates/';
-const APK_FALLBACK = APK_BASE_URL + 'trudata-v1.1.3.apk';
-let _latestApkUrl = APK_FALLBACK;
-
-function parseVersion(filename){
-  const m=filename.match(/trudata-v(\d+)\.(\d+)\.(\d+)\.apk$/i);
-  if(!m) return null;
-  return [parseInt(m[1]),parseInt(m[2]),parseInt(m[3])];
+/* ===== ANDROID APP DOWNLOAD =====
+   The newest trudata-vX.Y.Z.apk in the app-updates bucket is looked up once
+   (latest_app_release in the database, then update.json), so uploading a new
+   version is all it takes. If both lookups fail, the newest version known
+   when this page was published is used. */
+const APK_BASE_URL='https://kefcmjfvrqbgtivssdwn.supabase.co/storage/v1/object/public/app-updates/';
+let latestApk={url:APK_BASE_URL+'trudata-v1.1.6.apk',version:'1.1.6',size:8918171};
+function parseVersion(v){
+  const m=String(v||'').match(/(\d+)\.(\d+)\.(\d+)/);
+  return m?[+m[1],+m[2],+m[3]]:null;
 }
 function compareVersions(a,b){
   for(let i=0;i<3;i++){if(a[i]!==b[i]) return a[i]-b[i];}
   return 0;
 }
-async function fetchLatestApkUrl(){
-  try{
-    const res=await fetch('https://kefcmjfvrqbgtivssdwn.supabase.co/storage/v1/object/list/app-updates',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prefix:'',limit:50,offset:0,sortBy:{column:'name',order:'asc'}})
-    });
-    if(!res.ok) throw new Error('List failed');
-    const files=await res.json();
-    let best=null,bestVer=null;
-    (files||[]).forEach(f=>{
-      if(!f.name||!f.name.endsWith('.apk')) return;
-      const ver=parseVersion(f.name);
-      if(!ver) return;
-      if(!bestVer||compareVersions(ver,bestVer)>0){bestVer=ver;best=f.name;}
-    });
-    if(best){_latestApkUrl=APK_BASE_URL+best;}
-  }catch(e){console.warn('APK version check failed, using fallback:',e);}
-  return _latestApkUrl;
+function offerApk(url,version,size){
+  const v=parseVersion(version||url.split('/').pop()),cur=parseVersion(latestApk.version);
+  if(!v||!url.startsWith(APK_BASE_URL)||!/\.apk$/i.test(url)) return;
+  if(compareVersions(v,cur)>=0) latestApk={url,version:v.join('.'),size:size||null};
 }
-async function downloadLatestApk(e){
+let apkLookup=null;
+function checkLatestApk(){
+  if(!apkLookup) apkLookup=(async()=>{
+    try{
+      const{data}=await supa.rpc('latest_app_release');
+      if(data&&data.name) offerApk(APK_BASE_URL+encodeURIComponent(data.name),data.version,data.size);
+    }catch(e){}
+    try{
+      const r=await fetch(APK_BASE_URL+'update.json?t='+Date.now(),{cache:'no-store'});
+      if(r.ok){
+        const j=await r.json();
+        const url=j.apk_url||j.apkUrl||j.download_url||j.downloadUrl||j.url||j.link;
+        if(typeof url==='string') offerApk(url,j.versionName||j.version_name||j.latest_version||j.latestVersion||j.version,null);
+      }
+    }catch(e){}
+    paintApkVersion();
+    return latestApk;
+  })();
+  return apkLookup;
+}
+function paintApkVersion(){
+  const mb=latestApk.size?` · ${(latestApk.size/1048576).toFixed(1)} MB`:'';
+  document.querySelectorAll('[data-bind=apk-version]').forEach(el=>{el.textContent='v'+latestApk.version;});
+  document.querySelectorAll('[data-bind=apk-size]').forEach(el=>{el.textContent=mb;});
+}
+function apkVersionHtml(){return`<span data-bind="apk-version">v${latestApk.version}</span>`;}
+function downloadLatestApk(e){
   if(e){e.preventDefault();e.stopPropagation();}
-  const url=await fetchLatestApkUrl();
-  const a=document.createElement('a');a.href=url;a.download='trudata.apk';a.click();
+  // Use what is already known so the download starts on this tap.
+  const a=document.createElement('a');a.href=latestApk.url;a.download=latestApk.url.split('/').pop();a.rel='noopener';
+  document.body.appendChild(a);a.click();a.remove();
+  showToast('Downloading TRU Data app '+'v'+latestApk.version+'…',3000,'success');
+  checkLatestApk();
 }
+
+/* ===== TERMS OF SERVICE AND PRIVACY POLICY ===== */
+const LEGAL_UPDATED='31 October 2026';
+const LEGAL_VERSION='2026-10-31';
+const LEGAL={
+  terms:{title:'Terms of Service',intro:'These terms apply when you use the TRU Data website or Android app (together, "TRU Data") to buy mobile data bundles, fund a wallet or work as a TRU agent. TRU Data is run by TRUTECH BUSINESS in Accra, Ghana. By creating an account or placing an order you agree to these terms.',sections:[
+    ['1. The service','TRU Data lets you buy MTN, Telecel and AirtelTigo data bundles for any Ghana number from a prepaid wallet. TRU Data is an independent reseller. We are <strong>not affiliated with MTN, Telecel or AirtelTigo</strong>, and the bundle itself (speed, coverage, validity, expiry) is provided by the network under its own terms.'],
+    ['2. Your account','You must give a real name, a working email address and a Ghana phone number. Keep your password private: you are responsible for everything done with your account. Tell us straight away if you think someone else has used it. One person may not hold several accounts to get around limits or offers.'],
+    ['3. Wallet and payments','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile Money:</strong> send money to the TRU Data MoMo number shown on your wallet page (registered to GEORGE DANQUAH DORDZIE) using your personal reference. Your wallet is credited after we confirm the payment on our statement. Sending to any other number, or without your reference, may delay or prevent crediting.</li><li><strong>Card / Paystack</strong> (when available): a processing fee of 3.5% is added and shown before you pay. Your wallet is credited once Paystack confirms the payment.</li><li>Wallet money can only be used to buy bundles on TRU Data. It does not earn interest and is not a bank account.</li><li>If we credit your wallet by mistake, we may remove that amount.</li></ul>'],
+    ['4. Orders and delivery','Check the phone number before you confirm: bundles are sent to the number you enter and <strong>cannot be moved to another number</strong> once delivered. Most orders are delivered within minutes, but delivery can take longer when a network is busy or down. Prices shown at checkout are the prices you pay; we may change prices for future orders at any time.'],
+    ['5. Refunds and complaints','<ul class="list-disc pl-5 space-y-1"><li>If an order cannot be delivered, or we cancel it, the amount is refunded to your TRU Data wallet.</li><li>If a delivered bundle did not arrive or is wrong, report it from <em>My Orders</em> within <strong>36 hours of delivery</strong>. Reports after that window cannot be investigated.</li><li>We do not refund orders sent to a wrong number you entered, or bundles already used.</li><li>Wallet balances are not normally paid back out as cash. Contact us if you have a special case.</li></ul>'],
+    ['6. Agents','<ul class="list-disc pl-5 space-y-1"><li>Agent accounts are approved by us and may be refused, suspended or closed, for example for misuse, complaints from customers or false details.</li><li>Agents set their profit on top of the agent base price. Saved prices are locked; changes need an approved price-change request.</li><li>Agents earn profit only on orders placed by other customers through their own link. Orders an agent places for themselves earn no profit.</li><li>Withdrawals: minimum ₵10, during the withdrawal window (normally Monday to Thursday, 8AM to 12PM), with a 1% fee deducted. We may hold or reverse profit from orders that were refunded, cancelled or fraudulent.</li><li>Agents must not misrepresent TRU Data, the networks or prices to their customers.</li></ul>'],
+    ['7. Things you must not do','Do not use TRU Data for fraud or money laundering, pay with money that is not yours, try to get bundles or wallet credit without paying, interfere with the site or app, access other people\'s accounts or data, or resell in a way that breaks a network\'s rules. We may suspend accounts, cancel orders and keep records where we see this, and may report it to the authorities.'],
+    ['8. Messages from us','We send messages about your account, orders, deposits and agent requests by SMS, email or on the site. These are part of the service.'],
+    ['9. Availability and liability','We work to keep TRU Data available and accurate but cannot promise it will always be uninterrupted or error-free. To the extent the law allows, we are not responsible for losses caused by network outages, delays by the networks or payment providers, or wrong details you entered. Our total responsibility for any order is limited to the amount you paid for it. Nothing in these terms removes rights you have under Ghanaian consumer law.'],
+    ['10. Changes and ending','We may update these terms. The date at the top shows when they last changed, and continuing to use TRU Data after a change means you accept it. You can stop using TRU Data at any time; ask us if you want your account closed.'],
+    ['11. Law and contact','These terms are governed by the laws of Ghana. Contact us on WhatsApp <strong>+233 59 757 8538</strong> or by email at <strong>kelvinjun12.2003@gmail.com</strong>.']
+  ]},
+  privacy:{title:'Privacy Policy',intro:'This policy explains what personal information TRU Data (run by TRUTECH BUSINESS, Accra, Ghana) collects when you use the website or Android app, why, who it is shared with and the choices you have. We handle personal data in line with Ghana\'s Data Protection Act, 2012 (Act 843).',sections:[
+    ['1. What we collect','<ul class="list-disc pl-5 space-y-1"><li><strong>Account details:</strong> your name, email address, phone number and password (stored only in scrambled form; we cannot read it).</li><li><strong>Orders:</strong> the numbers you buy bundles for, the bundle, network, price and order status.</li><li><strong>Wallet and payments:</strong> deposits, your deposit reference, MoMo transaction IDs, the number you sent from, amounts and balances. Card payments are handled by Paystack; we never see or store your card number.</li><li><strong>Agents:</strong> name, phone, business name, prices, sales, profit and the MoMo number for withdrawals.</li><li><strong>On your device:</strong> your sign-in session and a few settings (such as "Keep me signed in" and your last wallet balance) are stored in your browser or app so pages open quickly. We do not use advertising or tracking cookies.</li></ul>'],
+    ['2. Why we use it','To create and secure your account, deliver bundles, credit and debit your wallet, confirm payments, pay agents, send you messages about your orders and requests, handle complaints, prevent fraud and meet legal and accounting duties. We do not sell your personal information and do not use it for third-party advertising.'],
+    ['3. Who we share it with','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile networks and bundle suppliers</strong>: the recipient number and bundle, so the data can be delivered.</li><li><strong>Supabase</strong>: hosts our database and sign-in system.</li><li><strong>Paystack</strong>: processes card and Paystack payments when you choose them.</li><li><strong>SMS</strong>: text notifications are sent through the httpSMS service from our own phone, so your number and the message pass through it.</li><li><strong>WhatsApp</strong>: only when you choose to report an order or contact us there.</li><li><strong>Agents</strong>: if you buy through an agent\'s link, that agent can see the order (reference, bundle, amount, status) but not your account details.</li><li><strong>Authorities</strong>: when the law requires it or to deal with fraud.</li></ul>Some of these providers store data outside Ghana; we only use providers that protect it.'],
+    ['4. How long we keep it','Account details are kept while your account is open. Order, wallet and payment records are kept for as long as needed for accounting, tax and dispute purposes, usually up to 6 years, even after an account is closed. Messages in our SMS log are kept for a limited time.'],
+    ['5. Security','Your data is protected by access rules in our database (each person can only see their own records), encrypted connections, and private storage for payment and SMS keys. No system is perfectly secure, so please keep your password private and tell us if you suspect a problem.'],
+    ['6. Your rights','You can ask to see the personal information we hold about you, correct it, or have your account closed and personal details deleted (records we must keep by law will be kept). You can also object to how we use your data and complain to the Data Protection Commission of Ghana. Contact us using the details below.'],
+    ['7. Children','TRU Data is not meant for children under 13. If you believe a child has given us personal information, contact us and we will remove it.'],
+    ['8. Changes','We may update this policy. The date at the top shows when it last changed; important changes will be announced on the site.'],
+    ['9. Contact','WhatsApp <strong>+233 59 757 8538</strong> · Email <strong>kelvinjun12.2003@gmail.com</strong> · Accra, Ghana.']
+  ]}
+};
+function legalBodyHtml(kind){
+  const d=LEGAL[kind];
+  return`<p class="text-xs font-bold uppercase text-slate-400 mb-6">Last updated ${LEGAL_UPDATED}</p><p class="text-muted-theme leading-relaxed mb-8">${d.intro}</p>${d.sections.map(([h,b])=>`<section class="mb-7"><h2 class="text-lg font-black mb-2">${h}</h2><div class="text-sm text-slate-600 leading-relaxed">${b}</div></section>`).join('')}`;
+}
+function renderLegal(kind){
+  const other=kind==='terms'?'privacy':'terms';
+  return`<div class="max-w-3xl mx-auto px-4 py-12 animate__animated animate__fadeIn"><button onclick="history.length>1?history.back():navigateTo('landing')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 mb-8"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back</button><article class="card-theme rounded-3xl p-6 md:p-10"><h1 class="text-3xl md:text-4xl font-black mb-2">${LEGAL[kind].title}</h1>${legalBodyHtml(kind)}<p class="text-sm mt-8 pt-6 border-t border-slate-200">See also our <button onclick="navigateTo('${other}')" class="text-red-600 font-bold hover:underline">${LEGAL[other].title}</button>.</p></article></div>`;
+}
+// Read the terms from the sign-up form without leaving it.
+function openLegal(kind){
+  closeLegal();
+  const m=document.createElement('div');m.id='legal-modal';
+  m.className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4';
+  m.innerHTML=`<div class="card-theme max-w-2xl w-full rounded-3xl flex flex-col" style="max-height:88vh" role="dialog" aria-modal="true" aria-labelledby="legal-title"><div class="flex items-center justify-between gap-3 p-5 border-b border-slate-200"><h2 id="legal-title" class="text-xl font-black">${LEGAL[kind].title}</h2><button onclick="closeLegal()" aria-label="Close" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="p-5 md:p-7 overflow-y-auto">${legalBodyHtml(kind)}</div><div class="p-4 border-t border-slate-200"><button onclick="closeLegal()" class="w-full cta-button text-white py-3 rounded-2xl font-bold">Close</button></div></div>`;
+  m.addEventListener('click',e=>{if(e.target===m) closeLegal();});
+  document.body.appendChild(m);
+}
+function closeLegal(){document.getElementById('legal-modal')?.remove();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeLegal();});
 
 /* ===== UTILITIES ===== */
 function showToast(message,duration=3000,type='info'){
@@ -1005,7 +1072,7 @@ function updateAuthUI(){
    anything newer is fetched in the background and painted in when it arrives.
    Each page has its own address (#/wallet, #/orders, ...) so refreshing or
    pressing Back keeps you where you were. */
-const ROUTES={landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet','my-orders':'orders','agent-portal':'agents','agent-dashboard':'agent','admin-dashboard':'admin'};
+const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet','my-orders':'orders','agent-portal':'agents','agent-dashboard':'agent','admin-dashboard':'admin'};
 function viewToHash(view,params){
   if(!(view in ROUTES)) return null;
   if(view==='network'&&params) return '#/buy/'+params;
@@ -1015,7 +1082,7 @@ function hashToView(h){
   if(!h||!h.startsWith('#/')) return null;
   const[a,b]=h.slice(2).split('/');
   if(a==='buy') return b&&NETWORKS[b]?{view:'network',params:b}:{view:'home',params:null};
-  const m={about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet',orders:'my-orders',agents:'agent-portal',agent:'agent-dashboard',admin:'admin-dashboard'};
+  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet',orders:'my-orders',agents:'agent-portal',agent:'agent-dashboard',admin:'admin-dashboard'};
   return m[a]?{view:m[a],params:null}:null;
 }
 function syncUrl(view,params,replace){
@@ -1161,7 +1228,7 @@ function renderHome(){
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="#16a34a"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>
           </div>
           <div>
-            <p class="text-sm font-bold text-slate-900">Download Android App (v1.1.3)</p>
+            <p class="text-sm font-bold text-slate-900">Download Android App (${apkVersionHtml()})</p>
             <p class="text-xs text-slate-500">Get the best experience on our app</p>
           </div>
         </div>
@@ -1465,11 +1532,11 @@ function renderLandingPage(){
 }
 
 /* ===== ABOUT ===== */
-function renderAbout(){return`<div class="animate__animated animate__fadeIn"><section class="py-20 px-4 max-w-4xl mx-auto"><h1 class="text-4xl md:text-5xl font-black mb-8 text-center animate-slide-up">About TRU Data Network</h1><div class="mb-10 flex justify-center animate-scale-in"><a href="#" onclick="downloadLatestApk(event)" class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg hover:shadow-green-400/50 hover:scale-105 transition-all text-sm"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Download TruData Android App (v1.1.3)</a></div><div class="prose prose-slate max-w-none"><p class="text-lg text-muted-theme mb-8 animate-slide-up stagger-1" style="animation-fill-mode:both;">TRU Data Network was established to provide Ghanaians with a convenient way to purchase mobile data bundles online. We recognized that many people were looking for easier ways to buy data without visiting physical stores or navigating complex USSD codes.</p><div class="grid md:grid-cols-2 gap-8 mb-12"><div class="p-6 card-theme rounded-2xl animate-slide-up stagger-2" style="animation-fill-mode:both;"><h3 class="text-xl font-bold mb-3 text-red-600">Our Vision</h3><p class="text-sm text-muted-theme">To become a trusted platform for mobile data purchases in Ghana, providing convenient access to connectivity for all users.</p></div><div class="p-6 card-theme rounded-2xl animate-slide-up stagger-3" style="animation-fill-mode:both;"><h3 class="text-xl font-bold mb-3 text-red-600">Our Mission</h3><p class="text-sm text-muted-theme">To simplify the data purchasing process while maintaining transparency and customer satisfaction.</p></div></div><h2 class="text-2xl font-bold mb-4 animate-slide-up stagger-4" style="animation-fill-mode:both;">Why We Exist</h2><p class="text-muted-theme mb-6">In today's digital age, internet connectivity is increasingly important for education, work, and communication. TRU Data Network addresses this by providing an online platform where users can browse, compare, and purchase data bundles from major networks.</p><h2 class="text-2xl font-bold mb-4">Our Values</h2><ul class="space-y-4 mb-12"><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Transparency</strong><span class="text-sm text-muted-theme">Clear pricing with no hidden fees. What you see is what you pay.</span></div></li><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Reliability</strong><span class="text-sm text-muted-theme">We work to ensure timely processing of all orders.</span></div></li><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Customer Support</strong><span class="text-sm text-muted-theme">Assistance available via WhatsApp for order inquiries.</span></div></li></ul></div></section></div>`;}
+function renderAbout(){return`<div class="animate__animated animate__fadeIn"><section class="py-20 px-4 max-w-4xl mx-auto"><h1 class="text-4xl md:text-5xl font-black mb-8 text-center animate-slide-up">About TRU Data Network</h1><div class="mb-10 flex justify-center animate-scale-in"><a href="#" onclick="downloadLatestApk(event)" class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg hover:shadow-green-400/50 hover:scale-105 transition-all text-sm"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Download TruData Android App (${apkVersionHtml()})</a></div><div class="prose prose-slate max-w-none"><p class="text-lg text-muted-theme mb-8 animate-slide-up stagger-1" style="animation-fill-mode:both;">TRU Data Network was established to provide Ghanaians with a convenient way to purchase mobile data bundles online. We recognized that many people were looking for easier ways to buy data without visiting physical stores or navigating complex USSD codes.</p><div class="grid md:grid-cols-2 gap-8 mb-12"><div class="p-6 card-theme rounded-2xl animate-slide-up stagger-2" style="animation-fill-mode:both;"><h3 class="text-xl font-bold mb-3 text-red-600">Our Vision</h3><p class="text-sm text-muted-theme">To become a trusted platform for mobile data purchases in Ghana, providing convenient access to connectivity for all users.</p></div><div class="p-6 card-theme rounded-2xl animate-slide-up stagger-3" style="animation-fill-mode:both;"><h3 class="text-xl font-bold mb-3 text-red-600">Our Mission</h3><p class="text-sm text-muted-theme">To simplify the data purchasing process while maintaining transparency and customer satisfaction.</p></div></div><h2 class="text-2xl font-bold mb-4 animate-slide-up stagger-4" style="animation-fill-mode:both;">Why We Exist</h2><p class="text-muted-theme mb-6">In today's digital age, internet connectivity is increasingly important for education, work, and communication. TRU Data Network addresses this by providing an online platform where users can browse, compare, and purchase data bundles from major networks.</p><h2 class="text-2xl font-bold mb-4">Our Values</h2><ul class="space-y-4 mb-12"><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Transparency</strong><span class="text-sm text-muted-theme">Clear pricing with no hidden fees. What you see is what you pay.</span></div></li><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Reliability</strong><span class="text-sm text-muted-theme">We work to ensure timely processing of all orders.</span></div></li><li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><div><strong class="block text-slate-900">Customer Support</strong><span class="text-sm text-muted-theme">Assistance available via WhatsApp for order inquiries.</span></div></li></ul></div></section></div>`;}
 
 /* ===== AUTH VIEWS ===== */
 function renderLogin(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Welcome Back</h2><p class="text-sm text-muted-theme mt-2">Sign in to your account to continue</p></div><form onsubmit="handleLogin(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="login-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><div class="relative"><input type="password" id="login-password" required class="w-full p-4 pr-12 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"><button type="button" id="login-eye" onclick="togglePasswordVisibility('login-password','login-eye')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer bg-transparent border-none p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div></div><div class="flex items-center gap-3 mt-2"><input type="checkbox" id="remember-me" checked style="accent-color:#dc2626;width:16px;height:16px;cursor:pointer;"><label for="remember-me" class="text-sm font-semibold text-slate-600 cursor-pointer select-none">Keep me signed in</label></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-4">Sign In</button></form><div class="mt-6 flex justify-between items-center"><button onclick="navigateTo('register')" class="text-sm text-red-600 font-bold hover:underline">Create account</button><button onclick="navigateTo('forgot-password')" class="text-sm text-muted-theme hover:text-red-600 transition-colors">Forgot password?</button></div></div></div>`;}
-function renderRegister(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Create Account</h2><p class="text-sm text-muted-theme mt-2">Join TRU Data to start purchasing bundles</p></div><form onsubmit="handleRegister(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name</label><input type="text" id="reg-name" required maxlength="100" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="John Doe"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="reg-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><div class="relative"><input type="password" id="reg-password" required minlength="8" class="w-full p-4 pr-12 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"><button type="button" id="reg-eye" onclick="togglePasswordVisibility('reg-password','reg-eye')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer bg-transparent border-none p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Create Account</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Already have an account? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
+function renderRegister(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Create Account</h2><p class="text-sm text-muted-theme mt-2">Join TRU Data to start purchasing bundles</p></div><form onsubmit="handleRegister(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name</label><input type="text" id="reg-name" required maxlength="100" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="John Doe"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="reg-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="reg-phone" required maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><div class="relative"><input type="password" id="reg-password" required minlength="8" class="w-full p-4 pr-12 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"><button type="button" id="reg-eye" onclick="togglePasswordVisibility('reg-password','reg-eye')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer bg-transparent border-none p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div></div><label class="flex items-start gap-3 mt-4 text-sm text-slate-600 cursor-pointer"><input type="checkbox" id="reg-terms" required style="accent-color:#dc2626;width:16px;height:16px;margin-top:2px;flex-shrink:0;"><span>I agree to the <button type="button" onclick="openLegal('terms')" class="text-red-600 font-bold hover:underline">Terms of Service</button> and <button type="button" onclick="openLegal('privacy')" class="text-red-600 font-bold hover:underline">Privacy Policy</button>.</span></label><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Create Account</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Already have an account? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
 // BUG 3: Helper to toggle password visibility — toggles input type and swaps eye/eye-slash SVG icon
 function togglePasswordVisibility(inputId,iconId){
   const input=document.getElementById(inputId);
@@ -1575,9 +1642,10 @@ async function handleRegister(e){
   e.preventDefault();
   const name=document.getElementById('reg-name').value.trim(),email=document.getElementById('reg-email').value.trim(),phone=document.getElementById('reg-phone').value.trim(),password=document.getElementById('reg-password').value;
   const pv=validateGhanaPhone(phone);if(!pv.isValid){showToast(''+pv.error,4000,'error');return;}
+  if(!document.getElementById('reg-terms')?.checked){showToast('Please agree to the Terms of Service and Privacy Policy',4000,'error');return;}
   try{localStorage.setItem('tru-keep-signed-in','1');}catch(x){}
   try{
-    const{data:authData,error:authError}=await supa.auth.signUp({email,password,options:{data:{full_name:name,phone}}});
+    const{data:authData,error:authError}=await supa.auth.signUp({email,password,options:{data:{full_name:name,phone,terms_accepted_at:new Date().toISOString(),terms_version:LEGAL_VERSION}}});
     if(authError) throw authError;if(!authData.user) throw new Error('Failed to create user account');
     if(authData.session){
       state.user=authData.user;
@@ -2818,6 +2886,7 @@ function render(){
     case 'home': app.innerHTML=renderHome();extended.innerHTML='';break;
     case 'network': app.innerHTML=renderNetworkView(state.params);extended.innerHTML='';break;
     case 'about': app.innerHTML=renderAbout();extended.innerHTML='';break;
+    case 'terms': case 'privacy': app.innerHTML=renderLegal(state.view);extended.innerHTML='';break;
     case 'login':
       app.innerHTML=renderLogin();extended.innerHTML='';
       (function(){var s=null;try{s=localStorage.getItem('tru-remember-email');}catch(e){}var el=document.getElementById('login-email'),cb=document.getElementById('remember-me');if(s&&el) el.value=s;if(cb) cb.checked=keepSignedIn();})();
@@ -3132,6 +3201,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     else{updateAuthUI();paintBalance();}
   }
   prefetchUserData();
+  (window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>checkLatestApk());
 });
 
 supa.auth.onAuthStateChange((event,session)=>{
