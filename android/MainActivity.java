@@ -34,6 +34,8 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
@@ -65,6 +67,7 @@ public class MainActivity extends Activity {
     private FrameLayout adContainer;
     private InterstitialAd interstitialAd;
     private ProgressBar progress;
+    private SwipeRefreshLayout swipe; // the pull-to-refresh view around the WebView, if the layout has one
     private int navigationCount = 0;
     private long lastInterstitialAt = 0;
     private long lastBackPress = 0;
@@ -83,6 +86,7 @@ public class MainActivity extends Activity {
         addProgressBar();
 
         setupWebView();
+        setupPullToRefresh();
         setupAds();
 
         if (savedInstanceState != null) webView.restoreState(savedInstanceState);
@@ -125,6 +129,7 @@ public class MainActivity extends Activity {
             public void onProgressChanged(WebView view, int newProgress) {
                 progress.setProgress(newProgress);
                 progress.setVisibility(newProgress < 100 ? View.VISIBLE : View.GONE);
+                if (newProgress >= 100) doneRefreshing();
             }
         });
         webView.setWebViewClient(new WebViewClient() {
@@ -136,6 +141,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                doneRefreshing();
                 // Save the sign-in cookie straight away, not only when the app closes.
                 if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().flush();
             }
@@ -143,6 +149,7 @@ public class MainActivity extends Activity {
             @Override
             @SuppressWarnings("deprecation")
             public void onReceivedError(WebView view, int code, String description, String failingUrl) {
+                doneRefreshing();
                 if (failingUrl != null && failingUrl.startsWith(HOME)) showOffline();
             }
         });
@@ -153,6 +160,54 @@ public class MainActivity extends Activity {
                 openExternal(Uri.parse(url));
             }
         });
+    }
+
+    // Pull down at the top of a page to reload it. The spinner always stops:
+    // when the page has loaded, when it fails, or after 15 seconds at most.
+    private final Runnable stopRefreshing = new Runnable() {
+        @Override
+        public void run() {
+            if (swipe != null) swipe.setRefreshing(false);
+        }
+    };
+
+    private void setupPullToRefresh() {
+        if (!(webView.getParent() instanceof SwipeRefreshLayout)) return;
+        swipe = (SwipeRefreshLayout) webView.getParent();
+        swipe.setColorSchemeColors(BRAND_RED);
+        // Only pull-to-refresh when the page is scrolled to the very top.
+        swipe.setOnChildScrollUpCallback(new SwipeRefreshLayout.OnChildScrollUpCallback() {
+            @Override
+            public boolean canChildScrollUp(SwipeRefreshLayout parent, View child) {
+                return webView.getScrollY() > 0;
+            }
+        });
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateCacheMode();
+                if (showingOffline) {
+                    showingOffline = false;
+                    webView.loadUrl(HOME);
+                } else {
+                    webView.reload();
+                }
+                swipe.removeCallbacks(stopRefreshing);
+                swipe.postDelayed(stopRefreshing, 15000);
+            }
+        });
+    }
+
+    private void doneRefreshing() {
+        if (swipe != null) {
+            swipe.removeCallbacks(stopRefreshing);
+            swipe.setRefreshing(false);
+        }
+    }
+
+    // Fresh pages when online; the saved copy only when the network is down.
+    private void updateCacheMode() {
+        webView.getSettings().setCacheMode(isOnline() ? WebSettings.LOAD_DEFAULT : WebSettings.LOAD_CACHE_ELSE_NETWORK);
     }
 
     private void setupAds() {
@@ -278,6 +333,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        updateCacheMode();
         webView.onResume();
         if (bannerAd != null) bannerAd.resume();
     }
