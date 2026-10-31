@@ -8,8 +8,8 @@ package com.trudata.app;
 // this file, the layout, the manifest or the ads.
 //
 // Uses the app's existing layout (res/layout/activity_main.xml with
-// @id/webview and @id/ad_container) and the existing AdMob SDK
-// (InterstitialAd with isLoaded()).
+// @id/swipe_refresh, @id/webview, @id/progress_bar and @id/ad_container) and
+// the existing AdMob SDK (InterstitialAd with isLoaded()).
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -20,10 +20,8 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
@@ -67,7 +65,7 @@ public class MainActivity extends Activity {
     private FrameLayout adContainer;
     private InterstitialAd interstitialAd;
     private ProgressBar progress;
-    private SwipeRefreshLayout swipe; // the pull-to-refresh view around the WebView, if the layout has one
+    private SwipeRefreshLayout swipe;
     private int navigationCount = 0;
     private long lastInterstitialAt = 0;
     private long lastBackPress = 0;
@@ -83,7 +81,10 @@ public class MainActivity extends Activity {
 
         webView = findViewById(R.id.webview);
         adContainer = findViewById(R.id.ad_container);
-        addProgressBar();
+        swipe = findViewById(R.id.swipe_refresh);
+        progress = findViewById(R.id.progress_bar);
+        if (Build.VERSION.SDK_INT >= 21) progress.setProgressTintList(android.content.res.ColorStateList.valueOf(BRAND_RED));
+        progress.setMax(100);
 
         setupWebView();
         setupPullToRefresh();
@@ -91,15 +92,6 @@ public class MainActivity extends Activity {
 
         if (savedInstanceState != null) webView.restoreState(savedInstanceState);
         else loadWebApp(getIntent());
-    }
-
-    // Thin red bar across the top while a page loads.
-    private void addProgressBar() {
-        progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progress.setMax(100);
-        if (Build.VERSION.SDK_INT >= 21) progress.setProgressTintList(android.content.res.ColorStateList.valueOf(BRAND_RED));
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3), Gravity.TOP);
-        addContentView(progress, lp);
     }
 
     private void setupWebView() {
@@ -172,8 +164,6 @@ public class MainActivity extends Activity {
     };
 
     private void setupPullToRefresh() {
-        if (!(webView.getParent() instanceof SwipeRefreshLayout)) return;
-        swipe = (SwipeRefreshLayout) webView.getParent();
         swipe.setColorSchemeColors(BRAND_RED);
         // Only pull-to-refresh when the page is scrolled to the very top.
         swipe.setOnChildScrollUpCallback(new SwipeRefreshLayout.OnChildScrollUpCallback() {
@@ -298,10 +288,6 @@ public class MainActivity extends Activity {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo n = cm != null ? cm.getActiveNetworkInfo() : null;
         return n != null && n.isConnected();
-    }
-
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     // Back goes back a page in the site (sometimes showing the full-screen ad);
