@@ -774,7 +774,7 @@ let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery
    version is all it takes. If both lookups fail, the newest version known
    when this page was published is used. */
 const APK_BASE_URL='https://kefcmjfvrqbgtivssdwn.supabase.co/storage/v1/object/public/app-updates/';
-let latestApk={url:APK_BASE_URL+'trudata-v1.1.6.apk',version:'1.1.6',size:8918171};
+let latestApk={url:APK_BASE_URL+'trudata-v2.0.4.apk',version:'2.0.4',size:7728778};
 function parseVersion(v){
   const m=String(v||'').match(/(\d+)\.(\d+)\.(\d+)/);
   return m?[+m[1],+m[2],+m[3]]:null;
