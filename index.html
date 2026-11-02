@@ -1409,7 +1409,7 @@ function myOrdersHtml(data){
   function customerStatus(raw){
     const s=(raw||'Pending').trim();
     if(s==='Placing') return{label:'Placing order…',cls:'order-status-pending',dot:'&#x23F3;'};
-    if(s==='Completed') return{label:'Successfully Processed',cls:'order-status-completed',dot:'&#x1F7E2;'};
+    if(s==='Completed') return{label:'Processed · Delivering shortly',cls:'order-status-processing',dot:'&#x1F7E2;'};
     if(s==='Delivered') return{label:'Delivered',cls:'order-status-completed',dot:'&#x2705;'};
     if(s==='Processing') return{label:'Processing',cls:'order-status-processing',dot:'&#x1F535;'};
     if(s==='Deleted')   return{label:'Cancelled',cls:'order-status-deleted',dot:'&#x1F534;'};
@@ -2428,7 +2428,8 @@ async function sendAgentMessage(){
 /* ===== ADMIN: SMS NOTIFICATIONS (httpSMS) ===== */
 const SMS_EVENTS=[
   ['Customers','order_placed','Order received'],
-  ['Customers','order_delivered','Order delivered'],
+  ['Customers','order_processed','Order processed (Complete pressed)'],
+  ['Customers','order_delivered','Order delivered (Delivered pressed)'],
   ['Customers','order_cancelled','Order cancelled / refunded'],
   ['Customers','deposit_credited','Wallet credited'],
   ['Customers','deposit_rejected','Deposit not confirmed'],
@@ -3307,7 +3308,8 @@ function announce(table,r){
   const money=x=>'₵'+parseFloat(x||0).toFixed(2);
   if(table==='orders'){
     const what=`${r.bundle_name||'data'} ${String(r.Network||'').toUpperCase()} to ${r.Phone||''}`.trim();
-    if(r.Status==='Delivered'||r.Status==='Completed') showToast('✅ Your '+what+' has been delivered.',7000,'success');
+    if(r.Status==='Delivered') showToast('✅ Your '+what+' has been delivered.',7000,'success');
+    else if(r.Status==='Completed') showToast('🟢 Your '+what+' has been processed successfully. Your data will be delivered shortly.',7000,'success');
     else if(r.Status==='Processing') showToast('Your '+what+' is being processed.',4000,'info');
     else if(r.Status==='Deleted') showToast('Your order '+(r.ref||'')+' was cancelled. Any refund is back in your wallet.',7000,'error');
   }else if(table==='deposit_requests'){
