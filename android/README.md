@@ -47,14 +47,14 @@ chmod +x gradlew        # only if the file lost its permission when copied
 ```
 The APK is in `app/build/outputs/apk/release/`.
 
-Same package (`com.trudata.app`), same AdMob app ID and ad unit IDs as before.
-Version: `versionCode 25`, `versionName 2.1.0` in `app/build.gradle`. Raise
+Same package (`com.trudata.app`), same AdMob app ID and ad unit IDs as before, plus an app open ad (2.1.1).
+Version: `versionCode 26`, `versionName 2.1.1` in `app/build.gradle`. Raise
 both for every new APK.
 
 ## Publish the update
 
 Upload the APK to the Supabase bucket `app-updates` named exactly
-`trudata-v2.1.0.apk` (no extra dot after the `v`). The site picks the newest
+`trudata-v2.1.1.apk` (no extra dot after the `v`). The site picks the newest
 file by itself: the download button on the website and the "Update available"
 card inside older-version apps point to it. Update `update.json` too if you
 still use it.

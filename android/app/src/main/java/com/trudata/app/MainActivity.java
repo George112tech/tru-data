@@ -8,7 +8,7 @@ package com.trudata.app;
 //   - the red top bar (logo, or back arrow + page title, wallet balance, avatar)
 //   - the tab bar (Home, Orders, Wallet, Agent, Account) with haptic feedback
 //   - the red heartbeat splash screen and the "You're offline" screen
-//   - pull to refresh, AdMob banner + interstitial, sharing, deep links
+//   - pull to refresh, AdMob banner + interstitial + app open ad, sharing, deep links
 //
 // Everything inside (buying, wallet, orders, agent hub, admin) is the website
 // https://trudata.rvhssystems.com in "app mode". Changes merged on GitHub or
@@ -66,12 +66,16 @@ import android.widget.Toast;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.appopen.AppOpenAd;
 
 import org.json.JSONObject;
 
@@ -80,6 +84,16 @@ public class MainActivity extends Activity {
     // ----- AdMob (unchanged) -----
     private static final String BANNER_AD_UNIT_ID = "ca-app-pub-8934706810849620/7330461846";
     private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-8934706810849620/6017380172";
+    private static final String APP_OPEN_AD_UNIT_ID = "ca-app-pub-8934706810849620/8105276792";
+    // App open ad: as the splash fades (if it is ready within 5 s of launch), and when
+    // someone comes back after 30 s or more away. At most once every 4 minutes, never
+    // right after another full-screen ad, and not when they come back from something
+    // the app opened itself (sharing, WhatsApp, downloads, other apps).
+    private static final long APP_OPEN_LAUNCH_WINDOW_MS = 5000;
+    private static final long APP_OPEN_RETURN_AFTER_MS = 30 * 1000;
+    private static final long APP_OPEN_MIN_GAP_MS = 4 * 60 * 1000;
+    private static final long APP_OPEN_EXPIRES_MS = 4 * 60 * 60 * 1000; // AdMob: 4 hours
+    private static final long FULLSCREEN_SPACING_MS = 60 * 1000;
     // Full-screen ad: every 3rd Back press, and never more than once a minute.
     private static final int INTERSTITIAL_EVERY = 3;
     private static final long INTERSTITIAL_MIN_GAP_MS = 60 * 1000;
@@ -142,6 +156,16 @@ public class MainActivity extends Activity {
     private long lastInterstitialAt = 0;
     private long lastBackPress = 0;
 
+    private AppOpenAd appOpenAd;
+    private long appOpenLoadedAt = 0;
+    private boolean appOpenLoading = false;
+    private long lastAppOpenAt = 0;
+    private boolean showingFullScreenAd = false;
+    private long launchedAt = 0;
+    private boolean launchAdHandled = false;
+    private long backgroundAt = 0;
+    private boolean leftAppOnPurpose = false;
+
     private boolean offlineShown = false;
     private boolean loadFailed = false;
     private View splash;
@@ -183,6 +207,8 @@ public class MainActivity extends Activity {
         if (savedInstanceState != null) webView.restoreState(savedInstanceState);
         else loadWebApp(getIntent());
         showSplash();
+        launchedAt = System.currentTimeMillis();
+        loadAppOpenAd(); // so it can be ready as the splash fades
 
         registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         receiverRegistered = true;
@@ -496,6 +522,7 @@ public class MainActivity extends Activity {
         send.setType("text/plain");
         send.putExtra(Intent.EXTRA_TEXT, text);
         try {
+            leftAppOnPurpose = true;
             startActivity(Intent.createChooser(send, getString(R.string.share_title)));
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.no_app_for_link, Toast.LENGTH_SHORT).show();
@@ -643,6 +670,7 @@ public class MainActivity extends Activity {
                 if (heartbeat != null) heartbeat.cancel();
                 ViewGroup parent = (ViewGroup) v.getParent();
                 if (parent != null) parent.removeView(v);
+                showLaunchAdIfReady();
             }
         });
         startAds();
@@ -752,6 +780,7 @@ public class MainActivity extends Activity {
 
     private void openExternal(Uri uri) {
         try {
+            leftAppOnPurpose = true;
             startActivity(new Intent(Intent.ACTION_VIEW, uri));
         } catch (ActivityNotFoundException e) {
             Toast.makeText(this, R.string.no_app_for_link, Toast.LENGTH_SHORT).show();
@@ -935,6 +964,7 @@ public class MainActivity extends Activity {
         interstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdClosed() {
+                showingFullScreenAd = false;
                 interstitialAd.loadAd(new AdRequest.Builder().build());
             }
         });
@@ -946,10 +976,94 @@ public class MainActivity extends Activity {
         long now = System.currentTimeMillis();
         if (navigationCount % INTERSTITIAL_EVERY == 0
                 && now - lastInterstitialAt > INTERSTITIAL_MIN_GAP_MS
+                && now - lastAppOpenAt > FULLSCREEN_SPACING_MS
+                && !showingFullScreenAd
                 && interstitialAd != null
                 && interstitialAd.isLoaded()) {
             lastInterstitialAt = now;
+            showingFullScreenAd = true;
             interstitialAd.show();
+        }
+    }
+
+    // ----- App open ad -----
+
+    private void loadAppOpenAd() {
+        if (appOpenLoading || appOpenAdReady()) return;
+        appOpenLoading = true;
+        try {
+            AppOpenAd.load(this, APP_OPEN_AD_UNIT_ID, new AdRequest.Builder().build(),
+                    AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
+                    new AppOpenAd.AppOpenAdLoadCallback() {
+                        @Override
+                        public void onAppOpenAdLoaded(AppOpenAd ad) {
+                            appOpenLoading = false;
+                            appOpenAd = ad;
+                            appOpenLoadedAt = System.currentTimeMillis();
+                            // Arrived after the splash, but still right after launch: show it now.
+                            if (splash == null) showLaunchAdIfReady();
+                        }
+
+                        @Override
+                        public void onAppOpenAdFailedToLoad(LoadAdError error) {
+                            appOpenLoading = false;
+                        }
+                    });
+        } catch (RuntimeException e) {
+            appOpenLoading = false; // never let an ad stop the app
+        }
+    }
+
+    private boolean appOpenAdReady() {
+        return appOpenAd != null && System.currentTimeMillis() - appOpenLoadedAt < APP_OPEN_EXPIRES_MS;
+    }
+
+    private void showLaunchAdIfReady() {
+        if (launchAdHandled) return;
+        if (System.currentTimeMillis() - launchedAt > APP_OPEN_LAUNCH_WINDOW_MS) {
+            launchAdHandled = true; // too late: people are already using the app
+            return;
+        }
+        if (appOpenAdReady()) {
+            launchAdHandled = true;
+            showAppOpenAd();
+        }
+    }
+
+    private void showAppOpenAd() {
+        long now = System.currentTimeMillis();
+        if (isFinishing() || showingFullScreenAd || offlineShown || keyboardOpen) return;
+        if (now - lastAppOpenAt < APP_OPEN_MIN_GAP_MS || now - lastInterstitialAt < FULLSCREEN_SPACING_MS) return;
+        if (!appOpenAdReady()) {
+            appOpenAd = null;
+            loadAppOpenAd();
+            return;
+        }
+        final AppOpenAd ad = appOpenAd;
+        appOpenAd = null;
+        showingFullScreenAd = true;
+        lastAppOpenAt = now;
+        try {
+            ad.show(this, new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    showingFullScreenAd = false;
+                    loadAppOpenAd();
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(AdError error) {
+                    showingFullScreenAd = false;
+                    loadAppOpenAd();
+                }
+
+                @Override
+                public void onAdShowedFullScreenContent() {
+                }
+            });
+        } catch (RuntimeException e) {
+            showingFullScreenAd = false;
+            loadAppOpenAd();
         }
     }
 
@@ -1011,6 +1125,23 @@ public class MainActivity extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Back after a while (not from something the app opened itself): app open ad.
+        long away = backgroundAt > 0 ? System.currentTimeMillis() - backgroundAt : 0;
+        if (away >= APP_OPEN_RETURN_AFTER_MS && !leftAppOnPurpose && !showingFullScreenAd) showAppOpenAd();
+        backgroundAt = 0;
+        leftAppOnPurpose = false;
+    }
+
+    @Override
+    protected void onStop() {
+        // A full-screen ad covering the app does not count as leaving it.
+        if (!showingFullScreenAd) backgroundAt = System.currentTimeMillis();
+        super.onStop();
     }
 
     @Override
