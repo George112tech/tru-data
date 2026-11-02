@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Indicator behind the selected tab's icon. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="@color/red_50" />
+    <gradient
+        android:angle="315"
+        android:endColor="#FFE1E1"
+        android:startColor="#FFF5F5"
+        android:type="linear" />
     <corners android:radius="999dp" />
 </shape>

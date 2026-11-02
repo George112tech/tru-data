@@ -20,7 +20,7 @@
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@color/brand_red"
+        android:background="@drawable/bg_top_bar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingLeft="16dp"
@@ -57,7 +57,7 @@
                 android:paddingRight="8dp"
                 android:paddingTop="4dp"
                 android:text="TRU"
-                android:textColor="@color/brand_red"
+                android:textColor="@color/red_700"
                 android:textSize="17sp"
                 android:textStyle="bold" />
 

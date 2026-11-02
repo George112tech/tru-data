@@ -3,6 +3,12 @@
 <resources>
     <color name="brand_red">#DC2626</color>
     <color name="brand_red_dark">#B91C1C</color>
+    <!-- Shades of red used together in gradients (no single flat bright red). -->
+    <color name="red_900">#5F1010</color>
+    <color name="red_800">#8E1616</color>
+    <color name="red_700">#B91C1C</color>
+    <color name="red_coral">#D23B2E</color>
+    <color name="red_warm">#E0453A</color>
     <color name="red_100">#FEE2E2</color>
     <color name="red_50">#FEF2F2</color>
     <color name="ink_900">#0F172A</color>

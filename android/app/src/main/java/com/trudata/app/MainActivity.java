@@ -32,7 +32,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -92,7 +91,10 @@ public class MainActivity extends Activity {
     private static final String[] IN_APP_HOSTS = {SITE_HOST, "checkout.paystack.com", "standard.paystack.co", "js.paystack.co"};
 
     // ----- Design tokens (res/values/colors.xml) -----
-    private static final int BRAND_RED = Color.parseColor("#DC2626");
+    // Shades of red, used together (gradients) rather than one flat bright red.
+    private static final int RED_800 = Color.parseColor("#8E1616");
+    private static final int RED_700 = Color.parseColor("#B91C1C");
+    private static final int RED_600 = Color.parseColor("#C9302C");
     private static final int INK_500 = Color.parseColor("#64748B");
 
     // ----- Tabs: key (as the site names them), label, icon, address -----
@@ -154,9 +156,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setBackgroundDrawable(new ColorDrawable(BRAND_RED));
+        getWindow().setBackgroundDrawableResource(R.drawable.bg_splash);
         setContentView(R.layout.activity_main);
-        if (Build.VERSION.SDK_INT >= 21) getWindow().setStatusBarColor(BRAND_RED);
+        if (Build.VERSION.SDK_INT >= 21) getWindow().setStatusBarColor(RED_800);
         if (Build.VERSION.SDK_INT >= 27) {
             // White navigation bar with dark buttons, to sit under the white tab bar.
             getWindow().setNavigationBarColor(Color.WHITE);
@@ -225,7 +227,7 @@ public class MainActivity extends Activity {
         tabBar = findViewById(R.id.tab_bar);
         adContainer = findViewById(R.id.ad_container);
         if (Build.VERSION.SDK_INT >= 21) {
-            progress.setProgressTintList(android.content.res.ColorStateList.valueOf(BRAND_RED));
+            progress.setProgressTintList(android.content.res.ColorStateList.valueOf(RED_600));
         }
     }
 
@@ -315,8 +317,8 @@ public class MainActivity extends Activity {
         for (int i = 0; i < TAB_KEYS.length; i++) {
             boolean on = TAB_KEYS[i].equals(selectedTab);
             tabPills[i].setBackgroundResource(on ? R.drawable.bg_tab_pill : 0);
-            tabIcons[i].setColorFilter(on ? BRAND_RED : INK_500, PorterDuff.Mode.SRC_IN);
-            tabLabels[i].setTextColor(on ? BRAND_RED : INK_500);
+            tabIcons[i].setColorFilter(on ? RED_700 : INK_500, PorterDuff.Mode.SRC_IN);
+            tabLabels[i].setTextColor(on ? RED_700 : INK_500);
             tabLabels[i].setTypeface(on ? fontBold : fontSemiBold);
             tabBar.getChildAt(i).setSelected(on);
             if (on && animate) {
@@ -507,7 +509,7 @@ public class MainActivity extends Activity {
 
     private void showSplash() {
         FrameLayout box = new FrameLayout(this);
-        box.setBackgroundColor(BRAND_RED);
+        box.setBackgroundResource(R.drawable.bg_splash);
         box.setClickable(true);
 
         final View ring1 = ring();
@@ -524,7 +526,7 @@ public class MainActivity extends Activity {
         logoRow.setGravity(Gravity.CENTER_VERTICAL);
         TextView tru = new TextView(this);
         tru.setText("TRU");
-        tru.setTextColor(BRAND_RED);
+        tru.setTextColor(RED_700);
         tru.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32);
         tru.setTypeface(fontBlack);
         tru.setIncludeFontPadding(false);
@@ -769,7 +771,7 @@ public class MainActivity extends Activity {
     };
 
     private void setupPullToRefresh() {
-        swipe.setColorSchemeColors(BRAND_RED);
+        swipe.setColorSchemeColors(RED_600, RED_700, RED_800);
         swipe.setOnChildScrollUpCallback(new SwipeRefreshLayout.OnChildScrollUpCallback() {
             @Override
             public boolean canChildScrollUp(SwipeRefreshLayout parent, View child) {
@@ -820,7 +822,7 @@ public class MainActivity extends Activity {
     // =====================================================================
 
     private void setupOfflineView() {
-        ((ImageView) findViewById(R.id.offline_icon)).setColorFilter(BRAND_RED, PorterDuff.Mode.SRC_IN);
+        ((ImageView) findViewById(R.id.offline_icon)).setColorFilter(RED_700, PorterDuff.Mode.SRC_IN);
         ((TextView) findViewById(R.id.offline_title)).setTypeface(fontBold);
         ((TextView) findViewById(R.id.offline_text)).setTypeface(fontSemiBold);
         ((TextView) findViewById(R.id.offline_hint)).setTypeface(fontSemiBold);

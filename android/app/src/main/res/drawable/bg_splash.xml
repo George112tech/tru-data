@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launch window and splash: maroon at the top (matches the status bar),
+     crimson in the middle, deep red at the bottom, with a soft warm glow. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:centerColor="#B3201F"
+                android:endColor="#6E1212"
+                android:startColor="@color/red_800"
+                android:type="linear" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:centerX="0.5"
+                android:centerY="0.45"
+                android:endColor="#00E0453A"
+                android:gradientRadius="420dp"
+                android:startColor="#40E0453A"
+                android:type="radial" />
+        </shape>
+    </item>
+</layer-list>
