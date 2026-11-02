@@ -645,6 +645,15 @@ let MOMO_NETWORK='Telecel';
 let DEPOSIT_FEE=3;
 const MOMO_NETWORK_LABEL={MTN:'MTN MoMo',Telecel:'Telecel Cash',AirtelTigo:'AirtelTigo Money'};
 try{const m=JSON.parse(localStorage.getItem('tru:momo')||'null');if(m&&m.number){MOMO_NUMBER=m.number;MOMO_NAME=m.name||MOMO_NAME;if(MOMO_NETWORK_LABEL[m.network]) MOMO_NETWORK=m.network;if(typeof m.fee==='number') DEPOSIT_FEE=m.fee;}}catch(e){}
+// Online payments (card or mobile money through Paystack): the fee covers
+// Paystack's charge, which is taken from the whole amount paid, so the total
+// is deposit / (1 - rate). Admin → Deposits sets the rate (default 3.5%).
+let ONLINE_FEE=3.5;
+function onlineCharge(amount){
+  const a=Math.round((Number(amount)||0)*100)/100;
+  const total=a>0?Math.round(a/(1-ONLINE_FEE/100)*100)/100:0;
+  return{amount:a,total,fee:Math.round((total-a)*100)/100};
+}
 function momoNetworkLabel(){return MOMO_NETWORK_LABEL[MOMO_NETWORK]||MOMO_NETWORK;}
 function pctText(p){return String(Math.round(Number(p||0)*100)/100)+'%';}
 // What is credited for an amount sent: the fee is rounded to the pesewa, like the server does.
@@ -974,7 +983,7 @@ const LEGAL={
   terms:{title:'Terms of Service',intro:'These terms apply when you use the TRU Data website or Android app (together, "TRU Data") to buy mobile data bundles, fund a wallet or work as a TRU agent. TRU Data is run by TRUTECH BUSINESS in Accra, Ghana. By creating an account or placing an order you agree to these terms.',sections:[
     ['1. The service','TRU Data lets you buy MTN, Telecel and AirtelTigo data bundles for any Ghana number from a prepaid wallet. TRU Data is an independent reseller. We are <strong>not affiliated with MTN, Telecel or AirtelTigo</strong>, and the bundle itself (speed, coverage, validity, expiry) is provided by the network under its own terms.'],
     ['2. Your account','You must give a real name, a working email address and a Ghana phone number. Keep your password private: you are responsible for everything done with your account. Tell us straight away if you think someone else has used it. One person may not hold several accounts to get around limits or offers.'],
-    ['3. Wallet and payments','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile Money:</strong> send money to the TRU Data MoMo number shown on your wallet page (registered in the name shown there) using your personal reference. Your wallet is credited after we confirm the payment on our statement. Sending to any other number, or without your reference, may delay or prevent crediting.</li><li><strong>Deposit fee:</strong> a fee (currently 3%) is taken off each Mobile Money deposit when it is credited, to cover the charges we pay when we deliver your bundles. For example, if you send GH₵41.00, GH₵39.77 is added to your wallet. The current fee and the amount you will receive are shown on your wallet page before you send.</li><li><strong>Card / Paystack</strong> (when available): a processing fee of 3.5% is added and shown before you pay. Your wallet is credited once Paystack confirms the payment.</li><li>Wallet money can only be used to buy bundles on TRU Data. It does not earn interest and is not a bank account.</li><li>If we credit your wallet by mistake, we may remove that amount.</li></ul>'],
+    ['3. Wallet and payments','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile Money:</strong> send money to the TRU Data MoMo number shown on your wallet page (registered in the name shown there) using your personal reference. Your wallet is credited after we confirm the payment on our statement. Sending to any other number, or without your reference, may delay or prevent crediting.</li><li><strong>Deposit fee:</strong> a fee (currently 3%) is taken off each Mobile Money deposit when it is credited, to cover the charges we pay when we deliver your bundles. For example, if you send GH₵41.00, GH₵39.77 is added to your wallet. The current fee and the amount you will receive are shown on your wallet page before you send.</li><li><strong>Online payments</strong> (card or mobile money through our payment provider Paystack, when available): a payment fee (currently 3.5%) is added and shown before you pay, so that the full amount you chose reaches your wallet. Your wallet is credited once Paystack confirms the payment.</li><li>Wallet money can only be used to buy bundles on TRU Data. It does not earn interest and is not a bank account.</li><li>If we credit your wallet by mistake, we may remove that amount.</li></ul>'],
     ['4. Orders and delivery','Check the phone number before you confirm: bundles are sent to the number you enter and <strong>cannot be moved to another number</strong> once delivered. Most orders are delivered within minutes, but delivery can take longer when a network is busy or down. Prices shown at checkout are the prices you pay; we may change prices for future orders at any time.'],
     ['5. Refunds and complaints','<ul class="list-disc pl-5 space-y-1"><li>If an order cannot be delivered, or we cancel it, the amount is refunded to your TRU Data wallet.</li><li>If a delivered bundle did not arrive or is wrong, report it from <em>My Orders</em> within <strong>36 hours of delivery</strong>. Reports after that window cannot be investigated.</li><li>We do not refund orders sent to a wrong number you entered, or bundles already used.</li><li>Wallet balances are not normally paid back out as cash. Contact us if you have a special case.</li></ul>'],
     ['6. Agents','<ul class="list-disc pl-5 space-y-1"><li>Agent accounts are approved by us and may be refused, suspended or closed, for example for misuse, complaints from customers or false details.</li><li>Agents set their profit on top of the agent base price. Saved prices are locked; changes need an approved price-change request.</li><li>Agents earn profit only on orders placed by other customers through their own link. Orders an agent places for themselves earn no profit.</li><li>Withdrawals: minimum ₵10, during the withdrawal window (normally Monday to Thursday, 8AM to 12PM), with a 1% fee deducted. We may hold or reverse profit from orders that were refunded, cancelled or fraudulent.</li><li>Agents must not misrepresent TRU Data, the networks or prices to their customers.</li></ul>'],
@@ -1083,10 +1092,11 @@ function loadPaystackScript(){
 }
 async function loadPaymentSettings(){
   try{
-    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent']);
+    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent','online_fee_percent']);
     const m=Object.fromEntries((data||[]).map(r=>[r.key,r.value]));
     setMomo(typeof m.momo_number==='string'?m.momo_number:null,typeof m.momo_name==='string'?m.momo_name:null,
       typeof m.momo_network==='string'?m.momo_network:null,typeof m.deposit_fee_percent==='number'?m.deposit_fee_percent:null);
+    if(typeof m.online_fee_percent==='number'&&m.online_fee_percent>=0&&m.online_fee_percent<=10) ONLINE_FEE=m.online_fee_percent;
     state.paystackEnabled=m.paystack_enabled===true;
     state.paystackPublicKey=typeof m.paystack_public_key==='string'?m.paystack_public_key:'';
     if(state.paystackEnabled) loadPaystackScript().catch(()=>{});
@@ -1794,7 +1804,7 @@ function renderWallet(){
   const balance=state.userProfile?parseFloat(state.userProfile.balance||0):0;
   const code=state.userProfile?.deposit_code||'';
   const method=state.paystackEnabled&&state.depositMethod==='paystack'?'paystack':'momo';
-  const methodTabs=state.paystackEnabled?`<div class="flex gap-2 mb-6"><button onclick="state.depositMethod='momo';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='momo'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Mobile Money</button><button onclick="state.depositMethod='paystack';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='paystack'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Card / Paystack</button></div>`:'';
+  const methodTabs=state.paystackEnabled?`<div class="flex gap-2 mb-6"><button onclick="state.depositMethod='momo';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='momo'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Mobile Money</button><button onclick="state.depositMethod='paystack';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='paystack'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Online</button></div>`:'';
   const momo=`<div class="space-y-5">
     <div data-bind="deposit-fee-box" class="rounded-2xl p-4 border border-red-200" style="background:linear-gradient(135deg,#FFF5F5,#FFE4E4);${DEPOSIT_FEE>0?'':'display:none'}">
       <p class="text-sm font-black text-red-800">A <span data-bind="deposit-fee">${pctText(DEPOSIT_FEE)}</span> fee is taken off every deposit</p>
@@ -1822,7 +1832,7 @@ function renderWallet(){
     </div>
     <div><h4 class="text-sm font-black mb-2">Your deposit requests</h4><div id="deposit-requests-list" class="space-y-2">${SK.list(2,40)}</div></div>
   </div>`;
-  const paystack=`<div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label><input type="number" id="deposit-amount" min="5" step="0.01" oninput="updateDepositCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div><div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Deposit Amount:</span><span class="font-bold" id="calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Processing Fee (3.50%):</span><span class="font-bold" id="calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span></div></div><button onclick="initiateDeposit()" id="deposit-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"><span>Pay with Paystack</span></button><p class="text-xs text-muted-theme">Card and mobile money via Paystack. Credited instantly after payment.</p></div>`;
+  const paystack=`<div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to add to your wallet (₵)</label><input type="number" id="deposit-amount" min="5" step="0.01" oninput="updateDepositCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div><div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Added to your wallet:</span><span class="font-bold" id="calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Online payment fee (<span id="online-fee-label">${pctText(ONLINE_FEE)}</span>):</span><span class="font-bold" id="calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span></div></div><button onclick="initiateDeposit()" id="deposit-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"><span>Pay online</span></button><p class="text-xs text-muted-theme">Pay with card or mobile money online. The full amount you enter is added to your wallet straight after payment; the fee covers the payment provider's charge.</p></div>`;
   return`<div class="app-tight max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn"><div class="app-hide mb-8"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Home</button></div><div class="grid md:grid-cols-2 gap-8"><div class="wallet-card animate-scale-in self-start"><div class="wallet-label">Current Balance</div><div class="wallet-balance" data-bind="balance" data-dark="1">${state.userProfile?'₵'+balance.toFixed(2):SK.money(true)}</div><div class="mt-4 flex items-center gap-2 text-sm opacity-90"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Available for purchases</div></div><div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode:both;"><h3 class="text-xl font-black mb-6">Add Funds</h3>${methodTabs}${method==='paystack'?paystack:momo}</div></div><div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode:both;"><h3 class="text-xl font-black mb-6">Recent Transactions</h3><div class="space-y-4" id="transaction-list">${SK.list(3)}</div></div><div class="mt-8 card-theme p-6 md:p-8 rounded-3xl border border-red-100"><h3 class="text-lg font-black mb-1">Delete my account</h3><p class="text-sm text-muted-theme mb-4">Ask for your account and everything in it to be deleted. The admin reviews each request.</p><div id="my-deletion">${SK.bar('60%',40)}</div></div></div>`;
 }
 // The request shows up in the list straight away as "Checking"; it is removed
@@ -1879,7 +1889,7 @@ async function loadMyDepositRequests(){
   await paint('deposit-requests-list','my-deposits',fetchMyDeposits,myDepositsHtml,SK.list(2,40),()=>'<p class="text-xs text-red-500">Could not load deposit requests.</p>');
 }
 function updateDepositCalculation(amount){
-  const n=parseFloat(amount)||0,fee=n*0.035,total=n+fee;
+  const c=onlineCharge(amount),n=c.amount,fee=c.fee,total=c.total;
   const ae=document.getElementById('calc-amount'),fe=document.getElementById('calc-fee'),te=document.getElementById('calc-total'),btn=document.getElementById('deposit-btn');
   if(ae) ae.textContent=`₵${n.toFixed(2)}`;
   if(fe) fe.textContent=`₵${fee.toFixed(2)}`;
@@ -1961,14 +1971,14 @@ async function handleForgotPassword(e){
   catch(err){showToast(''+(err.message||'Failed to send reset email'),4000,'error');}
 }
 async function initiateDeposit(){
-  if(!state.paystackEnabled||!state.paystackPublicKey){showToast('Card payments are currently unavailable. Please pay with Mobile Money.',4000,'error');return;}
+  if(!state.paystackEnabled||!state.paystackPublicKey){showToast('Online payments are currently unavailable. Please pay with Mobile Money.',4000,'error');return;}
   if(!state.userProfile){showToast('Profile not loaded. Please refresh.',4000,'error');return;}
   const amount=parseFloat(document.getElementById('deposit-amount')?.value);
   if(!amount||amount<5){showToast('Minimum deposit is ₵5.00',3000,'error');return;}
-  const fee=amount*0.035,total=amount+fee;
+  const c=onlineCharge(amount),fee=c.fee,total=c.total;
   try{
     await loadPaystackScript();
-    const handler=PaystackPop.setup({key:state.paystackPublicKey,email:state.user.email,amount:Math.round(total*100),currency:'GHS',metadata:{user_id:state.user.id,custom_fields:[{display_name:"Deposit Type",variable_name:"deposit_type",value:"wallet_funding"},{display_name:"Net Amount",variable_name:"net_amount",value:amount.toFixed(2)},{display_name:"Fee",variable_name:"fee",value:fee.toFixed(2)}]},callback:(r)=>processDeposit(r,amount,fee),onClose:()=>showToast('Payment window closed',3000,'info')});
+    const handler=PaystackPop.setup({key:state.paystackPublicKey,email:state.user.email,amount:Math.round(total*100),currency:'GHS',metadata:{user_id:state.user.id,fee_method:'gross_up',custom_fields:[{display_name:"Deposit Type",variable_name:"deposit_type",value:"wallet_funding"},{display_name:"Net Amount",variable_name:"net_amount",value:c.amount.toFixed(2)},{display_name:"Fee",variable_name:"fee",value:fee.toFixed(2)}]},callback:(r)=>processDeposit(r,c.amount,fee),onClose:()=>showToast('Payment window closed',3000,'info')});
     handler.openIframe();
   }catch(err){showToast('Payment initialization failed.',4000,'error');}
 }
@@ -2365,7 +2375,7 @@ function renderAdminDepositsTab(){
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Credit a wallet by reference</h2><p class="text-xs text-muted-theme mb-4">For payments that came in without a request. The reference is the TRU… code the customer used.</p>
       <div class="grid md:grid-cols-4 gap-3"><input id="cr-code" type="text" maxlength="12" placeholder="TRU4F9A2C" class="p-3 border-2 rounded-xl font-bold uppercase"><input id="cr-amount" type="number" min="0.01" step="0.01" placeholder="Amount (₵)" class="p-3 border-2 rounded-xl font-bold"><input id="cr-txn" type="text" maxlength="40" placeholder="MoMo transaction ID" class="p-3 border-2 rounded-xl font-bold"><button id="cr-btn" onclick="adminCreditWallet()" class="bg-green-600 text-white rounded-xl font-black py-3">Credit Wallet</button></div>
       <p class="text-xs text-muted-theme mt-2">The same MoMo transaction ID can only be credited once.</p></div>
-    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Paystack</h2><p class="text-xs text-muted-theme mb-4">When on, customers also see a "Card / Paystack" option on their wallet page.</p><div id="admin-paystack-settings">${SK.form(3)}</div></div>
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Paystack</h2><p class="text-xs text-muted-theme mb-4">When on, customers also see an "Online" option (card or mobile money through Paystack) on their wallet page.</p><div id="admin-paystack-settings">${SK.form(3)}</div></div>
   </div>`;
 }
 /* ===== ACCOUNT DELETION (customers and agents) =====
@@ -2763,7 +2773,8 @@ async function adminCreditWallet(){
 function adminPaystackHtml(d){
   const on=d.enabled,status=d.status||{set:false};
   return`<div class="space-y-4">
-    <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4"><div><div class="font-black">Paystack payments are ${on?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${on?'Customers can pay by card / Paystack.':'Customers only see Mobile Money instructions.'}</div></div><button onclick="adminTogglePaystack()" class="px-5 py-2.5 rounded-xl font-black text-white ${on?'bg-slate-600':'bg-green-600'}">${on?'Turn Off':'Turn On'}</button></div>
+    <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4"><div><div class="font-black">Online payments (Paystack) are ${on?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${on?'Customers can pay online (card or mobile money).':'Customers only see Mobile Money instructions.'}</div></div><button onclick="adminTogglePaystack()" class="px-5 py-2.5 rounded-xl font-black text-white ${on?'bg-slate-600':'bg-green-600'}">${on?'Turn Off':'Turn On'}</button></div>
+    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Online payment fee (%)</label><div class="flex gap-2"><input id="ps-fee" type="number" min="0" max="10" step="0.01" value="${esc(ONLINE_FEE)}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-bold"><button onclick="adminSaveOnlineFee()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">Set this to the percentage Paystack charges you. Customers pay deposit ÷ (1 − fee), so after Paystack takes its cut you receive exactly what is credited. Example at ${pctText(ONLINE_FEE)}: to add ₵100.00 they pay ₵${onlineCharge(100).total.toFixed(2)}.</p></div>
     <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Public key</label><div class="flex gap-2"><input id="ps-public" type="text" value="${esc(d.publicKey||'')}" placeholder="pk_live_..." class="flex-1 min-w-0 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSavePaystackPublicKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div></div>
     <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Secret key</label><div class="flex gap-2"><input id="ps-secret" type="password" autocomplete="off" placeholder="${status.set?'Saved (ends in '+esc(status.last4)+'). Paste a new one to replace it':'sk_live_...'}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSavePaystackSecretKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">${status.set?`Secret key saved (${esc(status.mode)} mode, ends in ${esc(status.last4)}).`:'No secret key saved yet. Paystack deposits cannot be confirmed until you add one.'} It is stored privately and never shown again.</p></div>
   </div>`;
@@ -2773,6 +2784,15 @@ async function loadAdminPaystackSettings(){
     const[,st]=await Promise.all([loadPaymentSettings(),supa.rpc('paystack_secret_key_status').then(r=>r.data).catch(()=>null)]);
     return{enabled:state.paystackEnabled,publicKey:state.paystackPublicKey,status:st||{set:false}};
   },adminPaystackHtml,SK.form(3));
+}
+async function adminSaveOnlineFee(){
+  const fee=Math.round(parseFloat(document.getElementById('ps-fee')?.value)*100)/100;
+  if(!(fee>=0&&fee<=10)){showToast('The online fee must be between 0 and 10%',4000,'error');return;}
+  const before=ONLINE_FEE;ONLINE_FEE=fee;
+  const{error}=await supa.from('app_settings').upsert({key:'online_fee_percent',value:fee,updated_at:new Date().toISOString()});
+  if(error){ONLINE_FEE=before;showToast('Save failed: '+error.message,4000,'error');return;}
+  repaint('admin-paystack');
+  showToast(`Online fee saved: ${pctText(fee)}. To add ₵100.00 customers now pay ₵${onlineCharge(100).total.toFixed(2)}.`,5000,'success');
 }
 async function adminTogglePaystack(){
   const next=!state.paystackEnabled;
@@ -3779,6 +3799,7 @@ function onSettingChange(row){
   if(!row||!row.key) return;
   if(row.key==='withdrawal_override'){state.withdrawalOverride=row.value===true;paintWithdrawWindow();paintHtml('admin-wd-window',adminWindowHtml());}
   else if(row.key.startsWith('paystack')) soon('pay',()=>refreshPaymentSettings(true));
+  else if(row.key==='online_fee_percent'&&typeof row.value==='number'){ONLINE_FEE=row.value;paintHtml('online-fee-label',pctText(ONLINE_FEE));const i=document.getElementById('deposit-amount');updateDepositCalculation(i?i.value:0);}
   else if(row.key==='momo_number'&&typeof row.value==='string') setMomo(row.value,null);
   else if(row.key==='momo_name'&&typeof row.value==='string') setMomo(null,row.value);
   else if(row.key==='momo_network'&&typeof row.value==='string') setMomo(null,null,row.value);
@@ -3900,7 +3921,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
    Every action shows a spinner on the tapped button at once and ignores
    repeated taps until it has finished. */
 ['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
- 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack',
+ 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee',
  'adminToggleWithdrawalOverride','saveAnnouncement','saveAdminAgentBasePrice','saveEditAgentPrice','globalToggleAgentPriceLock','toggleRowPriceLock',
  'toggleAgentBasePrice','deleteAgentBasePrice','registerAsAgent','reapplyAsAgent','requestPriceUnlock','saveAgentProfit','submitWithdrawal',
  'adminApproveDeposit','adminRejectDeposit','adminApprovePriceUnlock','adminRejectPriceUnlock','adminLockAgentPricing','processWithdrawal',
