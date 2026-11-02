@@ -640,12 +640,31 @@ const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 // these are only the values used until the saved ones have loaded.
 let MOMO_NUMBER='0505175472';
 let MOMO_NAME='GEORGE DANQUAH DORDZIE';
-try{const m=JSON.parse(localStorage.getItem('tru:momo')||'null');if(m&&m.number){MOMO_NUMBER=m.number;MOMO_NAME=m.name||MOMO_NAME;}}catch(e){}
-function setMomo(number,name){
+// Network of that number, and the fee taken off Mobile Money deposits (percent).
+let MOMO_NETWORK='Telecel';
+let DEPOSIT_FEE=3;
+const MOMO_NETWORK_LABEL={MTN:'MTN MoMo',Telecel:'Telecel Cash',AirtelTigo:'AirtelTigo Money'};
+try{const m=JSON.parse(localStorage.getItem('tru:momo')||'null');if(m&&m.number){MOMO_NUMBER=m.number;MOMO_NAME=m.name||MOMO_NAME;if(MOMO_NETWORK_LABEL[m.network]) MOMO_NETWORK=m.network;if(typeof m.fee==='number') DEPOSIT_FEE=m.fee;}}catch(e){}
+function momoNetworkLabel(){return MOMO_NETWORK_LABEL[MOMO_NETWORK]||MOMO_NETWORK;}
+function pctText(p){return String(Math.round(Number(p||0)*100)/100)+'%';}
+// What is credited for an amount sent: the fee is rounded to the pesewa, like the server does.
+function depositAfterFee(amount,pct){
+  const a=Math.round((Number(amount)||0)*100)/100,fee=Math.round(a*Number(pct||0))/100;
+  return{amount:a,fee,credit:Math.round((a-fee)*100)/100};
+}
+function feeExampleText(){const x=depositAfterFee(41,DEPOSIT_FEE);return`Example: send ₵41.00, we credit ₵${x.credit.toFixed(2)} (₵${x.fee.toFixed(2)} fee).`;}
+function setMomo(number,name,network,fee){
   if(number) MOMO_NUMBER=number;if(name) MOMO_NAME=name;
-  try{localStorage.setItem('tru:momo',JSON.stringify({number:MOMO_NUMBER,name:MOMO_NAME}));}catch(e){}
+  if(network&&MOMO_NETWORK_LABEL[network]) MOMO_NETWORK=network;
+  if(typeof fee==='number'&&fee>=0) DEPOSIT_FEE=fee;
+  try{localStorage.setItem('tru:momo',JSON.stringify({number:MOMO_NUMBER,name:MOMO_NAME,network:MOMO_NETWORK,fee:DEPOSIT_FEE}));}catch(e){}
   document.querySelectorAll('[data-bind=momo-number]').forEach(el=>{el.textContent=MOMO_NUMBER;});
   document.querySelectorAll('[data-bind=momo-name]').forEach(el=>{el.textContent=MOMO_NAME;});
+  document.querySelectorAll('[data-bind=momo-network]').forEach(el=>{el.textContent=momoNetworkLabel();});
+  document.querySelectorAll('[data-bind=deposit-fee]').forEach(el=>{el.textContent=pctText(DEPOSIT_FEE);});
+  document.querySelectorAll('[data-bind=deposit-fee-example]').forEach(el=>{el.textContent=feeExampleText();});
+  document.querySelectorAll('[data-bind=deposit-fee-box]').forEach(el=>{el.style.display=DEPOSIT_FEE>0?'':'none';});
+  if(typeof paintMomoFee==='function') paintMomoFee();
 }
 // "Keep me signed in" (on by default) keeps the session in localStorage so it
 // survives closing the browser; when it is off the session lives in
@@ -949,13 +968,13 @@ function downloadLatestApk(e){
 }
 
 /* ===== TERMS OF SERVICE AND PRIVACY POLICY ===== */
-const LEGAL_UPDATED='31 October 2026';
-const LEGAL_VERSION='2026-10-31';
+const LEGAL_UPDATED='2 November 2026';
+const LEGAL_VERSION='2026-11-02';
 const LEGAL={
   terms:{title:'Terms of Service',intro:'These terms apply when you use the TRU Data website or Android app (together, "TRU Data") to buy mobile data bundles, fund a wallet or work as a TRU agent. TRU Data is run by TRUTECH BUSINESS in Accra, Ghana. By creating an account or placing an order you agree to these terms.',sections:[
     ['1. The service','TRU Data lets you buy MTN, Telecel and AirtelTigo data bundles for any Ghana number from a prepaid wallet. TRU Data is an independent reseller. We are <strong>not affiliated with MTN, Telecel or AirtelTigo</strong>, and the bundle itself (speed, coverage, validity, expiry) is provided by the network under its own terms.'],
     ['2. Your account','You must give a real name, a working email address and a Ghana phone number. Keep your password private: you are responsible for everything done with your account. Tell us straight away if you think someone else has used it. One person may not hold several accounts to get around limits or offers.'],
-    ['3. Wallet and payments','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile Money:</strong> send money to the TRU Data MoMo number shown on your wallet page (registered in the name shown there) using your personal reference. Your wallet is credited after we confirm the payment on our statement. Sending to any other number, or without your reference, may delay or prevent crediting.</li><li><strong>Card / Paystack</strong> (when available): a processing fee of 3.5% is added and shown before you pay. Your wallet is credited once Paystack confirms the payment.</li><li>Wallet money can only be used to buy bundles on TRU Data. It does not earn interest and is not a bank account.</li><li>If we credit your wallet by mistake, we may remove that amount.</li></ul>'],
+    ['3. Wallet and payments','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile Money:</strong> send money to the TRU Data MoMo number shown on your wallet page (registered in the name shown there) using your personal reference. Your wallet is credited after we confirm the payment on our statement. Sending to any other number, or without your reference, may delay or prevent crediting.</li><li><strong>Deposit fee:</strong> a fee (currently 3%) is taken off each Mobile Money deposit when it is credited, to cover the charges we pay when we deliver your bundles. For example, if you send GH₵41.00, GH₵39.77 is added to your wallet. The current fee and the amount you will receive are shown on your wallet page before you send.</li><li><strong>Card / Paystack</strong> (when available): a processing fee of 3.5% is added and shown before you pay. Your wallet is credited once Paystack confirms the payment.</li><li>Wallet money can only be used to buy bundles on TRU Data. It does not earn interest and is not a bank account.</li><li>If we credit your wallet by mistake, we may remove that amount.</li></ul>'],
     ['4. Orders and delivery','Check the phone number before you confirm: bundles are sent to the number you enter and <strong>cannot be moved to another number</strong> once delivered. Most orders are delivered within minutes, but delivery can take longer when a network is busy or down. Prices shown at checkout are the prices you pay; we may change prices for future orders at any time.'],
     ['5. Refunds and complaints','<ul class="list-disc pl-5 space-y-1"><li>If an order cannot be delivered, or we cancel it, the amount is refunded to your TRU Data wallet.</li><li>If a delivered bundle did not arrive or is wrong, report it from <em>My Orders</em> within <strong>36 hours of delivery</strong>. Reports after that window cannot be investigated.</li><li>We do not refund orders sent to a wrong number you entered, or bundles already used.</li><li>Wallet balances are not normally paid back out as cash. Contact us if you have a special case.</li></ul>'],
     ['6. Agents','<ul class="list-disc pl-5 space-y-1"><li>Agent accounts are approved by us and may be refused, suspended or closed, for example for misuse, complaints from customers or false details.</li><li>Agents set their profit on top of the agent base price. Saved prices are locked; changes need an approved price-change request.</li><li>Agents earn profit only on orders placed by other customers through their own link. Orders an agent places for themselves earn no profit.</li><li>Withdrawals: minimum ₵10, during the withdrawal window (normally Monday to Thursday, 8AM to 12PM), with a 1% fee deducted. We may hold or reverse profit from orders that were refunded, cancelled or fraudulent.</li><li>Agents must not misrepresent TRU Data, the networks or prices to their customers.</li></ul>'],
@@ -1064,9 +1083,10 @@ function loadPaystackScript(){
 }
 async function loadPaymentSettings(){
   try{
-    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name']);
+    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent']);
     const m=Object.fromEntries((data||[]).map(r=>[r.key,r.value]));
-    if(typeof m.momo_number==='string') setMomo(m.momo_number,typeof m.momo_name==='string'?m.momo_name:null);
+    setMomo(typeof m.momo_number==='string'?m.momo_number:null,typeof m.momo_name==='string'?m.momo_name:null,
+      typeof m.momo_network==='string'?m.momo_network:null,typeof m.deposit_fee_percent==='number'?m.deposit_fee_percent:null);
     state.paystackEnabled=m.paystack_enabled===true;
     state.paystackPublicKey=typeof m.paystack_public_key==='string'?m.paystack_public_key:'';
     if(state.paystackEnabled) loadPaystackScript().catch(()=>{});
@@ -1776,9 +1796,15 @@ function renderWallet(){
   const method=state.paystackEnabled&&state.depositMethod==='paystack'?'paystack':'momo';
   const methodTabs=state.paystackEnabled?`<div class="flex gap-2 mb-6"><button onclick="state.depositMethod='momo';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='momo'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Mobile Money</button><button onclick="state.depositMethod='paystack';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method==='paystack'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Card / Paystack</button></div>`:'';
   const momo=`<div class="space-y-5">
+    <div data-bind="deposit-fee-box" class="rounded-2xl p-4 border border-red-200" style="background:linear-gradient(135deg,#FFF5F5,#FFE4E4);${DEPOSIT_FEE>0?'':'display:none'}">
+      <p class="text-sm font-black text-red-800">A <span data-bind="deposit-fee">${pctText(DEPOSIT_FEE)}</span> fee is taken off every deposit</p>
+      <p class="text-xs text-red-700 mt-1">It covers the charges we pay when we deliver your bundles. The fee comes off the amount you send when your deposit is credited.</p>
+      <p class="text-xs font-bold text-red-800 mt-1" data-bind="deposit-fee-example">${feeExampleText()}</p>
+    </div>
     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
       <p class="text-xs font-black uppercase text-amber-700 mb-3">Step 1 · Send Mobile Money to</p>
       <div class="flex items-center justify-between gap-3 mb-2"><span class="text-2xl font-black tracking-wide" data-bind="momo-number">${esc(MOMO_NUMBER)}</span><button onclick="copyText(MOMO_NUMBER,'Number')" class="text-xs font-bold bg-white border border-amber-300 px-3 py-1.5 rounded-lg">Copy</button></div>
+      <p class="text-sm mb-1">Network: <strong data-bind="momo-network">${esc(momoNetworkLabel())}</strong></p>
       <p class="text-sm">Name that will show: <strong data-bind="momo-name">${esc(MOMO_NAME)}</strong></p>
       <p class="text-xs text-amber-800 mt-1">Check this name appears before you confirm the transfer.</p>
     </div>
@@ -1788,11 +1814,11 @@ function renderWallet(){
     </div>
     <div class="border border-slate-200 rounded-2xl p-4 space-y-3">
       <p class="text-xs font-black uppercase text-slate-500">Step 3 · Tell us you have sent it</p>
-      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Amount sent (₵)</label><input type="number" id="momo-amount" min="5" step="0.01" class="w-full p-3 border-2 rounded-xl text-lg font-black focus:border-red-600 outline-none" placeholder="0.00"></div>
+      <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Amount sent (₵)</label><input type="number" id="momo-amount" min="5" step="0.01" oninput="paintMomoFee()" class="w-full p-3 border-2 rounded-xl text-lg font-black focus:border-red-600 outline-none" placeholder="0.00"><p id="momo-fee-calc" class="text-xs font-semibold text-slate-600 mt-1"></p></div>
       <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">MoMo transaction ID (from your SMS)</label><input type="text" id="momo-txn" maxlength="40" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none" placeholder="e.g. 51234567890"></div>
       <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Number you sent from</label><input type="tel" id="momo-sender" maxlength="10" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none" placeholder="024xxxxxxx"></div>
       <button id="momo-submit-btn" onclick="submitDepositRequest()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50">I've Sent the Money</button>
-      <p class="text-xs text-muted-theme">Your wallet is credited as soon as we confirm the payment. No processing fee.</p>
+      <p class="text-xs text-muted-theme">Your wallet is credited as soon as we confirm the payment<span data-bind="deposit-fee-box" style="${DEPOSIT_FEE>0?'':'display:none'}">, less the <span data-bind="deposit-fee">${pctText(DEPOSIT_FEE)}</span> fee</span>.</p>
     </div>
     <div><h4 class="text-sm font-black mb-2">Your deposit requests</h4><div id="deposit-requests-list" class="space-y-2">${SK.list(2,40)}</div></div>
   </div>`;
@@ -1808,9 +1834,10 @@ async function submitDepositRequest(){
   if(!amount||amount<5){showToast('Minimum deposit is ₵5.00',3000,'error');return;}
   if(!txn){showToast('Enter the MoMo transaction ID from your SMS',3000,'error');return;}
   if(sender){const v=validateGhanaPhone(sender);if(!v.isValid){showToast(v.error,3000,'error');return;}}
+  if(DEPOSIT_FEE>0){const x=depositAfterFee(amount,DEPOSIT_FEE);if(!confirm(`You sent ₵${x.amount.toFixed(2)}.\n\nA ${pctText(DEPOSIT_FEE)} fee (₵${x.fee.toFixed(2)}) is taken off, so ₵${x.credit.toFixed(2)} will be added to your wallet once we confirm the payment.\n\nSubmit?`)) return;}
   const tempId='tmp-'+Date.now();
   if(!viewCache.has('my-deposits')) viewCache.set('my-deposits',[]);
-  const undo=mutate('my-deposits',list=>[{id:tempId,amount,momo_txn_id:txn.toUpperCase(),status:'pending',created_at:new Date().toISOString(),_pending:true},...list]);
+  const undo=mutate('my-deposits',list=>[{id:tempId,amount,fee_percent:DEPOSIT_FEE,momo_txn_id:txn.toUpperCase(),status:'pending',created_at:new Date().toISOString(),_pending:true},...list]);
   const fields=['momo-amount','momo-txn','momo-sender'].map(id=>document.getElementById(id));
   const saved=fields.map(el=>el?el.value:'');
   fields.forEach(el=>{if(el) el.value='';});
@@ -1825,13 +1852,24 @@ async function submitDepositRequest(){
     showToast(err.message||'Could not submit. Please try again.',5000,'error');
   }
 }
+// Under the amount box: the fee and what will be credited.
+function paintMomoFee(){
+  const el=document.getElementById('momo-fee-calc'),inp=document.getElementById('momo-amount');if(!el||!inp) return;
+  const x=depositAfterFee(inp.value,DEPOSIT_FEE);
+  el.textContent=x.amount>0?(DEPOSIT_FEE>0?`Fee ${pctText(DEPOSIT_FEE)}: ₵${x.fee.toFixed(2)} · You will receive ₵${x.credit.toFixed(2)}`:`You will receive ₵${x.amount.toFixed(2)}`):'';
+}
 function myDepositsHtml(data){
   if(!data||!data.length) return '<p class="text-xs text-muted-theme">No deposit requests yet.</p>';
   const badge=st=>st==='approved'?'<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Credited</span>':st==='rejected'?'<span class="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">Not found</span>':'<span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Checking</span>';
-  return data.map(r=>`<div class="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2 text-sm ${r._pending?'row-pending':''}"><div><span class="font-bold">₵${parseFloat(r.credited_amount??r.amount).toFixed(2)}</span> <span class="text-xs text-muted-theme">${esc(r.momo_txn_id||'')} · ${new Date(r.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'short'})}</span>${r.status==='rejected'&&r.admin_note?`<div class="text-xs text-red-600">${esc(r.admin_note)}</div>`:''}</div>${badge(r.status)}</div>`).join('');
+  const detail=r=>{
+    if(r.status==='approved'&&Number(r.fee_amount)>0) return`<div class="text-xs text-slate-600">₵${parseFloat(r.amount).toFixed(2)} sent, less ₵${parseFloat(r.fee_amount).toFixed(2)} fee</div>`;
+    if(r.status==='pending'&&Number(r.fee_percent)>0){const x=depositAfterFee(r.amount,r.fee_percent);return`<div class="text-xs text-slate-600">₵${x.amount.toFixed(2)} sent · you will receive ₵${x.credit.toFixed(2)} after the ${pctText(r.fee_percent)} fee</div>`;}
+    return'';
+  };
+  return data.map(r=>`<div class="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2 text-sm ${r._pending?'row-pending':''}"><div><span class="font-bold">₵${parseFloat(r.status==='approved'?(r.credited_amount??r.amount):r.amount).toFixed(2)}</span> <span class="text-xs text-muted-theme">${esc(r.momo_txn_id||'')} · ${new Date(r.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'short'})}</span>${detail(r)}${r.status==='rejected'&&r.admin_note?`<div class="text-xs text-red-600">${esc(r.admin_note)}</div>`:''}</div>${badge(r.status)}</div>`).join('');
 }
 async function fetchMyDeposits(){
-  const{data,error}=await supa.from('deposit_requests').select('id,amount,credited_amount,momo_txn_id,status,admin_note,created_at').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(10);
+  const{data,error}=await supa.from('deposit_requests').select('id,amount,credited_amount,fee_percent,fee_amount,momo_txn_id,status,admin_note,created_at').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(10);
   if(error) throw error;
   remember('deposit_requests',data,'status');
   return data;
@@ -2320,8 +2358,9 @@ async function updateAgentStatus(id,status){
 function renderAdminDepositsTab(){
   return`<div class="space-y-6">
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Mobile Money details customers pay to</h2><p class="text-xs text-muted-theme mb-4">Shown on every customer's wallet page. Changes show straight away.</p>
-      <div class="grid md:grid-cols-3 gap-3"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">MoMo number</label><input id="momo-set-number" type="tel" maxlength="10" value="${esc(MOMO_NUMBER)}" class="w-full p-3 border-2 rounded-xl font-bold"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Name on the account</label><input id="momo-set-name" type="text" maxlength="60" value="${esc(MOMO_NAME)}" class="w-full p-3 border-2 rounded-xl font-bold uppercase"></div><div class="flex items-end"><button onclick="adminSaveMomoDetails()" class="w-full bg-slate-900 text-white rounded-xl font-black py-3">Save details</button></div></div>
-      <p class="text-xs text-muted-theme mt-2">Check the name exactly as it shows when someone sends money to the number.</p></div>
+      <div class="grid md:grid-cols-2 gap-3"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">MoMo number</label><input id="momo-set-number" type="tel" maxlength="10" value="${esc(MOMO_NUMBER)}" class="w-full p-3 border-2 rounded-xl font-bold"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Network</label><select id="momo-set-network" class="w-full p-3 border-2 rounded-xl font-bold bg-white">${Object.entries(MOMO_NETWORK_LABEL).map(([k,l])=>`<option value="${k}" ${k===MOMO_NETWORK?'selected':''}>${l}</option>`).join('')}</select></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Name on the account</label><input id="momo-set-name" type="text" maxlength="60" value="${esc(MOMO_NAME)}" class="w-full p-3 border-2 rounded-xl font-bold uppercase"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Deposit fee (%)</label><input id="momo-set-fee" type="number" min="0" max="10" step="0.1" value="${esc(DEPOSIT_FEE)}" class="w-full p-3 border-2 rounded-xl font-bold"></div></div>
+      <button onclick="adminSaveMomoDetails()" class="mt-3 w-full md:w-auto px-8 bg-slate-900 text-white rounded-xl font-black py-3">Save details</button>
+      <p class="text-xs text-muted-theme mt-2">Check the name exactly as it shows when someone sends money to the number. The fee is taken off each new Mobile Money deposit when you approve it, and customers see it before they send. Requests already sent keep the fee they were shown.</p></div>
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Mobile Money deposits waiting for review</h2><p class="text-xs text-muted-theme mb-4">Check each one against your MoMo statement for <span data-bind="momo-number">${esc(MOMO_NUMBER)}</span>, then approve to credit the customer's wallet.</p><div id="admin-deposit-requests">${SK.table(6,3)}</div></div>
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Credit a wallet by reference</h2><p class="text-xs text-muted-theme mb-4">For payments that came in without a request. The reference is the TRU… code the customer used.</p>
       <div class="grid md:grid-cols-4 gap-3"><input id="cr-code" type="text" maxlength="12" placeholder="TRU4F9A2C" class="p-3 border-2 rounded-xl font-bold uppercase"><input id="cr-amount" type="number" min="0.01" step="0.01" placeholder="Amount (₵)" class="p-3 border-2 rounded-xl font-bold"><input id="cr-txn" type="text" maxlength="40" placeholder="MoMo transaction ID" class="p-3 border-2 rounded-xl font-bold"><button id="cr-btn" onclick="adminCreditWallet()" class="bg-green-600 text-white rounded-xl font-black py-3">Credit Wallet</button></div>
@@ -2496,15 +2535,19 @@ async function adminSaveMomoDetails(){
   const name=(document.getElementById('momo-set-name')?.value||'').trim().toUpperCase();
   if(!/^0[2-5][0-9]{8}$/.test(number)){showToast('Enter a 10-digit MoMo number, like 0505175472',4000,'error');return;}
   if(name.length<3){showToast('Enter the name on the MoMo account',4000,'error');return;}
-  if(!confirm(`Customers will be told to send money to:\n\n${number}\n${name}\n\nSave these details?`)) return;
-  const before={number:MOMO_NUMBER,name:MOMO_NAME};
-  setMomo(number,name);
+  const network=document.getElementById('momo-set-network')?.value||MOMO_NETWORK;
+  const fee=Math.round(parseFloat(document.getElementById('momo-set-fee')?.value)*100)/100;
+  if(!MOMO_NETWORK_LABEL[network]){showToast('Choose the network of the number',4000,'error');return;}
+  if(!(fee>=0&&fee<=10)){showToast('The deposit fee must be between 0 and 10%',4000,'error');return;}
+  if(!confirm(`Customers will be told to send money to:\n\n${number} (${MOMO_NETWORK_LABEL[network]})\n${name}\n\nDeposit fee: ${pctText(fee)}\n\nSave these details?`)) return;
+  const before={number:MOMO_NUMBER,name:MOMO_NAME,network:MOMO_NETWORK,fee:DEPOSIT_FEE};
+  setMomo(number,name,network,fee);
   try{
     const now=new Date().toISOString();
-    const{error}=await withTimeout(supa.from('app_settings').upsert([{key:'momo_number',value:number,updated_at:now},{key:'momo_name',value:name,updated_at:now}]),15000);
+    const{error}=await withTimeout(supa.from('app_settings').upsert([{key:'momo_number',value:number,updated_at:now},{key:'momo_name',value:name,updated_at:now},{key:'momo_network',value:network,updated_at:now},{key:'deposit_fee_percent',value:fee,updated_at:now}]),15000);
     if(error) throw error;
     showToast('Deposit details saved. Customers see them now.',4000,'success');
-  }catch(err){setMomo(before.number,before.name);showToast('Save failed: '+(err.message||'error'),5000,'error');}
+  }catch(err){setMomo(before.number,before.name,before.network,before.fee);showToast('Save failed: '+(err.message||'error'),5000,'error');}
 }
 
 /* ===== ADMIN: TEXT AN AGENT ===== */
@@ -2568,7 +2611,7 @@ function renderAdminSmsTab(){
   return`<div class="space-y-6">
     ${agentMessageCardHtml()}
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">SMS notifications</h2><p class="text-xs text-muted-theme mb-4">Texts go out through <a href="https://httpsms.com" target="_blank" rel="noopener" class="underline">httpSMS</a> from the Android phone running the httpSMS app, using that phone's SIM airtime.</p><div id="admin-sms-settings">${SK.form(4)}</div></div>
-    <div class="card-theme rounded-2xl p-6"><div class="flex items-center justify-between mb-4"><h2 class="text-lg font-black">Recent messages</h2><button onclick="loadAdminSmsLog()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold">Refresh</button></div><div id="admin-sms-log">${SK.table(4,4)}</div></div>
+    <div class="card-theme rounded-2xl p-6"><div class="flex items-center justify-between mb-4 gap-2 flex-wrap"><h2 class="text-lg font-black">Recent messages</h2><div class="flex gap-2 flex-wrap"><button onclick="adminClearSms('sent')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete sent</button><button onclick="adminClearSms('failed')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete failed</button><button onclick="loadAdminSmsLog()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold">Refresh</button></div></div><div id="admin-sms-log">${SK.table(4,4)}</div></div>
   </div>`;
 }
 async function loadAdminSmsTab(){
@@ -2626,13 +2669,35 @@ async function adminSendTestSms(){
 function adminSmsLogHtml(data){
   if(!data||!data.length) return'<p class="text-sm text-muted-theme text-center py-4">No messages yet.</p>';
   const badge={sent:'bg-green-100 text-green-700',failed:'bg-red-100 text-red-700',pending:'bg-amber-100 text-amber-700',sending:'bg-blue-100 text-blue-700',skipped:'bg-slate-100 text-slate-600'};
-  return`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Time</th><th class="p-3 text-xs font-black uppercase text-slate-500">To</th><th class="p-3 text-xs font-black uppercase text-slate-500">Message</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th></tr></thead><tbody>${data.map(m=>`<tr class="border-b align-top"><td class="p-3 text-xs whitespace-nowrap">${new Date(m.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3 font-mono text-xs whitespace-nowrap">${esc(m.to_phone)}</td><td class="p-3 text-xs">${esc(m.content)}${m.error?`<div class="text-red-500 mt-1">${esc(m.error)}</div>`:''}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${badge[m.status]||''}">${esc(m.status)}</span>${m.status==='failed'||(m.status==='pending'&&m.attempts>0)?`<button data-id="${esc(m.id)}" onclick="adminRetrySms(this.dataset.id)" class="block mt-1 text-xs underline font-bold">Retry</button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+  return`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Time</th><th class="p-3 text-xs font-black uppercase text-slate-500">To</th><th class="p-3 text-xs font-black uppercase text-slate-500">Message</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3"></th></tr></thead><tbody>${data.map(m=>`<tr class="border-b align-top"><td class="p-3 text-xs whitespace-nowrap">${new Date(m.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3 font-mono text-xs whitespace-nowrap">${esc(m.to_phone)}</td><td class="p-3 text-xs">${esc(m.content)}${m.error?`<div class="text-red-500 mt-1">${esc(m.error)}</div>`:''}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${badge[m.status]||''}">${esc(m.status)}</span>${m.status==='failed'||(m.status==='pending'&&m.attempts>0)?`<button data-id="${esc(m.id)}" onclick="adminRetrySms(this.dataset.id)" class="block mt-1 text-xs underline font-bold">Retry</button>`:''}</td><td class="p-3"><button data-id="${esc(m.id)}" onclick="adminDeleteSms(this.dataset.id)" title="${m.status==='pending'||m.status==='sending'?'Cancel and delete':'Delete'}" aria-label="Delete message" class="text-slate-400 hover:text-red-600 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button></td></tr>`).join('')}</tbody></table></div>`;
 }
 async function loadAdminSmsLog(){
   await paint('admin-sms-log','admin-sms-log',async()=>{
     const{data,error}=await supa.from('sms_outbox').select('id,event,to_phone,content,status,attempts,error,created_at').order('created_at',{ascending:false}).limit(50);
     if(error) throw error;return data||[];
   },adminSmsLogHtml,SK.table(4,4),()=>'<p class="text-sm text-red-500">Failed to load messages</p>');
+}
+async function adminDeleteSms(id){
+  const m=(viewCache.get('admin-sms-log')||[]).find(x=>x.id===id);
+  if(m&&(m.status==='pending'||m.status==='sending')&&!confirm('This message has not gone out yet. Delete it so it is not sent?')) return;
+  const undo=mutate('admin-sms-log',list=>list.filter(x=>x.id!==id));
+  try{
+    const{error}=await supa.rpc('admin_delete_sms',{p_ids:[id]});
+    if(error) throw error;
+    showToast('Message deleted',2000,'info');
+  }catch(err){undo();showToast('Delete failed: '+(err.message||'error'),4000,'error');}
+}
+async function adminClearSms(which){
+  const label=which==='failed'?'failed':'sent';
+  if(!confirm(`Delete all ${label} messages from the log? This cannot be undone.`)) return;
+  const keep=m=>which==='failed'?m.status!=='failed':!(m.status==='sent'||m.status==='skipped');
+  const undo=mutate('admin-sms-log',list=>list.filter(keep));
+  try{
+    const{data,error}=await supa.rpc('admin_clear_sms',{p_which:which});
+    if(error) throw error;
+    showToast(`${data||0} ${label} message${data===1?'':'s'} deleted`,3000,'info');
+    loadAdminSmsLog();
+  }catch(err){undo();showToast('Delete failed: '+(err.message||'error'),4000,'error');}
 }
 async function adminRetrySms(id){
   const undo=mutate('admin-sms-log',list=>list.map(m=>m.id===id?{...m,status:'pending',attempts:0,error:null}:m));
@@ -2648,7 +2713,7 @@ async function loadAdminDepositsTab(){
 }
 function adminDepositsHtml(data){
   if(!data||!data.length) return'<div class="text-center py-6 text-muted-theme">No deposits waiting for review.</div>';
-  return`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Date</th><th class="p-3 text-xs font-black uppercase text-slate-500">Customer</th><th class="p-3 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">MoMo Txn ID</th><th class="p-3 text-xs font-black uppercase text-slate-500">Sent From</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${data.map(r=>`<tr class="border-b"><td class="p-3 text-xs whitespace-nowrap">${new Date(r.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3"><div class="font-bold">${esc(r.profiles?.full_name||'')}</div><div class="text-xs text-muted-theme">${esc(r.profiles?.email||'')}</div></td><td class="p-3 font-mono font-bold">${esc(r.profiles?.deposit_code||'')}</td><td class="p-3 font-black">₵${parseFloat(r.amount).toFixed(2)}</td><td class="p-3 font-mono">${esc(r.momo_txn_id||'—')}</td><td class="p-3 font-mono">${esc(r.sender_phone||'—')}</td><td class="p-3"><div class="flex gap-2"><button data-id="${esc(r.id)}" data-amount="${esc(r.amount)}" onclick="adminApproveDeposit(this.dataset.id,this.dataset.amount)" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold">Approve</button><button data-id="${esc(r.id)}" onclick="adminRejectDeposit(this.dataset.id)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold">Reject</button></div></td></tr>`).join('')}</tbody></table></div>`;
+  return`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Date</th><th class="p-3 text-xs font-black uppercase text-slate-500">Customer</th><th class="p-3 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">MoMo Txn ID</th><th class="p-3 text-xs font-black uppercase text-slate-500">Sent From</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${data.map(r=>`<tr class="border-b"><td class="p-3 text-xs whitespace-nowrap">${new Date(r.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3"><div class="font-bold">${esc(r.profiles?.full_name||'')}</div><div class="text-xs text-muted-theme">${esc(r.profiles?.email||'')}</div></td><td class="p-3 font-mono font-bold">${esc(r.profiles?.deposit_code||'')}</td><td class="p-3"><div class="font-black">₵${parseFloat(r.amount).toFixed(2)}</div>${Number(r.fee_percent)>0?`<div class="text-xs text-muted-theme whitespace-nowrap">Credit ₵${depositAfterFee(r.amount,r.fee_percent).credit.toFixed(2)} after ${pctText(r.fee_percent)} fee</div>`:''}</td><td class="p-3 font-mono">${esc(r.momo_txn_id||'—')}</td><td class="p-3 font-mono">${esc(r.sender_phone||'—')}</td><td class="p-3"><div class="flex gap-2"><button data-id="${esc(r.id)}" data-amount="${esc(r.amount)}" data-fee="${esc(r.fee_percent||0)}" onclick="adminApproveDeposit(this.dataset.id,this.dataset.amount,this.dataset.fee)" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold">Approve</button><button data-id="${esc(r.id)}" onclick="adminRejectDeposit(this.dataset.id)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold">Reject</button></div></td></tr>`).join('')}</tbody></table></div>`;
 }
 async function loadAdminDepositRequests(){
   await paint('admin-deposit-requests','admin-deposits',async()=>{
@@ -2656,8 +2721,9 @@ async function loadAdminDepositRequests(){
     if(error) throw error;return data||[];
   },adminDepositsHtml,SK.table(6,3),()=>errorBox('Failed to load deposit requests','loadAdminDepositRequests()'));
 }
-async function adminApproveDeposit(id,amount){
-  const input=prompt('Amount received on MoMo (₵). Change it if the customer sent a different amount:',parseFloat(amount).toFixed(2));
+async function adminApproveDeposit(id,amount,feePct){
+  const pct=Number(feePct)||0;
+  const input=prompt('Amount received on MoMo (₵). Change it if the customer sent a different amount.'+(pct>0?`\nThe ${pctText(pct)} fee is taken off before the wallet is credited.`:''),parseFloat(amount).toFixed(2));
   if(input===null) return;
   const value=parseFloat(input);
   if(!value||value<=0){showToast('Enter a valid amount',3000,'error');return;}
@@ -2665,7 +2731,7 @@ async function adminApproveDeposit(id,amount){
   try{
     const{data,error}=await supa.rpc('approve_deposit_request',{p_id:id,p_amount:value});
     if(error) throw error;
-    showToast(`Credited ₵${Number(data.credited).toFixed(2)}`,3000,'success');
+    showToast(`Credited ₵${Number(data.credited).toFixed(2)}`+(Number(data.fee)>0?` (₵${Number(data.received).toFixed(2)} less ₵${Number(data.fee).toFixed(2)} fee)`:''),4000,'success');
   }catch(err){undo();showToast('Approve failed: '+(err.message||'error'),5000,'error');}
 }
 async function adminRejectDeposit(id){
@@ -2684,11 +2750,12 @@ async function adminCreditWallet(){
   const txn=document.getElementById('cr-txn')?.value.trim();
   if(!code){showToast('Enter the customer reference',3000,'error');return;}
   if(!amount||amount<=0){showToast('Enter the amount',3000,'error');return;}
-  if(!confirm(`Credit ₵${amount.toFixed(2)} to ${code}?`)) return;
+  const fx=depositAfterFee(amount,DEPOSIT_FEE);
+  if(!confirm(DEPOSIT_FEE>0?`Received ₵${fx.amount.toFixed(2)} from ${code}.\nLess the ${pctText(DEPOSIT_FEE)} fee (₵${fx.fee.toFixed(2)}), ₵${fx.credit.toFixed(2)} will be credited.\n\nContinue?`:`Credit ₵${amount.toFixed(2)} to ${code}?`)) return;
   try{
     const{data,error}=await supa.rpc('admin_credit_wallet',{p_deposit_code:code,p_amount:amount,p_momo_txn_id:txn||null});
     if(error) throw error;
-    showToast(`Credited ₵${Number(data.credited).toFixed(2)} to ${data.name||data.email}. New balance ₵${Number(data.new_balance).toFixed(2)}`,6000,'success');
+    showToast(`Credited ₵${Number(data.credited).toFixed(2)}${Number(data.fee)>0?` (less ₵${Number(data.fee).toFixed(2)} fee)`:''} to ${data.name||data.email}. New balance ₵${Number(data.new_balance).toFixed(2)}`,6000,'success');
     ['cr-code','cr-amount','cr-txn'].forEach(i=>{const el=document.getElementById(i);if(el) el.value='';});
     loadAdminDepositRequests();
   }catch(err){showToast('Credit failed: '+(err.message||'error'),5000,'error');}
@@ -2898,10 +2965,21 @@ function agentRequestsHtml(d){
   };
   const wdBadge=s=>s==='paid'?'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">✅ Paid</span>':s==='rejected'?'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">❌ Rejected</span>':'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">⏳ Waiting for admin</span>';
   const row=(left,right,pending)=>`<div class="flex items-center justify-between gap-3 bg-slate-50 rounded-xl px-4 py-3 ${pending?'row-pending':''}"><div class="min-w-0 text-sm">${left}</div><div class="shrink-0">${right}</div></div>`;
-  const unlocks=(d.unlocks||[]).map(r=>row(`<div class="font-bold">Price change</div><div class="text-xs text-muted-theme truncate">${fmt(r.created_at)}${r.note?' · '+esc(r.note):''}</div>`,unlockBadge(r),r._pending)).join('');
+  const del=r=>r.status==='approved'||r.status==='rejected'?`<button data-id="${esc(r.id)}" onclick="agentDeletePriceRequest(this.dataset.id)" aria-label="Delete request" title="Delete" class="ml-2 align-middle text-slate-400 hover:text-red-600 p-1"><svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>`:'';
+  const unlocks=(d.unlocks||[]).map(r=>row(`<div class="font-bold">Price change</div><div class="text-xs text-muted-theme truncate">${fmt(r.created_at)}${r.note?' · '+esc(r.note):''}</div>`,unlockBadge(r)+del(r),r._pending)).join('');
   const wds=(d.withdrawals||[]).map(w=>row(`<div class="font-bold">Withdrawal ₵${parseFloat(w.net_amount||w.amount||0).toFixed(2)}</div><div class="text-xs text-muted-theme">${fmt(w.created_at)} · ${esc(w.phone||'')}</div>`,wdBadge(w.status),w._pending)).join('');
   if(!unlocks&&!wds) return'<div class="text-center py-6 text-muted-theme text-sm">No requests yet. Price-change and withdrawal requests you make will show here with the admin\'s answer.</div>';
   return`<div class="space-y-5">${unlocks?`<div><p class="text-xs font-black uppercase text-slate-500 mb-2">Price-change requests</p><div class="space-y-2">${unlocks}</div></div>`:''}${wds?`<div><p class="text-xs font-black uppercase text-slate-500 mb-2">Withdrawals</p><div class="space-y-2">${wds}</div><button onclick="state.agentTab='withdraw';render()" class="text-xs font-bold text-blue-600 mt-2">See all withdrawals →</button></div>`:''}</div>`;
+}
+async function agentDeletePriceRequest(id){
+  if(!confirm('Delete this price-change request from your list?')) return;
+  const undo=mutate('agent-requests',d=>({...d,unlocks:(d.unlocks||[]).filter(r=>r.id!==id)}));
+  try{
+    const{error}=await supa.rpc('delete_price_unlock_request',{p_id:id});
+    if(error) throw error;
+    showToast('Request deleted',2000,'info');
+    loadAgentPricingPanel();
+  }catch(err){undo();showToast('Delete failed: '+(err.message||'error'),4000,'error');}
 }
 async function loadAgentRequests(){
   if(!state.agentProfile) return;
@@ -3703,6 +3781,8 @@ function onSettingChange(row){
   else if(row.key.startsWith('paystack')) soon('pay',()=>refreshPaymentSettings(true));
   else if(row.key==='momo_number'&&typeof row.value==='string') setMomo(row.value,null);
   else if(row.key==='momo_name'&&typeof row.value==='string') setMomo(null,row.value);
+  else if(row.key==='momo_network'&&typeof row.value==='string') setMomo(null,null,row.value);
+  else if(row.key==='deposit_fee_percent'&&typeof row.value==='number') setMomo(null,null,null,row.value);
 }
 function stopLive(){
   if(liveChannel){try{supa.removeChannel(liveChannel);}catch(e){}liveChannel=null;}
@@ -3824,7 +3904,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
  'adminToggleWithdrawalOverride','saveAnnouncement','saveAdminAgentBasePrice','saveEditAgentPrice','globalToggleAgentPriceLock','toggleRowPriceLock',
  'toggleAgentBasePrice','deleteAgentBasePrice','registerAsAgent','reapplyAsAgent','requestPriceUnlock','saveAgentProfit','submitWithdrawal',
  'adminApproveDeposit','adminRejectDeposit','adminApprovePriceUnlock','adminRejectPriceUnlock','adminLockAgentPricing','processWithdrawal',
- 'updateAgentStatus','adminAuth','updateStatus','deleteOrder','handleOrderButton','adminAddBundle','adminSaveBundle','adminToggleBundle','adminDeleteBundle','requestAccountDeletion','cancelAccountDeletion','adminApproveDeletion','adminRejectDeletion','adminSaveMomoDetails','sendAgentMessage'
+ 'updateAgentStatus','adminAuth','updateStatus','deleteOrder','handleOrderButton','adminAddBundle','adminSaveBundle','adminToggleBundle','adminDeleteBundle','adminDeleteSms','adminClearSms','agentDeletePriceRequest','requestAccountDeletion','cancelAccountDeletion','adminApproveDeletion','adminRejectDeletion','adminSaveMomoDetails','sendAgentMessage'
 ].forEach(n=>{if(typeof window[n]==='function') window[n]=action(window[n]);});
 
 /* ===== INIT =====
