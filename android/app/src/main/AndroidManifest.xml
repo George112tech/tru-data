@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- TRU Data Android app. Raise versionCode / versionName (here AND in
-     app/build.gradle) every time you publish a new APK. -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.trudata.app"
-    android:versionCode="25"
-    android:versionName="2.1.0">
-
-    <uses-sdk
-        android:minSdkVersion="21"
-        android:targetSdkVersion="29" />
+<!-- TRU Data Android app. The package name (namespace), SDK levels and
+     version are set in app/build.gradle. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

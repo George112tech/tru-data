@@ -26,17 +26,29 @@ normal site.
 the site is in app mode, the app keeps its own bars hidden and simply shows
 the site, so nothing breaks in the meantime.
 
-## Build in AIDE
+## Build
 
-1. Copy this whole folder to your phone (for example `AppProjects/TruData`).
-2. In AIDE, open the folder and tap `app/build.gradle` (or the project) to load it.
-3. Let AIDE download the libraries the first time (needs internet).
-4. Menu → Build → Build APK (release, signed with your usual key so it installs
-   over the old app).
+The project includes the Gradle wrapper (`gradlew`, Gradle 7.6.1) and uses
+Android Gradle Plugin 7.4.2 (compile SDK 33, target SDK 29, min SDK 21).
+It needs JDK 11 or newer (17 recommended) and internet access the first time.
+
+**In AIDE / AndroidIDE on the phone**
+1. Unzip and open the `TruData` folder as the project.
+2. Let it sync (it downloads Gradle and the libraries the first time).
+3. Build → release APK, signed with your usual key so it installs over the
+   old app. (Debug APKs can't install over a release-signed app.)
+
+**From a terminal** (Termux or a computer):
+```
+cd TruData
+chmod +x gradlew        # only if the file lost its permission when copied
+./gradlew assembleRelease
+```
+The APK is in `app/build/outputs/apk/release/`.
 
 Same package (`com.trudata.app`), same AdMob app ID and ad unit IDs as before.
-Version: `versionCode 25`, `versionName 2.1.0` (in `app/build.gradle` and
-`AndroidManifest.xml`). Raise both for every new APK.
+Version: `versionCode 25`, `versionName 2.1.0` in `app/build.gradle`. Raise
+both for every new APK.
 
 ## Publish the update
 
@@ -51,9 +63,10 @@ still use it.
 ```
 android/
   build.gradle, settings.gradle, gradle.properties
-  app/build.gradle                      SDK 29, min 21, AdMob 19.7.0 (keep 19.x)
+  gradlew, gradle/wrapper/              Gradle wrapper (Gradle 7.6.1)
+  app/build.gradle                      namespace, SDKs, version, AdMob 19.7.0 (keep 19.x)
   app/proguard-rules.pro
-  app/src/main/AndroidManifest.xml      AdMob app ID, deep links, TruTheme
+  app/src/main/AndroidManifest.xml      AdMob app ID, deep links, TruTheme (package and SDKs come from build.gradle)
   app/src/main/java/com/trudata/app/MainActivity.java
   app/src/main/res/layout/activity_main.xml
   app/src/main/res/drawable/            tab icons (Lucide) and shapes
