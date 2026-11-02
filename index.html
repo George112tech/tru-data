@@ -12,7 +12,9 @@
 <link rel="preload" href="fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/inter-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/inter-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="11.webp" as="image" fetchpriority="high">
+<link rel="preload" href="11.webp" as="image" imagesrcset="11-400.webp 400w, 11.webp 800w" imagesizes="(max-width: 768px) 200px, 280px">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://kefcmjfvrqbgtivssdwn.supabase.co" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <style>
@@ -239,13 +241,13 @@ body{font-family:'Inter','Inter Fallback','Plus Jakarta Sans',sans-serif;scroll-
 @keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
 @keyframes spin{to{transform:rotate(360deg);}}
 .animate-float{animation:float 6s ease-in-out infinite;}
-.animate-gradient{background-size:200% 200%;animation:gradient-shift 8s ease infinite;}
+.animate-gradient{background-size:200% 200%;}
 .animate-slide-up{animation:slide-up .35s ease-out both;}
 .animate-scale-in{animation:scale-in .3s ease-out both;}
 .stagger-1{animation-delay:.04s;}.stagger-2{animation-delay:.08s;}.stagger-3{animation-delay:.12s;}.stagger-4{animation-delay:.16s;}.stagger-5{animation-delay:.2s;}
 .hero-logo{max-width:280px;filter:drop-shadow(0 25px 50px rgba(59,130,246,.3));transition:all .6s cubic-bezier(.34,1.56,.64,1);}
 .hero-logo:hover{transform:scale(1.08) rotate(3deg);filter:drop-shadow(0 35px 70px rgba(96,165,250,.5));}
-.gradient-text{background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:gradient-shift 5s ease infinite;}
+.gradient-text{background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;}
 .feature-card{transition:all .4s cubic-bezier(.4,0,.2,1);border:1px solid var(--border-color);background:var(--bg-card);}
 .feature-card:hover{transform:translateY(-8px) scale(1.02);border-color:var(--accent-primary);box-shadow:var(--shadow-glow);}
 .cta-button{background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);background-size:200% 200%;transition:all .3s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;border:none;}
@@ -341,10 +343,12 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 
 /* ===== APK DOWNLOAD BUTTON ===== */
 .apk-float{position:fixed;bottom:100px;right:30px;z-index:99;display:flex;flex-direction:column;align-items:center;gap:6px;}
-.apk-float-btn{background:linear-gradient(135deg,#1a7f3c 0%,#22c55e 100%);color:white;border-radius:1rem;text-align:center;font-size:11px;font-weight:800;box-shadow:0 10px 40px rgba(34,197,94,.45);width:64px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;transition:all .3s cubic-bezier(.34,1.56,.64,1);animation:pulse-apk 2.5s infinite;letter-spacing:.02em;line-height:1.2;border:2px solid rgba(255,255,255,.3);}
+.apk-float-btn{background:linear-gradient(135deg,#1a7f3c 0%,#22c55e 100%);color:white;border-radius:1rem;text-align:center;font-size:11px;font-weight:800;box-shadow:0 10px 40px rgba(34,197,94,.45);width:64px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;transition:all .3s cubic-bezier(.34,1.56,.64,1);position:relative;letter-spacing:.02em;line-height:1.2;border:2px solid rgba(255,255,255,.3);}
 .apk-float-btn:hover{transform:scale(1.12) translateY(-4px);box-shadow:0 18px 55px rgba(34,197,94,.6);}
 .apk-float-label{background:rgba(0,0,0,.75);color:white;font-size:9px;font-weight:800;padding:3px 8px;border-radius:9999px;letter-spacing:.05em;white-space:nowrap;backdrop-filter:blur(8px);}
-@keyframes pulse-apk{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}70%{box-shadow:0 0 0 16px rgba(34,197,94,0);}}
+.apk-float-btn::after{content:'';position:absolute;inset:-2px;border-radius:inherit;background:rgba(34,197,94,.55);z-index:-1;animation:pulse-apk 2.5s ease-out infinite;will-change:transform,opacity;}
+@keyframes pulse-apk{0%{transform:scale(1);opacity:.7;}70%,100%{transform:scale(1.45);opacity:0;}}
+@media (prefers-reduced-motion:reduce){.apk-float-btn::after{animation:none;opacity:0;}}
 .nav-apk-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#16a34a,#22c55e);color:white;padding:.45rem 1rem;border-radius:9999px;font-size:.72rem;font-weight:800;cursor:pointer;text-decoration:none;transition:all .3s cubic-bezier(.4,0,.2,1);border:none;letter-spacing:.03em;white-space:nowrap;box-shadow:0 4px 14px rgba(34,197,94,.4);}
 .nav-apk-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(34,197,94,.55);}
 .mobile-apk-btn{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#16a34a,#22c55e);color:white!important;padding:.75rem 1rem;border-radius:.75rem;font-weight:800;font-size:.85rem;text-decoration:none;transition:all .3s ease;letter-spacing:.02em;}
@@ -534,7 +538,7 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
 
 <!-- Floating APK Download Button -->
 <div class="apk-float cust-only apk-only" title="Download TruData Android App">
-  <a href="#" onclick="downloadLatestApk(event)" class="apk-float-btn" aria-label="Download TruData Android APK">
+  <a href="#" onclick="downloadLatestApk(event)" class="apk-float-btn" aria-label="App: download the TruData Android APK">
     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>
     <span>App</span>
   </a>
@@ -1671,7 +1675,7 @@ function renderLandingPage(){
       <div class="relative z-10 mb-12 animate-scale-in">
         <div class="relative group">
           <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-500 blur-3xl rounded-full opacity-30 group-hover:opacity-50 transition-opacity duration-500"></div>
-          <img src="./11.webp" alt="TRU Data Network Logo - Data Bundle Platform" width="280" height="280" fetchpriority="high" class="hero-logo relative z-10 animate-float">
+          <img src="./11.webp" srcset="./11-400.webp 400w, ./11.webp 800w" sizes="(max-width: 768px) 200px, 280px" alt="TRU Data Network Logo - Data Bundle Platform" width="280" height="280" fetchpriority="high" class="hero-logo relative z-10 animate-float">
         </div>
       </div>
       <div class="relative z-10 max-w-3xl mx-auto text-center px-4">

@@ -5,8 +5,9 @@ GitHub Pages publishes the whole repository on the website's domain (the
 config files). Cloudflare Pages publishes only what
 `scripts/build-site.mjs` puts in `dist/`:
 
-- `index.html`, with a build id stamped in
-- `tailwind.css`, the `*.webp` images and `fonts/`
+- `index.html`, with a build id stamped in, and its script moved to a
+  minified `app.<hash>.js` (loaded with `defer`, cached for a year)
+- `tailwind.<hash>.css`, the images, icons and `fonts/`
 - `version.json`, the build id used by the app's auto-update
 - `_headers`, the cache and security headers
 
@@ -65,6 +66,9 @@ published to Cloudflare and can be deleted afterwards.
 - **Password-reset emails** link to the same domain, so Supabase needs no
   change. To test sign-in on the `pages.dev` address, add it under Supabase →
   Authentication → URL Configuration → Redirect URLs.
+- **Speed:** Cloudflare installs the build tools from `package-lock.json`
+  (esbuild minifies the script). If they are missing, the build still works,
+  just without minifying.
 - **Tailwind CSS** is prebuilt (`npm run build:css`) and committed, as before.
 - **App updates:** the page compares its build id with `version.json` and
   reloads itself when a newer build is out, never during a purchase or while
