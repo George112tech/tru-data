@@ -1,17 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace 'com.trudata.app'
-    compileSdk 33
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.trudata.app"
-        minSdk 21
-        // Same behaviour as before; raise later with care.
-        targetSdk 29
+        minSdkVersion 21
+        targetSdkVersion 29
         // Raise both for every new APK.
-        versionCode 25
-        versionName "2.1.0"
+        versionCode 26
+        versionName "2.1.1"
     }
 
     buildTypes {
@@ -26,9 +25,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    // Lint would stop a release build because targetSdk is older than the
-    // Play Store minimum; this APK is installed directly, so build anyway.
-    lint {
+    // This APK is installed directly (not through the Play Store), so lint's
+    // Play Store rules must not stop the release build.
+    lintOptions {
         checkReleaseBuilds false
         abortOnError false
     }

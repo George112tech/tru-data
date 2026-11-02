@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- TRU Data Android app. The package name (namespace), SDK levels and
-     version are set in app/build.gradle. -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- TRU Data Android app. SDK levels and version are set in app/build.gradle. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.trudata.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
