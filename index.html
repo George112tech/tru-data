@@ -3495,7 +3495,7 @@ window.TruAppBridge={
     navigateTo(to);return 'handled';
   },
   // Pull to refresh.
-  refresh(){refreshProfile(true);loadViewData(true);if(!state.user) refreshBundles(true);},
+  refresh(){checkForNewSite(true);refreshProfile(true);loadViewData(true);if(!state.user) refreshBundles(true);},
   // The app asks for the current state again (after it was in the background).
   state(){appLastState='';postAppState();}
 };
@@ -3856,7 +3856,39 @@ function startLive(){
   });
   liveChannel=ch;
 }
-function refreshEverything(){if(!state.user&&state.view!=='landing') return;refreshProfile(true);loadViewData(true);}
+function refreshEverything(){checkForNewSite();if(!state.user&&state.view!=='landing') return;refreshProfile(true);loadViewData(true);}
+/* ===== STAY ON THE NEWEST VERSION OF THE SITE =====
+   The Android app keeps this page open for days and the phone caches it, so
+   changes published on GitHub would not show until the app was closed. When
+   the server has a newer copy than the one running (Last-Modified), the page
+   reloads itself at a quiet moment: never during a purchase, a dialog or
+   while someone is typing. */
+let siteCheckAt=0;
+async function checkForNewSite(force){
+  if(!/^https?:$/.test(location.protocol)) return;
+  if(!force&&Date.now()-siteCheckAt<5*60*1000) return;
+  siteCheckAt=Date.now();
+  try{
+    const r=await fetch(location.pathname,{method:'HEAD',cache:'no-store'});
+    const server=Date.parse(r.headers.get('last-modified')||''),mine=Date.parse(document.lastModified);
+    if(!r.ok||!server||!mine||server<=mine+1000) return;
+    state.newSiteReady=true;reloadWhenQuiet();
+  }catch(e){}
+}
+function siteIsBusy(){
+  const a=document.activeElement;
+  return !!(state.activeOrderData||state.orderInFlight||document.getElementById('legal-modal')||document.getElementById('terms-gate')||
+    (a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.value));
+}
+function reloadWhenQuiet(){
+  if(!state.newSiteReady) return;
+  if(siteIsBusy()){setTimeout(reloadWhenQuiet,15000);return;}
+  // At most once every 2 minutes, so a misconfigured server can never cause a reload loop.
+  try{const last=+sessionStorage.getItem('tru:autoReload')||0;if(Date.now()-last<120000) return;sessionStorage.setItem('tru:autoReload',String(Date.now()));}catch(e){return;}
+  // Refresh the cached copy first, then load it.
+  fetch(location.pathname,{cache:'reload'}).catch(()=>{}).finally(()=>location.reload());
+}
+setInterval(()=>{if(document.visibilityState==='visible') checkForNewSite();},10*60*1000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible') refreshEverything();});
 window.addEventListener('online',()=>{refreshEverything();if(liveStatus!=='SUBSCRIBED') startLive();});
 setInterval(()=>{if(document.visibilityState==='visible'&&liveStatus!=='SUBSCRIBED') refreshEverything();},30000);
@@ -3978,7 +4010,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }
   if(!recovering) ensureTermsAccepted();
   prefetchUserData();
-  (window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>checkLatestApk());
+  (window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>{checkLatestApk();checkForNewSite(true);});
 });
 
 supa.auth.onAuthStateChange((event,session)=>{
