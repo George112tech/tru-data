@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TRU Data Network | Buy Data Bundles in Ghana - MTN, Telecel, AirtelTigo</title>
 <meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. Data top up service across Ghana.">
+<!-- Replaced with the build id when the site is published (scripts/build-site.mjs). -->
+<meta name="tru-build" content="dev">
 <meta name="keywords" content="buy data Ghana, MTN data bundles, Telecel data, AirtelTigo data, cheap data Ghana, mobile data Ghana, internet bundles, data top up Ghana, TRU Data Network">
 <!-- Fonts are served from this site (fonts/), not Google. -->
 <link rel="preload" href="fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -3860,18 +3862,26 @@ function refreshEverything(){checkForNewSite();if(!state.user&&state.view!=='lan
 /* ===== STAY ON THE NEWEST VERSION OF THE SITE =====
    The Android app keeps this page open for days and the phone caches it, so
    changes published on GitHub would not show until the app was closed. When
-   the server has a newer copy than the one running (Last-Modified), the page
-   reloads itself at a quiet moment: never during a purchase, a dialog or
-   while someone is typing. */
+   a newer version has been published, the page reloads itself at a quiet
+   moment: never during a purchase, a dialog or while someone is typing.
+   On Cloudflare Pages the build id in the page is compared with version.json;
+   elsewhere (GitHub Pages) the Last-Modified dates are compared. */
 let siteCheckAt=0;
 async function checkForNewSite(force){
   if(!/^https?:$/.test(location.protocol)) return;
   if(!force&&Date.now()-siteCheckAt<5*60*1000) return;
   siteCheckAt=Date.now();
   try{
-    const r=await fetch(location.pathname,{method:'HEAD',cache:'no-store'});
-    const server=Date.parse(r.headers.get('last-modified')||''),mine=Date.parse(document.lastModified);
-    if(!r.ok||!server||!mine||server<=mine+1000) return;
+    const mine=document.querySelector('meta[name=tru-build]')?.content||'dev';
+    if(mine!=='dev'){
+      const r=await fetch('version.json',{cache:'no-store'});
+      const v=r.ok?await r.json():null;
+      if(!v||typeof v.build!=='string'||v.build===mine) return;
+    }else{
+      const r=await fetch(location.pathname,{method:'HEAD',cache:'no-store'});
+      const server=Date.parse(r.headers.get('last-modified')||''),here=Date.parse(document.lastModified);
+      if(!r.ok||!server||!here||server<=here+1000) return;
+    }
     state.newSiteReady=true;reloadWhenQuiet();
   }catch(e){}
 }
