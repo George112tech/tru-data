@@ -1,11 +1,12 @@
-// Top-level build file. Built with the Gradle wrapper (./gradlew, Gradle 7.6.1).
+// Top-level build file. Built with the Gradle wrapper (./gradlew, Gradle 6.9.4).
+// Android Gradle Plugin 4.2.2 is the newest one that runs on Java 8.
 buildscript {
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:4.2.2'
     }
 }
 
