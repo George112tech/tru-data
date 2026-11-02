@@ -1,0 +1,35 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "com.trudata.app"
+        minSdkVersion 21
+        targetSdkVersion 29
+        // Raise both for every new APK (and in AndroidManifest.xml).
+        versionCode 25
+        versionName "2.1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.core:core:1.3.2'
+    // Stay on 19.x: the app uses InterstitialAd.isLoaded(), removed in 20.0.
+    implementation 'com.google.android.gms:play-services-ads:19.7.0'
+}

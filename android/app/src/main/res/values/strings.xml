@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TRU Data</string>
+    <string name="back">Back</string>
+    <string name="wallet_balance">Wallet balance</string>
+    <string name="account">Account</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_orders">Orders</string>
+    <string name="tab_wallet">Wallet</string>
+    <string name="tab_agent">Agent</string>
+    <string name="tab_account">Account</string>
+    <string name="offline_title">You\'re offline</string>
+    <string name="offline_text">Check your mobile data or Wi-Fi. Your wallet and orders are safe.</string>
+    <string name="offline_retry">Try again</string>
+    <string name="offline_hint">We\'ll reconnect automatically.</string>
+    <string name="splash_tagline">Cheap data. Delivered in minutes.</string>
+    <string name="press_back_again">Press back again to exit</string>
+    <string name="share_title">Share TRU Data</string>
+    <string name="no_app_for_link">No app found to open this link</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Red from the very first frame (no white flash before the splash). -->
+    <style name="TruTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/bg_splash</item>
+        <item name="android:statusBarColor">@color/red_800</item>
+        <item name="android:colorPrimary">@color/red_700</item>
+        <item name="android:colorPrimaryDark">@color/red_800</item>
+        <item name="android:colorAccent">@color/red_700</item>
+    </style>
+</resources>

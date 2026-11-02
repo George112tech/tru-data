@@ -1,39 +1,66 @@
-# TRU Data Android app
+# TRU Data Android app (2.1.0)
 
-The app is a thin shell around the live website, https://trudata.rvhssystems.com.
-Every change merged to `main` on GitHub (published by GitHub Pages) appears in
-the app the next time it is opened. You only build a new APK when you change
-these two files.
+This folder is the complete Android project. Open it in AIDE (or Android Studio)
+and build it as it is.
 
-## Build it in AIDE (once)
+Design: Figma file "TRU Data – Mobile App":
+https://www.figma.com/design/BNCeJWwtcRPB3IHV3sZHYn
 
-1. Open your existing TRU Data project in AIDE.
-2. Replace `MainActivity.java` with the one in this folder. Change its first
-   `package` line to your project's package name.
-3. Copy the `<uses-permission>` lines, the `<application>` settings and the two
-   `<intent-filter>` blocks from `AndroidManifest.xml` into your manifest.
-   Keep your own `package` and icon.
-4. Raise `versionCode` and `versionName` (for example 20 and 2.0.0).
-5. Delete the old copy of the website from the project's `assets` folder if it
-   is there; the app no longer uses it.
-6. Build the APK. Install it over the old app on your phone to check it (it
-   must be signed with the same key as the old app; building on the same
-   AIDE install does that).
+## What the app does itself, and what comes from the website
 
-## Publish it
+| The app (needs a new APK to change)          | The website (changes reach the app at once)          |
+|----------------------------------------------|------------------------------------------------------|
+| Red top bar: logo or back arrow + page title, wallet balance, initials | Home: greeting, balance card, quick actions, network switcher, bundles, recent orders |
+| Tab bar: Home, Orders, Wallet, Agent, Account | Buy sheet (slides up, drag down to close)            |
+| Red heartbeat splash screen                  | Wallet, MoMo top-up, orders, agent hub, account      |
+| "You're offline" screen, retries by itself   | Bundles, prices, MoMo number, announcements (admin)  |
+| Pull to refresh, haptics, share sheet        | Terms, privacy, account deletion                     |
+| AdMob banner + interstitial (same IDs)       | "Update available" prompt for new APKs               |
 
-1. Upload the APK to the `app-updates` bucket as `trudata-v2.0.0.apk`
-   (the name must follow `trudata-vX.Y.Z.apk`). The website's download
-   buttons pick up the newest version automatically.
-2. Update `update.json` in the same bucket to point at the new file, so the
-   old app's update check offers it to people who still have it.
+The app adds `TruDataApp/<version> TruShell/1` to its user agent. When the site
+sees `TruShell`, it hides its own menu and footer and shows the app screens.
+Older app versions (2.0.x) don't send `TruShell`, so they keep showing the
+normal site.
 
-## What the shell does
+**Merge the website changes (index.html) before you install this APK.** Until
+the site is in app mode, the app keeps its own bars hidden and simply shows
+the site, so nothing breaks in the meantime.
 
-- Keeps people signed in (DOM storage on).
-- Opens WhatsApp, Patupaa, phone links and APK downloads outside the app;
-  keeps the site and Paystack checkout inside.
-- The phone's Back button goes back a page before leaving the app.
-- Shows a "No internet connection" screen with a Try again button.
-- Adds `TruDataApp` to its user agent, so the site hides its "Download the
-  app" buttons inside the app.
+## Build in AIDE
+
+1. Copy this whole folder to your phone (for example `AppProjects/TruData`).
+2. In AIDE, open the folder and tap `app/build.gradle` (or the project) to load it.
+3. Let AIDE download the libraries the first time (needs internet).
+4. Menu → Build → Build APK (release, signed with your usual key so it installs
+   over the old app).
+
+Same package (`com.trudata.app`), same AdMob app ID and ad unit IDs as before.
+Version: `versionCode 25`, `versionName 2.1.0` (in `app/build.gradle` and
+`AndroidManifest.xml`). Raise both for every new APK.
+
+## Publish the update
+
+Upload the APK to the Supabase bucket `app-updates` named exactly
+`trudata-v2.1.0.apk` (no extra dot after the `v`). The site picks the newest
+file by itself: the download button on the website and the "Update available"
+card inside older-version apps point to it. Update `update.json` too if you
+still use it.
+
+## Files
+
+```
+android/
+  build.gradle, settings.gradle, gradle.properties
+  app/build.gradle                      SDK 29, min 21, AdMob 19.7.0 (keep 19.x)
+  app/proguard-rules.pro
+  app/src/main/AndroidManifest.xml      AdMob app ID, deep links, TruTheme
+  app/src/main/java/com/trudata/app/MainActivity.java
+  app/src/main/res/layout/activity_main.xml
+  app/src/main/res/drawable/            tab icons (Lucide) and shapes
+  app/src/main/res/values/              colours (design tokens), strings, theme
+  app/src/main/res/mipmap-*/            launcher icons
+  app/src/main/assets/fonts/            Inter (SIL Open Font License 1.1)
+```
+
+If you would rather keep your old launcher icon, copy your old `mipmap-*`
+folders over the new ones before building.

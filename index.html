@@ -372,6 +372,115 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
 .admin-mode .cust-only{display:none!important;}
 .in-app .apk-only{display:none!important;}
 .live-dot{width:8px;height:8px;border-radius:9999px;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2);display:inline-block;}
+/* ===== APP MODE (TRU Data Android app 2.1+) =====
+   The app draws the top bar, tab bar, splash and offline screens itself; the
+   page only shows the content. Design: Figma "TRU Data – Mobile App". */
+.app-shell nav,.app-shell footer,.app-shell .apk-float,.app-shell .app-hide{display:none!important;}
+.app-shell body{background:#F5F6F8;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;}
+.app-shell #app-view{min-height:0;}
+.app-shell #agent-session-banner{top:0;}
+.app-shell #toast-container{bottom:20px;}
+.app-shell .app-tight{padding-top:16px!important;padding-bottom:28px!important;}
+.app-shell button,.app-shell a{-webkit-user-select:none;user-select:none;}
+.app-screen{color:#0F172A;}
+/* Shades of red instead of one flat red: deep maroon -> crimson -> warm coral. */
+.app-shell{--r900:#5F1010;--r800:#8E1616;--r700:#B91C1C;--r600:#C9302C;--r500:#E0453A;--grad-bar:linear-gradient(90deg,#8E1616 0%,#B91C1C 55%,#D23B2E 100%);--grad-btn:linear-gradient(135deg,#E0453A 0%,#B91C1C 100%);}
+.app-body>div:empty{display:none;}
+.app-hero{background:radial-gradient(90% 70% at 100% 100%,rgba(255,138,110,.28),transparent 60%),radial-gradient(70% 60% at 0% 100%,rgba(60,0,0,.25),transparent 60%),var(--grad-bar);color:#fff;padding:4px 16px 18px;border-radius:0 0 28px 28px;}
+.app-greet{font-size:14px;font-weight:500;opacity:.8;}
+.app-name{font-size:22px;font-weight:800;letter-spacing:-.01em;line-height:28px;margin-bottom:14px;}
+.app-bal{background:radial-gradient(120% 90% at 105% -10%,rgba(255,120,100,.35),transparent 55%),linear-gradient(145deg,#5F1010 0%,#8E1616 45%,#C0262D 100%);border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:20px;box-shadow:0 12px 28px -8px rgba(60,0,0,.55);}
+.app-bal-top{display:flex;justify-content:space-between;align-items:center;}
+.app-ov{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.75;}
+.app-live{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;background:rgba(255,255,255,.14);padding:3px 8px;border-radius:999px;}
+.app-live i{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:app-pulse 2s infinite;}
+.app-amt{font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:36px;margin-top:4px;min-height:36px;}
+.app-hint{font-size:12px;font-weight:600;opacity:.72;margin-top:2px;}
+.app-bal-acts{display:flex;gap:10px;margin-top:14px;}
+.app-bal-acts button{flex:1;height:44px;border-radius:14px;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .12s;}
+.app-btn-white{background:#fff;color:#B91C1C;}
+.app-btn-glass{background:rgba(255,255,255,.14);color:#fff;}
+.app-body{padding:18px 16px 28px;display:flex;flex-direction:column;gap:18px;}
+.app-quick{display:flex;justify-content:space-between;}
+.app-qa{width:76px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#334155;transition:transform .12s;}
+.app-qa>span{width:52px;height:52px;border-radius:20px;background:linear-gradient(145deg,#FFF5F5,#FFE1E1);color:#B91C1C;box-shadow:inset 0 0 0 1px rgba(185,28,28,.08);display:flex;align-items:center;justify-content:center;}
+.app-sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:-6px;}
+.app-sh h2{font-size:17px;font-weight:700;letter-spacing:-.005em;}
+.app-sh button{font-size:12px;font-weight:700;color:#B91C1C;padding:6px 0 6px 12px;}
+.app-chips{display:flex;gap:8px;overflow-x:auto;margin:0 -16px;padding:2px 16px;scrollbar-width:none;}
+.app-chips::-webkit-scrollbar{display:none;}
+.app-chip{flex:none;display:flex;align-items:center;gap:8px;padding:5px 14px 5px 5px;border-radius:999px;background:#fff;border:1px solid #E2E8F0;font-size:14px;font-weight:700;color:#0F172A;transition:background .2s,color .2s,transform .12s;}
+.app-chip.on{background:#0F172A;color:#fff;border-color:#0F172A;}
+.app-mono{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex:none;}
+.app-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.app-tile{background:#fff;border:1px solid #E2E8F0;border-radius:20px;padding:14px 12px;text-align:left;transition:transform .12s,border-color .15s,background .15s;}
+.app-tile b{display:block;font-size:22px;font-weight:800;line-height:28px;letter-spacing:-.01em;}
+.app-tile small{display:block;font-size:12px;font-weight:600;color:#64748B;}
+.app-tile em{display:block;font-style:normal;font-size:14px;font-weight:800;color:#C0262D;margin-top:8px;}
+.app-tile:active{border-color:#C9302C;background:linear-gradient(160deg,#FFF5F5,#FFE8E8);}
+.app-more{width:100%;padding:12px;border-radius:14px;background:#fff;border:1px solid #E2E8F0;font-size:14px;font-weight:700;color:#334155;}
+.app-order{width:100%;display:flex;align-items:center;gap:12px;background:#fff;border-radius:20px;padding:14px;text-align:left;transition:transform .12s;}
+.app-order+.app-order{margin-top:10px;}
+.app-order-main{flex:1;min-width:0;}
+.app-order-main b,.app-row .tx b{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.app-order-main small,.app-row .tx small{display:block;font-size:12px;font-weight:500;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.app-order-r{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none;}
+.app-order-r b{font-size:14px;font-weight:800;}
+.app-st{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:999px;font-size:12px;font-weight:700;}
+.app-st::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+.st-pending{color:#D97706;background:#FFFBEB;}.st-processed{color:#2563EB;background:#EFF6FF;}.st-delivered{color:#059669;background:#ECFDF5;}.st-cancelled{color:#64748B;background:#F1F5F9;}
+.app-card{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(15,23,42,.06),0 8px 24px -4px rgba(15,23,42,.05);overflow:hidden;}
+.app-row{display:flex;align-items:center;gap:12px;padding:14px 16px 14px 14px;width:100%;text-align:left;background:#fff;}
+.app-row+.app-row{border-top:1px solid #F1F5F9;}
+.app-row .ic,.app-update .ic{width:38px;height:38px;border-radius:10px;background:#F1F5F9;color:#334155;display:flex;align-items:center;justify-content:center;flex:none;}
+.app-row .tx,.app-update .tx{flex:1;min-width:0;}
+.app-row.danger .ic{background:#FEF2F2;color:#B91C1C;}.app-row.danger b{color:#B91C1C;}
+.app-chev{color:#CBD5E1;flex:none;}
+.app-ovl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748B;margin:2px 4px -8px;}
+.app-profile{display:flex;align-items:center;gap:14px;padding:16px;}
+.app-profile .tx{flex:1;min-width:0;}
+.app-profile b{display:block;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.app-profile small{display:block;font-size:12px;font-weight:500;color:#64748B;overflow:hidden;text-overflow:ellipsis;}
+.app-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(145deg,#E0453A,#8E1616);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;flex:none;}
+.app-delete-body{padding:0 16px 16px 64px;}
+.app-update{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:20px;background:linear-gradient(135deg,#1E1B2E,#5F1010);color:#fff;}
+.app-update .ic{background:rgba(255,255,255,.12);color:#fff;}
+.app-update b{display:block;font-size:14px;font-weight:700;}.app-update small{display:block;font-size:12px;opacity:.7;}
+.app-empty{font-size:14px;color:#64748B;padding:8px 2px;}
+.app-empty-card{background:#fff;border-radius:20px;padding:20px;text-align:center;font-size:14px;font-weight:500;color:#64748B;}
+.app-hero-tall{padding:12px 24px 32px;}
+.app-hero-tall h1{font-size:32px;font-weight:900;line-height:36px;letter-spacing:-.02em;}
+.app-hero-tall p{font-size:14px;font-weight:500;opacity:.85;margin:14px 0 16px;line-height:20px;}
+.app-hero .app-chip{border-color:transparent;}
+.app-feat{display:flex;align-items:center;gap:14px;}
+.app-feat>span{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#FFF5F5,#FFE1E1);color:#B91C1C;display:flex;align-items:center;justify-content:center;flex:none;}
+.app-feat b{display:block;font-size:14px;font-weight:700;}.app-feat small{display:block;font-size:12px;font-weight:500;color:#64748B;}
+.app-cta{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+.app-btn-primary,.app-btn-secondary{height:52px;border-radius:14px;font-size:14px;font-weight:800;transition:transform .12s;}
+.app-btn-primary{background:var(--grad-btn);color:#fff;box-shadow:0 8px 20px -6px rgba(142,22,22,.45);}
+.app-btn-secondary{background:#fff;color:#0F172A;border:1.5px solid #E2E8F0;}
+.app-fine{font-size:12px;font-weight:500;color:#64748B;text-align:center;}
+.app-fine button{color:#B91C1C;font-weight:700;}
+.app-body #announcement-slot>div{padding:0!important;max-width:none!important;}
+.app-screen .tap:active,.app-tile:active,.app-qa:active,.app-chip:active,.app-order:active,.app-row:active,.app-bal-acts button:active,.app-btn-primary:active,.app-btn-secondary:active{transform:scale(.97);}
+.app-body>*{animation:app-in .35s cubic-bezier(.2,.8,.2,1) both;}
+.app-body>*:nth-child(2){animation-delay:.03s}.app-body>*:nth-child(3){animation-delay:.06s}.app-body>*:nth-child(4){animation-delay:.09s}.app-body>*:nth-child(5){animation-delay:.12s}.app-body>*:nth-child(n+6){animation-delay:.15s}
+.no-anim .app-body>*{animation:none;}
+.app-fade{animation:app-in .25s ease both;}
+@keyframes app-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes app-pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.6)}70%{box-shadow:0 0 0 6px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+/* Site pages inside the app: softer, layered reds instead of flat bright red. */
+.app-shell .cta-button,.app-shell .price-tag,.app-shell .btn-confirm-process{background:var(--grad-btn)!important;}
+.app-shell .wallet-card{background:radial-gradient(120% 90% at 105% -10%,rgba(255,120,100,.35),transparent 55%),linear-gradient(145deg,#5F1010 0%,#8E1616 45%,#C0262D 100%);}
+.app-shell .admin-tab-btn.active{background:var(--grad-btn);box-shadow:0 4px 12px rgba(142,22,22,.3);}
+.app-shell .text-red-600{color:#B91C1C;}
+.app-shell .bg-red-600{background:var(--grad-btn);}
+/* The purchase form becomes a bottom sheet that can be dragged down to close. */
+.app-shell .order-modal{align-items:flex-end!important;padding:0!important;}
+.app-shell .order-card{max-width:none!important;border-radius:28px 28px 0 0!important;padding:12px 20px 24px!important;max-height:92vh;overflow-y:auto;animation:sheet-up .32s cubic-bezier(.2,.9,.3,1) both!important;}
+.app-shell .order-card::before{content:'';display:block;width:40px;height:4px;border-radius:99px;background:#E2E8F0;margin:0 auto 16px;}
+@keyframes sheet-up{from{transform:translateY(100%)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.app-body>*,.app-fade,.app-shell .order-card{animation:none!important;}.app-live i{animation:none;}}
 </style>
 <!-- Built from index.html by `npm run build:css`. Rebuild after adding Tailwind classes. -->
 <link rel="stylesheet" href="tailwind.css">
@@ -544,6 +653,10 @@ function setMomo(number,name){
 // Inside the TRU Data Android app there is no need to offer the app download.
 const IN_APP=/TruDataApp/.test(navigator.userAgent);
 if(IN_APP) document.documentElement.classList.add('in-app');
+// App 2.1 and later (TruShell in the user agent) draw their own top bar and tab
+// bar, so the site switches to "app mode". Older app versions keep the normal site.
+const APP_SHELL=/TruShell\/\d/.test(navigator.userAgent);
+if(APP_SHELL) document.documentElement.classList.add('app-shell');
 // Without the Supabase library nothing can load: say so instead of showing a skeleton forever.
 if(!window.supabase){
   document.getElementById('app-view').innerHTML='<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center"><h2 class="text-2xl font-black mb-3">We could not connect</h2><p class="text-muted-theme mb-6">Please check your internet connection and try again.</p><button onclick="location.reload()" class="cta-button text-white px-8 py-4 rounded-2xl font-bold">Try again</button></div></div>';
@@ -699,6 +812,7 @@ function paintBalance(){
     if(!known){el.innerHTML=SK.money(el.dataset.dark==='1');return;}
     if(el.textContent!==val){el.textContent=val;el.classList.remove('balance-flash');void el.offsetWidth;el.classList.add('balance-flash');}
   });
+  postAppState();
 }
 
 const NETWORKS={
@@ -749,6 +863,7 @@ async function refreshBundles(force){
     setBundles(data);
     // Redraw the shop if prices changed, but never under an open purchase form.
     if(JSON.stringify(NORMAL_BUNDLES)!==before&&state.view==='network'&&!state.activeOrderData) render();
+    if(JSON.stringify(NORMAL_BUNDLES)!==before&&APP_SHELL) appPaintBundles();
     repaint('admin-bundles');
   }catch(e){}
 }
@@ -821,6 +936,7 @@ function paintApkVersion(){
   const mb=latestApk.size?` · ${(latestApk.size/1048576).toFixed(1)} MB`:'';
   document.querySelectorAll('[data-bind=apk-version]').forEach(el=>{el.textContent='v'+latestApk.version;});
   document.querySelectorAll('[data-bind=apk-size]').forEach(el=>{el.textContent=mb;});
+  if(APP_SHELL) appPaintUpdate();
 }
 function apkVersionHtml(){return`<span data-bind="apk-version">v${latestApk.version}</span>`;}
 function downloadLatestApk(e){
@@ -877,8 +993,9 @@ function openLegal(kind){
   m.innerHTML=`<div class="card-theme max-w-2xl w-full rounded-3xl flex flex-col" style="max-height:88vh" role="dialog" aria-modal="true" aria-labelledby="legal-title"><div class="flex items-center justify-between gap-3 p-5 border-b border-slate-200"><h2 id="legal-title" class="text-xl font-black">${LEGAL[kind].title}</h2><button onclick="closeLegal()" aria-label="Close" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="p-5 md:p-7 overflow-y-auto">${legalBodyHtml(kind)}</div><div class="p-4 border-t border-slate-200"><button onclick="closeLegal()" class="w-full cta-button text-white py-3 rounded-2xl font-bold">Close</button></div></div>`;
   m.addEventListener('click',e=>{if(e.target===m) closeLegal();});
   document.body.appendChild(m);
+  postAppState();
 }
-function closeLegal(){document.getElementById('legal-modal')?.remove();}
+function closeLegal(){const m=document.getElementById('legal-modal');if(m){m.remove();postAppState();}}
 /* Customers and agents agree to the current Terms and Privacy Policy once.
    Anyone signed in who has not (including accounts made before the terms
    existed, or after they change) sees them and must agree or log out. The
@@ -924,8 +1041,8 @@ function showToast(message,duration=3000,type='info'){
   // The same message twice in a row is shown once.
   if([...container.children].some(t=>t.textContent===message&&!t.classList.contains('hide'))) return;
   const toast=document.createElement('div');toast.className='toast';toast.setAttribute('role',type==='error'?'alert':'status');
-  if(type==='error') toast.style.borderLeft='4px solid #ef4444';
-  else if(type==='success') toast.style.borderLeft='4px solid #10b981';
+  if(type==='error'){toast.style.borderLeft='4px solid #ef4444';appHaptic('error');}
+  else if(type==='success'){toast.style.borderLeft='4px solid #10b981';appHaptic('success');}
   toast.textContent=message;container.appendChild(toast);
   while(container.children.length>3) container.firstElementChild.remove();
   setTimeout(()=>toast.classList.add('show'),10);
@@ -1162,7 +1279,7 @@ function updateAuthUI(){
    anything newer is fetched in the background and painted in when it arrives.
    Each page has its own address (#/wallet, #/orders, ...) so refreshing or
    pressing Back keeps you where you were. */
-const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet','my-orders':'orders','agent-portal':'agents','agent-dashboard':'agent','admin-dashboard':'admin'};
+const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet','my-orders':'orders','agent-portal':'agents','agent-dashboard':'agent','admin-dashboard':'admin',account:'account'};
 function viewToHash(view,params){
   if(!(view in ROUTES)) return null;
   if(view==='network'&&params) return '#/buy/'+params;
@@ -1172,7 +1289,7 @@ function hashToView(h){
   if(!h||!h.startsWith('#/')) return null;
   const[a,b]=h.slice(2).split('/');
   if(a==='buy') return b&&NETWORKS[b]?{view:'network',params:b}:{view:'home',params:null};
-  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet',orders:'my-orders',agents:'agent-portal',agent:'agent-dashboard',admin:'admin-dashboard'};
+  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet',orders:'my-orders',agents:'agent-portal',agent:'agent-dashboard',admin:'admin-dashboard',account:'account'};
   return m[a]?{view:m[a],params:null}:null;
 }
 function syncUrl(view,params,replace){
@@ -1199,6 +1316,9 @@ async function navigateTo(view,params=null,opts={}){
       if(state.user&&!state.userProfile){app.innerHTML=pageSkeleton();await fetchUserProfile();}
       if(!state.isAdmin){view=state.user?'home':'landing';params=null;opts={...opts,replace:true};}
     }
+    // In the app, signed-in people start on Home and the Account tab needs a sign-in.
+    if(APP_SHELL&&view==='landing'&&state.user) view='home';
+    if(view==='account'&&!state.user) view='login';
     if(view==='agent-dashboard'){
       if(!state.user){showToast('Please login first to access agent dashboard');view='login';}
       else{
@@ -1223,6 +1343,7 @@ async function navigateTo(view,params=null,opts={}){
 
 /* ========== CHANGE 3: renderHome – wallet card with My Orders + Sign Out ========== */
 function renderHome(){
+  if(APP_SHELL&&state.user) return renderAppHome();
   if(!state.user) return `<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-500 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><h2 class="text-2xl font-black mb-4">Login Required</h2><p class="text-muted-theme mb-8">Please sign in or create an account to purchase data bundles.</p><div class="flex flex-col gap-3"><button onclick="navigateTo('login')" class="cta-button text-white py-4 rounded-2xl font-bold text-lg">Sign In</button><button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 border-2 border-slate-200 hover:border-red-500 transition-all">Create Account</button></div></div></div>`;
   const bal=state.userProfile?parseFloat(state.userProfile.balance||0):0;
   return `<div class="animate__animated animate__fadeIn">
@@ -1341,8 +1462,8 @@ function renderHome(){
 /* ========== CHANGES 4, 5, 6: My Orders page ========== */
 function renderMyOrders(){
   if(!state.user) return `<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><h2 class="text-2xl font-black mb-4">Login Required</h2><p class="text-muted-theme mb-6">Please sign in to view your orders.</p><button onclick="navigateTo('login')" class="cta-button text-white py-4 px-8 rounded-2xl font-bold">Sign In</button></div></div>`;
-  return `<div class="max-w-4xl mx-auto px-4 py-12 animate__animated animate__fadeIn">
-    <div class="mb-8 flex items-center gap-4">
+  return `<div class="app-tight max-w-4xl mx-auto px-4 py-12 animate__animated animate__fadeIn">
+    <div class="app-hide mb-8 flex items-center gap-4">
       <button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group">
         <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back
       </button>
@@ -1506,6 +1627,7 @@ function startOrderCountdowns(data){
 
 /* ===== LANDING PAGE - FIX 1: Announcement banner added ===== */
 function renderLandingPage(){
+  if(APP_SHELL) return state.user?renderAppHome():renderAppWelcome();
   return`<div class="min-h-screen animate__animated animate__fadeIn">
     <div id="announcement-slot">${announcementHtml(state.announcement)}</div>
     <section class="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-20 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
@@ -1675,7 +1797,7 @@ function renderWallet(){
     <div><h4 class="text-sm font-black mb-2">Your deposit requests</h4><div id="deposit-requests-list" class="space-y-2">${SK.list(2,40)}</div></div>
   </div>`;
   const paystack=`<div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to Deposit (₵)</label><input type="number" id="deposit-amount" min="5" step="0.01" oninput="updateDepositCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div><div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Deposit Amount:</span><span class="font-bold" id="calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Processing Fee (3.50%):</span><span class="font-bold" id="calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="calc-total">₵0.00</span></div></div><button onclick="initiateDeposit()" id="deposit-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"><span>Pay with Paystack</span></button><p class="text-xs text-muted-theme">Card and mobile money via Paystack. Credited instantly after payment.</p></div>`;
-  return`<div class="max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn"><div class="mb-8"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Home</button></div><div class="grid md:grid-cols-2 gap-8"><div class="wallet-card animate-scale-in self-start"><div class="wallet-label">Current Balance</div><div class="wallet-balance" data-bind="balance" data-dark="1">${state.userProfile?'₵'+balance.toFixed(2):SK.money(true)}</div><div class="mt-4 flex items-center gap-2 text-sm opacity-90"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Available for purchases</div></div><div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode:both;"><h3 class="text-xl font-black mb-6">Add Funds</h3>${methodTabs}${method==='paystack'?paystack:momo}</div></div><div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode:both;"><h3 class="text-xl font-black mb-6">Recent Transactions</h3><div class="space-y-4" id="transaction-list">${SK.list(3)}</div></div><div class="mt-8 card-theme p-6 md:p-8 rounded-3xl border border-red-100"><h3 class="text-lg font-black mb-1">Delete my account</h3><p class="text-sm text-muted-theme mb-4">Ask for your account and everything in it to be deleted. The admin reviews each request.</p><div id="my-deletion">${SK.bar('60%',40)}</div></div></div>`;
+  return`<div class="app-tight max-w-4xl mx-auto px-4 py-16 animate__animated animate__fadeIn"><div class="app-hide mb-8"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Home</button></div><div class="grid md:grid-cols-2 gap-8"><div class="wallet-card animate-scale-in self-start"><div class="wallet-label">Current Balance</div><div class="wallet-balance" data-bind="balance" data-dark="1">${state.userProfile?'₵'+balance.toFixed(2):SK.money(true)}</div><div class="mt-4 flex items-center gap-2 text-sm opacity-90"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Available for purchases</div></div><div class="card-theme p-8 rounded-3xl animate-scale-in stagger-1" style="animation-fill-mode:both;"><h3 class="text-xl font-black mb-6">Add Funds</h3>${methodTabs}${method==='paystack'?paystack:momo}</div></div><div class="mt-12 card-theme p-8 rounded-3xl animate-slide-up stagger-2" style="animation-fill-mode:both;"><h3 class="text-xl font-black mb-6">Recent Transactions</h3><div class="space-y-4" id="transaction-list">${SK.list(3)}</div></div><div class="mt-8 card-theme p-6 md:p-8 rounded-3xl border border-red-100"><h3 class="text-lg font-black mb-1">Delete my account</h3><p class="text-sm text-muted-theme mb-4">Ask for your account and everything in it to be deleted. The admin reviews each request.</p><div id="my-deletion">${SK.bar('60%',40)}</div></div></div>`;
 }
 // The request shows up in the list straight away as "Checking"; it is removed
 // again if the server refuses it.
@@ -1860,7 +1982,7 @@ function initiateOrder(networkId,bundleId){
 function renderOrderForm(){
   if(!state.activeOrderData) return '';
   const{network,bundle}=state.activeOrderData,netInfo=NETWORKS[network],balance=state.userProfile?parseFloat(state.userProfile.balance||0):0,hasBal=balance>=bundle.price;
-  return`<div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn"><div class="card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in"><button onclick="state.activeOrderData=null;render();" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="text-center mb-6"><div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><span class="text-2xl font-black">${netInfo.name.charAt(0)}</span></div><h3 class="text-2xl font-black mb-1">Purchase ${bundle.size}</h3><p class="text-muted-theme text-sm">${netInfo.name} &bull; ${bundle.validity}</p></div><div class="bg-slate-50 rounded-2xl p-6 mb-6"><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Bundle Price</span><span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span></div><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Your Balance</span><span class="font-bold text-lg ${hasBal?'text-green-600':'text-red-500'}">₵${balance.toFixed(2)}</span></div><div class="border-t border-slate-200 mt-2 pt-2 flex justify-between items-center"><span class="font-bold">Total</span><span class="font-black text-xl text-red-600">₵${bundle.price.toFixed(2)}</span></div></div><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"><p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p></div><button id="confirm-purchase-btn" onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${hasBal?'':'opacity-50 cursor-not-allowed'}" ${hasBal?'':'disabled'}>${hasBal?'Confirm Purchase':'Insufficient Balance'}</button>${!hasBal?`<button onclick="state.activeOrderData=null;navigateTo('wallet')" class="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-300 transition-all">Add Funds to Wallet</button>`:''}</div></div></div>`;
+  return`<div class="order-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn" onclick="if(event.target===this)appCloseSheet()"><div class="order-card card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in"><button onclick="appCloseSheet()" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="text-center mb-6"><div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><span class="text-2xl font-black">${netInfo.name.charAt(0)}</span></div><h3 class="text-2xl font-black mb-1">Purchase ${bundle.size}</h3><p class="text-muted-theme text-sm">${netInfo.name} &bull; ${bundle.validity}</p></div><div class="bg-slate-50 rounded-2xl p-6 mb-6"><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Bundle Price</span><span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span></div><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Your Balance</span><span class="font-bold text-lg ${hasBal?'text-green-600':'text-red-500'}">₵${balance.toFixed(2)}</span></div><div class="border-t border-slate-200 mt-2 pt-2 flex justify-between items-center"><span class="font-bold">Total</span><span class="font-black text-xl text-red-600">₵${bundle.price.toFixed(2)}</span></div></div><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"><p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p></div><button id="confirm-purchase-btn" onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${hasBal?'':'opacity-50 cursor-not-allowed'}" ${hasBal?'':'disabled'}>${hasBal?'Confirm Purchase':'Insufficient Balance'}</button>${!hasBal?`<button onclick="state.activeOrderData=null;navigateTo('wallet')" class="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-300 transition-all">Add Funds to Wallet</button>`:''}</div></div></div>`;
 }
 
 /* ===== ORDER FUNCTIONS ===== */
@@ -2734,10 +2856,10 @@ function renderAgentDashboard(){
   const refLink=`${window.location.origin}${window.location.pathname}?agent=${esc(ap.agent_id||ap.id)}`;
   const tab=state.agentTab||'dashboard';
   const tabBtn=(id,label)=>`<button class="admin-tab-btn ${tab===id?'active':''}" onclick="state.agentTab='${id}';render()">${label}</button>`;
-  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8">
+  return`<div class="app-tight animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
       <div><h1 class="text-3xl font-black">Agent Dashboard</h1><p class="text-muted-theme text-sm">Welcome, <strong>${esc(ap.name||'Agent')}</strong> &bull; ID: <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">${esc(ap.agent_id||ap.id)}</code> <span id="live-indicator">${liveIndicatorHtml()}</span></p></div>
-      <button onclick="navigateTo('home')" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">← Back to Store</button>
+      <button onclick="navigateTo('home')" class="app-hide bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">← Back to Store</button>
     </div>
     <!-- Referral Link Card -->
     <div class="mb-8 bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-5 text-white">
@@ -3186,6 +3308,232 @@ function reportOrder(order){
    Draws the current page. Drawing the page you are already on again keeps it
    still: no entrance animations, and the field you were typing in keeps focus. */
 let lastRenderSig='';
+/* ===== APP MODE =====
+   Inside the TRU Data Android app (2.1 and later) the app itself draws the
+   top bar, the tab bar (Home, Orders, Wallet, Agent, Account), the splash and
+   the offline screen. The page hides its own menu and shows app screens for
+   Home, Welcome and Account; everything else (buying, wallet, orders, agent
+   hub, admin) is the normal site, so changes made on the site or in the admin
+   dashboard reach the app at once without a new APK.
+   Page -> app: window.TruApp.onState(json), .haptic(kind), .share(text)
+   App -> page: window.TruAppBridge.go(tab), .back(), .refresh() */
+const APP_ICONS={
+  zap:'<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  orders:'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>',
+  wallet:'<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
+  agent:'<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  trending:'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>',
+  shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  smartphone:'<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+  message:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+  trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+  chevron:'<path d="m9 18 6-6-6-6"/>'
+};
+function appIcon(n,s=24){return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${APP_ICONS[n]||''}</svg>`;}
+function appNative(){return APP_SHELL&&window.TruApp?window.TruApp:null;}
+function appHaptic(kind){const n=appNative();try{if(n&&n.haptic) n.haptic(kind||'tick');}catch(e){}}
+function appShare(text){
+  const n=appNative();
+  try{if(n&&n.share){n.share(text);return;}}catch(e){}
+  if(navigator.share){navigator.share({text}).catch(()=>{});return;}
+  copyText(text,'Link');
+}
+function appVersion(){const m=navigator.userAgent.match(/TruDataApp\/(\d+\.\d+(?:\.\d+)?)/);return m?m[1]:'';}
+function appUpdateAvailable(){const cur=parseVersion(appVersion()+(/^\d+\.\d+$/.test(appVersion())?'.0':'')),n=parseVersion(latestApk.version);return !!(cur&&n&&compareVersions(n,cur)>0);}
+function appUpdateHtml(){return appUpdateAvailable()?`<button type="button" class="app-update tap" onclick="downloadLatestApk(event)"><span class="ic">${appIcon('download',20)}</span><span class="tx"><b>Update available · v${esc(latestApk.version)}</b><small>Tap to download the new app</small></span></button>`:'';}
+function appPaintUpdate(){document.querySelectorAll('[data-bind=app-update]').forEach(el=>paintHtml(el,appUpdateHtml()));}
+function appInitials(){
+  const p=String(state.userProfile?.full_name||state.user?.email||'').trim().split(/[\s@._-]+/).filter(Boolean);
+  return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase();
+}
+const APP_TAB={home:'home',landing:'home',network:'home',success:'home','my-orders':'orders',wallet:'wallet','agent-portal':'agent','agent-dashboard':'agent',account:'account'};
+const APP_ROOT=new Set(['home','landing','my-orders','wallet','agent-portal','agent-dashboard','account','admin-dashboard']);
+const APP_TITLE={'my-orders':'My orders',wallet:'Wallet','agent-portal':'Agents','agent-dashboard':'Agent hub',account:'Account',terms:'Terms of Service',privacy:'Privacy Policy',about:'About us',login:'Sign in',register:'Create account','forgot-password':'Reset password','reset-password':'New password','admin-dashboard':'Admin','admin-login':'Admin',success:'Your order'};
+// Where Back goes from pages that are not one of the tabs.
+const APP_PARENT={network:'home',success:'home',login:'landing',register:'landing','forgot-password':'login','reset-password':'home','admin-login':'landing',terms:'account',privacy:'account',about:'account'};
+let appLastState='';
+// Tell the app what to show in its top bar and tab bar.
+function postAppState(){
+  if(!APP_SHELL) return;
+  try{
+    const v=state.view,signedIn=!!state.user&&!state.isAdmin;
+    const s={view:v,tab:state.isAdmin?'':(APP_TAB[v]||''),root:APP_ROOT.has(v),logo:v==='home'||v==='landing',
+      title:v==='network'&&NETWORKS[state.params]?NETWORKS[state.params].name:(APP_TITLE[v]||''),
+      loggedIn:!!state.user,admin:!!state.isAdmin,sheet:!!state.activeOrderData||!!document.getElementById('legal-modal'),
+      balance:signedIn&&state.userProfile?'₵'+parseFloat(state.userProfile.balance||0).toFixed(2):'',
+      initials:signedIn?appInitials():''};
+    const j=JSON.stringify(s);if(j===appLastState) return;appLastState=j;
+    const n=appNative();if(n&&n.onState) n.onState(j);
+  }catch(e){}
+}
+window.TruAppBridge={
+  // A tab was tapped. Tapping the tab you are on scrolls to the top and refreshes.
+  go(tab){
+    if(state.isAdmin){navigateTo('admin-dashboard');return;}
+    if(!state.user&&tab!=='home'){navigateTo('login');return;}
+    const to={home:state.user?'home':'landing',orders:'my-orders',wallet:'wallet',
+      agent:state.agentProfile?.status==='active'?'agent-dashboard':'agent-portal',account:'account'}[tab];
+    if(!to) return;
+    closeLegal();
+    if(state.activeOrderData){state.activeOrderData=null;if(state.view===to) render();}
+    if(state.view===to){window.scrollTo({top:0,behavior:'smooth'});loadViewData(true);return;}
+    navigateTo(to);
+  },
+  // The phone's Back button: 'handled', or 'exit' when there is nowhere to go back to.
+  back(){
+    if(document.getElementById('legal-modal')){closeLegal();postAppState();return 'handled';}
+    if(state.activeOrderData){appCloseSheet();return 'handled';}
+    const home=state.isAdmin?'admin-dashboard':(state.user?'home':'landing');
+    if(state.view===home||document.getElementById('terms-gate')) return 'exit';
+    let to=APP_ROOT.has(state.view)?home:(APP_PARENT[state.view]||home);
+    if((to==='account'&&!state.user)||(to==='landing'&&state.user)) to=home;
+    navigateTo(to);return 'handled';
+  },
+  // Pull to refresh.
+  refresh(){refreshProfile(true);loadViewData(true);if(!state.user) refreshBundles(true);},
+  // The app asks for the current state again (after it was in the background).
+  state(){appLastState='';postAppState();}
+};
+function appCloseSheet(){
+  const card=document.querySelector('.order-card');
+  if(!APP_SHELL||!card){state.activeOrderData=null;render();return;}
+  card.style.transition='transform .2s ease-in';card.style.transform='translateY(110%)';
+  const m=card.parentElement;if(m){m.style.transition='opacity .2s';m.style.opacity='0';}
+  setTimeout(()=>{if(state.activeOrderData){state.activeOrderData=null;render();}},190);
+}
+// Drag the purchase sheet down to close it.
+function appSheetDrag(){
+  if(!APP_SHELL) return;
+  const card=document.querySelector('.order-card');if(!card||card.__drag) return;card.__drag=true;
+  let y0=null,dy=0;
+  card.addEventListener('touchstart',e=>{if(card.scrollTop>0||e.target.closest('input,button')) return;y0=e.touches[0].clientY;dy=0;card.style.transition='none';},{passive:true});
+  card.addEventListener('touchmove',e=>{if(y0===null) return;dy=Math.max(0,e.touches[0].clientY-y0);card.style.transform=dy?`translateY(${dy}px)`:'';},{passive:true});
+  card.addEventListener('touchend',()=>{if(y0===null) return;y0=null;card.style.transition='transform .2s';if(dy>110) appCloseSheet();else card.style.transform='';});
+}
+const APP_NET={mtn:{mono:'M',bg:'#FFCC00',fg:'#0F172A',short:'MTN'},airteltigo:{mono:'AT',bg:'#0077B5',fg:'#fff',short:'AirtelTigo'},telecel:{mono:'T',bg:'#E60000',fg:'#fff',short:'Telecel'}};
+function appMono(n,size){
+  const x=APP_NET[n]||{mono:'•',bg:'#E2E8F0',fg:'#0F172A'};
+  return`<span class="app-mono" style="background:${x.bg};color:${x.fg}${size?`;width:${size}px;height:${size}px;border-radius:14px`:''}">${x.mono}</span>`;
+}
+function appNet(){const n=state.appNet||store.get('appNet');return APP_NET[n]?n:'mtn';}
+function appChipsHtml(){const cur=appNet();return Object.keys(APP_NET).map(n=>`<button type="button" class="app-chip ${n===cur?'on':''}" aria-pressed="${n===cur}" onclick="appSetNet('${n}')">${appMono(n)}${APP_NET[n].short}</button>`).join('');}
+function appTilesHtml(){
+  const n=appNet(),list=NORMAL_BUNDLES.filter(b=>b.network===n&&b.active!==false);
+  if(!list.length) return`<p class="app-empty">No ${APP_NET[n].short} bundles right now. Please check again soon.</p>`;
+  const shown=state.appAllBundles?list:list.slice(0,9);
+  return`<div class="app-tiles">${shown.map(b=>{const dp=getBundleDisplayPrice(b);return`<button type="button" class="app-tile" onclick="appHaptic();initiateOrder('${n}','${b.id}')"><b>${esc(b.size)}</b><small>${esc(b.validity)}</small><em>₵${dp.price.toFixed(2)}</em></button>`;}).join('')}</div>${list.length>shown.length?`<button type="button" class="app-more tap" style="margin-top:12px" onclick="state.appAllBundles=true;appPaintBundles()">Show all ${list.length} ${APP_NET[n].short} bundles</button>`:''}`;
+}
+function appPaintBundles(){
+  if(!document.getElementById('app-bundles')) return;
+  paintHtml('app-net-chips',appChipsHtml());
+  paintHtml('app-bundles',appTilesHtml());
+}
+function appSetNet(n){
+  if(!APP_NET[n]||n===appNet()) return;
+  state.appNet=n;state.appAllBundles=false;store.set('appNet',n);appHaptic('tick');
+  appPaintBundles();
+  const el=document.getElementById('app-bundles');if(el){el.classList.remove('app-fade');void el.offsetWidth;el.classList.add('app-fade');}
+}
+function appStatus(raw){
+  const s=(raw||'Pending').trim();
+  if(s==='Placing') return['Placing','st-pending'];
+  if(s==='Completed'||s==='Processing') return['Processed','st-processed'];
+  if(s==='Delivered') return['Delivered','st-delivered'];
+  if(s==='Deleted') return['Cancelled','st-cancelled'];
+  return['Pending','st-pending'];
+}
+function appOrderRow(o){
+  const st=appStatus(o.Status),d=new Date(o.created_at||Date.now());
+  const day=new Date().toDateString()===d.toDateString()?'Today':d.toLocaleDateString('en-GH',{day:'numeric',month:'short'});
+  const net=APP_NET[o.Network]?.short||String(o.Network||'').toUpperCase();
+  return`<button type="button" class="app-order ${o._pending?'row-pending':''}" onclick="navigateTo('my-orders')">${appMono(o.Network,42)}<span class="app-order-main"><b>${esc(net)} · ${esc(o.bundle_name)}</b><small>${esc(o.Phone)} · ${day}, ${d.toLocaleTimeString('en-GH',{hour:'2-digit',minute:'2-digit'})}</small></span><span class="app-order-r"><b>₵${parseFloat(o.Amount||0).toFixed(2)}</b><span class="app-st ${st[1]}">${st[0]}</span></span></button>`;
+}
+function appRecentHtml(data){
+  const list=(data||[]).slice(0,3);
+  return list.length?list.map(appOrderRow).join(''):`<div class="app-empty-card">No orders yet. Pick a bundle above to get started.</div>`;
+}
+function loadAppRecent(){
+  if(!APP_SHELL||!state.user||!document.getElementById('app-recent')) return;
+  paint('app-recent','my-orders',fetchMyOrders,appRecentHtml,SK.list(2,48),()=>errorBox('Could not load your orders.','loadAppRecent()'));
+}
+function appGreeting(){const h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening';}
+function renderAppHome(){
+  const p=state.userProfile;
+  const first=String(p?.full_name||'').trim().split(/\s+/)[0]||'there';
+  const qa=(label,icon,on)=>`<button type="button" class="app-qa" onclick="${on}"><span>${appIcon(icon)}</span>${label}</button>`;
+  return`<div class="app-screen">
+    <section class="app-hero">
+      <p class="app-greet">${appGreeting()},</p>
+      <h1 class="app-name">${esc(first)}</h1>
+      <div class="app-bal">
+        <div class="app-bal-top"><span class="app-ov">Wallet balance</span><span class="app-live"><i></i>Live</span></div>
+        <div class="app-amt">GH<span data-bind="balance" data-dark="1">${p?'₵'+parseFloat(p.balance||0).toFixed(2):SK.money(true)}</span></div>
+        <p class="app-hint">Top up with Mobile Money from your Wallet</p>
+        <div class="app-bal-acts"><button type="button" class="app-btn-white" onclick="navigateTo('wallet')">${appIcon('plus',18)}Top up</button><button type="button" class="app-btn-glass" onclick="navigateTo('wallet')">${appIcon('clock',18)}History</button></div>
+      </div>
+    </section>
+    <div class="app-body">
+      <div data-bind="app-update">${appUpdateHtml()}</div>
+      <div id="announcement-slot">${announcementHtml(state.announcement)}</div>
+      <div class="app-quick">${qa('Buy data','zap',"document.getElementById('app-buy')?.scrollIntoView({behavior:'smooth'})")}${qa('Top up','plus',"navigateTo('wallet')")}${qa('My orders','orders',"navigateTo('my-orders')")}${qa('Invite','share','appInvite()')}</div>
+      <div class="app-sh" id="app-buy"><h2>Buy data</h2><button type="button" onclick="navigateTo('network','${appNet()}')">All bundles</button></div>
+      <div class="app-chips" id="app-net-chips">${appChipsHtml()}</div>
+      <div id="app-bundles">${appTilesHtml()}</div>
+      <div class="app-sh"><h2>Recent orders</h2><button type="button" onclick="navigateTo('my-orders')">See all</button></div>
+      <div id="app-recent">${viewCache.has('my-orders')?appRecentHtml(viewCache.get('my-orders')):SK.list(2,48)}</div>
+    </div>
+  </div>`;
+}
+function appInvite(){
+  const ap=state.agentProfile;
+  const link=location.origin+location.pathname+(ap&&ap.status==='active'?'?agent='+encodeURIComponent(ap.agent_id||ap.id):'');
+  appShare('Buy cheap MTN, AirtelTigo and Telecel data with TRU Data: '+link);
+}
+function renderAppWelcome(){
+  const feat=(icon,t,s)=>`<div class="app-feat"><span>${appIcon(icon,22)}</span><div><b>${t}</b><small>${s}</small></div></div>`;
+  return`<div class="app-screen">
+    <section class="app-hero app-hero-tall">
+      <h1>Data bundles, delivered in minutes.</h1>
+      <p>Buy MTN, AirtelTigo and Telecel data from your wallet. No queues, no stress.</p>
+      <div class="app-chips">${Object.keys(APP_NET).map(n=>`<button type="button" class="app-chip" onclick="navigateTo('network','${n}')">${appMono(n)}${APP_NET[n].short}</button>`).join('')}</div>
+    </section>
+    <div class="app-body" style="padding:24px 24px 28px">
+      <div id="announcement-slot">${announcementHtml(state.announcement)}</div>
+      ${feat('zap','Instant delivery','Most orders arrive within minutes')}
+      ${feat('wallet','Top up with MoMo','Send to our MoMo number, we credit your wallet')}
+      ${feat('trending','Earn as an agent','Sell data at your own prices')}
+      <div class="app-cta">
+        <button type="button" class="app-btn-primary" onclick="navigateTo('register')">Create free account</button>
+        <button type="button" class="app-btn-secondary" onclick="navigateTo('login')">I already have an account</button>
+        <p class="app-fine">By continuing you agree to our <button type="button" onclick="openLegal('terms')">Terms</button> and <button type="button" onclick="openLegal('privacy')">Privacy Policy</button>.</p>
+      </div>
+    </div>
+  </div>`;
+}
+function renderAppAccount(){
+  const p=state.userProfile||{},ap=state.agentProfile;
+  const row=(icon,t,s,on)=>`<button type="button" class="app-row" onclick="${on}"><span class="ic">${appIcon(icon,20)}</span><span class="tx"><b>${t}</b><small>${s}</small></span><span class="app-chev">${appIcon('chevron',20)}</span></button>`;
+  const ver=appVersion();
+  return`<div class="app-screen"><div class="app-body">
+    <div class="app-card app-profile"><span class="app-avatar">${esc(appInitials()||'TD')}</span><span class="tx"><b>${esc(p.full_name||'Your account')}</b><small>${esc(p.email||state.user?.email||'')}</small>${p.phone?`<small>${esc(p.phone)}</small>`:''}</span></div>
+    <div data-bind="app-update">${appUpdateHtml()}</div>
+    <p class="app-ovl">Shortcuts</p>
+    <div class="app-card">${row('wallet','Wallet','Balance, top-ups and history',"navigateTo('wallet')")}${row('orders','My orders','Every bundle you have bought',"navigateTo('my-orders')")}${ap?row('agent','Agent hub',ap.status==='active'?'Earnings, prices and your link':'Application: '+esc(ap.status),"navigateTo('agent-dashboard')"):row('trending','Become an agent','Sell data at your own prices',"navigateTo('agent-portal')")}${row('share','Invite a friend','Share TRU Data','appInvite()')}</div>
+    <p class="app-ovl">Help &amp; legal</p>
+    <div class="app-card">${row('message','Contact support','WhatsApp +233 59 757 8538',"location.href='https://wa.me/233597578538'")}${row('file','Terms of Service','How TRU Data works',"openLegal('terms')")}${row('shield','Privacy Policy','What we keep and why',"openLegal('privacy')")}${row('smartphone','App version',ver?'v'+esc(ver):'TRU Data app',"appUpdateAvailable()?downloadLatestApk(event):showToast('You have the latest version of the app.',2500,'info')")}</div>
+    <p class="app-ovl">Account</p>
+    <div class="app-card">${row('logout','Log out','You can sign back in any time',"appLogout()")}</div>
+    <div class="app-card"><div class="app-row danger"><span class="ic">${appIcon('trash',20)}</span><span class="tx"><b>Delete my account</b><small>Everything is removed. Your balance is not refunded.</small></span></div><div id="my-deletion" class="app-delete-body">${SK.bar('60%',40)}</div></div>
+  </div></div>`;
+}
+function appLogout(){if(confirm('Log out of TRU Data?')) logoutUser();}
+
 function render(){
   const app=document.getElementById('app-view'),extended=document.getElementById('extended-content');
   updateAuthUI();
@@ -3218,12 +3566,14 @@ function render(){
       break;
     case 'agent-portal': app.innerHTML=renderAgentPortal();extended.innerHTML='';break;
     case 'agent-dashboard': app.innerHTML=renderAgentDashboard();extended.innerHTML='';break;
+    case 'account': app.innerHTML=renderAppAccount();extended.innerHTML='';break;
     default: navigateTo('landing');return;
   }
-  if(state.activeOrderData){const m=document.createElement('div');m.innerHTML=renderOrderForm();app.appendChild(m.firstElementChild);}
+  if(state.activeOrderData){const m=document.createElement('div');m.innerHTML=renderOrderForm();app.appendChild(m.firstElementChild);appSheetDrag();}
   if(focusId){const el=document.getElementById(focusId);if(el){try{el.focus({preventScroll:true});}catch(e){}}}
   paintBalance();
   loadViewData();
+  postAppState();
 }
 /* Background loading for each page. Sections show what is already known (or
    a skeleton) and update themselves when fresh data arrives. */
@@ -3253,7 +3603,8 @@ async function refreshPaymentSettings(force){
 function loadViewData(force){
   const v=state.view;
   if(v==='landing') loadAnnouncement();
-  else if(v==='home'||v==='success'){refreshProfile(force);refreshBundles(force);}
+  else if(v==='home'||v==='success'){refreshProfile(force);refreshBundles(force);if(APP_SHELL&&v==='home'){loadAppRecent();loadAnnouncement();}}
+  else if(v==='account'){refreshProfile(force);refreshAgentProfile(force);loadMyDeletion();checkLatestApk();}
   else if(v==='network') refreshBundles(force);
   else if(v==='wallet'){refreshProfile(force);refreshPaymentSettings(force);fetchUserTransactions();loadMyDepositRequests();loadMyDeletion();}
   else if(v==='my-orders') loadMyOrders();
@@ -3370,7 +3721,7 @@ function startLive(){
     on('profiles','id=eq.'+uid,p=>onMyProfile(p.new));
   }
   if(uid&&!admin){
-    on('orders','user_id=eq.'+uid,p=>{remember('orders',[p.new],'Status');soon('my-orders',loadMyOrders,400);});
+    on('orders','user_id=eq.'+uid,p=>{remember('orders',[p.new],'Status');soon('my-orders',()=>{loadMyOrders();loadAppRecent();},400);});
     on('transactions','user_id=eq.'+uid,()=>soon('tx',fetchUserTransactions,400));
     on('deposit_requests','user_id=eq.'+uid,p=>{remember('deposit_requests',[p.new],'status');soon('my-deposits',loadMyDepositRequests,400);});
     on('agent_profiles','user_id=eq.'+uid,p=>onMyAgentProfile(p.new));
