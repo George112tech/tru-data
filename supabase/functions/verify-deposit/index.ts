@@ -1,4 +1,11 @@
-// Verifies a Paystack wallet deposit server-to-server and credits the wallet.
+// Verifies an online (Paystack) wallet deposit server-to-server and credits the wallet.
+//
+// The online fee covers Paystack's charge, which Paystack takes from the WHOLE
+// amount paid. So the page asks for total = deposit / (1 - rate), and here the
+// deposit is total * (1 - rate): to get GHS 100.00 at 3.5% the customer pays
+// GHS 103.63, Paystack keeps 3.5% of that, and GHS 100.00 is credited.
+// (Adding 3.5% of the deposit on top, GHS 103.50, left the business short.)
+// The rate is the admin's "online_fee_percent" setting (default 3.5).
 //
 // The browser only sends the Paystack reference. The amount credited is what
 // Paystack says was actually paid, never what the browser claims.
@@ -13,8 +20,13 @@
 
 import { createClient } from "jsr:@supabase/supabase-js@2.45.4";
 
-const FEE_RATE = 0.035;
+const DEFAULT_FEE_PERCENT = 3.5;
+const OLD_FEE_RATE = 0.035; // payments started on the page before this change
 const MIN_DEPOSIT = 5;
+
+function round2(n: number) {
+  return Math.round(n * 100) / 100;
+}
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -66,11 +78,23 @@ Deno.serve(async (req) => {
     return json({ error: "Payment does not belong to this account" }, 403);
   }
 
-  // The page charges round(net * 1.035) pesewas, so dividing back and rounding
-  // recovers the net amount (floor would turn 10.35 / 1.035 into 9.99).
   const paid = tx.amount / 100;
-  const net = Math.round((paid / (1 + FEE_RATE)) * 100) / 100;
-  const fee = Math.round((paid - net) * 100) / 100;
+  let net: number;
+  if (tx.metadata?.fee_method === "gross_up") {
+    // The current rate from the database, never one sent by the browser.
+    const { data: setting } = await admin.from("app_settings")
+      .select("value").eq("key", "online_fee_percent").maybeSingle();
+    const pct = typeof setting?.value === "number" && setting.value >= 0 && setting.value <= 10
+      ? setting.value
+      : DEFAULT_FEE_PERCENT;
+    // The page charges round2(deposit / (1 - rate)); rounding the reverse
+    // recovers the deposit exactly (the rounding error is under half a pesewa).
+    net = round2(paid * (1 - pct / 100));
+  } else {
+    // Started on the old page, which charged round2(deposit * 1.035).
+    net = round2(paid / (1 + OLD_FEE_RATE));
+  }
+  const fee = round2(paid - net);
   if (net < MIN_DEPOSIT) return json({ error: "Below minimum deposit" }, 400);
 
   const { data: credited, error } = await admin.rpc("credit_deposit", {
