@@ -1929,15 +1929,73 @@ async function handleRegister(e){
     showToast(msg,5000,'error');
   }
 }
+/* ===== SIGN-IN LOCKOUT AND IP LIMIT =====
+   Before a password is sent, begin_login (database) checks the visitor's IP
+   and the account: 5 wrong passwords lock the account for 5 minutes; after
+   that, 3 more wrong passwords lock it again for longer each time (15 min,
+   30 min, 1 h ... up to 24 h). The form shows a countdown until the person
+   can try again. A successful sign-in or a password reset starts over.
+   Supabase also refuses a session for a locked account (login_lock_hook). */
+function lockCountdownText(sec){
+  const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),x=String(sec%60).padStart(2,'0');
+  return h?`${h}:${String(m).padStart(2,'0')}:${x}`:`${m}:${x}`;
+}
+function showLoginLock(form,info){
+  if(!form) return;
+  const btn=form.querySelector('button[type=submit]');
+  let box=form.querySelector('.login-lock');
+  if(!box){box=document.createElement('div');box.className='login-lock rounded-2xl border-2 border-red-200 bg-red-50 p-4 text-center';box.setAttribute('role','alert');btn.parentNode.insertBefore(box,btn);}
+  clearInterval(box.__timer);
+  const secs=Math.max(1,Math.round(info.retry_after_seconds||(info.retry_after_minutes||1)*60));
+  const until=Date.now()+secs*1000,locked=info.reason==='locked';
+  const tick=()=>{
+    const left=Math.max(0,Math.round((until-Date.now())/1000));
+    if(!document.body.contains(box)){clearInterval(box.__timer);return;}
+    if(left<=0){clearInterval(box.__timer);box.remove();if(btn) btn.disabled=false;showToast('You can try signing in again now.',4000,'info');return;}
+    if(btn) btn.disabled=true;
+    paintHtml(box,`<p class="text-sm font-bold text-red-800">${esc(locked?'Too many wrong passwords. Your account is locked.':info.message||'Too many sign-in attempts.')}</p><p class="text-xs text-red-700 mt-1">You can try again in</p><p class="text-3xl font-black text-red-700 tabular-nums" data-lock-left>${lockCountdownText(left)}</p>${locked?`<button type="button" onclick="navigateTo('forgot-password')" class="mt-2 text-sm font-bold text-red-700 underline">Reset your password to unlock it now</button>`:''}`);
+  };
+  tick();box.__timer=setInterval(tick,1000);
+}
+// Returns the attempt to report after a successful sign-in, or null when the
+// sign-in must not go ahead (the form then shows why and for how long).
+async function beginLogin(email,form){
+  try{
+    const{data,error}=await withTimeout(supa.rpc('begin_login',{p_email:email}),10000,'The server');
+    if(error){
+      // Not installed yet on the database: sign in as before.
+      if(error.code==='PGRST202'||/begin_login/.test(error.message||'')) return{attempt:null};
+      showToast(error.message||'Could not sign in',4000,'error');return null;
+    }
+    if(data&&data.ok===false){showLoginLock(form,data);return null;}
+    return data||{attempt:null};
+  }catch(err){return{attempt:null};} // a network hiccup here never stops a sign-in; Supabase still refuses locked accounts
+}
+// After a failed sign-in: say how many tries are left, or show the lock at once.
+async function loginFailed(email,form,gate,error){
+  const wrong=/invalid login credentials/i.test(error?.message||'');
+  if(error?.status===429&&!wrong){const again=await beginLogin(email,form);if(!again) return;}
+  if(!wrong){showToast('Login failed: '+(error?.message||'Unknown error'),5000,'error');return;}
+  const left=gate&&typeof gate.attempts_left_after_failure==='number'?gate.attempts_left_after_failure:null;
+  if(left===0){await beginLogin(email,form);showToast('Wrong email or password.',4000,'error');return;}
+  showToast('Wrong email or password.'+(left!==null?` ${left} attempt${left===1?'':'s'} left before your account is locked for ${gate.next_lock||'a while'}.`:''),6000,'error');
+}
+function finishLogin(gate){
+  if(gate&&gate.attempt!==undefined) supa.rpc('finish_login',{p_attempt:gate.attempt||null}).then(()=>{},()=>{});
+}
+
 async function handleLogin(e){
   e.preventDefault();
   const email=document.getElementById('login-email').value.trim(),password=document.getElementById('login-password').value,keep=document.getElementById('remember-me')?.checked!==false;
   // Decide where the session is kept before it is created.
   try{localStorage.setItem('tru-keep-signed-in',keep?'1':'0');if(keep) localStorage.setItem('tru-remember-email',email);else localStorage.removeItem('tru-remember-email');}catch(x){}
+  const form=e.target instanceof HTMLFormElement?e.target:null;
   try{
+    const gate=await beginLogin(email,form);if(!gate) return;
     const{data,error}=await supa.auth.signInWithPassword({email,password});
-    if(error){showToast('Login failed: '+error.message,4000,'error');return;}
+    if(error){await loginFailed(email,form,gate,error);return;}
     if(!data.user){showToast('Login failed: No user data',4000,'error');return;}
+    finishLogin(gate);
     state.user=data.user;
     await Promise.all([fetchUserProfile(),fetchAgentProfile()]);
     if(!state.userProfile){showToast('Failed to load profile data. Please contact support.',4000,'error');return;}
@@ -2092,8 +2150,12 @@ window.adminAuth=async(e)=>{
   e.preventDefault();
   const email=document.getElementById('adm-u').value.trim(),password=document.getElementById('adm-p').value;
   try{localStorage.setItem('tru-keep-signed-in','1');}catch(x){}
+  const form=e.target instanceof HTMLFormElement?e.target:null;
   try{
-    const{data,error}=await supa.auth.signInWithPassword({email,password});if(error) throw error;
+    const gate=await beginLogin(email,form);if(!gate) return;
+    const{data,error}=await supa.auth.signInWithPassword({email,password});
+    if(error){await loginFailed(email,form,gate,error);return;}
+    finishLogin(gate);
     state.user=data.user;await fetchUserProfile();
     if(!state.isAdmin){await refuseSignIn('This account is not an admin.');return;}
     cacheUserState();startLive();
@@ -2159,11 +2221,11 @@ function renderAdminDashboard(){
     <div id="admin-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode:both;">${adminStatsHtml()}</div>
     <!-- Admin Tabs -->
     <div class="flex gap-2 mb-6 flex-wrap animate-slide-up stagger-3" style="animation-fill-mode:both;">
-      ${tabBtn('orders','Orders')}${tabBtn('broadcast','Broadcast')}${tabBtn('agent-prices','Agent Prices')}${tabBtn('agents','Agents')}${tabBtn('withdrawals','Withdrawals')}${tabBtn('deposits','Deposits')}${tabBtn('bundles','Bundles')}${tabBtn('deletions','Deletions')}${tabBtn('sms','SMS')}
+      ${tabBtn('orders','Orders')}${tabBtn('broadcast','Broadcast')}${tabBtn('agent-prices','Agent Prices')}${tabBtn('agents','Agents')}${tabBtn('withdrawals','Withdrawals')}${tabBtn('deposits','Deposits')}${tabBtn('bundles','Bundles')}${tabBtn('deletions','Deletions')}${tabBtn('sms','SMS')}${tabBtn('security','Security')}
     </div>
     <!-- Tab Content -->
     <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:both;">
-      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='deletions'?renderAdminDeletionsTab():tab==='sms'?renderAdminSmsTab():tab==='agents'?`<div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
+      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='deletions'?renderAdminDeletionsTab():tab==='sms'?renderAdminSmsTab():tab==='security'?renderAdminSecurityTab():tab==='agents'?`<div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
     </div>
   </div>`;
 }
@@ -2614,6 +2676,7 @@ const SMS_EVENTS=[
   ['Customers','order_cancelled','Order cancelled / refunded'],
   ['Customers','deposit_credited','Wallet credited'],
   ['Customers','deposit_rejected','Deposit not confirmed'],
+  ['Customers','account_locked','Account locked (too many wrong passwords)'],
   ['Agents','agent_status','Application approved / rejected / suspended'],
   ['Agents','withdrawal_update','Withdrawal paid / rejected'],
   ['Agents','price_unlock_update','Price-change request answered'],
@@ -2624,6 +2687,37 @@ const SMS_EVENTS=[
   ['Admin alerts','admin_new_agent','New agent application'],
   ['Admin alerts','admin_price_request','Agent price-change request'],
 ];
+/* ===== ADMIN: SIGN-IN SECURITY ===== */
+function renderAdminSecurityTab(){
+  return`<div class="card-theme rounded-2xl p-6"><div class="flex items-center justify-between mb-1 gap-3"><h2 class="text-lg font-black">Sign-in security</h2><button onclick="loadAdminSecurity()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold">Refresh</button></div>
+    <p class="text-xs text-muted-theme mb-4">5 wrong passwords lock an account for 5 minutes. After that, 3 more wrong passwords lock it again for longer each time: 15 min, 30 min, 1 h, 2 h, 4 h, 8 h, then 24 h. A successful sign-in or a password reset starts over. One network (IP address) is paused after 20 failed attempts in 15 minutes or 100 in a day.</p>
+    <div id="admin-security">${SK.list(3,48)}</div></div>`;
+}
+function adminSecurityHtml(d){
+  if(!d) return'<p class="text-sm text-muted-theme">Not set up yet. Run the sign-in security SQL first.</p>';
+  const fmt=x=>new Date(x).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const locked=(d.locked||[]).map(l=>`<div class="flex items-center justify-between gap-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3 ${l._pending?'row-pending':''}"><div class="min-w-0"><div class="font-bold text-sm truncate">${esc(l.email)}</div><div class="text-xs text-red-700">Locked until ${fmt(l.locked_until)} · lock #${esc(l.lock_level)}</div></div><button data-email="${esc(l.email)}" onclick="adminUnlockLogin(this.dataset.email)" class="shrink-0 text-xs bg-white border border-red-200 text-red-700 px-3 py-1.5 rounded-lg font-bold">Unlock</button></div>`).join('');
+  const ips=(d.busy_ips||[]).map(i=>`<div class="flex items-center justify-between text-sm bg-slate-50 rounded-xl px-4 py-2"><span class="font-mono">${esc(i.ip)}</span><span class="text-xs text-muted-theme">${esc(i.failed)} failed · last ${fmt(i.last)}</span></div>`).join('');
+  return`<div class="grid sm:grid-cols-2 gap-3 mb-5"><div class="bg-slate-50 rounded-xl p-4"><div class="text-2xl font-black">${(d.locked||[]).length}</div><div class="text-xs text-muted-theme">Accounts locked now</div></div><div class="bg-slate-50 rounded-xl p-4"><div class="text-2xl font-black">${esc(d.failed_24h||0)}</div><div class="text-xs text-muted-theme">Failed sign-ins in 24 hours</div></div></div>
+    <p class="text-xs font-black uppercase text-slate-500 mb-2">Locked accounts</p><div class="space-y-2 mb-5">${locked||'<p class="text-sm text-muted-theme">None.</p>'}</div>
+    <p class="text-xs font-black uppercase text-slate-500 mb-2">Networks with 10+ failed sign-ins today</p><div class="space-y-2">${ips||'<p class="text-sm text-muted-theme">None.</p>'}</div>`;
+}
+async function loadAdminSecurity(){
+  await paint('admin-security','admin-security',async()=>{
+    const{data,error}=await supa.rpc('admin_login_security');
+    if(error){if(error.code==='PGRST202') return null;throw error;}
+    return data;
+  },adminSecurityHtml,SK.list(3,48),()=>errorBox('Could not load sign-in security.','loadAdminSecurity()'));
+}
+async function adminUnlockLogin(email){
+  if(!confirm(`Unlock ${email}? They can sign in again straight away.`)) return;
+  const undo=mutate('admin-security',d=>({...d,locked:(d.locked||[]).filter(l=>l.email!==email)}));
+  try{
+    const{error}=await supa.rpc('admin_unlock_login',{p_email:email});
+    if(error) throw error;
+    showToast('Account unlocked',2500,'success');
+  }catch(err){undo();showToast('Unlock failed: '+(err.message||'error'),4000,'error');}
+}
 function renderAdminSmsTab(){
   return`<div class="space-y-6">
     ${agentMessageCardHtml()}
@@ -3732,6 +3826,7 @@ function loadViewData(force){
     else if(t==='sms') loadAdminSmsTab();
     else if(t==='bundles') loadAdminBundles();
     else if(t==='deletions') loadAdminDeletions();
+    else if(t==='security') loadAdminSecurity();
   }
 }
 
@@ -3972,7 +4067,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
  'adminToggleWithdrawalOverride','saveAnnouncement','saveAdminAgentBasePrice','saveEditAgentPrice','globalToggleAgentPriceLock','toggleRowPriceLock',
  'toggleAgentBasePrice','deleteAgentBasePrice','registerAsAgent','reapplyAsAgent','requestPriceUnlock','saveAgentProfit','submitWithdrawal',
  'adminApproveDeposit','adminRejectDeposit','adminApprovePriceUnlock','adminRejectPriceUnlock','adminLockAgentPricing','processWithdrawal',
- 'updateAgentStatus','adminAuth','updateStatus','deleteOrder','handleOrderButton','adminAddBundle','adminSaveBundle','adminToggleBundle','adminDeleteBundle','adminDeleteSms','adminClearSms','agentDeletePriceRequest','requestAccountDeletion','cancelAccountDeletion','adminApproveDeletion','adminRejectDeletion','adminSaveMomoDetails','sendAgentMessage'
+ 'updateAgentStatus','adminAuth','updateStatus','deleteOrder','handleOrderButton','adminAddBundle','adminSaveBundle','adminToggleBundle','adminDeleteBundle','adminDeleteSms','adminClearSms','adminUnlockLogin','agentDeletePriceRequest','requestAccountDeletion','cancelAccountDeletion','adminApproveDeletion','adminRejectDeletion','adminSaveMomoDetails','sendAgentMessage'
 ].forEach(n=>{if(typeof window[n]==='function') window[n]=action(window[n]);});
 
 /* ===== INIT =====
