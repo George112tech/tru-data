@@ -93,7 +93,7 @@ $$;
 create or replace function private.minutes_until(p_at timestamptz)
 returns integer
 language sql
-immutable
+stable
 as $$
   select greatest(1, ceil(extract(epoch from (p_at - now())) / 60)::integer);
 $$;
