@@ -328,6 +328,8 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 .become-agent-hero{background:linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f172a 100%);border:1px solid rgba(59,130,246,.25);border-radius:2rem;padding:3rem 2rem;position:relative;overflow:hidden;}
 .become-agent-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 50%,rgba(59,130,246,.12) 0%,transparent 55%),radial-gradient(ellipse at 75% 50%,rgba(99,102,241,.08) 0%,transparent 55%);}
 .agent-stat-card{border-radius:1rem;padding:1rem;text-align:center;}
+.agents-off .agents-only{display:none!important;}
+.agent-closing{background:linear-gradient(135deg,#fff7ed,#fef2f2);border:2px solid #fdba74;border-radius:1rem;padding:1rem 1.1rem;color:#9a3412;}
 .withdrawal-window-open{background:#f0fdf4;border:2px solid #86efac;border-radius:1rem;padding:1rem;color:#166534;}
 .withdrawal-window-closed{background:#fefce8;border:2px solid #fde047;border-radius:1rem;padding:1rem;color:#854d0e;}
 
@@ -503,7 +505,7 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
     <div class="hidden md:flex gap-8 items-center">
       <button onclick="navigateTo('home')" class="cust-only font-semibold text-sm hover:text-red-600 transition-colors duration-300">Buy Data</button>
       <button onclick="navigateTo('about')" class="cust-only font-semibold text-sm hover:text-red-600 transition-colors duration-300">About</button>
-      <button onclick="navigateTo('agent-portal')" class="cust-only font-semibold text-sm hover:text-blue-600 transition-colors duration-300 text-blue-500 font-bold">Agents</button>
+      <button onclick="navigateTo('agent-portal')" class="cust-only agents-only font-semibold text-sm hover:text-blue-600 transition-colors duration-300 text-blue-500 font-bold">Agents</button>
       <a href="#" onclick="downloadLatestApk(event)" class="nav-apk-btn cust-only apk-only"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Get Android App</a>
       <div id="user-auth-section" class="flex items-center gap-3"></div>
     </div>
@@ -522,7 +524,7 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
     <div class="px-4 py-3 flex flex-col gap-1 bg-white/95 backdrop-blur-md">
       <button onclick="navigateTo('home');closeMobileMenu()" class="cust-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>Buy Data</button>
       <button onclick="navigateTo('about');closeMobileMenu()" class="cust-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>About</button>
-      <button onclick="navigateTo('agent-portal');closeMobileMenu()" class="cust-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Agents</button>
+      <button onclick="navigateTo('agent-portal');closeMobileMenu()" class="cust-only agents-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Agents</button>
       <a href="#" onclick="downloadLatestApk(event);closeMobileMenu()" class="mobile-apk-btn mx-1 cust-only apk-only"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Download Android App (APK)</a>
       <div id="user-auth-section-mobile-menu" class="flex flex-col gap-1"></div>
     </div>
@@ -531,7 +533,7 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
 
 <main id="app-view" class="flex-grow min-h-screen"><div class="max-w-6xl mx-auto px-4 py-10" role="status" aria-busy="true" aria-label="Loading"><div class="skel mb-6" style="height:220px;border-radius:1.5rem"></div><div class="skel mx-auto mb-4" style="height:28px;width:60%"></div><div class="skel mx-auto mb-10" style="height:16px;width:40%"></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="skel" style="height:180px;border-radius:2rem"></div><div class="skel" style="height:180px;border-radius:2rem"></div><div class="skel" style="height:180px;border-radius:2rem"></div></div></div></main>
 <div id="extended-content"></div>
-<div id="agent-session-banner" style="display:none;" class="cust-only agent-banner sticky top-16 z-[55]">
+<div id="agent-session-banner" style="display:none;" class="cust-only agents-only agent-banner sticky top-16 z-[55]">
   <span class="relative z-10 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>Agent Link Active — You are viewing <strong>Agent Pricing</strong>. Agent ID: <span id="agent-banner-id" class="font-mono bg-white/20 px-2 py-0.5 rounded"></span></span>
 </div>
 <div id="toast-container"></div>
@@ -1098,11 +1100,12 @@ function loadPaystackScript(){
 }
 async function loadPaymentSettings(){
   try{
-    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent','online_fee_percent']);
+    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent','online_fee_percent','agent_shutdown']);
     const m=Object.fromEntries((data||[]).map(r=>[r.key,r.value]));
     setMomo(typeof m.momo_number==='string'?m.momo_number:null,typeof m.momo_name==='string'?m.momo_name:null,
       typeof m.momo_network==='string'?m.momo_network:null,typeof m.deposit_fee_percent==='number'?m.deposit_fee_percent:null);
     if(typeof m.online_fee_percent==='number'&&m.online_fee_percent>=0&&m.online_fee_percent<=10) ONLINE_FEE=m.online_fee_percent;
+    setAgentShutdown(m.agent_shutdown||null);
     state.paystackEnabled=m.paystack_enabled===true;
     state.paystackPublicKey=typeof m.paystack_public_key==='string'?m.paystack_public_key:'';
     if(state.paystackEnabled) loadPaystackScript().catch(()=>{});
@@ -1127,6 +1130,67 @@ function confirmProcessOrder(){
   closeAdminConfirmation();
   showToast('Order marked as Processing. Redirecting...');
 }
+
+/* ===== AGENT ACCOUNTS: 7-DAY NOTICE, THEN DEACTIVATED ===== */
+// Admin -> Agents -> "Send 7-day reminder" texts every agent and stores
+// app_settings.agent_shutdown = {notice_at, closes_at, sent}. Until closes_at,
+// agents can withdraw any amount on any day; after it there are no agent pages.
+state.agentShutdown=store.get('agentShutdown');
+let agentPhaseTimer=null,agentPhaseShown='';
+function agentsPhase(){
+  const c=state.agentShutdown&&Date.parse(state.agentShutdown.closes_at);
+  if(!c) return 'active';
+  return Date.now()<c?'closing':'closed';
+}
+function agentCloseDate(withTime){
+  const c=state.agentShutdown&&new Date(state.agentShutdown.closes_at);
+  if(!c||isNaN(c)) return '';
+  const d=c.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  return withTime===false?d:d+' at '+c.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+function agentTimeLeft(){
+  const ms=Date.parse(state.agentShutdown?.closes_at)-Date.now();
+  if(!(ms>0)) return '';
+  const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.max(1,Math.ceil(ms%36e5/6e4));
+  if(d>0) return d+(d===1?' day':' days')+(h?' '+h+(h===1?' hour':' hours'):'');
+  if(h>0) return h+(h===1?' hour':' hours')+' '+(m===60?0:m)+' min';
+  return m+(m===1?' minute':' minutes');
+}
+function setAgentShutdown(v){
+  const next=v&&typeof v==='object'&&v.closes_at?v:null;
+  const before=agentsPhase()+'|'+(state.agentShutdown?.closes_at||'');
+  state.agentShutdown=next;store.set('agentShutdown',next);
+  applyAgentPhase(before!==agentsPhase()+'|'+(next?.closes_at||''));
+}
+// Show or hide everything agent-related, and switch over by itself at the closing time.
+function applyAgentPhase(changed){
+  const phase=agentsPhase();
+  if(agentPhaseShown&&agentPhaseShown!==phase) changed=true;
+  agentPhaseShown=phase;
+  document.documentElement.classList.toggle('agents-off',phase==='closed');
+  clearTimeout(agentPhaseTimer);
+  if(phase==='closing'){
+    // Check every minute (the time left on screen) and switch over at the closing time.
+    const ms=Date.parse(state.agentShutdown.closes_at)-Date.now();
+    agentPhaseTimer=setTimeout(()=>applyAgentPhase(false),Math.max(1000,Math.min(ms+500,6e4)));
+    paintHtml('agent-closing-banner',agentClosingBannerHtml());
+    if(!changed&&!state.agentShutdownBusy&&document.getElementById('admin-agent-shutdown')) paintAdminAgentShutdown();
+  }
+  if(phase==='closed'){
+    sessionStorage.removeItem('tru_agent_id');sessionStorage.removeItem('tru_agent_prices');
+    if(state.agentPricingMode){state.agentId=state.agentProfile?.agent_id||null;state.agentPricingMode=false;state.agentLinkPrices={};if(state.view==='network') render();}
+  }
+  if(!changed) return;
+  updateAuthUI();postAppState();
+  if(state.view==='agent-portal'||state.view==='agent-dashboard') navigateTo(state.view,state.params,{replace:true,keepScroll:true});
+  else if(state.view==='account'||(state.view==='admin-dashboard'&&state.adminTab==='agents')) render();
+}
+function agentClosingBannerHtml(){
+  if(agentsPhase()!=='closing') return '';
+  return`<div class="agent-closing flex items-start gap-3 flex-wrap"><svg class="w-6 h-6 shrink-0 text-orange-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"></path></svg><div class="flex-1 min-w-[200px]"><p class="font-black">Agent accounts close on ${esc(agentCloseDate())}</p><p class="text-sm mt-1">That is in <strong>${esc(agentTimeLeft())}</strong>. Withdraw all your profit before then: withdrawals are open every day, at any time, for any amount. After that, the agent dashboard and agent links stop working.</p></div><button onclick="state.agentTab='withdraw';render()" class="shrink-0 bg-orange-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-orange-700">Withdraw now</button></div>`;
+}
+
+applyAgentPhase(false);
 
 /* ===== AGENT SYSTEM UTILITIES ===== */
 async function detectAgentLink(){
@@ -1277,7 +1341,7 @@ function updateAuthUI(){
     return;
   }
   if(state.user){
-    const agentBtn=state.agentProfile?`<button onclick="navigateTo('agent-dashboard')" class="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-xs font-bold hover:bg-blue-200 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent</button>`:'';
+    const agentBtn=state.agentProfile&&agentsPhase()!=='closed'?`<button onclick="navigateTo('agent-dashboard')" class="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-xs font-bold hover:bg-blue-200 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent</button>`:'';
     paintHtml(s,`<div class="flex items-center gap-3">
       ${agentBtn}
       <button onclick="navigateTo('my-orders')" class="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-200 transition-all">
@@ -1296,7 +1360,7 @@ function updateAuthUI(){
     // Mobile top bar: just wallet icon shortcut
     if(sm) paintHtml(sm,`<button onclick="navigateTo('wallet')" class="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>Wallet</button>`);
     // Mobile menu: full list
-    const agentMenuBtn=state.agentProfile?`<button onclick="navigateTo('agent-dashboard');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent Dashboard</button>`:'';
+    const agentMenuBtn=state.agentProfile&&agentsPhase()!=='closed'?`<button onclick="navigateTo('agent-dashboard');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent Dashboard</button>`:'';
     if(smm) paintHtml(smm,`${agentMenuBtn}<button onclick="navigateTo('my-orders');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>My Orders</button><button onclick="logoutUser();closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>Logout</button>`);
   }else{
     paintHtml(s,`<div class="flex items-center gap-2">
@@ -1355,6 +1419,10 @@ async function navigateTo(view,params=null,opts={}){
     // In the app, signed-in people start on Home and the Account tab needs a sign-in.
     if(APP_SHELL&&view==='landing'&&state.user) view='home';
     if(view==='account'&&!state.user) view='login';
+    if((view==='agent-portal'||view==='agent-dashboard')&&agentsPhase()==='closed'){
+      showToast('Agent accounts have been closed.',4000,'info');
+      view=state.user?'home':'landing';params=null;opts={...opts,replace:true};
+    }
     if(view==='agent-dashboard'){
       if(!state.user){showToast('Please login first to access agent dashboard');view='login';}
       else{
@@ -2225,7 +2293,7 @@ function renderAdminDashboard(){
     </div>
     <!-- Tab Content -->
     <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:both;">
-      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='deletions'?renderAdminDeletionsTab():tab==='sms'?renderAdminSmsTab():tab==='security'?renderAdminSecurityTab():tab==='agents'?`<div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
+      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='deletions'?renderAdminDeletionsTab():tab==='sms'?renderAdminSmsTab():tab==='security'?renderAdminSecurityTab():tab==='agents'?`<div id="admin-agent-shutdown" class="mb-6">${adminAgentShutdownHtml()}</div><div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
     </div>
   </div>`;
 }
@@ -2926,6 +2994,55 @@ async function adminSavePaystackSecretKey(){
   loadAdminPaystackSettings();
 }
 
+/* ===== ADMIN: DEACTIVATE AGENT ACCOUNTS ===== */
+function adminAgentShutdownHtml(){
+  const phase=agentsPhase(),sd=state.agentShutdown||{};
+  const fmt=t=>t?new Date(t).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}):'';
+  const busy=state.agentShutdownBusy?'disabled':'';
+  if(phase==='active') return`<div class="card-theme rounded-2xl p-6 border-2 border-red-100">
+    <div class="flex items-start justify-between gap-4 flex-wrap"><div class="flex-1 min-w-[240px]"><h3 class="font-black text-lg mb-1">Deactivate agent accounts</h3>
+    <p class="text-sm text-muted-theme mb-3">One button starts it. This is what happens:</p>
+    <ol class="text-sm text-muted-theme space-y-1.5 list-decimal pl-5"><li>Every active agent gets an SMS that agent accounts close in <strong>7 days</strong> and that they should withdraw their profit.</li><li>For those 7 days, agents can withdraw <strong>any amount, on any day, at any time</strong> (the 1% fee still applies). Nobody new can apply.</li><li>After 7 days the agent dashboard, the Agents page and agent links are gone. Agent links show normal prices.</li></ol>
+    <p class="text-xs text-muted-theme mt-3">Withdrawal requests made before then stay in the Withdrawals tab for you to pay. You can cancel during the 7 days.</p></div>
+    <button id="agent-shutdown-btn" ${busy} onclick="adminStartAgentShutdown()" class="shrink-0 px-5 py-3 rounded-xl font-bold text-sm text-white shadow-md bg-gradient-to-r from-red-700 to-red-500 hover:from-red-800 hover:to-red-600 disabled:opacity-50">Send 7-day reminder</button></div></div>`;
+  if(phase==='closing') return`<div class="card-theme rounded-2xl p-6 border-2 border-orange-200">
+    <div class="flex items-start justify-between gap-4 flex-wrap"><div class="flex-1 min-w-[240px]"><p class="text-xs font-black uppercase text-orange-600 mb-1">Deactivation under way</p><h3 class="font-black text-lg mb-1">Agent accounts close on ${esc(fmt(sd.closes_at))}</h3>
+    <p class="text-sm text-muted-theme">${esc(agentTimeLeft())} left. Reminder texted to <strong>${Number(sd.sent)||0}</strong> agent${Number(sd.sent)===1?'':'s'} on ${esc(fmt(sd.resent_at||sd.notice_at))}. Withdrawals are open every day for any amount until then.</p></div>
+    <div class="flex gap-2 flex-wrap shrink-0"><button ${busy} onclick="adminStartAgentShutdown(true)" class="px-4 py-2.5 rounded-xl font-bold text-sm bg-orange-100 text-orange-800 hover:bg-orange-200 disabled:opacity-50">Send reminder again</button><button ${busy} onclick="adminCancelAgentShutdown()" class="px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50">Cancel deactivation</button></div></div></div>`;
+  return`<div class="card-theme rounded-2xl p-6 border-2 border-slate-200">
+    <div class="flex items-start justify-between gap-4 flex-wrap"><div class="flex-1 min-w-[240px]"><p class="text-xs font-black uppercase text-slate-500 mb-1">Agent accounts are off</p><h3 class="font-black text-lg mb-1">Deactivated on ${esc(fmt(sd.closes_at))}</h3>
+    <p class="text-sm text-muted-theme">There is no agent dashboard or Agents page, and agent links show normal prices. Pay any requests still pending in the <button onclick="state.adminTab='withdrawals';render()" class="underline font-bold">Withdrawals</button> tab.</p></div>
+    <button ${busy} onclick="adminCancelAgentShutdown(true)" class="shrink-0 px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50">Turn agent accounts back on</button></div></div>`;
+}
+function paintAdminAgentShutdown(){paintHtml('admin-agent-shutdown',adminAgentShutdownHtml());}
+async function adminStartAgentShutdown(resend){
+  const when=new Date(Date.now()+7*864e5).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+  const ask=resend
+    ?'Text every active agent again that agent accounts close on '+new Date(state.agentShutdown.closes_at).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+'?'
+    :'Send the 7-day reminder now?\n\n• Every active agent gets an SMS.\n• Withdrawals open every day for any amount until '+when+'.\n• Then agent accounts are deactivated: no agent dashboard, no Agents page, no agent links.';
+  if(!confirm(ask)) return;
+  state.agentShutdownBusy=true;paintAdminAgentShutdown();
+  try{
+    const{data,error}=await supa.rpc('admin_start_agent_shutdown',{p_resend:!!resend});
+    if(error) throw error;
+    const prev=state.agentShutdown||{};
+    state.agentShutdownBusy=false;
+    setAgentShutdown(resend?{...prev,sent:data.sent,resent_at:new Date().toISOString()}:{notice_at:new Date().toISOString(),closes_at:data.closes_at,sent:data.sent});
+    paintAdminAgentShutdown();
+    showToast(data.sent?'Reminder sent to '+data.sent+' agent'+(data.sent===1?'':'s')+'. Agent accounts close on '+agentCloseDate()+'.':'Started, but no agent has a valid phone number to text.',6000,data.sent?'success':'info');
+  }catch(e){state.agentShutdownBusy=false;paintAdminAgentShutdown();showToast('Could not send the reminder: '+(e.message||'error'),6000,'error');}
+}
+async function adminCancelAgentShutdown(reopen){
+  if(!confirm(reopen?'Turn agent accounts back on? Agents get their dashboard and links back, and people can apply again.':'Cancel the deactivation? Agent accounts stay on and the normal withdrawal rules come back. Agents are not texted about this.')) return;
+  state.agentShutdownBusy=true;paintAdminAgentShutdown();
+  try{
+    const{error}=await supa.rpc('admin_cancel_agent_shutdown');
+    if(error) throw error;
+    state.agentShutdownBusy=false;setAgentShutdown(null);paintAdminAgentShutdown();
+    showToast(reopen?'Agent accounts are back on.':'Deactivation cancelled. Agent accounts stay on.',4000,'success');
+  }catch(e){state.agentShutdownBusy=false;paintAdminAgentShutdown();showToast('Could not change it: '+(e.message||'error'),5000,'error');}
+}
+
 /* ===== ADMIN WITHDRAWALS TAB ===== */
 function renderAdminWithdrawalsTab(){
   return`<div class="space-y-4">
@@ -3003,7 +3120,12 @@ function renderAgentPortal(){
     }
     return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-2xl font-black mb-4">You're Already an Agent!</h2><p class="text-muted-theme mb-8">Your agent account is active. Go to your dashboard to manage pricing and track your sales.</p><div class="space-y-3"><button onclick="navigateTo('agent-dashboard')" class="w-full cta-button text-white py-4 rounded-2xl font-bold">Go to Agent Dashboard</button><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button></div></div></div>`;
   }
-  const formHtml=state.user
+  const formHtml=agentsPhase()!=='active'
+    ?`<div class="relative z-10 max-w-md mx-auto text-center bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+        <p class="text-white font-bold text-lg mb-2">We are no longer accepting new agents</p>
+        <p class="text-blue-200 text-sm">Agent accounts close on ${esc(agentCloseDate(false))}. You can still buy data at our normal prices.</p>
+      </div>`
+    :state.user
     ?`<div class="relative z-10 max-w-lg mx-auto bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
         <h3 class="text-xl font-bold text-white mb-5 text-center">Apply to Become an Agent</h3>
         <div class="space-y-4">
@@ -3049,6 +3171,7 @@ function renderAgentDashboard(){
       <div><h1 class="text-3xl font-black">Agent Dashboard</h1><p class="text-muted-theme text-sm">Welcome, <strong>${esc(ap.name||'Agent')}</strong> &bull; ID: <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">${esc(ap.agent_id||ap.id)}</code> <span id="live-indicator">${liveIndicatorHtml()}</span></p></div>
       <button onclick="navigateTo('home')" class="app-hide bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">← Back to Store</button>
     </div>
+    <div id="agent-closing-banner" class="mb-6 empty:hidden">${agentClosingBannerHtml()}</div>
     <!-- Referral Link Card -->
     <div class="mb-8 bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-5 text-white">
       <p class="text-xs font-bold uppercase text-blue-200 mb-2">Your Agent Referral Link</p>
@@ -3072,7 +3195,7 @@ function renderAgentDashboard(){
 function renderAgentOverviewTab(){
   return`<div class="grid lg:grid-cols-3 gap-6">
     <div class="card-theme rounded-2xl p-6 lg:col-span-2"><div class="flex items-center justify-between mb-4 gap-3 flex-wrap"><h3 class="text-xl font-bold">Your Requests</h3><span class="text-xs text-muted-theme flex items-center gap-2"><span class="live-dot"></span>Updates as soon as the admin decides</span></div><div id="agent-requests">${SK.list(3,40)}</div></div>
-    <div class="card-theme rounded-2xl p-6"><h3 class="text-lg font-bold mb-3">How it works</h3><ul class="space-y-3 text-sm text-muted-theme"><li><strong class="text-slate-700">Pricing:</strong> set your profit on each bundle in <em>My Pricing</em>. Saved prices lock; use <em>Request price change</em> to change them.</li><li><strong class="text-slate-700">Orders:</strong> every order through your link shows in <em>My Orders</em>.</li><li class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-blue-700 font-semibold"><span class="font-black">Withdrawal rules:</span> Minimum ₵10 &bull; Monday–Thursday, 8AM–12PM &bull; 1% fee applies</li></ul></div>
+    <div class="card-theme rounded-2xl p-6"><h3 class="text-lg font-bold mb-3">How it works</h3><ul class="space-y-3 text-sm text-muted-theme"><li><strong class="text-slate-700">Pricing:</strong> set your profit on each bundle in <em>My Pricing</em>. Saved prices lock; use <em>Request price change</em> to change them.</li><li><strong class="text-slate-700">Orders:</strong> every order through your link shows in <em>My Orders</em>.</li><li class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-blue-700 font-semibold"><span class="font-black">Withdrawal rules:</span> ${agentsPhase()==='closing'?'Until '+esc(agentCloseDate(false))+': any amount, any day, any time':'Minimum ₵10 &bull; Monday–Thursday, 8AM–12PM'} &bull; 1% fee applies</li></ul></div>
   </div>`;
 }
 function agentRequestsHtml(d){
@@ -3118,10 +3241,12 @@ async function loadAgentRequests(){
 function withdrawWindowOpen(){
   const now=new Date();const h=now.getHours();const d=now.getDay();
   const scheduleOpen=d>=1&&d<=4&&h>=8&&h<12;
-  return{scheduleOpen,open:scheduleOpen||state.withdrawalOverride};
+  const closing=agentsPhase()==='closing';
+  return{scheduleOpen,closing,open:closing||scheduleOpen||state.withdrawalOverride};
 }
 function withdrawWindowHtml(){
-  const{scheduleOpen,open}=withdrawWindowOpen();
+  const{scheduleOpen,open,closing}=withdrawWindowOpen();
+  if(closing) return`<div class="withdrawal-window-open"><p class="font-bold text-sm">Withdrawals are OPEN every day until ${esc(agentCloseDate())}, for any amount</p><p class="text-xs font-semibold mt-1">Agent accounts close then. Withdraw all your profit before that time.</p></div>`;
   const overrideBadge=state.withdrawalOverride&&!scheduleOpen?`<p class="text-xs font-bold text-green-700 mt-1">⚡ Admin has opened the window outside normal hours.</p>`:'';
   return`<div class="${open?'withdrawal-window-open':'withdrawal-window-closed'}"><p class="font-bold text-sm">${open?'Withdrawal window is OPEN — Submit your request now':'Withdrawal window is CLOSED — Available: Monday to Thursday, 8AM–12PM only'}</p>${overrideBadge}</div>`;
 }
@@ -3129,8 +3254,19 @@ function paintWithdrawWindow(){
   paintHtml('wd-window',withdrawWindowHtml());
   const b=document.getElementById('wd-submit');if(b) b.disabled=!withdrawWindowOpen().open;
 }
+function withdrawMin(){return agentsPhase()==='closing'?0.01:10;}
+function wdPreview(v){
+  const a=parseFloat(v)||0,fee=Math.round(a)/100,el=document.getElementById('wd-fee-preview');
+  if(el) el.textContent=a>=withdrawMin()?'Fee: ₵'+fee.toFixed(2)+' — You receive: ₵'+(a-fee).toFixed(2):'';
+}
+function withdrawAll(){
+  const el=document.getElementById('wd-amount');if(!el) return;
+  const a=Math.floor((state.agentStats.profit||0)*100)/100;
+  if(!(a>0)){showToast('You have no profit left to withdraw',3000,'info');return;}
+  el.value=a.toFixed(2);wdPreview(el.value);
+}
 function renderAgentWithdrawTab(){
-  const{open}=withdrawWindowOpen();
+  const{open,closing}=withdrawWindowOpen();
   return`<div class="space-y-6">
     <!-- Request Form -->
     <div class="card-theme rounded-2xl p-6">
@@ -3138,7 +3274,7 @@ function renderAgentWithdrawTab(){
       <div id="wd-window" class="mb-6">${withdrawWindowHtml()}</div>
       <div class="space-y-4 max-w-md">
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800 font-semibold"><svg class="w-4 h-4 inline mr-1 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>A <strong>1% processing fee</strong> is deducted from all withdrawals. You receive the amount minus the fee.</div>
-        <div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount (Minimum ₵10)</label><input type="number" id="wd-amount" min="10" step="0.01" oninput="const a=parseFloat(this.value)||0;const fee=a*0.01;const net=a-fee;document.getElementById('wd-fee-preview').textContent=a>=10?'Fee: ₵'+fee.toFixed(2)+' — You receive: ₵'+net.toFixed(2):'';" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none" placeholder="10.00"><p id="wd-fee-preview" class="text-xs text-blue-600 font-bold mt-1.5"></p></div>
+        <div><div class="flex items-center justify-between gap-2 mb-2"><label class="block text-xs font-bold uppercase text-slate-500">Amount (${closing?'any amount':'Minimum ₵10'})</label>${closing?`<button type="button" onclick="withdrawAll()" class="text-xs font-bold text-blue-600 hover:underline">Withdraw all</button>`:''}</div><input type="number" id="wd-amount" min="${closing?'0.01':'10'}" step="0.01" oninput="wdPreview(this.value)" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none" placeholder="${closing?'0.00':'10.00'}"><p id="wd-fee-preview" class="text-xs text-blue-600 font-bold mt-1.5"></p></div>
         <div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Mobile Money Number</label><input type="tel" id="wd-phone" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none" placeholder="024xxxxxxx"></div>
         <div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Network</label><select id="wd-network" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none"><option value="mtn">MTN MoMo</option><option value="telecel">Telecel Cash</option><option value="airteltigo">AirtelTigo Money</option></select></div>
         <button id="wd-submit" onclick="submitWithdrawal()" ${!open?'disabled':''} class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">Request Withdrawal</button>
@@ -3308,7 +3444,7 @@ async function submitWithdrawal(){
   const amount=parseFloat(amountEl?.value);
   const phone=phoneEl?.value.trim();
   const network=document.getElementById('wd-network')?.value;
-  if(!amount||amount<10){showToast('Minimum withdrawal is ₵10',3000,'error');return;}
+  if(!amount||amount<withdrawMin()){showToast(withdrawMin()<1?'Enter the amount to withdraw':'Minimum withdrawal is ₵10',3000,'error');return;}
   if(!phone){showToast('Enter your MoMo number',3000,'error');return;}
   const v=validateGhanaPhone(phone);if(!v.isValid){showToast(v.error,3000,'error');return;}
   if(!state.agentProfile){showToast('Agent profile not found',3000,'error');return;}
@@ -3566,7 +3702,7 @@ function postAppState(){
       title:v==='network'&&NETWORKS[state.params]?NETWORKS[state.params].name:(APP_TITLE[v]||''),
       loggedIn:!!state.user,admin:!!state.isAdmin,sheet:!!state.activeOrderData||!!document.getElementById('legal-modal'),
       balance:signedIn&&state.userProfile?'₵'+parseFloat(state.userProfile.balance||0).toFixed(2):'',
-      initials:signedIn?appInitials():''};
+      initials:signedIn?appInitials():'',agents:agentsPhase()!=='closed'};
     const j=JSON.stringify(s);if(j===appLastState) return;appLastState=j;
     const n=appNative();if(n&&n.onState) n.onState(j);
   }catch(e){}
@@ -3691,7 +3827,7 @@ function renderAppHome(){
 }
 function appInvite(){
   const ap=state.agentProfile;
-  const link=location.origin+location.pathname+(ap&&ap.status==='active'?'?agent='+encodeURIComponent(ap.agent_id||ap.id):'');
+  const link=location.origin+location.pathname+(ap&&ap.status==='active'&&agentsPhase()!=='closed'?'?agent='+encodeURIComponent(ap.agent_id||ap.id):'');
   appShare('Buy cheap MTN, AirtelTigo and Telecel data with TRU Data: '+link);
 }
 function renderAppWelcome(){
@@ -3723,7 +3859,7 @@ function renderAppAccount(){
     <div class="app-card app-profile"><span class="app-avatar">${esc(appInitials()||'TD')}</span><span class="tx"><b>${esc(p.full_name||'Your account')}</b><small>${esc(p.email||state.user?.email||'')}</small>${p.phone?`<small>${esc(p.phone)}</small>`:''}</span></div>
     <div data-bind="app-update">${appUpdateHtml()}</div>
     <p class="app-ovl">Shortcuts</p>
-    <div class="app-card">${row('wallet','Wallet','Balance, top-ups and history',"navigateTo('wallet')")}${row('orders','My orders','Every bundle you have bought',"navigateTo('my-orders')")}${ap?row('agent','Agent hub',ap.status==='active'?'Earnings, prices and your link':'Application: '+esc(ap.status),"navigateTo('agent-dashboard')"):row('trending','Become an agent','Sell data at your own prices',"navigateTo('agent-portal')")}${row('share','Invite a friend','Share TRU Data','appInvite()')}</div>
+    <div class="app-card">${row('wallet','Wallet','Balance, top-ups and history',"navigateTo('wallet')")}${row('orders','My orders','Every bundle you have bought',"navigateTo('my-orders')")}${agentsPhase()==='closed'?'':ap?row('agent','Agent hub',ap.status==='active'?'Earnings, prices and your link':'Application: '+esc(ap.status),"navigateTo('agent-dashboard')"):row('trending','Become an agent','Sell data at your own prices',"navigateTo('agent-portal')")}${row('share','Invite a friend','Share TRU Data','appInvite()')}</div>
     <p class="app-ovl">Help &amp; legal</p>
     <div class="app-card">${row('message','Contact support','WhatsApp +233 59 757 8538',"location.href='https://wa.me/233597578538'")}${row('file','Terms of Service','How TRU Data works',"openLegal('terms')")}${row('shield','Privacy Policy','What we keep and why',"openLegal('privacy')")}${row('smartphone','App version',ver?'v'+esc(ver):'TRU Data app',"appUpdateAvailable()?downloadLatestApk(event):showToast('You have the latest version of the app.',2500,'info')")}</div>
     <p class="app-ovl">Account</p>
@@ -3899,7 +4035,8 @@ function onMyAgentProfile(row){
 }
 function onSettingChange(row){
   if(!row||!row.key) return;
-  if(row.key==='withdrawal_override'){state.withdrawalOverride=row.value===true;paintWithdrawWindow();paintHtml('admin-wd-window',adminWindowHtml());}
+  if(row.key==='agent_shutdown') setAgentShutdown(row.value);
+  else if(row.key==='withdrawal_override'){state.withdrawalOverride=row.value===true;paintWithdrawWindow();paintHtml('admin-wd-window',adminWindowHtml());}
   else if(row.key.startsWith('paystack')) soon('pay',()=>refreshPaymentSettings(true));
   else if(row.key==='online_fee_percent'&&typeof row.value==='number'){ONLINE_FEE=row.value;paintHtml('online-fee-label',pctText(ONLINE_FEE));const i=document.getElementById('deposit-amount');updateDepositCalculation(i?i.value:0);}
   else if(row.key==='momo_number'&&typeof row.value==='string') setMomo(row.value,null);
@@ -3919,7 +4056,7 @@ function startLive(){
   const on=(table,filter,fn)=>ch.on('postgres_changes',Object.assign({event:'*',schema:'public',table},filter?{filter}:{}),p=>{try{fn(p);}catch(e){console.warn('live update',e);}});
   on('announcements',null,()=>soon('ann',loadAnnouncement));
   on('bundles',null,()=>soon('bundles',()=>refreshBundles(true),400));
-  on('app_settings',null,p=>onSettingChange(p.new));
+  on('app_settings',null,p=>onSettingChange(p.eventType==='DELETE'?{key:p.old&&p.old.key,value:null}:p.new));
   if(uid){
     on('profiles','id=eq.'+uid,p=>onMyProfile(p.new));
   }

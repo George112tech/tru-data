@@ -400,7 +400,7 @@ public class MainActivity extends Activity {
     // State from the site
     // =====================================================================
 
-    // {"view","tab","title","root","logo","loggedIn","admin","sheet","balance","initials"}
+    // {"view","tab","title","root","logo","loggedIn","admin","sheet","balance","initials","agents"}
     private void applyState(String json) {
         if (!onSite()) return;
         JSONObject s;
@@ -446,6 +446,11 @@ public class MainActivity extends Activity {
         avatar.setVisibility(showAvatar ? View.VISIBLE : View.GONE);
 
         tabsAllowed = loggedIn && !admin;
+        // The Agent tab goes away when the admin has deactivated agent accounts.
+        int agentTab = java.util.Arrays.asList(TAB_KEYS).indexOf("agent");
+        if (agentTab >= 0) {
+            tabBar.getChildAt(agentTab).setVisibility(s.optBoolean("agents", true) ? View.VISIBLE : View.GONE);
+        }
         selectTab(s.optString("tab", ""), false);
         // No pull-to-refresh while a sheet or dialog is open (it is dragged down to close).
         swipe.setEnabled(!s.optBoolean("sheet"));
