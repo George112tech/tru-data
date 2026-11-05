@@ -2,6 +2,7 @@
 //
 // POST {action: "create", amount}  (signed-in customer)
 //   Creates a SeevPlus hosted checkout on the server for deposit / (1 - fee),
+//   sent to SeevPlus in pesewas (GHS 5.10 is sent as 510),
 //   so the customer receives exactly `amount` after SeevPlus takes its fee, and
 //   returns the SeevPlus checkout_url. The secret key never reaches the browser.
 //
@@ -37,6 +38,8 @@ const FAILED = new Set(["failed", "failure", "declined", "cancelled", "canceled"
 const EXPIRED = new Set(["expired", "abandoned", "timeout", "timed_out"]);
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
+// SeevPlus amounts are in pesewas (minor units): GHS 5.00 is 500.
+const toPesewas = (ghs: number) => Math.round(ghs * 100);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const cors = {
@@ -126,6 +129,7 @@ async function create(req: Request, body: any) {
   const name = (profile?.full_name || "").trim() || email.split("@")[0];
 
   const charge = round2(deposit / (1 - s.fee / 100));
+  const chargeMinor = toPesewas(charge);
   const id = crypto.randomUUID();
   const { error: insErr } = await admin.from("seev_payments")
     .insert({ id, user_id: user.id, deposit, charge, fee_percent: s.fee, status: "creating" });
@@ -138,7 +142,7 @@ async function create(req: Request, body: any) {
       headers: { Authorization: `Bearer ${key}`, "Idempotency-Key": `tru_${id}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         type: "checkout",
-        amount: charge,
+        amount: chargeMinor,
         currency: "GHS",
         recipient: { name, email },
         redirect_url: `${SITE}?seev=${id}`,
@@ -154,11 +158,11 @@ async function create(req: Request, body: any) {
   const url = typeof p.checkout_url === "string" ? p.checkout_url : "";
   let urlOk = false;
   try { const h = new URL(url).hostname; urlOk = h === "seevplus.com" || h.endsWith(".seevplus.com"); } catch { /* bad URL */ }
-  // SeevPlus must be charging exactly what we asked for (guards against a units mix-up).
-  const amountOk = p.amount === undefined || Math.abs(Number(p.amount) - charge) < 0.005;
+  // SeevPlus must be charging exactly what we asked for (in pesewas).
+  const amountOk = p.amount === undefined || Number(p.amount) === chargeMinor;
   if (!res.ok || out?.success === false || !urlOk || !p.reference || !amountOk) {
     const why = !res.ok || out?.success === false ? errorText(out, res.status)
-      : !amountOk ? `SeevPlus amount ${p.amount} does not match ${charge}` : "SeevPlus sent no checkout link";
+      : !amountOk ? `SeevPlus amount ${p.amount} does not match ${chargeMinor} pesewas` : "SeevPlus sent no checkout link";
     console.error("seevplus create failed", res.status, JSON.stringify(out).slice(0, 800));
     await admin.from("seev_payments").update({ status: "failed", error: why, updated_at: new Date().toISOString() }).eq("id", id);
     return json({ error: "SeevPlus could not start the payment: " + why }, 502);
@@ -185,10 +189,11 @@ async function check(row: any, key: string) {
   }
   const p = payload(out);
   const st = String(p.status ?? p.payment_status ?? "").toLowerCase();
+  // In pesewas, like every SeevPlus amount.
   const paidAmount = Number(p.amount_paid ?? p.paid_amount ?? p.amount);
   const sameRef = !p.reference || String(p.reference) === row.reference;
   const currencyOk = !p.currency || String(p.currency).toUpperCase() === "GHS";
-  const amountOk = Number.isFinite(paidAmount) ? paidAmount + 0.005 >= Number(row.charge) : true;
+  const amountOk = Number.isFinite(paidAmount) ? paidAmount >= toPesewas(Number(row.charge)) : true;
 
   if (PAID.has(st) && sameRef && currencyOk && amountOk) {
     const { data: credited, error } = await admin.rpc("credit_deposit", {
@@ -204,7 +209,7 @@ async function check(row: any, key: string) {
   }
   if (PAID.has(st)) {
     // Paid, but not what we asked for: leave it for the admin to look at.
-    const why = !amountOk ? `SeevPlus says ${paidAmount} was paid, ${row.charge} was due` : "Reference or currency does not match";
+    const why = !amountOk ? `SeevPlus says GHS ${(paidAmount / 100).toFixed(2)} was paid, GHS ${Number(row.charge).toFixed(2)} was due` : "Reference or currency does not match";
     console.error("seevplus mismatch", row.reference, why, JSON.stringify(out).slice(0, 800));
     await admin.from("seev_payments").update({ provider_status: st, checked_at: now, updated_at: now, error: why }).eq("id", row.id);
     return { status: "pending", credited: false, amount: Number(row.deposit), error: "Payment needs checking by the admin" };
