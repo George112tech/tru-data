@@ -941,7 +941,7 @@ let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery
    version is all it takes. If both lookups fail, the newest version known
    when this page was published is used. */
 const APK_BASE_URL='https://kefcmjfvrqbgtivssdwn.supabase.co/storage/v1/object/public/app-updates/';
-let latestApk={url:APK_BASE_URL+'trudata-v2.0.4.apk',version:'2.0.4',size:7728778};
+let latestApk={url:APK_BASE_URL+'trudata-v2.1.4.apk',version:'2.1.4',size:4144356};
 function parseVersion(v){
   const m=String(v||'').match(/(\d+)\.(\d+)\.(\d+)/);
   return m?[+m[1],+m[2],+m[3]]:null;
@@ -950,10 +950,14 @@ function compareVersions(a,b){
   for(let i=0;i<3;i++){if(a[i]!==b[i]) return a[i]-b[i];}
   return 0;
 }
+// The version in the file name (trudata-v2.1.4.apk) wins over any version
+// written next to it, so an update.json that says "2.1.4" but still links to
+// an older file cannot send people to the wrong (or a deleted) file.
 function offerApk(url,version,size){
-  const v=parseVersion(version||url.split('/').pop()),cur=parseVersion(latestApk.version);
+  const fromName=parseVersion(decodeURIComponent(url.split('/').pop()));
+  const v=fromName||parseVersion(version),cur=parseVersion(latestApk.version);
   if(!v||!url.startsWith(APK_BASE_URL)||!/\.apk$/i.test(url)) return;
-  if(compareVersions(v,cur)>=0) latestApk={url,version:v.join('.'),size:size||null};
+  if(compareVersions(v,cur)>0||(compareVersions(v,cur)===0&&size)) latestApk={url,version:v.join('.'),size:size||latestApk.size};
 }
 let apkLookup=null;
 function checkLatestApk(){
