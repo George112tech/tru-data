@@ -7,8 +7,13 @@
 -- later, the function looks the payment up at SeevPlus and credits the wallet
 -- once, through credit_deposit(), with reference SEEV-<SeevPlus reference>.
 --
+-- SeevPlus also calls the same function as a webhook (payment.succeeded /
+-- payment.failed), signed with the webhook signing secret; the function then
+-- checks the payment with SeevPlus itself before crediting, so a payment is
+-- credited even if the customer never comes back.
+--
 -- Admin -> Deposits -> SeevPlus: switch it on and off, set the fee and save
--- the secret key (stored in private.secrets, never shown again).
+-- the secret key and webhook secret (stored in private.secrets, never shown again).
 
 begin;
 
@@ -116,12 +121,44 @@ begin
   end if;
   select * into v_row from private.secrets where key = 'seevplus_secret_key';
   if not found then
-    return jsonb_build_object('set', false);
+    return jsonb_build_object('set', false,
+      'webhook', exists (select 1 from private.secrets where key = 'seevplus_webhook_secret'));
   end if;
   return jsonb_build_object('set', true, 'last4', right(v_row.value, 4),
     'mode', case when v_row.value ~* '(^|_)live_' then 'live' when v_row.value ~* '(^|_)test_' then 'test' else 'unknown' end,
-    'updated_at', v_row.updated_at);
+    'updated_at', v_row.updated_at,
+    'webhook', exists (select 1 from private.secrets where key = 'seevplus_webhook_secret'));
 end;
+$$;
+
+-- The webhook signing secret (SeevPlus -> Developer Webhooks): same rules.
+create or replace function public.set_seevplus_webhook_secret(p_secret text)
+returns void
+language plpgsql
+security definer
+set search_path to 'public', 'private'
+as $$
+declare v_key text := trim(coalesce(p_secret, ''));
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access only';
+  end if;
+  if v_key !~ '^[!-~]{16,255}$' then
+    raise exception 'That does not look like a SeevPlus webhook signing secret';
+  end if;
+  insert into private.secrets (key, value, updated_at) values ('seevplus_webhook_secret', v_key, now())
+  on conflict (key) do update set value = excluded.value, updated_at = now();
+end;
+$$;
+
+create or replace function public.get_seevplus_webhook_secret()
+returns text
+language sql
+stable
+security definer
+set search_path to 'public', 'private'
+as $$
+  select value from private.secrets where key = 'seevplus_webhook_secret';
 $$;
 
 create or replace function public.get_seevplus_secret_key()
@@ -138,6 +175,10 @@ revoke execute on function public.set_seevplus_secret_key(text) from public, ano
 grant execute on function public.set_seevplus_secret_key(text) to authenticated;
 revoke execute on function public.seevplus_key_status() from public, anon;
 grant execute on function public.seevplus_key_status() to authenticated;
+revoke execute on function public.set_seevplus_webhook_secret(text) from public, anon;
+grant execute on function public.set_seevplus_webhook_secret(text) to authenticated;
+revoke execute on function public.get_seevplus_webhook_secret() from public, anon, authenticated;
+grant execute on function public.get_seevplus_webhook_secret() to service_role;
 revoke execute on function public.get_seevplus_secret_key() from public, anon, authenticated;
 grant execute on function public.get_seevplus_secret_key() to service_role;
 
