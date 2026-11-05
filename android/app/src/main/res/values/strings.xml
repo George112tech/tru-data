@@ -17,4 +17,8 @@
     <string name="press_back_again">Press back again to exit</string>
     <string name="share_title">Share TRU Data</string>
     <string name="no_app_for_link">No app found to open this link</string>
+    <string name="secure_payment">Secure payment</string>
+    <string name="leave_payment">Leave this payment? If you have already approved it, your wallet will still be credited.</string>
+    <string name="leave_payment_yes">Leave</string>
+    <string name="leave_payment_no">Stay</string>
 </resources>

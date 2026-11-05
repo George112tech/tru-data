@@ -22,7 +22,10 @@ package com.trudata.app;
 //   app -> page   TruAppBridge.go(tab), TruAppBridge.back(), TruAppBridge.refresh()
 // The site switches to app mode when the user agent contains "TruShell/1".
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -51,6 +54,7 @@ import android.view.ViewTreeObserver;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -104,6 +108,10 @@ public class MainActivity extends Activity {
     // These open inside the app; everything else (WhatsApp, calls, downloads) opens outside it.
     // Payment pages stay inside the app, so the customer comes back to the site signed in.
     private static final String[] IN_APP_HOSTS = {SITE_HOST, "checkout.paystack.com", "standard.paystack.co", "js.paystack.co", "seevplus.com"};
+    // Opening one of these starts a payment: until the customer is back on the
+    // site, every web page (including a bank or MoMo page the gateway sends
+    // them to) stays inside the app, with no tabs, ads or pull-to-refresh.
+    private static final String[] PAYMENT_HOSTS = {"seevplus.com", "checkout.paystack.com", "standard.paystack.co"};
 
     // ----- Design tokens (res/values/colors.xml) -----
     // Shades of red, used together (gradients) rather than one flat bright red.
@@ -148,6 +156,8 @@ public class MainActivity extends Activity {
     private boolean tabsAllowed = false;
     private String selectedTab = "";
     private boolean keyboardOpen = false;
+    private boolean inPayment = false;        // a payment page is open
+    private boolean clearHistoryOnSite = false;
     private boolean adLoaded = false;
 
     private AdView bannerAd;
@@ -392,9 +402,66 @@ public class MainActivity extends Activity {
     // Bars only show once the site is in app mode (an old version of the site
     // keeps its own menu), and the tabs hide while the keyboard is open.
     private void updateChrome() {
-        topBar.setVisibility(chromeReady ? View.VISIBLE : View.GONE);
-        tabBar.setVisibility(chromeReady && tabsAllowed && !keyboardOpen ? View.VISIBLE : View.GONE);
-        adContainer.setVisibility(adLoaded && !keyboardOpen ? View.VISIBLE : View.GONE);
+        topBar.setVisibility(chromeReady || inPayment ? View.VISIBLE : View.GONE);
+        tabBar.setVisibility(chromeReady && tabsAllowed && !keyboardOpen && !inPayment ? View.VISIBLE : View.GONE);
+        adContainer.setVisibility(adLoaded && !keyboardOpen && !inPayment ? View.VISIBLE : View.GONE);
+    }
+
+    // =====================================================================
+    // Payment pages (SeevPlus, Paystack): a plain "Secure payment" bar with a
+    // back arrow; nothing else on screen. Back on the site, the page sets the
+    // bars again and the payment pages are dropped from the back history.
+    // =====================================================================
+
+    private static boolean hostIn(String host, String[] hosts) {
+        if (host == null) return false;
+        for (String h : hosts) if (host.equals(h) || host.endsWith("." + h)) return true;
+        return false;
+    }
+
+    private void onPageChanged(String url) {
+        Uri u = Uri.parse(url);
+        String host = u.getHost();
+        String scheme = u.getScheme() == null ? "" : u.getScheme();
+        if (!scheme.equals("http") && !scheme.equals("https")) return;
+        if (SITE_HOST.equals(host)) {
+            if (inPayment) {
+                inPayment = false;
+                clearHistoryOnSite = true;
+                swipe.setEnabled(true);
+                updateChrome();
+            }
+        } else if (inPayment || hostIn(host, PAYMENT_HOSTS)) {
+            showPaymentChrome();
+        }
+    }
+
+    private void showPaymentChrome() {
+        inPayment = true;
+        backButton.setVisibility(View.VISIBLE);
+        topBar.setPadding(dp(8), 0, dp(16), 0);
+        logo.setVisibility(View.GONE);
+        titleView.setText(R.string.secure_payment);
+        balanceChip.setVisibility(View.GONE);
+        avatar.setVisibility(View.GONE);
+        // No pull-to-refresh: a reload could send the payment form again.
+        swipe.setEnabled(false);
+        updateChrome();
+    }
+
+    // Back on a payment page: leaving is fine (a payment already approved is
+    // still credited by the site), but ask first so it is not done by mistake.
+    private void confirmLeavePayment() {
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.leave_payment)
+                .setPositiveButton(R.string.leave_payment_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        webView.loadUrl(HOME + "#/wallet");
+                    }
+                })
+                .setNegativeButton(R.string.leave_payment_no, null)
+                .show();
     }
 
     // =====================================================================
@@ -727,12 +794,28 @@ public class MainActivity extends Activity {
             }
 
             @Override
+            @TargetApi(21)
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                Uri u = request.getUrl();
+                String scheme = u.getScheme() == null ? "" : u.getScheme();
+                // Frames inside a page (a card or MoMo form inside the checkout) load normally.
+                if (!request.isForMainFrame() && (scheme.equals("http") || scheme.equals("https"))) return false;
+                return openOutsideIfNeeded(u);
+            }
+
+            @Override
             public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
                 loadFailed = false;
+                onPageChanged(url);
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                // Back on the site after paying: Back must not return to the payment page.
+                if (clearHistoryOnSite && SITE_HOST.equals(Uri.parse(url).getHost())) {
+                    clearHistoryOnSite = false;
+                    view.clearHistory();
+                }
                 doneRefreshing();
                 hideSplash();
                 if (!loadFailed) hideOffline();
@@ -776,9 +859,10 @@ public class MainActivity extends Activity {
         String scheme = uri.getScheme() == null ? "" : uri.getScheme();
         String host = uri.getHost() == null ? "" : uri.getHost();
         if (scheme.equals("http") || scheme.equals("https")) {
-            for (String h : IN_APP_HOSTS) {
-                if (host.equals(h) || host.endsWith("." + h)) return false;
-            }
+            if (hostIn(host, IN_APP_HOSTS)) return false;
+            // During a payment, any page the gateway sends the customer to stays
+            // in the app, so the gateway can send them back here when they are done.
+            if (inPayment) return false;
         }
         openExternal(uri);
         return true;
@@ -978,6 +1062,7 @@ public class MainActivity extends Activity {
     }
 
     private void showInterstitial() {
+        if (inPayment) return;
         navigationCount++;
         long now = System.currentTimeMillis();
         if (navigationCount % INTERSTITIAL_EVERY == 0
@@ -1093,6 +1178,10 @@ public class MainActivity extends Activity {
     }
 
     private void goBack(final boolean fromSystem) {
+        if (inPayment && !SITE_HOST.equals(Uri.parse(String.valueOf(webView.getUrl())).getHost())) {
+            confirmLeavePayment();
+            return;
+        }
         webView.evaluateJavascript(
                 "(function(){try{return window.TruAppBridge?TruAppBridge.back():'none';}catch(e){return 'none';}})()",
                 new ValueCallback<String>() {
@@ -1138,7 +1227,8 @@ public class MainActivity extends Activity {
         super.onStart();
         // Back after a while (not from something the app opened itself): app open ad.
         long away = backgroundAt > 0 ? System.currentTimeMillis() - backgroundAt : 0;
-        if (away >= APP_OPEN_RETURN_AFTER_MS && !leftAppOnPurpose && !showingFullScreenAd) showAppOpenAd();
+        // Not while paying: the customer may have just approved the payment in their MoMo app.
+        if (away >= APP_OPEN_RETURN_AFTER_MS && !leftAppOnPurpose && !showingFullScreenAd && !inPayment) showAppOpenAd();
         backgroundAt = 0;
         leftAppOnPurpose = false;
     }
