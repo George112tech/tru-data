@@ -2145,6 +2145,12 @@ async function loadSeevPayments(){
     if(error) throw error;return data||[];
   },seevPaymentsHtml,SK.list(2,40),()=>'<p class="text-xs text-red-500">Could not load SeevPlus payments.</p>');
 }
+function appVersionAtLeast(v){
+  const m=navigator.userAgent.match(/TruDataApp\/([\d.]+)/);if(!m) return false;
+  const a=m[1].split('.').map(Number),b=v.split('.').map(Number);
+  for(let i=0;i<Math.max(a.length,b.length);i++){const x=a[i]||0,y=b[i]||0;if(x!==y) return x>y;}
+  return true;
+}
 async function startSeevPayment(){
   if(!state.seevEnabled){showToast('SeevPlus payments are currently unavailable. Please use another way to pay.',4000,'error');return;}
   if(!state.user||!state.userProfile){showToast('Please sign in again.',4000,'error');return;}
@@ -2157,9 +2163,12 @@ async function startSeevPayment(){
     showToast(msg||'Could not start the SeevPlus payment. Please try again.',6000,'error');loadSeevPayments();return;
   }
   try{localStorage.setItem('tru:seev',data.session);}catch(e){}
-  showToast(APP_SHELL?'Finish the payment on the SeevPlus page, then come back to the app.':'Taking you to SeevPlus…',5000,'info');
+  // App 2.1.3+ opens the payment page inside the app and comes back here when it is done;
+  // older apps open it in the phone's browser.
+  const inApp=!APP_SHELL||appVersionAtLeast('2.1.3');
+  showToast(inApp?'Opening SeevPlus…':'Finish the payment on the SeevPlus page, then come back to the app.',5000,'info');
   location.href=data.checkout_url;
-  if(APP_SHELL) setTimeout(()=>{loadSeevPayments();},1500);
+  if(!inApp) setTimeout(()=>{loadSeevPayments();},1500);
 }
 // Back from SeevPlus (or tapped "Check"): ask the server, which asks SeevPlus.
 async function checkSeevPayment(id,opts={}){
