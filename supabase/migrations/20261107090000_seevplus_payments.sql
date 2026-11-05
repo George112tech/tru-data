@@ -94,7 +94,8 @@ begin
   if not public.is_admin() then
     raise exception 'Admin access only';
   end if;
-  if v_key !~ '^[A-Za-z0-9_.:-]{20,255}$' then
+  -- Any printable key without spaces (SeevPlus key formats may change).
+  if v_key !~ '^[!-~]{16,255}$' then
     raise exception 'That does not look like a SeevPlus API key';
   end if;
   insert into private.secrets (key, value, updated_at) values ('seevplus_secret_key', v_key, now())
