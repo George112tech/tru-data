@@ -102,7 +102,8 @@ public class MainActivity extends Activity {
     private static final String HOME = "https://trudata.rvhssystems.com/";
     private static final String SITE_HOST = "trudata.rvhssystems.com";
     // These open inside the app; everything else (WhatsApp, calls, downloads) opens outside it.
-    private static final String[] IN_APP_HOSTS = {SITE_HOST, "checkout.paystack.com", "standard.paystack.co", "js.paystack.co"};
+    // Payment pages stay inside the app, so the customer comes back to the site signed in.
+    private static final String[] IN_APP_HOSTS = {SITE_HOST, "checkout.paystack.com", "standard.paystack.co", "js.paystack.co", "seevplus.com"};
 
     // ----- Design tokens (res/values/colors.xml) -----
     // Shades of red, used together (gradients) rather than one flat bright red.
