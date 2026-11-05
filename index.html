@@ -3198,6 +3198,9 @@ function adminSeevHtml(d){
     <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4"><div><div class="font-black">SeevPlus payments are ${on?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${on?'Customers can pay with SeevPlus.':'Customers do not see SeevPlus.'}</div></div><button onclick="adminToggleSeev()" class="px-5 py-2.5 rounded-xl font-black text-white ${on?'bg-slate-600':'bg-green-600'}">${on?'Turn Off':'Turn On'}</button></div>
     <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">SeevPlus payment fee (%)</label><div class="flex gap-2"><input id="seev-fee" type="number" min="0" max="10" step="0.01" value="${esc(SEEV_FEE)}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-bold"><button onclick="adminSaveSeevFee()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">Set this to the percentage SeevPlus charges you per payment. Customers pay deposit ÷ (1 − fee), so after SeevPlus takes its cut you receive what is credited. Example at ${pctText(SEEV_FEE)}: to add ₵100.00 they pay ₵${seevCharge(100).total.toFixed(2)}.</p></div>
     <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Checkout API secret key</label><div class="flex gap-2"><input id="seev-secret" type="password" autocomplete="off" placeholder="${status.set?'Saved (ends in '+esc(status.last4)+'). Paste a new one to replace it':'Your SeevPlus Checkout API secret key'}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSaveSeevKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">${status.set?`Key saved (${status.mode==='live'?'live':status.mode==='test'?'sandbox / test':'mode not shown in the key'}, ends in ${esc(status.last4)}).`:'No key saved yet. Use the secret key SeevPlus gave you for the Checkout API (Developer Dashboard → API Keys), not the publishable one.'} It is stored privately on the server and never shown again. Do not turn on IP restrictions for this key.</p></div>
+    <div class="border-t border-slate-200 pt-4"><p class="text-xs font-bold uppercase text-slate-500 mb-1">Webhook</p><p class="text-xs text-muted-theme mb-2">In SeevPlus → Developer Dashboard → Webhooks, add this URL with the events <strong>payment.succeeded</strong> and <strong>payment.failed</strong>, in the same environment as the key (sandbox or production). Payments are then confirmed even if the customer never comes back to the site.</p>
+      <div class="flex gap-2 mb-3"><code class="flex-1 min-w-0 bg-slate-100 px-3 py-2.5 rounded-xl text-xs font-mono break-all">${esc(SEEV_WEBHOOK_URL)}</code><button onclick="copyText(SEEV_WEBHOOK_URL,'Webhook URL')" class="px-4 rounded-xl bg-slate-100 font-bold text-sm">Copy</button></div>
+      <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Webhook signing secret</label><div class="flex gap-2"><input id="seev-whsec" type="password" autocomplete="off" placeholder="${status.webhook?'Saved. Paste a new one to replace it':'The signing secret SeevPlus shows for the webhook'}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSaveSeevWebhookSecret()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">${status.webhook?'Signing secret saved. Webhooks are checked with it.':'Not saved yet. Without it, webhooks are refused, and payments are confirmed when the customer comes back or opens their wallet.'}</p></div>
   </div>`;
 }
 async function loadAdminSeevSettings(){
@@ -3249,6 +3252,17 @@ async function adminToggleSeev(){
   const{error}=await supa.from('app_settings').upsert({key:'seevplus_enabled',value:next,updated_at:new Date().toISOString()});
   if(error){state.seevEnabled=!next;undo();showToast('Could not change SeevPlus: '+error.message,5000,'error');return;}
   showToast(next?'SeevPlus is ON':'SeevPlus is OFF',3000,'success');
+}
+const SEEV_WEBHOOK_URL=SB_URL+'/functions/v1/seevplus';
+async function adminSaveSeevWebhookSecret(){
+  const input=document.getElementById('seev-whsec');
+  const key=input?.value.trim();
+  if(!key){showToast('Paste the webhook signing secret first',3000,'error');return;}
+  const{error}=await supa.rpc('set_seevplus_webhook_secret',{p_secret:key});
+  if(input) input.value='';
+  if(error){showToast('Save failed: '+error.message,5000,'error');return;}
+  showToast('Webhook signing secret saved',3000,'success');
+  loadAdminSeevSettings();
 }
 async function adminSaveSeevKey(){
   const input=document.getElementById('seev-secret');
@@ -4468,7 +4482,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
    Every action shows a spinner on the tapped button at once and ignores
    repeated taps until it has finished. */
 ['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
- 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminCheckSeev','adminSyncSeev',
+ 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
  'adminToggleWithdrawalOverride','saveAnnouncement','saveAdminAgentBasePrice','saveEditAgentPrice','globalToggleAgentPriceLock','toggleRowPriceLock',
  'toggleAgentBasePrice','deleteAgentBasePrice','registerAsAgent','reapplyAsAgent','requestPriceUnlock','saveAgentProfit','submitWithdrawal',
  'adminApproveDeposit','adminRejectDeposit','adminApprovePriceUnlock','adminRejectPriceUnlock','adminLockAgentPricing','processWithdrawal',

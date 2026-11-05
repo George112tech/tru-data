@@ -16,6 +16,12 @@
 //   Re-checks open sessions from the last 2 days, for customers who closed the
 //   page before coming back.
 //
+// Webhook: SeevPlus posts payment.succeeded / payment.failed to this same URL
+//   with X-Seev-Timestamp and X-Seev-Signature = "v1=" + hex(HMAC_SHA256(
+//   signing secret, timestamp + "." + raw body)). A valid event only triggers
+//   the same check as "verify" (SeevPlus is asked again), so a replayed or old
+//   event can never credit twice or credit anything that is not paid.
+//
 // The secret key is the one the admin saved on the dashboard (Deposits tab);
 // the SEEVPLUS_SECRET_KEY function secret is the fallback. SUPABASE_URL,
 // SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
@@ -41,6 +47,23 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+async function webhookSecret(): Promise<string | null> {
+  const { data } = await admin.rpc("get_seevplus_webhook_secret");
+  return (data as string) || Deno.env.get("SEEVPLUS_WEBHOOK_SECRET") || null;
+}
+
+async function hmacHex(secret: string, text: string) {
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(text)));
+  return Array.from(sig, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+function sameText(a: string, b: string) {
+  if (a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
 
 async function secretKey(): Promise<string | null> {
   const { data } = await admin.rpc("get_seevplus_secret_key");
@@ -223,10 +246,40 @@ async function sync(req: Request) {
   return json({ checked: (rows || []).length, paid, credited: round2(credited) });
 }
 
+async function webhook(req: Request, raw: string) {
+  const secret = await webhookSecret();
+  if (!secret) return json({ error: "Webhook secret not set" }, 503);
+  const ts = req.headers.get("X-Seev-Timestamp") ?? "";
+  const sig = req.headers.get("X-Seev-Signature") ?? "";
+  const age = Math.abs(Date.now() / 1000 - Number(ts));
+  if (!ts || !Number.isFinite(Number(ts)) || age > 300) return json({ error: "Invalid signature" }, 401);
+  if (!sameText("v1=" + await hmacHex(secret, `${ts}.${raw}`), sig)) return json({ error: "Invalid signature" }, 401);
+
+  let event: any;
+  try { event = JSON.parse(raw); } catch { return json({ error: "Bad body" }, 400); }
+  const tx = event?.data?.transaction ?? {};
+  const ref = String(tx.reference ?? tx.gatewaySessionRef ?? "");
+  if (!ref || !/^payment\./.test(String(event?.event ?? ""))) return json({ received: true, ignored: "not a payment event" });
+  const { data: row } = await admin.from("seev_payments").select("*").eq("reference", ref).maybeSingle();
+  if (!row) return json({ received: true, ignored: "unknown reference" });
+  const key = await secretKey();
+  if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
+  const r = await check(row, key);
+  return json({ received: true, status: r.status, credited: r.credited });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-  const body = await req.json().catch(() => ({}));
+  const raw = await req.text();
+  if (req.headers.has("X-Seev-Signature")) {
+    try { return await webhook(req, raw); } catch (e) {
+      console.error("seevplus webhook error", e);
+      return json({ error: "Webhook failed" }, 500);
+    }
+  }
+  let body: any = {};
+  try { body = JSON.parse(raw || "{}"); } catch { body = {}; }
   try {
     if (body?.action === "create") return await create(req, body);
     if (body?.action === "verify") return await verify(body);
