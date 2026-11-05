@@ -1002,7 +1002,7 @@ const LEGAL={
     ['11. Law and contact','These terms are governed by the laws of Ghana. Contact us on WhatsApp <strong>+233 59 757 8538</strong> or by email at <strong>kelvinjun12.2003@gmail.com</strong>.']
   ]},
   privacy:{title:'Privacy Policy',intro:'This policy explains what personal information TRU Data (run by TRUTECH BUSINESS, Accra, Ghana) collects when you use the website or Android app, why, who it is shared with and the choices you have. We handle personal data in line with Ghana\'s Data Protection Act, 2012 (Act 843).',sections:[
-    ['1. What we collect','<ul class="list-disc pl-5 space-y-1"><li><strong>Account details:</strong> your name, email address, phone number and password (stored only in scrambled form; we cannot read it).</li><li><strong>Orders:</strong> the numbers you buy bundles for, the bundle, network, price and order status.</li><li><strong>Wallet and payments:</strong> deposits, your deposit reference, MoMo transaction IDs, the number you sent from, amounts and balances. Card payments are handled by Paystack; we never see or store your card number.</li><li><strong>Agents:</strong> name, phone, business name, prices, sales, profit and the MoMo number for withdrawals.</li><li><strong>On your device:</strong> your sign-in session and a few settings (such as "Keep me signed in" and your last wallet balance) are stored in your browser or app so pages open quickly. We do not use advertising or tracking cookies.</li></ul>'],
+    ['1. What we collect','<ul class="list-disc pl-5 space-y-1"><li><strong>Account details:</strong> your name, email address, phone number and password (stored only in scrambled form; we cannot read it).</li><li><strong>Orders:</strong> the numbers you buy bundles for, the bundle, network, price and order status.</li><li><strong>Wallet and payments:</strong> deposits, your deposit reference, MoMo transaction IDs, the number you sent from, amounts and balances. Card payments are handled by Paystack; we never see or store your card number.</li><li><strong>Agents:</strong> name, phone, business name, prices, sales, profit and the MoMo number for withdrawals.</li><li><strong>Security records:</strong> sign-in attempts, the network address (IP) they came from, and a record of account, wallet, order and agent changes (what changed, when and by whom). We keep these for up to 400 days to prevent fraud and resolve disputes.</li><li><strong>On your device:</strong> your sign-in session and a few settings (such as "Keep me signed in" and your last wallet balance) are stored in your browser or app so pages open quickly. We do not use advertising or tracking cookies.</li></ul>'],
     ['2. Why we use it','To create and secure your account, deliver bundles, credit and debit your wallet, confirm payments, pay agents, send you messages about your orders and requests, handle complaints, prevent fraud and meet legal and accounting duties. We do not sell your personal information and do not use it for third-party advertising.'],
     ['3. Who we share it with','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile networks and bundle suppliers</strong>: the recipient number and bundle, so the data can be delivered.</li><li><strong>Supabase</strong>: hosts our database and sign-in system.</li><li><strong>Paystack</strong>: processes card and Paystack payments when you choose them.</li><li><strong>SMS</strong>: text notifications are sent through the httpSMS service from our own phone, so your number and the message pass through it.</li><li><strong>WhatsApp</strong>: only when you choose to report an order or contact us there.</li><li><strong>Agents</strong>: if you buy through an agent\'s link, that agent can see the order (reference, bundle, amount, status) but not your account details.</li><li><strong>Authorities</strong>: when the law requires it or to deal with fraud.</li></ul>Some of these providers store data outside Ghana; we only use providers that protect it.'],
     ['4. How long we keep it','Account details are kept while your account is open. Order, wallet and payment records are kept for as long as needed for accounting, tax and dispute purposes, usually up to 6 years, even after an account is closed. Messages in our SMS log are kept for a limited time.'],
@@ -1296,6 +1296,7 @@ async function logoutUser(){
 }
 function resetUserState(){
   document.getElementById('terms-gate')?.remove();
+  if(state.audit) state.audit={...state.audit,rows:[],q:'',cat:'',who:'',more:false,error:null};
   state.user=null;state.userProfile=null;state.isAdmin=false;state.isDirectMode=false;state.activeOrderData=null;
   state.agentProfile=null;state.agentStats={sales:0,profit:0,pending:0};state.orders=[];state.ordersLoaded=false;
   store.clearUser();viewCache.clear();seenStatus.clear();
@@ -2289,11 +2290,11 @@ function renderAdminDashboard(){
     <div id="admin-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode:both;">${adminStatsHtml()}</div>
     <!-- Admin Tabs -->
     <div class="flex gap-2 mb-6 flex-wrap animate-slide-up stagger-3" style="animation-fill-mode:both;">
-      ${tabBtn('orders','Orders')}${tabBtn('broadcast','Broadcast')}${tabBtn('agent-prices','Agent Prices')}${tabBtn('agents','Agents')}${tabBtn('withdrawals','Withdrawals')}${tabBtn('deposits','Deposits')}${tabBtn('bundles','Bundles')}${tabBtn('deletions','Deletions')}${tabBtn('sms','SMS')}${tabBtn('security','Security')}
+      ${tabBtn('orders','Orders')}${tabBtn('broadcast','Broadcast')}${tabBtn('agent-prices','Agent Prices')}${tabBtn('agents','Agents')}${tabBtn('withdrawals','Withdrawals')}${tabBtn('deposits','Deposits')}${tabBtn('bundles','Bundles')}${tabBtn('deletions','Deletions')}${tabBtn('sms','SMS')}${tabBtn('security','Security')}${tabBtn('audit','Audit log')}
     </div>
     <!-- Tab Content -->
     <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:both;">
-      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='deletions'?renderAdminDeletionsTab():tab==='sms'?renderAdminSmsTab():tab==='security'?renderAdminSecurityTab():tab==='agents'?`<div id="admin-agent-shutdown" class="mb-6">${adminAgentShutdownHtml()}</div><div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
+      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='deletions'?renderAdminDeletionsTab():tab==='sms'?renderAdminSmsTab():tab==='security'?renderAdminSecurityTab():tab==='audit'?renderAdminAuditTab():tab==='agents'?`<div id="admin-agent-shutdown" class="mb-6">${adminAgentShutdownHtml()}</div><div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
     </div>
   </div>`;
 }
@@ -2755,6 +2756,101 @@ const SMS_EVENTS=[
   ['Admin alerts','admin_new_agent','New agent application'],
   ['Admin alerts','admin_price_request','Agent price-change request'],
 ];
+/* ===== ADMIN: AUDIT LOG =====
+   The database writes a line for every important change (money, orders, agents,
+   settings, messages, accounts, security). Nobody can edit or delete lines from
+   the site. Newest first; "Load more" pages back by id. */
+const AUDIT_PAGE=50;
+const AUDIT_CATS=[['','Everything'],['money','Money'],['orders','Orders'],['agents','Agents'],['catalog','Bundles & prices'],['settings','Settings'],['messages','Messages'],['accounts','Accounts'],['security','Security']];
+const AUDIT_WHO=[['','Anyone'],['admin','Admin'],['system','Server (automatic)'],['customer','Customers'],['agent','Agents'],['visitor','Not signed in'],['database','Supabase dashboard']];
+const AUDIT_STYLE={money:'bg-green-100 text-green-800',orders:'bg-blue-100 text-blue-800',agents:'bg-indigo-100 text-indigo-800',catalog:'bg-amber-100 text-amber-800',settings:'bg-slate-200 text-slate-800',messages:'bg-purple-100 text-purple-800',accounts:'bg-cyan-100 text-cyan-800',security:'bg-red-100 text-red-800'};
+state.audit={cat:'',who:'',q:'',rows:[],more:false,loading:false,error:null,missing:false,seq:0};
+let auditSearchTimer=null;
+function renderAdminAuditTab(){
+  const a=state.audit;
+  const opt=(list,v)=>list.map(([k,l])=>`<option value="${k}" ${k===v?'selected':''}>${l}</option>`).join('');
+  return`<div class="card-theme rounded-2xl p-6">
+    <div class="flex items-center justify-between gap-3 flex-wrap mb-1"><h2 class="text-lg font-black">Audit log</h2>
+      <div class="flex gap-2"><button onclick="loadAdminAudit(true)" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold hover:bg-slate-200">Refresh</button><button onclick="exportAuditCsv()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold hover:bg-slate-200">Download CSV</button></div></div>
+    <p class="text-xs text-muted-theme mb-4">Every important change on the site: who made it, when, and from which network (IP). Lines cannot be edited or deleted from the site. They are kept for 400 days.</p>
+    <div class="grid sm:grid-cols-3 gap-2 mb-4">
+      <select id="audit-cat" onchange="state.audit.cat=this.value;loadAdminAudit(true)" class="p-2.5 border-2 rounded-xl text-sm font-bold">${opt(AUDIT_CATS,a.cat)}</select>
+      <select id="audit-who" onchange="state.audit.who=this.value;loadAdminAudit(true)" class="p-2.5 border-2 rounded-xl text-sm font-bold">${opt(AUDIT_WHO,a.who)}</select>
+      <input id="audit-q" type="search" value="${esc(a.q)}" oninput="auditSearch(this.value)" placeholder="Search email, order ref, phone, IP…" class="p-2.5 border-2 rounded-xl text-sm font-bold">
+    </div>
+    <div id="admin-audit">${adminAuditHtml()}</div></div>`;
+}
+function auditSearch(v){
+  clearTimeout(auditSearchTimer);
+  auditSearchTimer=setTimeout(()=>{state.audit.q=v.trim();loadAdminAudit(true);},400);
+}
+function auditWhen(t){
+  const d=new Date(t),sec=(Date.now()-d)/1000;
+  const rel=sec<60?'just now':sec<3600?Math.floor(sec/60)+' min ago':sec<86400?Math.floor(sec/3600)+' h ago':'';
+  const abs=d.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+  return rel?rel+' · '+abs:abs;
+}
+function auditWhoLabel(r){
+  const k={admin:'Admin',system:'Server',customer:'Customer',agent:'Agent',visitor:'Not signed in',database:'Dashboard'}[r.actor_kind]||r.actor_kind;
+  const cls={admin:'bg-slate-900 text-white',system:'bg-slate-200 text-slate-700',database:'bg-orange-100 text-orange-800'}[r.actor_kind]||'bg-slate-100 text-slate-700';
+  return`<span class="px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${cls}">${esc(k)}</span>`;
+}
+function auditVal(v){
+  if(v===null||v===undefined) return'<span class="text-slate-400">empty</span>';
+  const t=typeof v==='object'?JSON.stringify(v):String(v);
+  return esc(t.length>140?t.slice(0,140)+'…':t);
+}
+function auditDetailsHtml(d){
+  const keys=Object.keys(d||{});
+  if(!keys.length) return'';
+  const isDiff=keys.every(k=>d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k])&&'from' in d[k]&&'to' in d[k]);
+  const rows=keys.slice(0,30).map(k=>isDiff
+    ?`<tr><td class="pr-3 py-1 font-mono text-[11px] text-slate-500 align-top">${esc(k)}</td><td class="py-1 text-xs break-all"><span class="line-through text-red-600/80">${auditVal(d[k].from)}</span> → <span class="font-bold text-green-700">${auditVal(d[k].to)}</span></td></tr>`
+    :`<tr><td class="pr-3 py-1 font-mono text-[11px] text-slate-500 align-top">${esc(k)}</td><td class="py-1 text-xs break-all">${auditVal(d[k])}</td></tr>`).join('');
+  return`<details class="mt-1.5"><summary class="text-xs font-bold text-blue-600 cursor-pointer select-none">Details</summary><table class="mt-1.5 w-full">${rows}</table></details>`;
+}
+function adminAuditHtml(){
+  const a=state.audit;
+  if(a.missing) return'<p class="text-sm text-muted-theme">Not set up yet. Run the audit log SQL first.</p>';
+  if(a.error&&!a.rows.length) return errorBox('Could not load the audit log.','loadAdminAudit(true)');
+  if(!a.rows.length) return a.loading?SK.list(6,44):'<p class="text-sm text-muted-theme text-center py-6">Nothing found.</p>';
+  let day='';
+  const items=a.rows.map(r=>{
+    const dd=new Date(r.at).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const head=dd!==day?`<p class="text-xs font-black uppercase text-slate-500 pt-3 pb-1">${esc(dd)}</p>`:'';day=dd;
+    const cat=AUDIT_CATS.find(c=>c[0]===r.category);
+    return head+`<div class="audit-row border border-slate-200 rounded-xl px-4 py-3" data-id="${esc(r.id)}">
+      <div class="flex items-start gap-2 flex-wrap"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${AUDIT_STYLE[r.category]||'bg-slate-100 text-slate-700'}">${esc(cat?cat[1]:r.category)}</span><p class="text-sm font-semibold flex-1 min-w-[200px] break-words">${esc(r.summary)}</p></div>
+      <div class="text-xs text-muted-theme mt-1 flex items-center gap-1.5 flex-wrap">${auditWhoLabel(r)}<span>${esc(r.actor_email||'')}</span>${r.ip?`<span>· IP ${esc(r.ip)}</span>`:''}<span>· ${esc(auditWhen(r.at))}</span></div>
+      ${auditDetailsHtml(r.details)}</div>`;
+  }).join('');
+  return`<div class="space-y-2">${items}</div>${a.more?`<div class="text-center mt-4"><button onclick="loadAdminAudit(false)" ${a.loading?'disabled':''} class="text-sm bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-xl font-bold disabled:opacity-50">${a.loading?'Loading…':'Load more'}</button></div>`:''}`;
+}
+async function loadAdminAudit(reset){
+  const a=state.audit;
+  if(reset){a.rows=[];a.more=false;a.error=null;}
+  const seq=++a.seq;a.loading=true;paintHtml('admin-audit',adminAuditHtml());
+  try{
+    const last=a.rows.length?a.rows[a.rows.length-1].id:null;
+    const{data,error}=await supa.rpc('admin_audit_log',{p_category:a.cat||null,p_who:a.who||null,p_search:a.q||null,p_before:last,p_limit:AUDIT_PAGE});
+    if(seq!==a.seq) return;
+    if(error){if(error.code==='PGRST202'){a.missing=true;}else throw error;}
+    else{a.missing=false;a.rows=a.rows.concat(data||[]);a.more=(data||[]).length===AUDIT_PAGE;}
+  }catch(e){if(seq!==a.seq) return;a.error=e;if(a.rows.length) showToast('Could not load more: '+(e.message||'error'),4000,'error');}
+  a.loading=false;paintHtml('admin-audit',adminAuditHtml());
+}
+function exportAuditCsv(){
+  const rows=state.audit.rows;
+  if(!rows.length){showToast('Nothing to download yet',2500,'info');return;}
+  const q=v=>{const t=v==null?'':(typeof v==='object'?JSON.stringify(v):String(v));return /[",\n\r]/.test(t)||/^[=+\-@]/.test(t)?'"'+(/^[=+\-@]/.test(t)?"'":'')+t.replace(/"/g,'""')+'"':t;};
+  const head=['Time','Who','Email','IP','Category','Action','What happened','Customer','Details'];
+  const lines=[head.join(',')].concat(rows.map(r=>[new Date(r.at).toISOString(),r.actor_kind,r.actor_email,r.ip,r.category,r.action,r.summary,r.subject_email,r.details].map(q).join(',')));
+  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='trudata-audit-log-'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+  showToast('Downloaded '+rows.length+' lines. Load more first to include older ones.',4000,'success');
+}
+
 /* ===== ADMIN: SIGN-IN SECURITY ===== */
 function renderAdminSecurityTab(){
   return`<div class="card-theme rounded-2xl p-6"><div class="flex items-center justify-between mb-1 gap-3"><h2 class="text-lg font-black">Sign-in security</h2><button onclick="loadAdminSecurity()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold">Refresh</button></div>
@@ -3963,6 +4059,7 @@ function loadViewData(force){
     else if(t==='bundles') loadAdminBundles();
     else if(t==='deletions') loadAdminDeletions();
     else if(t==='security') loadAdminSecurity();
+    else if(t==='audit') loadAdminAudit(!state.audit.rows.length||force);
   }
 }
 
