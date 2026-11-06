@@ -311,25 +311,12 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 .order-status-processing{background:#dbeafe;color:#1e40af;}
 .order-status-completed{background:#dcfce7;color:#166534;}
 .order-status-deleted{background:#fee2e2;color:#991b1b;}
-/* ===== AGENT SYSTEM STYLES ===== */
-.agent-banner{background:linear-gradient(135deg,#1e40af 0%,#2563eb 50%,#0284c7 100%);color:white;padding:.65rem 1.5rem;text-align:center;font-size:.78rem;font-weight:800;letter-spacing:.04em;position:relative;overflow:hidden;z-index:55;}
-.agent-banner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.04) 10px,rgba(255,255,255,.04) 20px);}
 .pricing-mode-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .7rem;border-radius:9999px;font-size:.6rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
 .pricing-mode-system{background:rgba(16,185,129,.12);color:#059669;border:1px solid rgba(16,185,129,.25);}
-.pricing-mode-agent{background:rgba(37,99,235,.12);color:#1d4ed8;border:1px solid rgba(37,99,235,.25);}
-.agent-price-wrap{display:inline-flex;flex-direction:column;align-items:flex-end;gap:.15rem;}
-.agent-price-final{font-size:1rem;font-weight:800;color:#1e40af;line-height:1;}
-.agent-price-base{font-size:.6rem;color:#94a3b8;text-decoration:line-through;}
-.agent-profit-pill{background:rgba(37,99,235,.1);color:#1d4ed8;font-size:.58rem;padding:.1rem .45rem;border-radius:9999px;font-weight:700;}
 .admin-tab-btn{padding:.55rem 1.1rem;border-radius:.7rem;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .25s ease;border:none;text-transform:uppercase;letter-spacing:.04em;}
 .admin-tab-btn.active{background:linear-gradient(135deg,#dc2626,#ef4444);color:white;box-shadow:0 4px 12px rgba(220,38,38,.3);}
 .admin-tab-btn:not(.active){background:var(--bg-tertiary);color:var(--text-secondary);}
 .admin-tab-btn:not(.active):hover{background:var(--border-color);}
-.become-agent-hero{background:linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f172a 100%);border:1px solid rgba(59,130,246,.25);border-radius:2rem;padding:3rem 2rem;position:relative;overflow:hidden;}
-.become-agent-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 50%,rgba(59,130,246,.12) 0%,transparent 55%),radial-gradient(ellipse at 75% 50%,rgba(99,102,241,.08) 0%,transparent 55%);}
-.agent-stat-card{border-radius:1rem;padding:1rem;text-align:center;}
-.agents-off .agents-only{display:none!important;}
-.agent-closing{background:linear-gradient(135deg,#fff7ed,#fef2f2);border:2px solid #fdba74;border-radius:1rem;padding:1rem 1.1rem;color:#9a3412;}
 .withdrawal-window-open{background:#f0fdf4;border:2px solid #86efac;border-radius:1rem;padding:1rem;color:#166534;}
 .withdrawal-window-closed{background:#fefce8;border:2px solid #fde047;border-radius:1rem;padding:1rem;color:#854d0e;}
 
@@ -386,7 +373,6 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
 .app-shell nav,.app-shell footer,.app-shell .apk-float,.app-shell .app-hide{display:none!important;}
 .app-shell body{background:#F5F6F8;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;}
 .app-shell #app-view{min-height:0;}
-.app-shell #agent-session-banner{top:0;}
 .app-shell #toast-container{bottom:20px;}
 .app-shell .app-tight{padding-top:16px!important;padding-bottom:28px!important;}
 .app-shell button,.app-shell a{-webkit-user-select:none;user-select:none;}
@@ -505,7 +491,6 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
     <div class="hidden md:flex gap-8 items-center">
       <button onclick="navigateTo('home')" class="cust-only font-semibold text-sm hover:text-red-600 transition-colors duration-300">Buy Data</button>
       <button onclick="navigateTo('about')" class="cust-only font-semibold text-sm hover:text-red-600 transition-colors duration-300">About</button>
-      <button onclick="navigateTo('agent-portal')" class="cust-only agents-only font-semibold text-sm hover:text-blue-600 transition-colors duration-300 text-blue-500 font-bold">Agents</button>
       <a href="#" onclick="downloadLatestApk(event)" class="nav-apk-btn cust-only apk-only"><svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Get Android App</a>
       <div id="user-auth-section" class="flex items-center gap-3"></div>
     </div>
@@ -524,7 +509,6 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
     <div class="px-4 py-3 flex flex-col gap-1 bg-white/95 backdrop-blur-md">
       <button onclick="navigateTo('home');closeMobileMenu()" class="cust-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>Buy Data</button>
       <button onclick="navigateTo('about');closeMobileMenu()" class="cust-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-red-50 hover:text-red-600 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>About</button>
-      <button onclick="navigateTo('agent-portal');closeMobileMenu()" class="cust-only agents-only w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors duration-200 flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Agents</button>
       <a href="#" onclick="downloadLatestApk(event);closeMobileMenu()" class="mobile-apk-btn mx-1 cust-only apk-only"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 0a.477.477 0 0 1 .477.477v.85a3.246 3.246 0 0 1-3.246 3.246H9.246A3.246 3.246 0 0 1 6 1.327v-.85A.477.477 0 0 1 6.477 0h11.046ZM12 5.815l5.6 9.846H6.4L12 5.815Zm0-2.37L5.303 16.508A2.4 2.4 0 0 0 7.38 20.16h9.24a2.4 2.4 0 0 0 2.077-3.652L12 3.445Z"/></svg>Download Android App (APK)</a>
       <div id="user-auth-section-mobile-menu" class="flex flex-col gap-1"></div>
     </div>
@@ -533,9 +517,6 @@ button.is-busy::after{content:'';position:absolute;left:50%;top:50%;width:1.15em
 
 <main id="app-view" class="flex-grow min-h-screen"><div class="max-w-6xl mx-auto px-4 py-10" role="status" aria-busy="true" aria-label="Loading"><div class="skel mb-6" style="height:220px;border-radius:1.5rem"></div><div class="skel mx-auto mb-4" style="height:28px;width:60%"></div><div class="skel mx-auto mb-10" style="height:16px;width:40%"></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6"><div class="skel" style="height:180px;border-radius:2rem"></div><div class="skel" style="height:180px;border-radius:2rem"></div><div class="skel" style="height:180px;border-radius:2rem"></div></div></div></main>
 <div id="extended-content"></div>
-<div id="agent-session-banner" style="display:none;" class="cust-only agents-only agent-banner sticky top-16 z-[55]">
-  <span class="relative z-10 flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>Agent Link Active — You are viewing <strong>Agent Pricing</strong>. Agent ID: <span id="agent-banner-id" class="font-mono bg-white/20 px-2 py-0.5 rounded"></span></span>
-</div>
 <div id="toast-container"></div>
 
 <!-- Floating APK Download Button -->
@@ -742,8 +723,7 @@ function cacheUserState(){
   if(!state.user) return;
   store.set('u:user',{id:state.user.id,email:state.user.email});
   store.set('u:profile',state.userProfile);
-  store.set('u:agent',state.agentProfile);
-  store.set('u:agentStats',state.agentProfile?state.agentStats:null);
+  store.set('u:agent',null);store.set('u:agentStats',null);
 }
 // Read the saved session synchronously so the first paint already shows the
 // signed-in page; the server confirms it a moment later.
@@ -757,8 +737,6 @@ function restoreCachedSession(){
     if(cached&&cached.id===u.id){
       state.userProfile=store.get('u:profile');
       state.isAdmin=state.userProfile?.role==='admin';
-      state.agentProfile=store.get('u:agent');
-      const st=store.get('u:agentStats');if(st) state.agentStats=st;
     }
     return true;
   }catch(e){return false;}
@@ -914,26 +892,9 @@ async function refreshBundles(force){
 
 let state={view:'landing',isAdmin:false,isDirectMode:false,orders:[],searchQuery:'',networkFilter:'all',activeOrderData:null,selectedProvider:'patupaa',currentProcessingOrder:null,confirmationSelectedProvider:'patupaa',user:null,userProfile:null,depositAmount:'',isLoading:false,connectionError:null,announcement:null,
 
-  /* Agent system */
-  agentId:null,agentProfileId:null,agentProfile:null,agentPricingMode:false,agentBasePrices:[],agentPrices:[],adminTab:'orders',agentTab:'dashboard',agentStats:{sales:0,profit:0,pending:0},
-  /* Admin withdrawal override — persists in sessionStorage so it survives re-renders */
-  withdrawalOverride:false
+  adminTab:'orders'
 };
 
-
-/* =====================================================================
-   SUPABASE SQL MIGRATION — run once in Supabase SQL Editor
-   =====================================================================
-   ALTER TABLE agent_profiles
-     ADD COLUMN IF NOT EXISTS agent_profit    NUMERIC DEFAULT 0,
-     ADD COLUMN IF NOT EXISTS total_sales     NUMERIC DEFAULT 0,
-     ADD COLUMN IF NOT EXISTS total_withdrawn NUMERIC DEFAULT 0;
-
-   ALTER TABLE agent_base_prices
-     ALTER COLUMN pricing_locked SET DEFAULT false;
-
-   UPDATE agent_base_prices SET pricing_locked = false WHERE pricing_locked IS NULL;
-   ===================================================================== */
 
 /* ===== ANDROID APP DOWNLOAD =====
    The newest trudata-vX.Y.Z.apk in the app-updates bucket is looked up once
@@ -999,23 +960,22 @@ function downloadLatestApk(e){
 const LEGAL_UPDATED='2 November 2026';
 const LEGAL_VERSION='2026-11-02';
 const LEGAL={
-  terms:{title:'Terms of Service',intro:'These terms apply when you use the TRU Data website or Android app (together, "TRU Data") to buy mobile data bundles, fund a wallet or work as a TRU agent. TRU Data is run by TRUTECH BUSINESS in Accra, Ghana. By creating an account or placing an order you agree to these terms.',sections:[
+  terms:{title:'Terms of Service',intro:'These terms apply when you use the TRU Data website or Android app (together, "TRU Data") to buy mobile data bundles and fund a wallet. TRU Data is run by TRUTECH BUSINESS in Accra, Ghana. By creating an account or placing an order you agree to these terms.',sections:[
     ['1. The service','TRU Data lets you buy MTN, Telecel and AirtelTigo data bundles for any Ghana number from a prepaid wallet. TRU Data is an independent reseller. We are <strong>not affiliated with MTN, Telecel or AirtelTigo</strong>, and the bundle itself (speed, coverage, validity, expiry) is provided by the network under its own terms.'],
     ['2. Your account','You must give a real name, a working email address and a Ghana phone number. Keep your password private: you are responsible for everything done with your account. Tell us straight away if you think someone else has used it. One person may not hold several accounts to get around limits or offers.'],
     ['3. Wallet and payments','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile Money:</strong> send money to the TRU Data MoMo number shown on your wallet page (registered in the name shown there) using your personal reference. Your wallet is credited after we confirm the payment on our statement. Sending to any other number, or without your reference, may delay or prevent crediting.</li><li><strong>Deposit fee:</strong> a fee (currently 3%) is taken off each Mobile Money deposit when it is credited, to cover the charges we pay when we deliver your bundles. For example, if you send GH₵41.00, GH₵39.77 is added to your wallet. The current fee and the amount you will receive are shown on your wallet page before you send.</li><li><strong>Online payments</strong> (card or mobile money through our payment provider Paystack, when available): a payment fee (currently 3.5%) is added and shown before you pay, so that the full amount you chose reaches your wallet. Your wallet is credited once Paystack confirms the payment.</li><li><strong>SeevPlus</strong> (mobile money on the secure SeevPlus payment page, when available): a payment fee is added and shown before you pay, so the full amount you chose reaches your wallet. Your wallet is credited once SeevPlus confirms the payment.</li><li>Wallet money can only be used to buy bundles on TRU Data. It does not earn interest and is not a bank account.</li><li>If we credit your wallet by mistake, we may remove that amount.</li></ul>'],
     ['4. Orders and delivery','Check the phone number before you confirm: bundles are sent to the number you enter and <strong>cannot be moved to another number</strong> once delivered. Most orders are delivered within minutes, but delivery can take longer when a network is busy or down. Prices shown at checkout are the prices you pay; we may change prices for future orders at any time. We check MTN numbers before you pay: a number we have not been able to verify costs a fixed amount more (shown before you confirm), and delivery to it may take longer.'],
     ['5. Refunds and complaints','<ul class="list-disc pl-5 space-y-1"><li>If an order cannot be delivered, or we cancel it, the amount is refunded to your TRU Data wallet.</li><li>If a delivered bundle did not arrive or is wrong, report it from <em>My Orders</em> within <strong>36 hours of delivery</strong>. Reports after that window cannot be investigated.</li><li>We do not refund orders sent to a wrong number you entered, or bundles already used.</li><li>Wallet balances are not normally paid back out as cash. Contact us if you have a special case.</li></ul>'],
-    ['6. Agents','<ul class="list-disc pl-5 space-y-1"><li>Agent accounts are approved by us and may be refused, suspended or closed, for example for misuse, complaints from customers or false details.</li><li>Agents set their profit on top of the agent base price. Saved prices are locked; changes need an approved price-change request.</li><li>Agents earn profit only on orders placed by other customers through their own link. Orders an agent places for themselves earn no profit.</li><li>Withdrawals: minimum ₵10, during the withdrawal window (normally Monday to Thursday, 8AM to 12PM), with a 1% fee deducted. We may hold or reverse profit from orders that were refunded, cancelled or fraudulent.</li><li>Agents must not misrepresent TRU Data, the networks or prices to their customers.</li></ul>'],
-    ['7. Things you must not do','Do not use TRU Data for fraud or money laundering, pay with money that is not yours, try to get bundles or wallet credit without paying, interfere with the site or app, access other people\'s accounts or data, or resell in a way that breaks a network\'s rules. We may suspend accounts, cancel orders and keep records where we see this, and may report it to the authorities.'],
-    ['8. Messages from us','We send messages about your account, orders, deposits and agent requests by SMS, email or on the site. These are part of the service.'],
-    ['9. Availability and liability','We work to keep TRU Data available and accurate but cannot promise it will always be uninterrupted or error-free. To the extent the law allows, we are not responsible for losses caused by network outages, delays by the networks or payment providers, or wrong details you entered. Our total responsibility for any order is limited to the amount you paid for it. Nothing in these terms removes rights you have under Ghanaian consumer law.'],
+    ['6. Things you must not do','Do not use TRU Data for fraud or money laundering, pay with money that is not yours, try to get bundles or wallet credit without paying, interfere with the site or app, access other people\'s accounts or data, or resell in a way that breaks a network\'s rules. We may suspend accounts, cancel orders and keep records where we see this, and may report it to the authorities.'],
+    ['7. Messages from us','We send messages about your account, orders and deposits by SMS, email or on the site. These are part of the service.'],
+    ['8. Availability and liability','We work to keep TRU Data available and accurate but cannot promise it will always be uninterrupted or error-free. To the extent the law allows, we are not responsible for losses caused by network outages, delays by the networks or payment providers, or wrong details you entered. Our total responsibility for any order is limited to the amount you paid for it. Nothing in these terms removes rights you have under Ghanaian consumer law.'],
     ['10. Changes and ending','We may update these terms. The date at the top shows when they last changed, and continuing to use TRU Data after a change means you accept it. You can stop using TRU Data at any time; ask us if you want your account closed.'],
     ['11. Law and contact','These terms are governed by the laws of Ghana. Contact us on WhatsApp <strong>+233 59 757 8538</strong> or by email at <strong>kelvinjun12.2003@gmail.com</strong>.']
   ]},
   privacy:{title:'Privacy Policy',intro:'This policy explains what personal information TRU Data (run by TRUTECH BUSINESS, Accra, Ghana) collects when you use the website or Android app, why, who it is shared with and the choices you have. We handle personal data in line with Ghana\'s Data Protection Act, 2012 (Act 843).',sections:[
-    ['1. What we collect','<ul class="list-disc pl-5 space-y-1"><li><strong>Account details:</strong> your name, email address, phone number and password (stored only in scrambled form; we cannot read it).</li><li><strong>Orders:</strong> the numbers you buy bundles for, the bundle, network, price and order status.</li><li><strong>Wallet and payments:</strong> deposits, your deposit reference, MoMo transaction IDs, the number you sent from, amounts and balances. Card and online payments are handled by Paystack or SeevPlus; we never see or store your card number or Mobile Money PIN.</li><li><strong>Agents:</strong> name, phone, business name, prices, sales, profit and the MoMo number for withdrawals.</li><li><strong>Security records:</strong> sign-in attempts, the network address (IP) they came from, and a record of account, wallet, order and agent changes (what changed, when and by whom). We keep these for up to 400 days to prevent fraud and resolve disputes.</li><li><strong>On your device:</strong> your sign-in session and a few settings (such as "Keep me signed in" and your last wallet balance) are stored in your browser or app so pages open quickly. We do not use advertising or tracking cookies.</li></ul>'],
-    ['2. Why we use it','To create and secure your account, deliver bundles, credit and debit your wallet, confirm payments, pay agents, send you messages about your orders and requests, handle complaints, prevent fraud and meet legal and accounting duties. We do not sell your personal information and do not use it for third-party advertising.'],
-    ['3. Who we share it with','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile networks and bundle suppliers</strong>: the recipient number and bundle, so the data can be delivered.</li><li><strong>Supabase</strong>: hosts our database and sign-in system.</li><li><strong>Paystack</strong>: processes card and Paystack payments when you choose them.</li><li><strong>SeevPlus</strong>: processes SeevPlus payments when you choose them. We send your name, email and the amount so it can take the payment.</li><li><strong>SMS</strong>: text notifications are sent through the httpSMS service from our own phone, so your number and the message pass through it.</li><li><strong>WhatsApp</strong>: only when you choose to report an order or contact us there.</li><li><strong>Agents</strong>: if you buy through an agent\'s link, that agent can see the order (reference, bundle, amount, status) but not your account details.</li><li><strong>Authorities</strong>: when the law requires it or to deal with fraud.</li></ul>Some of these providers store data outside Ghana; we only use providers that protect it.'],
+    ['1. What we collect','<ul class="list-disc pl-5 space-y-1"><li><strong>Account details:</strong> your name, email address, phone number and password (stored only in scrambled form; we cannot read it).</li><li><strong>Orders:</strong> the numbers you buy bundles for, the bundle, network, price and order status.</li><li><strong>Wallet and payments:</strong> deposits, your deposit reference, MoMo transaction IDs, the number you sent from, amounts and balances. Card and online payments are handled by Paystack or SeevPlus; we never see or store your card number or Mobile Money PIN.</li><li><strong>Security records:</strong> sign-in attempts, the network address (IP) they came from, and a record of account, wallet and order changes (what changed, when and by whom). We keep these for up to 400 days to prevent fraud and resolve disputes.</li><li><strong>On your device:</strong> your sign-in session and a few settings (such as "Keep me signed in" and your last wallet balance) are stored in your browser or app so pages open quickly. We do not use advertising or tracking cookies.</li></ul>'],
+    ['2. Why we use it','To create and secure your account, deliver bundles, credit and debit your wallet, confirm payments, send you messages about your orders and requests, handle complaints, prevent fraud and meet legal and accounting duties. We do not sell your personal information and do not use it for third-party advertising.'],
+    ['3. Who we share it with','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile networks and bundle suppliers</strong>: the recipient number and bundle, so the data can be delivered.</li><li><strong>Supabase</strong>: hosts our database and sign-in system.</li><li><strong>Paystack</strong>: processes card and Paystack payments when you choose them.</li><li><strong>SeevPlus</strong>: processes SeevPlus payments when you choose them. We send your name, email and the amount so it can take the payment.</li><li><strong>SMS</strong>: text notifications are sent through the httpSMS service from our own phone, so your number and the message pass through it.</li><li><strong>WhatsApp</strong>: only when you choose to report an order or contact us there.</li><li><strong>Authorities</strong>: when the law requires it or to deal with fraud.</li></ul>Some of these providers store data outside Ghana; we only use providers that protect it.'],
     ['4. How long we keep it','Account details are kept while your account is open. Order, wallet and payment records are kept for as long as needed for accounting, tax and dispute purposes, usually up to 6 years, even after an account is closed. Messages in our SMS log are kept for a limited time.'],
     ['5. Security','Your data is protected by access rules in our database (each person can only see their own records), encrypted connections, and private storage for payment and SMS keys. No system is perfectly secure, so please keep your password private and tell us if you suspect a problem.'],
     ['6. Your rights','You can ask to see the personal information we hold about you, correct it, or have your account closed and personal details deleted (records we must keep by law will be kept). You can also object to how we use your data and complain to the Data Protection Commission of Ghana. Contact us using the details below.'],
@@ -1111,12 +1071,11 @@ function loadPaystackScript(){
 }
 async function loadPaymentSettings(){
   try{
-    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent','online_fee_percent','agent_shutdown','seevplus_enabled','seevplus_fee_percent','unverified_enabled','unverified_surcharge']);
+    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent','online_fee_percent','seevplus_enabled','seevplus_fee_percent','unverified_enabled','unverified_surcharge']);
     const m=Object.fromEntries((data||[]).map(r=>[r.key,r.value]));
     setMomo(typeof m.momo_number==='string'?m.momo_number:null,typeof m.momo_name==='string'?m.momo_name:null,
       typeof m.momo_network==='string'?m.momo_network:null,typeof m.deposit_fee_percent==='number'?m.deposit_fee_percent:null);
     if(typeof m.online_fee_percent==='number'&&m.online_fee_percent>=0&&m.online_fee_percent<=10) ONLINE_FEE=m.online_fee_percent;
-    setAgentShutdown(m.agent_shutdown||null);
     state.seevEnabled=m.seevplus_enabled===true;
     state.unverifiedEnabled=m.unverified_enabled===true;
     if(typeof m.unverified_surcharge==='number'&&m.unverified_surcharge>=0) state.unverifiedFee=m.unverified_surcharge;
@@ -1157,153 +1116,6 @@ function openPatupaa(o){
   showToast('Order marked as Processing. Redirecting...');
 }
 
-/* ===== AGENT ACCOUNTS: 7-DAY NOTICE, THEN DEACTIVATED ===== */
-// Admin -> Agents -> "Send 7-day reminder" texts every agent and stores
-// app_settings.agent_shutdown = {notice_at, closes_at, sent}. Until closes_at,
-// agents can withdraw any amount on any day; after it there are no agent pages.
-state.agentShutdown=store.get('agentShutdown');
-let agentPhaseTimer=null,agentPhaseShown='';
-function agentsPhase(){
-  const c=state.agentShutdown&&Date.parse(state.agentShutdown.closes_at);
-  if(!c) return 'active';
-  return Date.now()<c?'closing':'closed';
-}
-function agentCloseDate(withTime){
-  const c=state.agentShutdown&&new Date(state.agentShutdown.closes_at);
-  if(!c||isNaN(c)) return '';
-  const d=c.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  return withTime===false?d:d+' at '+c.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-}
-function agentTimeLeft(){
-  const ms=Date.parse(state.agentShutdown?.closes_at)-Date.now();
-  if(!(ms>0)) return '';
-  const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.max(1,Math.ceil(ms%36e5/6e4));
-  if(d>0) return d+(d===1?' day':' days')+(h?' '+h+(h===1?' hour':' hours'):'');
-  if(h>0) return h+(h===1?' hour':' hours')+' '+(m===60?0:m)+' min';
-  return m+(m===1?' minute':' minutes');
-}
-function setAgentShutdown(v){
-  const next=v&&typeof v==='object'&&v.closes_at?v:null;
-  const before=agentsPhase()+'|'+(state.agentShutdown?.closes_at||'');
-  state.agentShutdown=next;store.set('agentShutdown',next);
-  applyAgentPhase(before!==agentsPhase()+'|'+(next?.closes_at||''));
-}
-// Show or hide everything agent-related, and switch over by itself at the closing time.
-function applyAgentPhase(changed){
-  const phase=agentsPhase();
-  if(agentPhaseShown&&agentPhaseShown!==phase) changed=true;
-  agentPhaseShown=phase;
-  document.documentElement.classList.toggle('agents-off',phase==='closed');
-  clearTimeout(agentPhaseTimer);
-  if(phase==='closing'){
-    // Check every minute (the time left on screen) and switch over at the closing time.
-    const ms=Date.parse(state.agentShutdown.closes_at)-Date.now();
-    agentPhaseTimer=setTimeout(()=>applyAgentPhase(false),Math.max(1000,Math.min(ms+500,6e4)));
-    paintHtml('agent-closing-banner',agentClosingBannerHtml());
-    if(!changed&&!state.agentShutdownBusy&&document.getElementById('admin-agent-shutdown')) paintAdminAgentShutdown();
-  }
-  if(phase==='closed'){
-    sessionStorage.removeItem('tru_agent_id');sessionStorage.removeItem('tru_agent_prices');
-    if(state.agentPricingMode){state.agentId=state.agentProfile?.agent_id||null;state.agentPricingMode=false;state.agentLinkPrices={};if(state.view==='network') render();}
-  }
-  if(!changed) return;
-  updateAuthUI();postAppState();
-  if(state.view==='agent-portal'||state.view==='agent-dashboard') navigateTo(state.view,state.params,{replace:true,keepScroll:true});
-  else if(state.view==='account'||(state.view==='admin-dashboard'&&state.adminTab==='agents')) render();
-}
-function agentClosingBannerHtml(){
-  if(agentsPhase()!=='closing') return '';
-  return`<div class="agent-closing flex items-start gap-3 flex-wrap"><svg class="w-6 h-6 shrink-0 text-orange-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"></path></svg><div class="flex-1 min-w-[200px]"><p class="font-black">Agent accounts close on ${esc(agentCloseDate())}</p><p class="text-sm mt-1">That is in <strong>${esc(agentTimeLeft())}</strong>. Withdraw all your profit before then: withdrawals are open every day, at any time, for any amount. After that, the agent dashboard and agent links stop working.</p></div><button onclick="state.agentTab='withdraw';render()" class="shrink-0 bg-orange-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-orange-700">Withdraw now</button></div>`;
-}
-
-applyAgentPhase(false);
-
-/* ===== AGENT SYSTEM UTILITIES ===== */
-async function detectAgentLink(){
-  const params=new URLSearchParams(window.location.search);
-  const agentId=params.get('agent')||sessionStorage.getItem('tru_agent_id');
-  if(!agentId) return;
-  sessionStorage.setItem('tru_agent_id',agentId);
-  state.agentId=agentId;
-  state.agentPricingMode=true;
-  const banner=document.getElementById('agent-session-banner');
-  const bannerIdEl=document.getElementById('agent-banner-id');
-  if(banner) banner.style.display='block';
-  if(bannerIdEl) bannerIdEl.textContent=agentId;
-  // The server returns this agent's final prices only (no cost prices or other agents' data).
-  try{
-    const{data,error}=await supa.rpc('get_agent_link_prices',{p_agent_code:agentId});
-    if(error) throw error;
-    state.agentLinkPrices=Object.fromEntries((data||[]).map(r=>[r.bundle_id,parseFloat(r.price)]));
-    try{sessionStorage.setItem('tru_agent_prices',JSON.stringify({code:agentId,prices:state.agentLinkPrices}));}catch(x){}
-  }catch(e){state.agentLinkPrices=state.agentLinkPrices||{};}
-  if(!Object.keys(state.agentLinkPrices).length){
-    // Unknown or inactive agent code: fall back to normal pricing.
-    sessionStorage.removeItem('tru_agent_id');sessionStorage.removeItem('tru_agent_prices');
-    state.agentId=null;state.agentPricingMode=false;
-    if(banner) banner.style.display='none';
-  }
-}
-async function loadAgentBasePrices(){
-  try{
-    const{data,error}=await supa.from('agent_base_prices').select('*').eq('status','active');
-    if(!error&&data) state.agentBasePrices=data;
-  }catch(e){}
-}
-async function loadAgentPricesForSession(){
-  // Priority: agentProfileId (UUID fetched during detectAgentLink for customer sessions)
-  // Then fall back to agentProfile.id (when the agent themselves is logged in)
-  // The agent_prices table stores agent_id as the agent_profiles UUID — never the text agent_id string
-  const agentKey=state.agentProfile?.id;
-  if(!agentKey) return;
-  try{
-    const{data,error}=await supa.from('agent_prices').select('*').eq('agent_id',agentKey).eq('status','approved');
-    if(!error&&data) state.agentPrices=data;
-  }catch(e){}
-}
-async function fetchAgentProfile(){
-  if(!state.user) return;
-  try{
-    const{data,error}=await supa.from('agent_profiles').select('*').eq('user_id',state.user.id).maybeSingle();
-    if(error) return; // offline or server error: keep what we had
-    state.agentProfile=data||null;
-    if(data&&!state.agentId) state.agentId=data.agent_id||data.id;
-    cacheUserState();
-  }catch(e){}
-}
-async function fetchAgentStats(){
-  if(!state.agentProfile) return;
-  try{
-    const{data}=await supa.from('orders').select('Amount,agent_profit,Status').eq('agent_id',state.agentProfile.id).neq('Status','Deleted');
-    if(data){
-      state.agentStats.sales=data.reduce((a,o)=>a+parseFloat(o.Amount||0),0);
-      const grossProfit=data.reduce((a,o)=>a+parseFloat(o.agent_profit||0),0);
-      // Subtract total amount already withdrawn (paid withdrawals) to show available profit balance
-      const totalWithdrawn=parseFloat(state.agentProfile.total_withdrawn||0);
-      state.agentStats.profit=Math.max(0,grossProfit-totalWithdrawn);
-      state.agentStats.grossProfit=grossProfit;
-      state.agentStats.totalWithdrawn=totalWithdrawn;
-      state.agentStats.pending=data.filter(o=>o.Status==='Pending'||o.Status==='Processing').length;
-      state.agentStats.completed=data.filter(o=>o.Status==='Completed'||o.Status==='Delivered').length;
-      state.agentStats.totalOrders=data.length;
-      state.agentStats.loaded=true;
-      cacheUserState();
-      paintHtml('agent-stats',agentStatsHtml());
-    }
-  }catch(e){}
-}
-async function fetchAdminAgentBasePrices(){
-  try{
-    const{data,error}=await supa.from('agent_base_prices').select('*').order('network').order('bundle_name');
-    if(!error) state.agentBasePrices=data||[];
-  }catch(e){state.agentBasePrices=[];}
-}
-function getBundleDisplayPrice(bundle){
-  if(!state.agentPricingMode||!state.agentId) return{price:bundle.price,isAgent:false};
-  const price=state.agentLinkPrices?.[bundle.id];
-  if(price==null) return{price:bundle.price,isAgent:false};
-  return{price,isAgent:true,profit:0};
-}
 function validateGhanaPhone(phone){
   phone=phone.replace(/[\s-]/g,'');
   const prefixes=[...new Set(['024','054','055','059','025','053','063','077','057','020','050','026','056','027','076','023','028','058'])];
@@ -1324,7 +1136,7 @@ function resetUserState(){
   document.getElementById('terms-gate')?.remove();
   if(state.audit) state.audit={...state.audit,rows:[],q:'',cat:'',who:'',more:false,error:null};
   state.user=null;state.userProfile=null;state.isAdmin=false;state.isDirectMode=false;state.activeOrderData=null;
-  state.agentProfile=null;state.agentStats={sales:0,profit:0,pending:0};state.orders=[];state.ordersLoaded=false;
+  state.orders=[];state.ordersLoaded=false;
   store.clearUser();viewCache.clear();seenStatus.clear();
   startLive();
 }
@@ -1368,9 +1180,7 @@ function updateAuthUI(){
     return;
   }
   if(state.user){
-    const agentBtn=state.agentProfile&&agentsPhase()!=='closed'?`<button onclick="navigateTo('agent-dashboard')" class="flex items-center gap-1.5 bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-xs font-bold hover:bg-blue-200 transition-all"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent</button>`:'';
     paintHtml(s,`<div class="flex items-center gap-3">
-      ${agentBtn}
       <button onclick="navigateTo('my-orders')" class="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-4 py-2 rounded-full text-xs font-bold hover:bg-slate-200 transition-all">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
         My Orders
@@ -1387,8 +1197,7 @@ function updateAuthUI(){
     // Mobile top bar: just wallet icon shortcut
     if(sm) paintHtml(sm,`<button onclick="navigateTo('wallet')" class="flex items-center gap-1 bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>Wallet</button>`);
     // Mobile menu: full list
-    const agentMenuBtn=state.agentProfile&&agentsPhase()!=='closed'?`<button onclick="navigateTo('agent-dashboard');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-blue-600 hover:bg-blue-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Agent Dashboard</button>`:'';
-    if(smm) paintHtml(smm,`${agentMenuBtn}<button onclick="navigateTo('my-orders');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>My Orders</button><button onclick="logoutUser();closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>Logout</button>`);
+    if(smm) paintHtml(smm,`<button onclick="navigateTo('my-orders');closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>My Orders</button><button onclick="logoutUser();closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-sm text-red-500 hover:bg-red-50 transition-colors flex items-center gap-3"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>Logout</button>`);
   }else{
     paintHtml(s,`<div class="flex items-center gap-2">
       <button onclick="navigateTo('login')" class="text-xs font-bold text-slate-600 hover:text-red-600 transition-colors">Login</button>
@@ -1406,7 +1215,7 @@ function updateAuthUI(){
    anything newer is fetched in the background and painted in when it arrives.
    Each page has its own address (#/wallet, #/orders, ...) so refreshing or
    pressing Back keeps you where you were. */
-const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet','my-orders':'orders','agent-portal':'agents','agent-dashboard':'agent','admin-dashboard':'admin',account:'account'};
+const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet','my-orders':'orders','admin-dashboard':'admin',account:'account'};
 function viewToHash(view,params){
   if(!(view in ROUTES)) return null;
   if(view==='network'&&params) return '#/buy/'+params;
@@ -1416,7 +1225,7 @@ function hashToView(h){
   if(!h||!h.startsWith('#/')) return null;
   const[a,b]=h.slice(2).split('/');
   if(a==='buy') return b&&NETWORKS[b]?{view:'network',params:b}:{view:'home',params:null};
-  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet',orders:'my-orders',agents:'agent-portal',agent:'agent-dashboard',admin:'admin-dashboard',account:'account'};
+  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet',orders:'my-orders',admin:'admin-dashboard',account:'account'};
   return m[a]?{view:m[a],params:null}:null;
 }
 function syncUrl(view,params,replace){
@@ -1446,24 +1255,8 @@ async function navigateTo(view,params=null,opts={}){
     // In the app, signed-in people start on Home and the Account tab needs a sign-in.
     if(APP_SHELL&&view==='landing'&&state.user) view='home';
     if(view==='account'&&!state.user) view='login';
-    if((view==='agent-portal'||view==='agent-dashboard')&&agentsPhase()==='closed'){
-      showToast('Agent accounts have been closed.',4000,'info');
-      view=state.user?'home':'landing';params=null;opts={...opts,replace:true};
-    }
-    if(view==='agent-dashboard'){
-      if(!state.user){showToast('Please login first to access agent dashboard');view='login';}
-      else{
-        if(!state.agentProfile){app.innerHTML=pageSkeleton();await fetchAgentProfile();}
-        const st=state.agentProfile?.status;
-        if(st!=='active'){
-          if(!state.agentProfile) showToast('You are not registered as an agent yet');
-          else if(st==='pending') showToast('Your agent application is pending admin approval',4000,'error');
-          else if(st==='rejected') showToast('Your agent application was not approved. You can update it and apply again.',5000,'error');
-          else if(st==='suspended') showToast('Your agent account is suspended. Please contact the admin.',5000,'error');
-          view='agent-portal';
-        }
-      }
-    }
+    // Agent accounts were removed: old agent links and pages go to Home.
+    if(view==='agent-portal'||view==='agent-dashboard'){view=state.user?'home':'landing';params=null;opts={...opts,replace:true};}
     state.view=view;state.params=params;
     if(view==='my-orders') state.announcement=null;
     if(!opts.fromHistory) syncUrl(view,params,opts.replace);
@@ -2093,7 +1886,7 @@ async function handleLogin(e){
     if(!data.user){showToast('Login failed: No user data',4000,'error');return;}
     finishLogin(gate);
     state.user=data.user;
-    await Promise.all([fetchUserProfile(),fetchAgentProfile()]);
+    await fetchUserProfile();
     if(!state.userProfile){showToast('Failed to load profile data. Please contact support.',4000,'error');return;}
     // Admin accounts sign in on the admin login only.
     if(state.isAdmin){await refuseSignIn('This account cannot sign in here.');return;}
@@ -2101,8 +1894,6 @@ async function handleLogin(e){
     showToast('Welcome back!',3000,'success');navigateTo('home');
     ensureTermsAccepted();
     prefetchUserData();
-    // Link prices depend on who is logged in (agents see normal prices on their own link).
-    detectAgentLink().then(()=>{if(state.view==='network') render();});
   }catch(err){showToast('Login error: '+(err.message||'Unknown error'),4000,'error');}
 }
 async function fetchUserProfile(){
@@ -2258,18 +2049,11 @@ async function processDeposit(response,netAmount,fee){
 /* ===== NETWORK VIEW ===== */
 function renderNetworkView(networkId){
   const network=NETWORKS[networkId],BUNDLES=NORMAL_BUNDLES.filter(b=>b.network===networkId&&b.active!==false);
-  const isAgentMode=state.agentPricingMode&&state.agentId;
-  const modeBadge=isAgentMode
-    ?`<span class="pricing-mode-badge pricing-mode-agent">Agent Pricing</span>`
-    :`<span class="pricing-mode-badge pricing-mode-system">🟢 Standard Pricing</span>`;
   const bundleCards=BUNDLES.map((bundle,idx)=>{
-    const dp=getBundleDisplayPrice(bundle);
-    const priceHTML=dp.isAgent
-      ?`<div class="agent-price-wrap"><span class="agent-price-final">₵${dp.price.toFixed(2)}</span></div>`
-      :`<div class="price-tag">₵${bundle.price.toFixed(2)}</div>`;
+    const priceHTML=`<div class="price-tag">₵${bundle.price.toFixed(2)}</div>`;
     return`<div class="card-theme p-6 rounded-2xl hover:border-red-500 transition-all cursor-pointer group animate-slide-up stagger-${(idx%5)+1}" style="animation-fill-mode:both;" onclick="initiateOrder('${networkId}','${bundle.id}')"><div class="flex justify-between items-start mb-4"><div><h3 class="text-2xl font-black text-slate-900 group-hover:text-red-600 transition-colors">${bundle.size}</h3><p class="text-sm text-muted-theme">${bundle.validity} Validity</p></div>${priceHTML}</div><div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200"><span class="text-xs font-bold text-slate-500 uppercase">Click to Purchase</span><svg class="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div></div>`;
   }).join('');
-  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8"><div class="mb-8 flex items-center justify-between flex-wrap gap-3"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Networks</button>${modeBadge}</div><div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div><img src="${network.logo}" alt="${network.name}" width="${network.logoW}" height="${network.logoH}" decoding="async" class="w-auto h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10"><h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1><p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p></div>${networkId==='mtn'&&state.unverifiedEnabled?`<div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"><strong>We check every MTN number before you pay.</strong> Verified numbers pay the prices below. Unverified numbers pay ₵${unvFee().toFixed(2)} more, and delivery to them may take longer.</div>`:''}<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${bundleCards}</div></div>`;
+  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8"><div class="mb-8 flex items-center justify-between flex-wrap gap-3"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Networks</button></div><div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div><img src="${network.logo}" alt="${network.name}" width="${network.logoW}" height="${network.logoH}" decoding="async" class="w-auto h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10"><h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1><p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p></div>${networkId==='mtn'&&state.unverifiedEnabled?`<div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"><strong>We check every MTN number before you pay.</strong> Verified numbers pay the prices below. Unverified numbers pay ₵${unvFee().toFixed(2)} more, and delivery to them may take longer.</div>`:''}<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${bundleCards}</div></div>`;
 }
 function initiateOrder(networkId,bundleId){
   if(state.isAdmin) return;
@@ -2277,12 +2061,8 @@ function initiateOrder(networkId,bundleId){
   if(!bundle){showToast('Bundle not found',3000,'error');return;}
   if(!state.user){showToast('Please login first',3000,'error');navigateTo('login');return;}
   if(!state.userProfile){showToast('Profile loading... Try again shortly.',3000,'error');fetchUserProfile();return;}
-  // Determine effective price based on pricing mode
-  const dp=getBundleDisplayPrice(bundle);
-  const effectiveBundle=dp.isAgent?{...bundle,price:dp.price}:{...bundle};
-  const pricingMode=dp.isAgent?'agent':'system';
   // requestId makes repeated taps on the same form resolve to one order.
-  state.activeOrderData={network:networkId,bundle:effectiveBundle,originalPrice:bundle.price,pricingMode,agentProfit:dp.isAgent?dp.profit:0,requestId:crypto.randomUUID()};
+  state.activeOrderData={network:networkId,bundle:{...bundle},originalPrice:bundle.price,requestId:crypto.randomUUID()};
   render();
 }
 function renderOrderForm(){
@@ -2378,7 +2158,7 @@ async function handleOrderButton(){
     // place_order prices the bundle, debits the wallet and saves the order in one step.
     const{data:res,error}=await supa.rpc('place_order',{
       p_bundle_id:bundle.id,p_phone:phone,
-      p_agent_code:state.agentPricingMode&&state.agentId?state.agentId:null,
+      p_agent_code:null,
       p_request_id:requestId
     });
     if(error) throw error;
@@ -2422,7 +2202,7 @@ async function adminLogout(){logoutUser();}
 // Signs straight back out of an account used on the wrong login page.
 async function refuseSignIn(msg){
   try{await supa.auth.signOut();}catch(e){}
-  state.user=null;state.userProfile=null;state.isAdmin=false;state.agentProfile=null;
+  state.user=null;state.userProfile=null;state.isAdmin=false;
   store.clearUser();viewCache.clear();updateAuthUI();
   showToast(msg,5000,'error');
 }
@@ -2472,17 +2252,17 @@ function renderAdminDashboard(){
   const tabBtn=(id,label)=>`<button class="admin-tab-btn ${tab===id?'active':''}" onclick="state.adminTab='${id}';render()">${label}</button>`;
   return`<div class="animate__animated animate__fadeIn max-w-7xl mx-auto px-4 py-8">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-slide-up">
-      <div><h1 class="text-3xl font-black flex items-center gap-3"><span class="bg-slate-900 text-white px-3 py-1 rounded-lg text-xl">A</span>Admin Dashboard</h1><p class="text-sm text-muted-theme mt-1 flex items-center gap-2">Manage orders, agents, and system settings <span id="live-indicator">${liveIndicatorHtml()}</span></p></div>
+      <div><h1 class="text-3xl font-black flex items-center gap-3"><span class="bg-slate-900 text-white px-3 py-1 rounded-lg text-xl">A</span>Admin Dashboard</h1><p class="text-sm text-muted-theme mt-1 flex items-center gap-2">Manage orders, payments and system settings <span id="live-indicator">${liveIndicatorHtml()}</span></p></div>
       <div class="flex gap-3"><button onclick="adminLogout()" class="px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 transition-all">Logout</button></div>
     </div>
     <div id="admin-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up stagger-2" style="animation-fill-mode:both;">${adminStatsHtml()}</div>
     <!-- Admin Tabs -->
     <div class="flex gap-2 mb-6 flex-wrap animate-slide-up stagger-3" style="animation-fill-mode:both;">
-      ${tabBtn('orders','Orders')}${tabBtn('broadcast','Broadcast')}${tabBtn('agent-prices','Agent Prices')}${tabBtn('agents','Agents')}${tabBtn('withdrawals','Withdrawals')}${tabBtn('deposits','Deposits')}${tabBtn('bundles','Bundles')}${tabBtn('deletions','Deletions')}${tabBtn('sms','SMS')}${tabBtn('security','Security')}${tabBtn('audit','Audit log')}
+      ${tabBtn('orders','Orders')}${tabBtn('broadcast','Broadcast')}${tabBtn('deposits','Deposits')}${tabBtn('bundles','Bundles')}${tabBtn('deletions','Deletions')}${tabBtn('sms','SMS')}${tabBtn('security','Security')}${tabBtn('audit','Audit log')}
     </div>
     <!-- Tab Content -->
     <div id="admin-tab-content" class="animate-slide-up stagger-4" style="animation-fill-mode:both;">
-      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='agent-prices'?renderAdminAgentPricesTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='deletions'?renderAdminDeletionsTab():tab==='sms'?renderAdminSmsTab():tab==='security'?renderAdminSecurityTab():tab==='audit'?renderAdminAuditTab():tab==='agents'?`<div id="admin-agent-shutdown" class="mb-6">${adminAgentShutdownHtml()}</div><div id="admin-agents-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>`:renderAdminWithdrawalsTab()}
+      ${tab==='orders'?renderAdminOrdersTab():tab==='broadcast'?renderAdminBroadcastTab():tab==='deposits'?renderAdminDepositsTab():tab==='bundles'?renderAdminBundlesTab():tab==='deletions'?renderAdminDeletionsTab():tab==='sms'?renderAdminSmsTab():tab==='security'?renderAdminSecurityTab():tab==='audit'?renderAdminAuditTab():renderAdminOrdersTab()}
     </div>
   </div>`;
 }
@@ -2497,7 +2277,7 @@ function adminOrdersTableHtml(){
   const filtered=state.orders.filter(o=>{const ms=(o.Phone||'').includes(state.searchQuery||'')||(o.ref||'').toLowerCase().includes(q);const mn=state.networkFilter==='all'||o.Network===state.networkFilter;return ms&&mn;});
   const limit=state.adminOrdersShown||100;
   const shown=filtered.slice(0,limit);
-  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Mode</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${shown.length===0?`<tr><td colspan="9" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:shown.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0 ${order._pending?'row-pending':''}"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}${Number(order.unverified_fee)>0?`<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800" title="Includes ₵${Number(order.unverified_fee).toFixed(2)} for an unverified number">Unverified +₵${Number(order.unverified_fee).toFixed(2)}</span></div>`:''}</td><td class="p-4"><span class="pricing-mode-badge ${order.pricing_mode==='agent'?'pricing-mode-agent':'pricing-mode-system'}">${order.pricing_mode==='agent'?'Agent':'System'}</span></td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
+  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${shown.length===0?`<tr><td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:shown.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0 ${order._pending?'row-pending':''}"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}${Number(order.unverified_fee)>0?`<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800" title="Includes ₵${Number(order.unverified_fee).toFixed(2)} for an unverified number">Unverified +₵${Number(order.unverified_fee).toFixed(2)}</span></div>`:''}</td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
 ${order.Status==='Pending'&&!order.api_reference?`<button data-ref="${esc(order.ref)}" onclick="showProcessConfirmation(this.dataset.ref)" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button>`:''}
 <button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button data-ref="${esc(order.ref)}" onclick="deleteOrder(this.dataset.ref)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div>${filtered.length>shown.length?`<div class="p-4 text-center border-t border-slate-100"><button onclick="state.adminOrdersShown=(state.adminOrdersShown||100)+100;paintAdminOrders()" class="text-sm bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-xl font-bold">Show more (${filtered.length-shown.length} more)</button></div>`:''}`;
 }
@@ -2506,189 +2286,6 @@ function renderAdminBroadcastTab(){
   return`<div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1 flex items-center gap-2"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>Broadcast Message</h2><p class="text-xs text-muted-theme mb-6">Post a message visible to all customers on the landing page. Replaces any previous message.</p><div class="grid md:grid-cols-2 gap-4 mb-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Main Message <span class="text-red-500">*</span></label><input type="text" id="ann-main" class="w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none transition-all" placeholder="e.g. MTN bundles now available!"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Sub Message (optional)</label><input type="text" id="ann-sub" class="w-full p-3 border-2 rounded-xl font-semibold focus:border-red-600 outline-none transition-all" placeholder="e.g. Prices updated for all packages."></div></div><button onclick="saveAnnouncement()" class="cta-button text-white px-6 py-3 rounded-xl font-bold text-sm inline-flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>Post Announcement</button></div>`;
 }
 
-function renderAdminAgentPricesTab(){
-  return`<div class="card-theme rounded-2xl p-6 mb-6"><h3 class="text-xl font-bold mb-1">Price-change requests</h3><p class="text-xs text-muted-theme mb-4">Approving opens pricing for that agent only. Every other agent stays locked.</p><div id="admin-price-unlock-requests">${SK.list(2,40)}</div></div><div class="card-theme rounded-2xl p-6">
-    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
-      <div><h3 class="text-xl font-bold">Agent Base Prices</h3><p class="text-xs text-muted-theme mt-1">Define the cost basis for agents. Agents add their own profit on top. System (normal user) prices are <strong>never affected</strong>.</p></div>
-      <div class="flex gap-2 flex-wrap">
-        <span id="global-lock-slot">${globalLockBtnHtml(viewCache.get('admin-base-prices'))}</span>
-        <button onclick="showAddAgentPriceForm()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all">+ Add Price</button>
-      </div>
-    </div>
-    <div id="admin-agent-prices-container">${SK.table(6,5)}</div>
-    <div id="add-agent-price-form" style="display:none;" class="mt-6 bg-blue-50 border border-blue-200 rounded-2xl p-5">
-      <h4 class="font-bold text-blue-800 mb-4">New Agent Base Price</h4>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <select id="abp-network" class="p-3 border-2 rounded-xl font-bold focus:border-blue-500 outline-none bg-white">
-          <option value="mtn">MTN</option><option value="airteltigo">AirtelTigo</option><option value="telecel">Telecel</option>
-        </select>
-        <input type="text" id="abp-bundle" placeholder="Bundle (e.g. 1GB)" class="p-3 border-2 rounded-xl font-bold focus:border-blue-500 outline-none">
-        <input type="number" id="abp-price" placeholder="Agent base price (₵)" step="0.01" min="0.01" class="p-3 border-2 rounded-xl font-bold focus:border-blue-500 outline-none">
-        <button onclick="saveAdminAgentBasePrice()" class="bg-blue-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">Save</button>
-      </div>
-    </div>
-  </div>`;
-}
-function globalLockBtnHtml(list){
-  if(!list) return SK.bar('170px',36);
-  const allLocked=list.length>0&&list.every(p=>p.pricing_locked);
-  return`<button onclick="globalToggleAgentPriceLock()" id="global-lock-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ${allLocked?'bg-green-100 text-green-700 hover:bg-green-200':'bg-amber-100 text-amber-700 hover:bg-amber-200'}">${allLocked
-    ?'<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>Unlock All Agent Pricing'
-    :'<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Lock All Agent Pricing'}</button>`;
-}
-
-/* ===== ADMIN AGENT PRICE ACTIONS ===== */
-function showAddAgentPriceForm(){
-  const f=document.getElementById('add-agent-price-form');
-  if(f) f.style.display=f.style.display==='none'?'block':'none';
-}
-function adminUnlockRequestsHtml(d){
-  const fmt=x=>new Date(x).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  const reqRows=(d.reqs||[]).map(r=>`<tr class="border-b ${r._pending?'row-pending':''}"><td class="p-3 text-xs whitespace-nowrap">${fmt(r.created_at)}</td><td class="p-3"><div class="font-bold">${esc(r.agent_profiles?.name||'')}</div><div class="text-xs font-mono text-muted-theme">${esc(r.agent_profiles?.agent_id||'')}</div></td><td class="p-3 text-sm">${esc(r.note||'—')}</td><td class="p-3"><div class="flex gap-2"><button data-id="${esc(r.id)}" onclick="adminApprovePriceUnlock(this.dataset.id)" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold">Approve</button><button data-id="${esc(r.id)}" onclick="adminRejectPriceUnlock(this.dataset.id)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold">Reject</button></div></td></tr>`).join('');
-  const openRows=(d.open||[]).map(a=>`<div class="flex items-center justify-between gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-2 ${a._pending?'row-pending':''}"><span class="text-sm"><strong>${esc(a.name||'')}</strong> <span class="font-mono text-xs">${esc(a.agent_id||'')}</span> — open until ${fmt(a.price_unlock_until)}</span><button data-id="${esc(a.id)}" onclick="adminLockAgentPricing(this.dataset.id)" class="text-xs bg-slate-700 text-white px-3 py-1 rounded-lg font-bold">Lock now</button></div>`).join('');
-  return(reqRows?`<div class="overflow-x-auto mb-4"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Requested</th><th class="p-3 text-xs font-black uppercase text-slate-500">Agent</th><th class="p-3 text-xs font-black uppercase text-slate-500">Reason</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${reqRows}</tbody></table></div>`:'<p class="text-sm text-muted-theme mb-4">No requests waiting.</p>')
-    +(openRows?`<div class="space-y-2"><p class="text-xs font-black uppercase text-slate-500">Open right now</p>${openRows}</div>`:'');
-}
-async function loadAdminPriceUnlockRequests(){
-  await paint('admin-price-unlock-requests','admin-unlock',async()=>{
-    const[{data:reqs,error:re},{data:open,error:oe}]=await Promise.all([
-      supa.from('price_unlock_requests').select('id,note,created_at,agent_profiles(name,agent_id)').eq('status','pending').order('created_at',{ascending:true}),
-      supa.from('agent_profiles').select('id,name,agent_id,price_unlock_until').gt('price_unlock_until',new Date().toISOString())
-    ]);
-    if(re) throw re;if(oe) throw oe;
-    return{reqs:reqs||[],open:open||[]};
-  },adminUnlockRequestsHtml,SK.list(2,40),()=>'<p class="text-sm text-red-500">Failed to load price-change requests</p>');
-}
-async function adminApprovePriceUnlock(id){
-  const input=prompt('Open this agent\'s pricing for how many hours? (1-168)','24');
-  if(input===null) return;
-  const hours=parseInt(input,10);
-  if(!hours||hours<1||hours>168){showToast('Enter between 1 and 168 hours',3000,'error');return;}
-  const req=(viewCache.get('admin-unlock')?.reqs||[]).find(r=>r.id===id);
-  const until=new Date(Date.now()+hours*3600e3).toISOString();
-  const undo=mutate('admin-unlock',d=>({reqs:d.reqs.filter(r=>r.id!==id),open:req?[...d.open,{id:'tmp',name:req.agent_profiles?.name,agent_id:req.agent_profiles?.agent_id,price_unlock_until:until,_pending:true}]:d.open}));
-  try{
-    const{data,error}=await supa.rpc('approve_price_unlock',{p_id:id,p_hours:hours});
-    if(error) throw error;
-    showToast('Pricing opened until '+new Date(data).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),4000,'success');
-    loadAdminPriceUnlockRequests();
-  }catch(err){undo();showToast('Approve failed: '+(err.message||'error'),5000,'error');}
-}
-async function adminRejectPriceUnlock(id){
-  if(!confirm('Reject this price-change request?')) return;
-  const undo=mutate('admin-unlock',d=>({...d,reqs:d.reqs.filter(r=>r.id!==id)}));
-  try{
-    const{error}=await supa.rpc('reject_price_unlock',{p_id:id});
-    if(error) throw error;
-    showToast('Request rejected',3000,'info');
-  }catch(err){undo();showToast('Reject failed: '+(err.message||'error'),5000,'error');}
-}
-async function adminLockAgentPricing(agentProfileId){
-  const undo=mutate('admin-unlock',d=>({...d,open:d.open.filter(a=>a.id!==agentProfileId)}));
-  try{
-    const{error}=await supa.rpc('lock_agent_pricing',{p_agent_profile_id:agentProfileId});
-    if(error) throw error;
-    showToast('Agent pricing locked',3000,'success');
-  }catch(err){undo();showToast('Lock failed: '+(err.message||'error'),5000,'error');}
-}
-function adminBasePricesHtml(list){
-  if(!list.length) return`<div class="text-center py-8 text-muted-theme">No agent base prices yet. Click "+ Add Price" to create one.<br><span class="text-xs mt-2 block">System prices for normal users remain untouched.</span></div>`;
-  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Agent Base Price</th><th class="p-3 text-xs font-black uppercase text-slate-500">System Price</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Pricing Lock</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${list.map(p=>{const sysBundle=NORMAL_BUNDLES.find(b=>b.network===p.network&&b.size===p.bundle_name);const locked=p.pricing_locked;return`<tr class="border-b hover:bg-slate-50 ${p._pending?'row-pending':''}"><td class="p-3 font-bold">${esc(p.network?.toUpperCase())}</td><td class="p-3">${esc(p.bundle_name)}</td><td class="p-3 font-bold text-blue-600" id="abp-val-${esc(p.id)}">₵${parseFloat(p.base_price).toFixed(2)}</td><td class="p-3 text-muted-theme text-sm">${sysBundle?'₵'+sysBundle.price.toFixed(2):'—'}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${p.status==='active'?'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">${esc(p.status||'active')}</span></td><td class="p-3"><span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${locked?'bg-red-100 text-red-700':'bg-slate-100 text-slate-600'}">${locked?'<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked':'<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>Unlocked'}</span></td><td class="p-3"><div class="flex gap-2 flex-wrap"><button onclick="showEditAgentPriceInline('${esc(p.id)}',${esc(p.base_price)})" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-all">Edit</button><button onclick="toggleAgentBasePrice('${esc(p.id)}','${p.status==='active'?'disabled':'active'}')" class="text-xs ${p.status==='active'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'} px-3 py-1 rounded-lg font-bold hover:opacity-80">${p.status==='active'?'Disable':'Enable'}</button><button onclick="deleteAgentBasePrice('${esc(p.id)}')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200">Delete</button><button id="row-lock-btn-${esc(p.id)}" onclick="toggleRowPriceLock('${esc(p.id)}')" class="text-xs ${locked?'bg-green-100 text-green-700 hover:bg-green-200':'bg-orange-100 text-orange-700 hover:bg-orange-200'} px-3 py-1 rounded-lg font-bold transition-all">${locked?'Unlock':'Lock'}</button></div><div id="edit-inline-${esc(p.id)}" style="display:none;" class="mt-2 flex gap-2 items-center"><input type="number" id="edit-price-${esc(p.id)}" value="${esc(p.base_price)}" step="0.01" min="0.01" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none"><button onclick="saveEditAgentPrice('${esc(p.id)}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-700">Save</button><button onclick="document.getElementById('edit-inline-${esc(p.id)}').style.display='none'" class="bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-300">Cancel</button></div></td></tr>`}).join('')}</tbody></table></div>`;
-}
-// Base prices table and the "Lock all" button are painted from the same list.
-function paintBasePrices(){repaint('admin-base-prices');paintHtml('global-lock-slot',globalLockBtnHtml(viewCache.get('admin-base-prices')));}
-async function loadAdminAgentPricesTable(){
-  loadAdminPriceUnlockRequests();
-  const list=await paint('admin-agent-prices-container','admin-base-prices',async()=>{
-    const{data,error}=await supa.from('agent_base_prices').select('*').order('network').order('bundle_name');
-    if(error) throw error;return data||[];
-  },adminBasePricesHtml,SK.table(6,5),()=>errorBox('Failed to load agent prices','loadAdminAgentPricesTable()'));
-  if(list) state.agentBasePrices=list;
-  paintHtml('global-lock-slot',globalLockBtnHtml(viewCache.get('admin-base-prices')));
-}
-// Change base-price rows now, roll back if the database refuses.
-async function optimisticBasePrices(change,run,okMsg,failMsg){
-  const before=viewCache.get('admin-base-prices');
-  if(before){viewCache.set('admin-base-prices',change(JSON.parse(JSON.stringify(before))));paintBasePrices();}
-  try{
-    const{error}=await withTimeout(run(),15000);if(error) throw error;
-    const now=viewCache.get('admin-base-prices');
-    if(now){viewCache.set('admin-base-prices',now.map(p=>({...p,_pending:false})));paintBasePrices();state.agentBasePrices=viewCache.get('admin-base-prices');}
-    if(okMsg) showToast(okMsg,3000,'success');
-  }catch(err){
-    if(before){viewCache.set('admin-base-prices',before);paintBasePrices();}
-    showToast(failMsg+': '+(err.message||'error'),4000,'error');
-  }
-}
-async function saveAdminAgentBasePrice(){
-  const network=document.getElementById('abp-network')?.value;
-  const bundle=document.getElementById('abp-bundle')?.value.trim();
-  const price=parseFloat(document.getElementById('abp-price')?.value);
-  if(!network||!bundle||!price||price<=0){showToast('Please fill all fields correctly',3000,'error');return;}
-  const sysBundle=NORMAL_BUNDLES.find(b=>b.network===network&&b.size===bundle);
-  const row={network,bundle_name:bundle,bundle_id:sysBundle?.id||null,base_price:price,currency:'GHS',status:'active',pricing_locked:false,admin_id:state.user?.id,created_at:new Date().toISOString()};
-  document.getElementById('abp-bundle').value='';document.getElementById('abp-price').value='';
-  document.getElementById('add-agent-price-form').style.display='none';
-  await optimisticBasePrices(list=>[...list,{...row,id:'tmp-'+Date.now(),_pending:true}],()=>supa.from('agent_base_prices').insert([row]),'Agent base price saved!','Save failed');
-  loadAdminAgentPricesTable();
-}
-async function toggleAgentBasePrice(id,newStatus){
-  await optimisticBasePrices(list=>list.map(p=>p.id===id?{...p,status:newStatus,_pending:true}:p),()=>supa.from('agent_base_prices').update({status:newStatus}).eq('id',id),'Status updated','Update failed');
-}
-function showEditAgentPriceInline(id,currentPrice){
-  const el=document.getElementById('edit-inline-'+id);
-  if(el) el.style.display=el.style.display==='none'?'flex':'none';
-}
-async function saveEditAgentPrice(id){
-  const input=document.getElementById('edit-price-'+id);
-  const newPrice=parseFloat(input?.value);
-  if(!newPrice||newPrice<=0){showToast('Enter a valid price',3000,'error');return;}
-  await optimisticBasePrices(list=>list.map(p=>p.id===id?{...p,base_price:newPrice,_pending:true}:p),()=>supa.from('agent_base_prices').update({base_price:newPrice}).eq('id',id),'Price updated successfully','Update failed');
-}
-async function globalToggleAgentPriceLock(){
-  const list=viewCache.get('admin-base-prices')||[];
-  if(!list.length) return;
-  const lock=!list.every(p=>p.pricing_locked);
-  const ids=list.map(p=>p.id);
-  await optimisticBasePrices(l=>l.map(p=>({...p,pricing_locked:lock,_pending:true})),()=>supa.from('agent_base_prices').update({pricing_locked:lock}).in('id',ids),
-    lock?'All agent pricing locked — agents cannot edit profits until unlocked.':'All agent pricing unlocked — agents can now edit their profits.','Lock operation failed');
-}
-// Per-row lock toggle: called from the Lock / Unlock button on each individual bundle row
-// Per-row lock toggle: called from the Lock / Unlock button on each individual bundle row
-async function toggleRowPriceLock(id){
-  const entry=(viewCache.get('admin-base-prices')||[]).find(p=>p.id===id);
-  if(!entry) return;
-  const newLocked=!entry.pricing_locked;
-  await optimisticBasePrices(list=>list.map(p=>p.id===id?{...p,pricing_locked:newLocked,_pending:true}:p),()=>supa.from('agent_base_prices').update({pricing_locked:newLocked}).eq('id',id),
-    newLocked?'Bundle locked — agents can no longer edit this profit.':'Bundle unlocked — agents can now set their profit.','Toggle failed');
-}
-async function deleteAgentBasePrice(id){
-  if(!confirm('Delete this agent base price? Agents using it will fall back to system pricing.')) return;
-  await optimisticBasePrices(list=>list.filter(p=>p.id!==id),()=>supa.from('agent_base_prices').delete().eq('id',id),'Deleted','Delete failed');
-}
-function adminAgentsHtml(data){
-  if(!data||!data.length) return`<div class="text-center py-8 text-muted-theme">No agents registered yet.</div>`;
-  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Agent ID</th><th class="p-3 text-xs font-black uppercase text-slate-500">Name</th><th class="p-3 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-3 text-xs font-black uppercase text-slate-500">Business</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Joined</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${data.map(a=>{
-    // Show "Updated" badge for pending agents who have re-submitted (updated_at differs from created_at)
-    const isResubmitted=a.status==='pending'&&a.updated_at&&a.created_at&&a.updated_at!==a.created_at;
-    const updatedBadge=isResubmitted?`<span class="ml-1 text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">Updated</span>`:'';
-    return`<tr class="border-b hover:bg-slate-50 ${a._pending?'row-pending':''}"><td class="p-3 font-mono text-xs font-bold">${esc(a.agent_id||a.id)}</td><td class="p-3 font-bold">${esc(a.name)}</td><td class="p-3">${esc(a.phone)}</td><td class="p-3 text-muted-theme">${esc(a.business_name||'—')}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${a.status==='active'?'bg-green-100 text-green-700':a.status==='pending'?'bg-amber-100 text-amber-700':'bg-red-100 text-red-700'}">${esc(a.status)}</span>${updatedBadge}</td><td class="p-3 text-xs text-muted-theme">${new Date(a.created_at).toLocaleDateString()}</td><td class="p-3"><div class="flex gap-2 flex-wrap">${a.status==='pending'?`<button onclick="updateAgentStatus('${esc(a.id)}','active')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-all">Approve</button><button onclick="updateAgentStatus('${esc(a.id)}','rejected')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-all">Reject</button>`:a.status==='active'?`<button onclick="updateAgentStatus('${esc(a.id)}','suspended')" class="text-xs bg-amber-100 text-amber-700 px-3 py-1 rounded-lg font-bold hover:bg-amber-200 transition-all">Suspend</button>`:a.status==='rejected'||a.status==='suspended'?`<button onclick="updateAgentStatus('${esc(a.id)}','active')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-all">Re-approve</button>`:'—'}</div></td></tr>`;}).join('')}</tbody></table></div>`;
-}
-async function loadAdminAgentsList(){
-  await paint('admin-agents-container','admin-agents',async()=>{
-    const{data,error}=await supa.from('agent_profiles').select('*').order('created_at',{ascending:false});
-    if(error) throw error;return data||[];
-  },adminAgentsHtml,SK.table(6,4),()=>errorBox('Failed to load agents','loadAdminAgentsList()'));
-}
-async function updateAgentStatus(id,status){
-  const undo=mutate('admin-agents',list=>list.map(a=>a.id===id?{...a,status,_pending:true}:a));
-  try{
-    const{error}=await supa.from('agent_profiles').update({status}).eq('id',id);
-    if(error) throw error;
-    mutate('admin-agents',list=>list.map(a=>a.id===id?{...a,_pending:false}:a));
-    showToast('Agent status updated to '+status,3000,'success');
-  }catch(err){undo();showToast('Update failed: '+err.message,4000,'error');}
-}
 /* ===== ADMIN DEPOSITS TAB (MoMo requests, direct credit, Paystack switch) ===== */
 function renderAdminDepositsTab(){
   return`<div class="space-y-6">
@@ -2705,9 +2302,9 @@ function renderAdminDepositsTab(){
       <div class="flex items-center justify-between gap-3 mt-6 mb-2"><h3 class="text-sm font-black">Recent SeevPlus payments</h3><button onclick="adminSyncSeev()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold hover:bg-slate-200">Check waiting payments</button></div><div id="admin-seev-payments">${SK.table(5,3)}</div></div>
   </div>`;
 }
-/* ===== ACCOUNT DELETION (customers and agents) =====
+/* ===== ACCOUNT DELETION =====
    A request goes to the admin. Once approved, the account and everything in
-   it is deleted. Money in the wallet (and unpaid agent profit) is not refunded. */
+   it is deleted. Money in the wallet is not refunded. */
 function myDeletionHtml(r){
   if(r&&r.status==='pending') return`<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 ${r._pending?'row-pending':''}"><p class="text-sm font-bold text-amber-800">⏳ You asked for your account to be deleted on ${new Date(r.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric'})}. The admin will review it.</p><p class="text-xs text-amber-700 mt-1">Changed your mind? You can cancel the request until it is approved.</p><button onclick="cancelAccountDeletion()" class="mt-3 text-sm font-bold bg-white border border-amber-300 px-4 py-2 rounded-xl">Cancel request</button></div>`;
   const note=r&&r.status==='rejected'?`<p class="text-sm text-red-600 font-semibold mb-3">Your last request was not approved${r.admin_note?': '+esc(r.admin_note):'.'}</p>`:'';
@@ -2722,8 +2319,7 @@ async function loadMyDeletion(){
 }
 async function requestAccountDeletion(){
   const bal=parseFloat(state.userProfile?.balance||0);
-  const agent=state.agentProfile?'\n• Your agent account, prices and any unpaid agent profit':'';
-  if(!confirm(`Delete your TRU Data account?\n\nOnce the admin approves, these are deleted for good:\n• Your account and login\n• Your wallet${bal>0?' (₵'+bal.toFixed(2)+')':''}\n• Your orders and payment history${agent}\n\nThere is NO REFUND of any money left in the account.`)) return;
+  if(!confirm(`Delete your TRU Data account?\n\nOnce the admin approves, these are deleted for good:\n• Your account and login\n• Your wallet${bal>0?' (₵'+bal.toFixed(2)+')':''}\n• Your orders and payment history\n\nThere is NO REFUND of any money left in the account.`)) return;
   const reason=prompt('Why are you leaving? (optional)','');
   if(reason===null) return;
   if(!viewCache.has('my-deletion')) viewCache.set('my-deletion',null);
@@ -2873,12 +2469,12 @@ async function adminDeleteBundle(id){
 
 /* ===== ADMIN: ACCOUNT DELETION REQUESTS ===== */
 function renderAdminDeletionsTab(){
-  return`<div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Account deletion requests</h2><p class="text-xs text-muted-theme mb-4">Approving deletes the account and everything in it: login, profile, wallet balance (not refunded), orders, payments and agent records. Orders the person bought through another agent's link are kept for that agent with the person's details removed.</p><div id="admin-deletions">${SK.table(5,3)}</div></div>`;
+  return`<div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Account deletion requests</h2><p class="text-xs text-muted-theme mb-4">Approving deletes the account and everything in it: login, profile, wallet balance (not refunded), orders and payments.</p><div id="admin-deletions">${SK.table(5,3)}</div></div>`;
 }
 function adminDeletionsHtml(d){
   const fmt=x=>new Date(x).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const pending=d.pending||[],done=d.done||[];
-  const rows=pending.map(r=>`<tr class="border-b align-top"><td class="p-3 text-xs whitespace-nowrap">${fmt(r.created_at)}</td><td class="p-3"><div class="font-bold">${esc(r.label||'')}</div><div class="text-xs text-muted-theme">${esc(r.email||'')}${r.phone?' · '+esc(r.phone):''}</div>${r.agent_code?`<div class="text-xs font-mono text-blue-700">Agent ${esc(r.agent_code)}</div>`:''}</td><td class="p-3 font-black">${r.balance!=null?'₵'+Number(r.balance).toFixed(2):'—'}</td><td class="p-3 text-sm">${esc(r.reason||'—')}</td><td class="p-3"><div class="flex gap-2 flex-wrap"><button data-id="${esc(r.id)}" onclick="adminApproveDeletion(this.dataset.id)" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold">Delete account</button><button data-id="${esc(r.id)}" onclick="adminRejectDeletion(this.dataset.id)" class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-bold">Reject</button></div></td></tr>`).join('');
+  const rows=pending.map(r=>`<tr class="border-b align-top"><td class="p-3 text-xs whitespace-nowrap">${fmt(r.created_at)}</td><td class="p-3"><div class="font-bold">${esc(r.label||'')}</div><div class="text-xs text-muted-theme">${esc(r.email||'')}${r.phone?' · '+esc(r.phone):''}</div></td><td class="p-3 font-black">${r.balance!=null?'₵'+Number(r.balance).toFixed(2):'—'}</td><td class="p-3 text-sm">${esc(r.reason||'—')}</td><td class="p-3"><div class="flex gap-2 flex-wrap"><button data-id="${esc(r.id)}" onclick="adminApproveDeletion(this.dataset.id)" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold">Delete account</button><button data-id="${esc(r.id)}" onclick="adminRejectDeletion(this.dataset.id)" class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-bold">Reject</button></div></td></tr>`).join('');
   const hist=done.map(r=>`<div class="flex items-center justify-between gap-3 text-sm bg-slate-50 rounded-xl px-4 py-2"><span>${esc(r.label||'')} <span class="text-xs text-muted-theme">${fmt(r.reviewed_at||r.created_at)}</span></span><span class="text-xs font-bold ${r.status==='approved'?'text-red-600':r.status==='rejected'?'text-slate-500':'text-slate-400'}">${r.status==='approved'?'Deleted'+(r.balance_forfeited>0?' · ₵'+Number(r.balance_forfeited).toFixed(2)+' not refunded':''):r.status==='rejected'?'Rejected':'Cancelled by user'}</span></div>`).join('');
   return(rows?`<div class="overflow-x-auto mb-6"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Requested</th><th class="p-3 text-xs font-black uppercase text-slate-500">Account</th><th class="p-3 text-xs font-black uppercase text-slate-500">Wallet</th><th class="p-3 text-xs font-black uppercase text-slate-500">Reason</th><th class="p-3 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="text-sm text-muted-theme mb-6">No requests waiting.</p>')
     +(hist?`<p class="text-xs font-black uppercase text-slate-500 mb-2">Recently handled</p><div class="space-y-2">${hist}</div>`:'');
@@ -2899,7 +2495,7 @@ async function loadAdminDeletions(){
 }
 async function adminApproveDeletion(id){
   const r=(viewCache.get('admin-deletions')?.pending||[]).find(x=>x.id===id);if(!r) return;
-  const typed=prompt(`Permanently delete ${r.label||r.email}'s account${r.agent_code?' (agent '+r.agent_code+')':''}?\n\nTheir login, wallet${r.balance>0?' (₵'+Number(r.balance).toFixed(2)+', not refunded)':''}, orders, payments${r.agent_code?' and agent records':''} will be deleted. This cannot be undone.\n\nType DELETE to confirm.`,'');
+  const typed=prompt(`Permanently delete ${r.label||r.email}'s account?\n\nTheir login, wallet${r.balance>0?' (₵'+Number(r.balance).toFixed(2)+', not refunded)':''}, orders, payments will be deleted. This cannot be undone.\n\nType DELETE to confirm.`,'');
   if(typed===null) return;
   if(typed.trim().toUpperCase()!=='DELETE'){showToast('Not deleted. Type DELETE to confirm.',4000,'error');return;}
   const undo=mutate('admin-deletions',d=>({...d,pending:d.pending.filter(x=>x.id!==id)}));
@@ -2941,45 +2537,6 @@ async function adminSaveMomoDetails(){
   }catch(err){setMomo(before.number,before.name,before.network,before.fee);showToast('Save failed: '+(err.message||'error'),5000,'error');}
 }
 
-/* ===== ADMIN: TEXT AN AGENT ===== */
-let agentMsgLookup=null;
-function agentMessageCardHtml(){
-  return`<div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Message an agent</h2><p class="text-xs text-muted-theme mb-4">Enter the agent ID; the phone numbers on their account appear below.</p>
-    <div class="flex gap-2 mb-3"><input id="am-agent" type="text" maxlength="20" placeholder="AGT-XXXXXX" oninput="this.value=this.value.toUpperCase();soon('am-find',findAgentForMessage,500)" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-bold font-mono uppercase"><button onclick="findAgentForMessage()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm whitespace-nowrap">Find</button></div>
-    <div id="am-agent-info" class="mb-3"></div>
-    <textarea id="am-text" rows="4" maxlength="480" oninput="document.getElementById('am-count').textContent=this.value.length+' / 160 · '+Math.max(1,Math.ceil(this.value.length/153))+' SMS'" placeholder="Type your message…" class="w-full p-3 border-2 rounded-xl"></textarea>
-    <div class="flex items-center justify-between gap-3 mt-2"><span id="am-count" class="text-xs text-muted-theme">0 / 160 · 1 SMS</span><button onclick="sendAgentMessage()" class="bg-green-600 text-white px-5 py-2.5 rounded-xl font-black text-sm">Send SMS</button></div></div>`;
-}
-async function findAgentForMessage(){
-  const box=document.getElementById('am-agent-info');if(!box) return;
-  const code=(document.getElementById('am-agent')?.value||'').trim();
-  agentMsgLookup=null;
-  if(code.length<5){box.innerHTML='';return;}
-  box.innerHTML=SK.bar('70%',40);
-  try{
-    const{data,error}=await withTimeout(supa.rpc('agent_contact',{p_agent_code:code}),15000);
-    if(error) throw error;
-    if((document.getElementById('am-agent')?.value||'').trim()!==code) return; // typed on
-    if(!data){box.innerHTML='<p class="text-sm text-red-600 font-semibold">No agent with that ID.</p>';return;}
-    agentMsgLookup=data;
-    const nums=[...new Set([data.agent_phone,data.account_phone].filter(Boolean))];
-    box.innerHTML=`<div class="bg-slate-50 rounded-xl p-4"><div class="font-bold">${esc(data.name||'')}${data.business_name?' · '+esc(data.business_name):''} <span class="text-xs font-bold px-2 py-0.5 rounded-full ${data.status==='active'?'bg-green-100 text-green-700':'bg-slate-200 text-slate-600'}">${esc(data.status||'')}</span></div>${nums.length?`<div class="mt-2 space-y-1">${nums.map(n=>`<label class="flex items-center gap-2 text-sm"><input type="checkbox" class="am-num" value="${esc(n)}" checked> <span class="font-mono font-bold">${esc(n)}</span> <span class="text-xs text-muted-theme">${n===data.agent_phone&&n===data.account_phone?'agent & account phone':n===data.agent_phone?'agent phone':'account phone'}</span></label>`).join('')}</div>`:'<p class="text-sm text-red-600 mt-2">This agent has no phone number on their account.</p>'}</div>`;
-  }catch(err){box.innerHTML=`<p class="text-sm text-red-600">${esc(err.message||'Lookup failed')}</p>`;}
-}
-async function sendAgentMessage(){
-  const text=(document.getElementById('am-text')?.value||'').trim();
-  const to=[...document.querySelectorAll('.am-num:checked')].map(i=>i.value);
-  if(!agentMsgLookup){showToast('Find the agent first',3000,'error');return;}
-  if(!to.length){showToast('Tick at least one phone number',3000,'error');return;}
-  if(!text){showToast('Type a message',3000,'error');return;}
-  try{
-    const{data,error}=await withTimeout(supa.rpc('admin_send_sms',{p_to:to,p_message:text}),15000);
-    if(error) throw error;
-    showToast(`Message to ${agentMsgLookup.name||agentMsgLookup.agent_id} queued for ${data} number${data===1?'':'s'}.`,4000,'success');
-    document.getElementById('am-text').value='';document.getElementById('am-count').textContent='0 / 160 · 1 SMS';
-    loadAdminSmsLog();
-  }catch(err){showToast(err.message||'Could not send',5000,'error');}
-}
 
 /* ===== ADMIN: SMS NOTIFICATIONS (httpSMS) ===== */
 const SMS_EVENTS=[
@@ -2990,15 +2547,9 @@ const SMS_EVENTS=[
   ['Customers','deposit_credited','Wallet credited'],
   ['Customers','deposit_rejected','Deposit not confirmed'],
   ['Customers','account_locked','Account locked (too many wrong passwords)'],
-  ['Agents','agent_status','Application approved / rejected / suspended'],
-  ['Agents','withdrawal_update','Withdrawal paid / rejected'],
-  ['Agents','price_unlock_update','Price-change request answered'],
   ['Admin alerts','admin_new_order','New order'],
   ['Admin alerts','admin_new_deposit','Customer says they sent MoMo'],
   ['Admin alerts','admin_online_deposit','Online payment received'],
-  ['Admin alerts','admin_new_withdrawal','Agent withdrawal request'],
-  ['Admin alerts','admin_new_agent','New agent application'],
-  ['Admin alerts','admin_price_request','Agent price-change request'],
 ];
 /* ===== ADMIN: AUDIT LOG =====
    The database writes a line for every important change (money, orders, agents,
@@ -3128,7 +2679,6 @@ async function adminUnlockLogin(email){
 }
 function renderAdminSmsTab(){
   return`<div class="space-y-6">
-    ${agentMessageCardHtml()}
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">SMS notifications</h2><p class="text-xs text-muted-theme mb-4">Texts go out through <a href="https://httpsms.com" target="_blank" rel="noopener" class="underline">httpSMS</a> from the Android phone running the httpSMS app, using that phone's SIM airtime.</p><div id="admin-sms-settings">${SK.form(4)}</div></div>
     <div class="card-theme rounded-2xl p-6"><div class="flex items-center justify-between mb-4 gap-2 flex-wrap"><h2 class="text-lg font-black">Recent messages</h2><div class="flex gap-2 flex-wrap"><button onclick="adminClearSms('sent')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete sent</button><button onclick="adminClearSms('failed')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete failed</button><button onclick="loadAdminSmsLog()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold">Refresh</button></div></div><div id="admin-sms-log">${SK.table(4,4)}</div></div>
   </div>`;
@@ -3418,542 +2968,6 @@ async function adminSaveSeevKey(){
   loadAdminSeevSettings();
 }
 
-/* ===== ADMIN: DEACTIVATE AGENT ACCOUNTS ===== */
-function adminAgentShutdownHtml(){
-  const phase=agentsPhase(),sd=state.agentShutdown||{};
-  const fmt=t=>t?new Date(t).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}):'';
-  const busy=state.agentShutdownBusy?'disabled':'';
-  if(phase==='active') return`<div class="card-theme rounded-2xl p-6 border-2 border-red-100">
-    <div class="flex items-start justify-between gap-4 flex-wrap"><div class="flex-1 min-w-[240px]"><h3 class="font-black text-lg mb-1">Deactivate agent accounts</h3>
-    <p class="text-sm text-muted-theme mb-3">One button starts it. This is what happens:</p>
-    <ol class="text-sm text-muted-theme space-y-1.5 list-decimal pl-5"><li>Every active agent gets an SMS that agent accounts close in <strong>7 days</strong> and that they should withdraw their profit.</li><li>For those 7 days, agents can withdraw <strong>any amount, on any day, at any time</strong> (the 1% fee still applies). Nobody new can apply.</li><li>After 7 days the agent dashboard, the Agents page and agent links are gone. Agent links show normal prices.</li></ol>
-    <p class="text-xs text-muted-theme mt-3">Withdrawal requests made before then stay in the Withdrawals tab for you to pay. You can cancel during the 7 days.</p></div>
-    <button id="agent-shutdown-btn" ${busy} onclick="adminStartAgentShutdown()" class="shrink-0 px-5 py-3 rounded-xl font-bold text-sm text-white shadow-md bg-gradient-to-r from-red-700 to-red-500 hover:from-red-800 hover:to-red-600 disabled:opacity-50">Send 7-day reminder</button></div></div>`;
-  if(phase==='closing') return`<div class="card-theme rounded-2xl p-6 border-2 border-orange-200">
-    <div class="flex items-start justify-between gap-4 flex-wrap"><div class="flex-1 min-w-[240px]"><p class="text-xs font-black uppercase text-orange-600 mb-1">Deactivation under way</p><h3 class="font-black text-lg mb-1">Agent accounts close on ${esc(fmt(sd.closes_at))}</h3>
-    <p class="text-sm text-muted-theme">${esc(agentTimeLeft())} left. Reminder texted to <strong>${Number(sd.sent)||0}</strong> agent${Number(sd.sent)===1?'':'s'} on ${esc(fmt(sd.resent_at||sd.notice_at))}. Withdrawals are open every day for any amount until then.</p></div>
-    <div class="flex gap-2 flex-wrap shrink-0"><button ${busy} onclick="adminStartAgentShutdown(true)" class="px-4 py-2.5 rounded-xl font-bold text-sm bg-orange-100 text-orange-800 hover:bg-orange-200 disabled:opacity-50">Send reminder again</button><button ${busy} onclick="adminCancelAgentShutdown()" class="px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50">Cancel deactivation</button></div></div></div>`;
-  return`<div class="card-theme rounded-2xl p-6 border-2 border-slate-200">
-    <div class="flex items-start justify-between gap-4 flex-wrap"><div class="flex-1 min-w-[240px]"><p class="text-xs font-black uppercase text-slate-500 mb-1">Agent accounts are off</p><h3 class="font-black text-lg mb-1">Deactivated on ${esc(fmt(sd.closes_at))}</h3>
-    <p class="text-sm text-muted-theme">There is no agent dashboard or Agents page, and agent links show normal prices. Pay any requests still pending in the <button onclick="state.adminTab='withdrawals';render()" class="underline font-bold">Withdrawals</button> tab.</p></div>
-    <button ${busy} onclick="adminCancelAgentShutdown(true)" class="shrink-0 px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 disabled:opacity-50">Turn agent accounts back on</button></div></div>`;
-}
-function paintAdminAgentShutdown(){paintHtml('admin-agent-shutdown',adminAgentShutdownHtml());}
-async function adminStartAgentShutdown(resend){
-  const when=new Date(Date.now()+7*864e5).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
-  const ask=resend
-    ?'Text every active agent again that agent accounts close on '+new Date(state.agentShutdown.closes_at).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+'?'
-    :'Send the 7-day reminder now?\n\n• Every active agent gets an SMS.\n• Withdrawals open every day for any amount until '+when+'.\n• Then agent accounts are deactivated: no agent dashboard, no Agents page, no agent links.';
-  if(!confirm(ask)) return;
-  state.agentShutdownBusy=true;paintAdminAgentShutdown();
-  try{
-    const{data,error}=await supa.rpc('admin_start_agent_shutdown',{p_resend:!!resend});
-    if(error) throw error;
-    const prev=state.agentShutdown||{};
-    state.agentShutdownBusy=false;
-    setAgentShutdown(resend?{...prev,sent:data.sent,resent_at:new Date().toISOString()}:{notice_at:new Date().toISOString(),closes_at:data.closes_at,sent:data.sent});
-    paintAdminAgentShutdown();
-    showToast(data.sent?'Reminder sent to '+data.sent+' agent'+(data.sent===1?'':'s')+'. Agent accounts close on '+agentCloseDate()+'.':'Started, but no agent has a valid phone number to text.',6000,data.sent?'success':'info');
-  }catch(e){state.agentShutdownBusy=false;paintAdminAgentShutdown();showToast('Could not send the reminder: '+(e.message||'error'),6000,'error');}
-}
-async function adminCancelAgentShutdown(reopen){
-  if(!confirm(reopen?'Turn agent accounts back on? Agents get their dashboard and links back, and people can apply again.':'Cancel the deactivation? Agent accounts stay on and the normal withdrawal rules come back. Agents are not texted about this.')) return;
-  state.agentShutdownBusy=true;paintAdminAgentShutdown();
-  try{
-    const{error}=await supa.rpc('admin_cancel_agent_shutdown');
-    if(error) throw error;
-    state.agentShutdownBusy=false;setAgentShutdown(null);paintAdminAgentShutdown();
-    showToast(reopen?'Agent accounts are back on.':'Deactivation cancelled. Agent accounts stay on.',4000,'success');
-  }catch(e){state.agentShutdownBusy=false;paintAdminAgentShutdown();showToast('Could not change it: '+(e.message||'error'),5000,'error');}
-}
-
-/* ===== ADMIN WITHDRAWALS TAB ===== */
-function renderAdminWithdrawalsTab(){
-  return`<div class="space-y-4">
-    <div id="admin-wd-window" class="card-theme rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">${adminWindowHtml()}</div>
-    <div id="admin-withdrawals-container" class="card-theme rounded-2xl p-6">${SK.table(6,4)}</div>
-  </div>`;
-}
-function adminWindowHtml(){
-  const isOverride=state.withdrawalOverride;
-  return`<div>
-        <h3 class="font-black text-lg mb-1">Withdrawal Window Control</h3>
-        <p class="text-sm text-muted-theme">Normal schedule: Monday–Thursday, 8AM–12PM. Use the override to open the window outside these hours.</p>
-        ${isOverride?`<div class="mt-2 inline-flex items-center gap-2 bg-green-100 border border-green-300 text-green-800 px-3 py-1.5 rounded-lg text-xs font-bold"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>OVERRIDE ACTIVE — Window is open for all agents</div>`:`<div class="mt-2 inline-flex items-center gap-2 bg-slate-100 border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Normal schedule active</div>`}
-      </div>
-      <button onclick="adminToggleWithdrawalOverride()" class="shrink-0 px-5 py-3 rounded-xl font-bold text-sm transition-all ${isOverride?'bg-red-100 text-red-700 hover:bg-red-200 border-2 border-red-300':'bg-green-600 text-white hover:bg-green-700 shadow-md'} flex items-center gap-2">
-        ${isOverride
-          ?`<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Close Withdrawal Window`
-          :`<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>Open Withdrawal Window`}
-      </button>`;
-}
-function adminWithdrawalsHtml(data){
-  if(!data||!data.length) return`<div class="text-center py-8 text-muted-theme">No withdrawal requests yet.</div>`;
-  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Agent</th><th class="p-3 text-xs font-black uppercase text-slate-500">Payout Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">MoMo #</th><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Requested</th><th class="p-3 text-xs font-black uppercase text-slate-500">Action</th></tr></thead><tbody>${data.map(w=>{const netAmt=parseFloat(w.net_amount||w.amount||0);const reqAmt=parseFloat(w.requested_amount||0);const fee=parseFloat(w.fee||0);return`<tr class="border-b hover:bg-slate-50 ${w._pending?'row-pending':''}"><td class="p-3 font-mono text-xs">${esc(w.agent_id)}</td><td class="p-3"><div class="flex flex-col"><span class="font-black text-green-600 text-sm">&#8373;${netAmt.toFixed(2)}</span>${reqAmt>0?`<span class="text-xs text-slate-400 font-semibold">Requested: &#8373;${reqAmt.toFixed(2)} &bull; Fee: &#8373;${fee.toFixed(2)}</span>`:`<span class="text-xs text-slate-400 font-semibold">Fee: &#8373;${fee.toFixed(2)}</span>`}</div></td><td class="p-3 font-bold">${esc(w.phone)}</td><td class="p-3">${esc((w.network||'').toUpperCase())}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${w.status==='paid'?'bg-green-100 text-green-700':w.status==='rejected'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(w.status)}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(w.created_at).toLocaleDateString()}</td><td class="p-3">${w.status==='pending'?`<div class="flex gap-2"><button onclick="processWithdrawal('${esc(w.id)}','paid')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200">Pay</button><button onclick="processWithdrawal('${esc(w.id)}','rejected')" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200">Reject</button></div>`:'—'}</td></tr>`}).join('')}</tbody></table></div>`;
-}
-async function loadAdminWithdrawals(){
-  await paint('admin-withdrawals-container','admin-withdrawals',async()=>{
-    const{data,error}=await supa.from('agent_withdrawals').select('*').order('created_at',{ascending:false}).limit(300);
-    if(error) throw error;return data||[];
-  },adminWithdrawalsHtml,SK.table(6,4),()=>errorBox('Failed to load withdrawals','loadAdminWithdrawals()'));
-}
-async function processWithdrawal(id,status){
-  if(status==='rejected'&&!confirm('Reject this withdrawal request?')) return;
-  const undo=mutate('admin-withdrawals',list=>list.map(w=>w.id===id?{...w,status,_pending:true}:w));
-  try{
-    const{error:we}=await supa.from('agent_withdrawals').update({status,processed_at:new Date().toISOString()}).eq('id',id);
-    if(we) throw we;
-    // total_withdrawn is recalculated by the database trigger on agent_withdrawals.
-    mutate('admin-withdrawals',list=>list.map(w=>w.id===id?{...w,_pending:false}:w));
-    showToast(status==='paid'?'Withdrawal marked as paid':'Withdrawal rejected',3000,'success');
-  }catch(err){undo();showToast('Failed: '+(err.message||String(err)),4000,'error');}
-}
-
-/* ===== ADMIN WITHDRAWAL WINDOW OVERRIDE ===== */
-async function loadWithdrawalOverride(){
-  try{
-    const{data}=await supa.from('app_settings').select('value').eq('key','withdrawal_override').maybeSingle();
-    state.withdrawalOverride=data?.value===true;
-  }catch(e){}
-  paintHtml('admin-wd-window',adminWindowHtml());
-  paintWithdrawWindow();
-}
-async function adminToggleWithdrawalOverride(){
-  const next=!state.withdrawalOverride;
-  state.withdrawalOverride=next;paintHtml('admin-wd-window',adminWindowHtml());
-  const{error}=await supa.from('app_settings').upsert({key:'withdrawal_override',value:next,updated_at:new Date().toISOString()});
-  if(error){state.withdrawalOverride=!next;paintHtml('admin-wd-window',adminWindowHtml());showToast('Could not change the withdrawal window: '+error.message,4000,'error');return;}
-  if(next) showToast('Withdrawal window OPENED for all agents — override is active.',4000,'success');
-  else showToast('Withdrawal window override removed — normal schedule applies.',4000,'info');
-}
-
-/* ===== AGENT PORTAL (BECOME AGENT) ===== */
-function renderAgentPortal(){
-  if(state.agentProfile){
-    const ap=state.agentProfile;
-    const liveNote=`<p class="text-xs text-muted-theme mt-4 flex items-center justify-center gap-2"><span class="live-dot"></span>This page updates by itself when the admin decides.</p>`;
-    if(ap.status==='pending'){
-      return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in ${ap._pending?'row-pending':''}"><div class="w-20 h-20 bg-amber-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h2 class="text-2xl font-black mb-3">Application Under Review</h2><p class="text-muted-theme mb-6">Your agent application has been submitted and is awaiting admin approval. You will be able to access your dashboard once approved.</p><div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800 font-semibold">Agent ID: <code class="font-mono bg-amber-100 px-2 py-0.5 rounded">${esc(ap.agent_id||ap.id)}</code></div><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button>${liveNote}</div></div>`;
-    }
-    if(ap.status==='suspended'){
-      return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-red-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg></div><h2 class="text-2xl font-black mb-3">Agent Account Suspended</h2><p class="text-muted-theme mb-6">Your agent account has been suspended, so your agent link and dashboard are paused. Please contact the admin on WhatsApp +233 59 757 8538.</p><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button>${liveNote}</div></div>`;
-    }
-    // Rejected agents get a pre-filled edit form to update and re-submit their application
-    if(ap.status==='rejected'){
-      return`<div class="min-h-screen flex items-center justify-center px-4 py-12"><div class="max-w-md w-full card-theme p-8 rounded-3xl animate-scale-in"><div class="w-20 h-20 bg-red-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h2 class="text-2xl font-black mb-2 text-center">Your Application Was Not Approved</h2><p class="text-muted-theme text-sm text-center mb-6">You can update your details below and re-submit for review.</p><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Full Name *</label><input type="text" id="agent-name" maxlength="100" value="${esc(ap.name||'')}" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="Your full name"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number *</label><input type="tel" id="agent-phone" value="${esc(ap.phone||'')}" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Business Name (Optional)</label><input type="text" id="agent-business" maxlength="100" value="${esc(ap.business_name||'')}" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="e.g. John's Data Hub"></div><button onclick="reapplyAsAgent()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-2">Re-submit Application</button><p class="text-xs text-muted-theme text-center">This will update your existing application. Admin will review your updated details.</p></div></div></div>`;
-    }
-    return`<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h2 class="text-2xl font-black mb-4">You're Already an Agent!</h2><p class="text-muted-theme mb-8">Your agent account is active. Go to your dashboard to manage pricing and track your sales.</p><div class="space-y-3"><button onclick="navigateTo('agent-dashboard')" class="w-full cta-button text-white py-4 rounded-2xl font-bold">Go to Agent Dashboard</button><button onclick="navigateTo('home')" class="w-full bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">Buy Data</button></div></div></div>`;
-  }
-  const formHtml=agentsPhase()!=='active'
-    ?`<div class="relative z-10 max-w-md mx-auto text-center bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-        <p class="text-white font-bold text-lg mb-2">We are no longer accepting new agents</p>
-        <p class="text-blue-200 text-sm">Agent accounts close on ${esc(agentCloseDate(false))}. You can still buy data at our normal prices.</p>
-      </div>`
-    :state.user
-    ?`<div class="relative z-10 max-w-lg mx-auto bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-        <h3 class="text-xl font-bold text-white mb-5 text-center">Apply to Become an Agent</h3>
-        <div class="space-y-4">
-          <div><label class="block text-xs font-bold uppercase text-blue-200 mb-1.5">Full Name *</label><input type="text" id="agent-name" maxlength="100" class="w-full p-3.5 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-blue-400" placeholder="Your full name"></div>
-          <div><label class="block text-xs font-bold uppercase text-blue-200 mb-1.5">Phone Number *</label><input type="tel" id="agent-phone" maxlength="10" class="w-full p-3.5 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-blue-400" placeholder="024xxxxxxx"></div>
-          <div><label class="block text-xs font-bold uppercase text-blue-200 mb-1.5">Business Name (Optional)</label><input type="text" id="agent-business" maxlength="100" class="w-full p-3.5 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-blue-400" placeholder="e.g. John's Data Hub"></div>
-          <button onclick="registerAsAgent()" class="w-full bg-white text-blue-700 py-4 rounded-xl font-black text-lg hover:bg-blue-50 transition-all">Apply Now — It's Free</button>
-        </div>
-      </div>`
-    :`<div class="relative z-10 max-w-md mx-auto text-center bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-        <p class="text-blue-200 mb-5 text-lg">Login first to register as an agent</p>
-        <button onclick="navigateTo('login')" class="bg-white text-blue-700 px-8 py-4 rounded-xl font-black hover:bg-blue-50 transition-all">Login to Continue</button>
-      </div>`;
-  return`<div class="animate__animated animate__fadeIn"><div class="become-agent-hero max-w-5xl mx-auto m-6">
-    <div class="relative z-10 text-center mb-10"><div class="w-20 h-20 bg-white/15 rounded-2xl flex items-center justify-center mx-auto mb-6"><svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div><h1 class="text-4xl md:text-5xl font-black text-white mb-4">Become a TRU Agent</h1><p class="text-blue-200 text-xl max-w-2xl mx-auto">Earn money selling data bundles to your network. Set your own profit margins and grow your income.</p></div>
-    <div class="grid md:grid-cols-3 gap-5 mb-10 relative z-10">
-      <div class="text-center p-5 bg-white/10 rounded-2xl backdrop-blur-sm"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h3 class="font-bold text-lg text-white mb-2">Set Your Profit</h3><p class="text-blue-200 text-sm">Add your margin on top of admin agent base prices</p></div>
-      <div class="text-center p-5 bg-white/10 rounded-2xl backdrop-blur-sm"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg></div><h3 class="font-bold text-lg text-white mb-2">Unique Agent Link</h3><p class="text-blue-200 text-sm">Share your referral link — customers see your special pricing automatically</p></div>
-      <div class="text-center p-5 bg-white/10 rounded-2xl backdrop-blur-sm"><div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div><h3 class="font-bold text-lg text-white mb-2">Real-time Dashboard</h3><p class="text-blue-200 text-sm">Track sales, profit, and request withdrawals anytime</p></div>
-    </div>
-    ${formHtml}
-  </div></div>`;
-}
-
-/* ===== AGENT DASHBOARD ===== */
-function agentStatsHtml(){
-  const ap=state.agentProfile||{};
-  const st=state.agentStats||{};
-  const v=x=>st.loaded||st.sales!=null&&st.totalWithdrawn!=null?x:SK.stat();
-  return`<div class="agent-stat-card bg-green-50 border border-green-200"><div class="text-2xl font-black text-green-700">${v('₵'+(st.sales||0).toFixed(2))}</div><div class="text-xs font-bold text-green-600 uppercase mt-1">Total Sales</div></div>
-      <div class="agent-stat-card bg-blue-50 border border-blue-200"><div class="text-2xl font-black text-blue-700">${v('₵'+(st.profit||0).toFixed(2))}</div><div class="text-xs font-bold text-blue-600 uppercase mt-1">Available Profit</div>${(st.totalWithdrawn||0)>0?`<div class="text-xs text-slate-400 mt-0.5">Gross: ₵${(st.grossProfit||0).toFixed(2)}</div>`:''}</div>
-      <div class="agent-stat-card bg-amber-50 border border-amber-200"><div class="text-2xl font-black text-amber-700">${v('₵'+(st.totalWithdrawn||0).toFixed(2))}</div><div class="text-xs font-bold text-amber-600 uppercase mt-1">Total Withdrawn</div></div>
-      <div class="agent-stat-card bg-purple-50 border border-purple-200"><div class="text-2xl font-black text-purple-700">${esc(ap.status||'Active')}</div><div class="text-xs font-bold text-purple-600 uppercase mt-1">Account Status</div></div>`;
-}
-function renderAgentDashboard(){
-  const ap=state.agentProfile;
-  if(!ap) return pageSkeleton();
-  const refLink=`${window.location.origin}${window.location.pathname}?agent=${esc(ap.agent_id||ap.id)}`;
-  const tab=state.agentTab||'dashboard';
-  const tabBtn=(id,label)=>`<button class="admin-tab-btn ${tab===id?'active':''}" onclick="state.agentTab='${id}';render()">${label}</button>`;
-  return`<div class="app-tight animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
-      <div><h1 class="text-3xl font-black">Agent Dashboard</h1><p class="text-muted-theme text-sm">Welcome, <strong>${esc(ap.name||'Agent')}</strong> &bull; ID: <code class="bg-slate-100 px-2 py-0.5 rounded text-xs">${esc(ap.agent_id||ap.id)}</code> <span id="live-indicator">${liveIndicatorHtml()}</span></p></div>
-      <button onclick="navigateTo('home')" class="app-hide bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">← Back to Store</button>
-    </div>
-    <div id="agent-closing-banner" class="mb-6 empty:hidden">${agentClosingBannerHtml()}</div>
-    <!-- Referral Link Card -->
-    <div class="mb-8 bg-gradient-to-r from-blue-700 to-blue-600 rounded-2xl p-5 text-white">
-      <p class="text-xs font-bold uppercase text-blue-200 mb-2">Your Agent Referral Link</p>
-      <div class="flex items-center gap-3 flex-wrap">
-        <code class="flex-1 bg-white/15 px-4 py-3 rounded-xl text-sm font-mono truncate min-w-0" id="agent-ref-link">${esc(refLink)}</code>
-        <button onclick="copyAgentLink()" class="bg-white text-blue-700 px-4 py-3 rounded-xl font-bold text-sm hover:bg-blue-50 transition-all whitespace-nowrap shrink-0 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>Copy Link</button>
-      </div>
-      <p class="text-blue-200 text-xs mt-2">Customers who open your link will see your special pricing automatically.</p>
-    </div>
-    <!-- Stats -->
-    <div id="agent-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">${agentStatsHtml()}</div>
-    <!-- Tabs -->
-    <div class="flex gap-2 mb-6 flex-wrap">
-      ${tabBtn('dashboard','Overview')}${tabBtn('pricing','My Pricing')}${tabBtn('orders','My Orders')}${tabBtn('withdraw','Withdraw')}
-    </div>
-    <div id="agent-tab-content">
-      ${tab==='dashboard'?renderAgentOverviewTab():tab==='pricing'?`<div class="card-theme rounded-2xl p-6"><h3 class="text-xl font-bold mb-4">My Bundle Pricing</h3><p class="text-muted-theme text-sm mb-4">Set your profit margin for each bundle. You only see agent base prices — system prices are hidden.</p><div id="agent-pricing-panel">${SK.table(5,5)}</div></div>`:tab==='orders'?`<div class="card-theme rounded-2xl p-6"><h3 class="text-xl font-bold mb-4">Orders via My Link</h3><div id="agent-orders-panel">${SK.table(6,5)}</div></div>`:renderAgentWithdrawTab()}
-    </div>
-  </div>`;
-}
-function renderAgentOverviewTab(){
-  return`<div class="grid lg:grid-cols-3 gap-6">
-    <div class="card-theme rounded-2xl p-6 lg:col-span-2"><div class="flex items-center justify-between mb-4 gap-3 flex-wrap"><h3 class="text-xl font-bold">Your Requests</h3><span class="text-xs text-muted-theme flex items-center gap-2"><span class="live-dot"></span>Updates as soon as the admin decides</span></div><div id="agent-requests">${SK.list(3,40)}</div></div>
-    <div class="card-theme rounded-2xl p-6"><h3 class="text-lg font-bold mb-3">How it works</h3><ul class="space-y-3 text-sm text-muted-theme"><li><strong class="text-slate-700">Pricing:</strong> set your profit on each bundle in <em>My Pricing</em>. Saved prices lock; use <em>Request price change</em> to change them.</li><li><strong class="text-slate-700">Orders:</strong> every order through your link shows in <em>My Orders</em>.</li><li class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-blue-700 font-semibold"><span class="font-black">Withdrawal rules:</span> ${agentsPhase()==='closing'?'Until '+esc(agentCloseDate(false))+': any amount, any day, any time':'Minimum ₵10 &bull; Monday–Thursday, 8AM–12PM'} &bull; 1% fee applies</li></ul></div>
-  </div>`;
-}
-function agentRequestsHtml(d){
-  const fmt=x=>new Date(x).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  const until=state.agentProfile?.price_unlock_until?new Date(state.agentProfile.price_unlock_until):null;
-  const unlockBadge=r=>{
-    if(r.status==='pending') return'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">⏳ Waiting for admin</span>';
-    if(r.status==='rejected') return'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">❌ Not approved</span>';
-    const open=until&&until>new Date();
-    return open?`<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">✅ Approved — open until ${fmt(until)}</span>`:'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">✅ Approved (window closed)</span>';
-  };
-  const wdBadge=s=>s==='paid'?'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">✅ Paid</span>':s==='rejected'?'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">❌ Rejected</span>':'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">⏳ Waiting for admin</span>';
-  const row=(left,right,pending)=>`<div class="flex items-center justify-between gap-3 bg-slate-50 rounded-xl px-4 py-3 ${pending?'row-pending':''}"><div class="min-w-0 text-sm">${left}</div><div class="shrink-0">${right}</div></div>`;
-  const del=r=>r.status==='approved'||r.status==='rejected'?`<button data-id="${esc(r.id)}" onclick="agentDeletePriceRequest(this.dataset.id)" aria-label="Delete request" title="Delete" class="ml-2 align-middle text-slate-400 hover:text-red-600 p-1"><svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>`:'';
-  const unlocks=(d.unlocks||[]).map(r=>row(`<div class="font-bold">Price change</div><div class="text-xs text-muted-theme truncate">${fmt(r.created_at)}${r.note?' · '+esc(r.note):''}</div>`,unlockBadge(r)+del(r),r._pending)).join('');
-  const wds=(d.withdrawals||[]).map(w=>row(`<div class="font-bold">Withdrawal ₵${parseFloat(w.net_amount||w.amount||0).toFixed(2)}</div><div class="text-xs text-muted-theme">${fmt(w.created_at)} · ${esc(w.phone||'')}</div>`,wdBadge(w.status),w._pending)).join('');
-  if(!unlocks&&!wds) return'<div class="text-center py-6 text-muted-theme text-sm">No requests yet. Price-change and withdrawal requests you make will show here with the admin\'s answer.</div>';
-  return`<div class="space-y-5">${unlocks?`<div><p class="text-xs font-black uppercase text-slate-500 mb-2">Price-change requests</p><div class="space-y-2">${unlocks}</div></div>`:''}${wds?`<div><p class="text-xs font-black uppercase text-slate-500 mb-2">Withdrawals</p><div class="space-y-2">${wds}</div><button onclick="state.agentTab='withdraw';render()" class="text-xs font-bold text-blue-600 mt-2">See all withdrawals →</button></div>`:''}</div>`;
-}
-async function agentDeletePriceRequest(id){
-  if(!confirm('Delete this price-change request from your list?')) return;
-  const undo=mutate('agent-requests',d=>({...d,unlocks:(d.unlocks||[]).filter(r=>r.id!==id)}));
-  try{
-    const{error}=await supa.rpc('delete_price_unlock_request',{p_id:id});
-    if(error) throw error;
-    showToast('Request deleted',2000,'info');
-    loadAgentPricingPanel();
-  }catch(err){undo();showToast('Delete failed: '+(err.message||'error'),4000,'error');}
-}
-async function loadAgentRequests(){
-  if(!state.agentProfile) return;
-  await paint('agent-requests','agent-requests',async()=>{
-    const ap=state.agentProfile;
-    const[u,w]=await Promise.all([
-      supa.from('price_unlock_requests').select('id,status,note,hours,created_at,reviewed_at').eq('agent_profile_id',ap.id).order('created_at',{ascending:false}).limit(5),
-      supa.from('agent_withdrawals').select('id,status,amount,net_amount,phone,network,created_at,processed_at').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(5)
-    ]);
-    if(u.error) throw u.error;if(w.error) throw w.error;
-    remember('price_unlock_requests',u.data,'status');remember('agent_withdrawals',w.data,'status');
-    return{unlocks:u.data||[],withdrawals:w.data||[]};
-  },agentRequestsHtml,SK.list(3,40),()=>errorBox('Could not load your requests.','loadAgentRequests()'));
-}
-function withdrawWindowOpen(){
-  const now=new Date();const h=now.getHours();const d=now.getDay();
-  const scheduleOpen=d>=1&&d<=4&&h>=8&&h<12;
-  const closing=agentsPhase()==='closing';
-  return{scheduleOpen,closing,open:closing||scheduleOpen||state.withdrawalOverride};
-}
-function withdrawWindowHtml(){
-  const{scheduleOpen,open,closing}=withdrawWindowOpen();
-  if(closing) return`<div class="withdrawal-window-open"><p class="font-bold text-sm">Withdrawals are OPEN every day until ${esc(agentCloseDate())}, for any amount</p><p class="text-xs font-semibold mt-1">Agent accounts close then. Withdraw all your profit before that time.</p></div>`;
-  const overrideBadge=state.withdrawalOverride&&!scheduleOpen?`<p class="text-xs font-bold text-green-700 mt-1">⚡ Admin has opened the window outside normal hours.</p>`:'';
-  return`<div class="${open?'withdrawal-window-open':'withdrawal-window-closed'}"><p class="font-bold text-sm">${open?'Withdrawal window is OPEN — Submit your request now':'Withdrawal window is CLOSED — Available: Monday to Thursday, 8AM–12PM only'}</p>${overrideBadge}</div>`;
-}
-function paintWithdrawWindow(){
-  paintHtml('wd-window',withdrawWindowHtml());
-  const b=document.getElementById('wd-submit');if(b) b.disabled=!withdrawWindowOpen().open;
-}
-function withdrawMin(){return agentsPhase()==='closing'?0.01:10;}
-function wdPreview(v){
-  const a=parseFloat(v)||0,fee=Math.round(a)/100,el=document.getElementById('wd-fee-preview');
-  if(el) el.textContent=a>=withdrawMin()?'Fee: ₵'+fee.toFixed(2)+' — You receive: ₵'+(a-fee).toFixed(2):'';
-}
-function withdrawAll(){
-  const el=document.getElementById('wd-amount');if(!el) return;
-  const a=Math.floor((state.agentStats.profit||0)*100)/100;
-  if(!(a>0)){showToast('You have no profit left to withdraw',3000,'info');return;}
-  el.value=a.toFixed(2);wdPreview(el.value);
-}
-function renderAgentWithdrawTab(){
-  const{open,closing}=withdrawWindowOpen();
-  return`<div class="space-y-6">
-    <!-- Request Form -->
-    <div class="card-theme rounded-2xl p-6">
-      <h3 class="text-xl font-bold mb-5">Request Withdrawal</h3>
-      <div id="wd-window" class="mb-6">${withdrawWindowHtml()}</div>
-      <div class="space-y-4 max-w-md">
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800 font-semibold"><svg class="w-4 h-4 inline mr-1 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>A <strong>1% processing fee</strong> is deducted from all withdrawals. You receive the amount minus the fee.</div>
-        <div><div class="flex items-center justify-between gap-2 mb-2"><label class="block text-xs font-bold uppercase text-slate-500">Amount (${closing?'any amount':'Minimum ₵10'})</label>${closing?`<button type="button" onclick="withdrawAll()" class="text-xs font-bold text-blue-600 hover:underline">Withdraw all</button>`:''}</div><input type="number" id="wd-amount" min="${closing?'0.01':'10'}" step="0.01" oninput="wdPreview(this.value)" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none" placeholder="${closing?'0.00':'10.00'}"><p id="wd-fee-preview" class="text-xs text-blue-600 font-bold mt-1.5"></p></div>
-        <div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Mobile Money Number</label><input type="tel" id="wd-phone" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none" placeholder="024xxxxxxx"></div>
-        <div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Network</label><select id="wd-network" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-blue-500 outline-none"><option value="mtn">MTN MoMo</option><option value="telecel">Telecel Cash</option><option value="airteltigo">AirtelTigo Money</option></select></div>
-        <button id="wd-submit" onclick="submitWithdrawal()" ${!open?'disabled':''} class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">Request Withdrawal</button>
-      </div>
-    </div>
-    <!-- Withdrawal History -->
-    <div class="card-theme rounded-2xl p-6">
-      <h3 class="text-xl font-bold mb-5 flex items-center gap-2">
-        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-        Withdrawal History
-      </h3>
-      <div id="agent-withdrawal-history">${SK.table(6,3)}</div>
-    </div>
-  </div>`;
-}
-
-/* ===== AGENT ACTIONS ===== */
-/* ===== AGENT ACTIONS ===== */
-// The application shows as "under review" straight away; if the database
-// refuses it the form comes back with what was typed.
-async function registerAsAgent(){
-  const name=document.getElementById('agent-name')?.value.trim();
-  const phone=document.getElementById('agent-phone')?.value.trim();
-  const business=document.getElementById('agent-business')?.value.trim();
-  if(!name||!phone){showToast('Name and phone are required',3000,'error');return;}
-  const v=validateGhanaPhone(phone);if(!v.isValid){showToast(v.error,4000,'error');return;}
-  const agentId='AGT-'+Math.random().toString(36).slice(2,8).toUpperCase();
-  state.agentProfile={id:'tmp',agent_id:agentId,name,phone,business_name:business||null,status:'pending',_pending:true};
-  render();
-  try{
-    const{data,error}=await supa.from('agent_profiles').insert([{user_id:state.user.id,agent_id:agentId,name,phone,business_name:business||null,status:'pending',pricing_locked:false,total_sales:0,agent_profit:0,total_withdrawn:0,created_at:new Date().toISOString()}]).select();
-    if(error) throw error;
-    state.agentProfile=data[0];state.agentId=agentId;cacheUserState();
-    if(state.view==='agent-portal') render();
-    updateAuthUI();startLive();
-    showToast('Application submitted! You will see the decision here as soon as the admin reviews it.',6000,'success');
-  }catch(err){
-    state.agentProfile=null;render();
-    const set=(id,v)=>{const el=document.getElementById(id);if(el) el.value=v||'';};
-    set('agent-name',name);set('agent-phone',phone);set('agent-business',business);
-    showToast('Registration failed: '+(err.message||'Unknown error'),5000,'error');
-  }
-}
-// BUG 4: New function — allows rejected agent to update their existing row and re-submit for review
-// Updates the existing application (never a new row) so the admin sees the same record.
-async function reapplyAsAgent(){
-  const name=document.getElementById('agent-name')?.value.trim();
-  const phone=document.getElementById('agent-phone')?.value.trim();
-  const business=document.getElementById('agent-business')?.value.trim();
-  if(!name||!phone){showToast('Name and phone are required',3000,'error');return;}
-  const v=validateGhanaPhone(phone);if(!v.isValid){showToast(v.error,4000,'error');return;}
-  const before=state.agentProfile;
-  state.agentProfile={...before,name,phone,business_name:business||null,status:'pending',_pending:true};
-  render();
-  try{
-    const{error}=await supa.from('agent_profiles').update({name,phone,business_name:business||null,status:'pending',updated_at:new Date().toISOString()}).eq('id',before.id);
-    if(error) throw error;
-    state.agentProfile={...state.agentProfile,_pending:false};cacheUserState();
-    if(state.view==='agent-portal') render();
-    showToast('Application re-submitted! You will see the decision here as soon as the admin reviews it.',5000,'success');
-  }catch(err){
-    state.agentProfile=before;render();
-    const set=(id,v)=>{const el=document.getElementById(id);if(el) el.value=v||'';};
-    set('agent-name',name);set('agent-phone',phone);set('agent-business',business);
-    showToast('Re-submission failed: '+(err.message||'Unknown error'),5000,'error');
-  }
-}
-function copyAgentLink(){
-  const el=document.getElementById('agent-ref-link');
-  if(!el) return;
-  navigator.clipboard.writeText(el.textContent).then(()=>showToast('Referral link copied!',3000,'success')).catch(()=>showToast('Copy manually: '+el.textContent,6000,'info'));
-}
-async function fetchAgentPricing(){
-  const ap=state.agentProfile;
-  const[prof,base,prices,reqs]=await Promise.all([
-    supa.from('agent_profiles').select('*').eq('user_id',state.user.id).maybeSingle(),
-    supa.from('agent_base_prices').select('*').eq('status','active').order('network').order('bundle_name'),
-    supa.from('agent_prices').select('*').eq('agent_id',ap.id).eq('status','approved'),
-    supa.from('price_unlock_requests').select('id,status,note,hours,created_at,reviewed_at').eq('agent_profile_id',ap.id).order('created_at',{ascending:false}).limit(1)
-  ]);
-  if(base.error) throw base.error;
-  if(prof.data){state.agentProfile=prof.data;cacheUserState();}
-  state.agentBasePrices=base.data||[];state.agentPrices=prices.data||[];
-  return{base:state.agentBasePrices,prices:state.agentPrices,last:(reqs.data||[])[0]||null,unlockUntil:state.agentProfile.price_unlock_until||null};
-}
-function agentPricingHtml(d){
-  // Pricing opens for this agent only when the admin approves a price-change request.
-  const fmt=x=>new Date(x).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  const openUntil=d.unlockUntil?new Date(d.unlockUntil):null;
-  const pricingOpen=!!openUntil&&openUntil>new Date();
-  state.agentPricingOpen=pricingOpen;
-  const last=d.last;
-  const requestBtn=`<button onclick="requestPriceUnlock()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-700">Request price change</button>`;
-  const unlockBar=pricingOpen
-    ?`<div class="mb-4 bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800 font-semibold">🔓 Your price-change request was approved. Your pricing is open until <strong>${fmt(openUntil)}</strong>. Change any markup you need; your prices lock again when this closes.</div>`
-    :last&&last.status==='pending'
-    ?`<div class="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 font-semibold ${last._pending?'row-pending':''}">⏳ Your price-change request (sent ${fmt(last.created_at)}) is waiting for the admin. This page opens your prices by itself once it is approved.</div>`
-    :last&&last.status==='rejected'
-    ?`<div class="mb-4 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap"><span class="text-sm text-red-800 font-semibold">❌ Your price-change request from ${fmt(last.created_at)} was not approved${last.reviewed_at?' on '+fmt(last.reviewed_at):''}. You can ask again.</span>${requestBtn}</div>`
-    :`<div class="mb-4 bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap"><span class="text-sm text-slate-600 font-semibold">${last&&last.status==='approved'?'Your last price-change window has closed. ':''}Need to change a locked price? Ask the admin to open your pricing.</span>${requestBtn}</div>`;
-  if(!d.base.length) return`<div class="text-center py-8 text-muted-theme">No agent base prices have been set by admin yet.<br><span class="text-xs">Check back later or contact admin.</span></div>`;
-  return unlockBar+`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Your Base Cost</th><th class="p-3 text-xs font-black uppercase text-slate-500">Your Profit (₵)</th><th class="p-3 text-xs font-black uppercase text-slate-500">Customer Pays</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th></tr></thead><tbody>${d.base.map(bp=>{
-    // Match only by bundle_id (matching by name bled locks across networks)
-    const ex=d.prices.find(p=>p.bundle_id===bp.id);
-    const pr=ex?parseFloat(ex.profit||0):0;
-    const finalPrice=ex?parseFloat(ex.final_price||0):(parseFloat(bp.base_price)+pr);
-    const locked=!pricingOpen&&(bp.pricing_locked===true||!!(ex&&ex.locked));
-    const agentSaved=!!ex;
-    // Admin locked this row but the agent has not saved a profit for it yet
-    const adminOnlyLocked=locked&&!agentSaved;
-    const rowClass=(locked?'border-b bg-slate-100 opacity-75':'border-b hover:bg-slate-50')+(ex&&ex._pending?' row-pending':'');
-    return`<tr class="${rowClass}"><td class="p-3 font-bold ${locked?'text-slate-400':''}">${esc(bp.network?.toUpperCase())}</td><td class="p-3 ${locked?'text-slate-400':''}">${esc(bp.bundle_name)}${locked?` <span class="ml-1 text-xs bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-bold">LOCKED</span>`:''}</td><td class="p-3 font-bold ${locked?'text-slate-400':'text-green-600'}">₵${parseFloat(bp.base_price).toFixed(2)}</td><td class="p-3">${adminOnlyLocked
-      ?`<div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><span class="text-xs text-slate-500 font-bold">🔒 Locked by admin</span></div>`
-      :locked
-      ?`<div class="flex items-center gap-2"><svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><div class="flex flex-col"><span class="font-black text-green-600 text-sm">₵${pr.toFixed(2)}</span><span class="text-xs text-slate-400 font-semibold">Your profit</span></div></div>`
-      :`<input type="number" min="0" step="0.01" value="${pr.toFixed(2)}" id="pr-${esc(bp.id)}" oninput="document.getElementById('tot-${esc(bp.id)}').textContent='₵'+(${parseFloat(bp.base_price)}+parseFloat(this.value||0)).toFixed(2)" class="w-24 p-2 border-2 rounded-lg font-bold text-sm focus:border-blue-500 outline-none">`}</td><td class="p-3" id="tot-${esc(bp.id)}">${locked?`<div class="flex flex-col"><span class="font-black text-blue-500 text-sm">₵${finalPrice.toFixed(2)}</span><span class="text-xs text-slate-400 font-semibold">Fixed price</span></div>`:`<span class="font-bold text-blue-600">₵${(parseFloat(bp.base_price)+pr).toFixed(2)}</span>`}</td><td class="p-3">${locked?`<div class="flex flex-col gap-1"><span class="inline-flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-200 px-2 py-1 rounded-lg"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>Locked</span><span class="text-xs text-slate-400">Request a price change to edit</span></div>`:`<button onclick="saveAgentProfit('${esc(bp.id)}')" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 transition-all">Save</button>`}</td></tr>`;}).join('')}</tbody></table></div><p class="text-xs text-muted-theme mt-4">Customer pays = Your Base Cost + Your Profit. System base prices are never exposed here. Once you save, your price is locked — use <em>Request price change</em> to change it later. <span class="text-slate-400 font-bold">Grayed-out rows are locked and uneditable.</span></p>`;
-}
-async function loadAgentPricingPanel(){
-  if(!state.agentProfile) return;
-  await paint('agent-pricing-panel','agent-pricing',fetchAgentPricing,agentPricingHtml,SK.table(5,5),()=>errorBox('Could not load your prices.','loadAgentPricingPanel()'));
-}
-async function requestPriceUnlock(){
-  const note=prompt('Why do you need to change your prices? (optional)','');
-  if(note===null) return;
-  const temp={id:'tmp',status:'pending',note:note||null,created_at:new Date().toISOString(),_pending:true};
-  const undoP=mutate('agent-pricing',d=>({...d,last:temp}));
-  const undoR=mutate('agent-requests',d=>({...d,unlocks:[temp,...(d.unlocks||[])]}));
-  try{
-    const{error}=await supa.rpc('request_price_unlock',{p_note:note});
-    if(error) throw error;
-    showToast('Request sent. Your prices open here as soon as the admin approves it.',5000,'success');
-    loadAgentPricingPanel();loadAgentRequests();
-  }catch(err){undoP();undoR();showToast(err.message||'Could not send request',5000,'error');}
-}
-async function saveAgentProfit(bundleId){
-  const d=viewCache.get('agent-pricing');
-  const bp=(d?.base||[]).find(b=>b.id===bundleId);
-  if(!bp||!state.agentProfile) return;
-  const input=document.getElementById(`pr-${bundleId}`);
-  if(!input) return;
-  const profit=parseFloat(input.value)||0;
-  const open=!!state.agentPricingOpen;
-  if(!confirm(open?'Save this price? You can keep changing prices until your open window closes.':'Once you save this profit, this bundle price will be locked. To change it later, use "Request price change". Do you want to proceed?')) return;
-  const finalPrice=parseFloat(bp.base_price)+profit;
-  const undo=mutate('agent-pricing',x=>({...x,prices:[...x.prices.filter(p=>p.bundle_id!==bundleId),{bundle_id:bundleId,profit,final_price:finalPrice,locked:true,status:'approved',_pending:true}]}));
-  try{
-    // Upsert matches on the bundle id only; bundle_name is stored for reference
-    const{error}=await supa.from('agent_prices').upsert([{agent_id:state.agentProfile.id,bundle_id:bundleId,bundle_name:bp.bundle_name,network:bp.network,profit,final_price:finalPrice,status:'approved',updated_at:new Date().toISOString()}],{onConflict:'agent_id,bundle_id'});
-    if(error) throw error;
-    showToast(open?'Profit saved for '+bp.bundle_name+'.':'Profit saved for '+bp.bundle_name+'. This price is now locked.',4000,'success');
-    loadAgentPricingPanel();
-  }catch(err){undo();showToast('Save failed: '+(err.message||'error'),4000,'error');}
-}
-function agentOrdersHtml(data){
-  if(!data||!data.length) return`<div class="text-center py-8 text-muted-theme">No orders through your link yet. Share your referral link to get started!</div>`;
-  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-3 text-xs font-black uppercase text-slate-500">Network</th><th class="p-3 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-3 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-3 text-xs font-black uppercase text-slate-500">Profit</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3 text-xs font-black uppercase text-slate-500">Date</th></tr></thead><tbody>${data.map(o=>`<tr class="border-b hover:bg-slate-50"><td class="p-3 font-mono text-xs font-bold">${esc(o.ref)}</td><td class="p-3 font-bold">${esc(o.Network?.toUpperCase())}</td><td class="p-3">${esc(o.bundle_name)}</td><td class="p-3 font-bold text-blue-600">₵${parseFloat(o.Amount).toFixed(2)}</td><td class="p-3 font-bold text-green-600">₵${parseFloat(o.agent_profit||0).toFixed(2)}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${o.Status==='Completed'||o.Status==='Delivered'?'bg-green-100 text-green-700':o.Status==='Pending'?'bg-yellow-100 text-yellow-700':o.Status==='Deleted'?'bg-red-100 text-red-700':'bg-blue-100 text-blue-700'}">${esc(o.Status==='Deleted'?'Cancelled':o.Status)}</span></td><td class="p-3 text-xs text-muted-theme">${new Date(o.created_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
-}
-async function loadAgentOrdersPanel(){
-  if(!state.agentProfile) return;
-  await paint('agent-orders-panel','agent-orders',async()=>{
-    const{data,error}=await supa.from('orders').select('id,ref,Network,bundle_name,Amount,agent_profit,Status,created_at').eq('agent_id',state.agentProfile.id).order('created_at',{ascending:false}).limit(100);
-    if(error) throw error;return data||[];
-  },agentOrdersHtml,SK.table(6,5),()=>errorBox('Failed to load orders','loadAgentOrdersPanel()'));
-}
-async function submitWithdrawal(){
-  const amountEl=document.getElementById('wd-amount'),phoneEl=document.getElementById('wd-phone');
-  const amount=parseFloat(amountEl?.value);
-  const phone=phoneEl?.value.trim();
-  const network=document.getElementById('wd-network')?.value;
-  if(!amount||amount<withdrawMin()){showToast(withdrawMin()<1?'Enter the amount to withdraw':'Minimum withdrawal is ₵10',3000,'error');return;}
-  if(!phone){showToast('Enter your MoMo number',3000,'error');return;}
-  const v=validateGhanaPhone(phone);if(!v.isValid){showToast(v.error,3000,'error');return;}
-  if(!state.agentProfile){showToast('Agent profile not found',3000,'error');return;}
-  // Quick check against the profit already on screen; the server checks again.
-  if(state.agentStats.loaded){
-    const availableProfit=parseFloat((state.agentStats.profit||0).toFixed(2));
-    if(amount>availableProfit){showToast('Insufficient balance. Your available profit is ₵'+availableProfit.toFixed(2)+' but you requested ₵'+amount.toFixed(2)+'.',5000,'error');return;}
-  }
-  const fee=+(amount*0.01).toFixed(2);
-  const temp={id:'tmp-'+Date.now(),status:'pending',amount:amount-fee,net_amount:amount-fee,requested_amount:amount,fee,phone,network,created_at:new Date().toISOString(),_pending:true};
-  const undoH=mutate('agent-wd-history',list=>[temp,...list]);
-  const undoR=mutate('agent-requests',d=>({...d,withdrawals:[temp,...(d.withdrawals||[])]}));
-  const prevStats={...state.agentStats};
-  state.agentStats.profit=Math.max(0,(state.agentStats.profit||0)-amount);paintHtml('agent-stats',agentStatsHtml());
-  amountEl.value='';phoneEl.value='';document.getElementById('wd-fee-preview').textContent='';
-  try{
-    // The server re-checks the window, available profit and pending requests.
-    const{data:wd,error}=await supa.rpc('request_agent_withdrawal',{p_amount:amount,p_phone:phone,p_network:network});
-    if(error) throw error;
-    showToast('Withdrawal request submitted! Fee: ₵'+Number(wd.fee).toFixed(2)+' — Admin will pay you: ₵'+Number(wd.net).toFixed(2),5000,'success');
-    loadAgentWithdrawalHistory();fetchAgentStats();
-  }catch(err){
-    undoH();undoR();state.agentStats=prevStats;paintHtml('agent-stats',agentStatsHtml());
-    if(amountEl&&!amountEl.value) amountEl.value=amount;if(phoneEl&&!phoneEl.value) phoneEl.value=phone;
-    showToast('Request failed: '+(err.message||'error'),5000,'error');
-  }
-}
-
-function agentWithdrawalsHtml(data){
-  if(!data||!data.length){
-    return`<div class="text-center py-8 text-muted-theme">
-      <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-      <p class="font-semibold">No withdrawal requests yet.</p>
-      <p class="text-xs mt-1">Your requests will appear here once submitted.</p>
-    </div>`;
-  }
-  const statusBadge=(s)=>{
-    if(s==='paid') return'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">✅ Paid</span>';
-    if(s==='rejected') return'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">❌ Rejected</span>';
-    return'<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">⏳ Pending</span>';
-  };
-  return`<div class="overflow-x-auto">
-    <table class="w-full text-left">
-      <thead class="bg-slate-50 border-b">
-        <tr>
-          <th class="p-3 text-xs font-black uppercase text-slate-500">Date</th>
-          <th class="p-3 text-xs font-black uppercase text-slate-500">You Requested</th>
-          <th class="p-3 text-xs font-black uppercase text-slate-500">Fee (1%)</th>
-          <th class="p-3 text-xs font-black uppercase text-slate-500">You Receive</th>
-          <th class="p-3 text-xs font-black uppercase text-slate-500">MoMo #</th>
-          <th class="p-3 text-xs font-black uppercase text-slate-500">Network</th>
-          <th class="p-3 text-xs font-black uppercase text-slate-500">Status</th>
-          <th class="p-3 text-xs font-black uppercase text-slate-500">Processed</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${data.map(w=>{
-          const reqAmt=parseFloat(w.requested_amount||0);
-          const netAmt=parseFloat(w.net_amount||w.amount||0);
-          const fee=parseFloat(w.fee||0);
-          // For old records that didn't store requested_amount, derive it from net+fee
-          const displayReq=reqAmt>0?reqAmt:(netAmt+fee);
-          return`<tr class="border-b hover:bg-slate-50 transition-colors ${w._pending?'row-pending':''}">
-          <td class="p-3 text-xs text-muted-theme whitespace-nowrap">${new Date(w.created_at).toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric'})}</td>
-          <td class="p-3 font-bold text-slate-800">&#8373;${displayReq.toFixed(2)}</td>
-          <td class="p-3 text-sm text-amber-600 font-semibold">&#8373;${fee.toFixed(2)}</td>
-          <td class="p-3 font-bold text-blue-600">&#8373;${netAmt.toFixed(2)}</td>
-          <td class="p-3 font-mono text-sm">${esc(w.phone)}</td>
-          <td class="p-3 text-sm">${esc((w.network||'').toUpperCase())}</td>
-          <td class="p-3">${statusBadge(w.status)}</td>
-          <td class="p-3 text-xs text-muted-theme whitespace-nowrap">${w.processed_at?new Date(w.processed_at).toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric'}):'—'}</td>
-        </tr>`;}).join('')}
-      </tbody>
-    </table>
-  </div>`;
-}
-async function loadAgentWithdrawalHistory(){
-  if(!state.agentProfile) return;
-  await paint('agent-withdrawal-history','agent-wd-history',async()=>{
-    const{data,error}=await supa.from('agent_withdrawals').select('*').eq('user_id',state.user.id).order('created_at',{ascending:false});
-    if(error) throw error;
-    remember('agent_withdrawals',data,'status');
-    return data||[];
-  },agentWithdrawalsHtml,SK.table(6,3),()=>'<div class="text-center py-6 text-red-500 font-semibold">Failed to load withdrawal history. Please try again.</div>');
-}
 window.showProcessConfirmation=function(ref){
   const order=state.orders.find(o=>o.ref===ref);if(!order) return;
   state.currentProcessingOrder=order;
@@ -4111,9 +3125,9 @@ function appInitials(){
   const p=String(state.userProfile?.full_name||state.user?.email||'').trim().split(/[\s@._-]+/).filter(Boolean);
   return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase();
 }
-const APP_TAB={home:'home',landing:'home',network:'home',success:'home','my-orders':'orders',wallet:'wallet','agent-portal':'agent','agent-dashboard':'agent',account:'account'};
-const APP_ROOT=new Set(['home','landing','my-orders','wallet','agent-portal','agent-dashboard','account','admin-dashboard']);
-const APP_TITLE={'my-orders':'My orders',wallet:'Wallet','agent-portal':'Agents','agent-dashboard':'Agent hub',account:'Account',terms:'Terms of Service',privacy:'Privacy Policy',about:'About us',login:'Sign in',register:'Create account','forgot-password':'Reset password','reset-password':'New password','admin-dashboard':'Admin','admin-login':'Admin',success:'Your order'};
+const APP_TAB={home:'home',landing:'home',network:'home',success:'home','my-orders':'orders',wallet:'wallet',account:'account'};
+const APP_ROOT=new Set(['home','landing','my-orders','wallet','account','admin-dashboard']);
+const APP_TITLE={'my-orders':'My orders',wallet:'Wallet',account:'Account',terms:'Terms of Service',privacy:'Privacy Policy',about:'About us',login:'Sign in',register:'Create account','forgot-password':'Reset password','reset-password':'New password','admin-dashboard':'Admin','admin-login':'Admin',success:'Your order'};
 // Where Back goes from pages that are not one of the tabs.
 const APP_PARENT={network:'home',success:'home',login:'landing',register:'landing','forgot-password':'login','reset-password':'home','admin-login':'landing',terms:'account',privacy:'account',about:'account'};
 let appLastState='';
@@ -4126,7 +3140,7 @@ function postAppState(){
       title:v==='network'&&NETWORKS[state.params]?NETWORKS[state.params].name:(APP_TITLE[v]||''),
       loggedIn:!!state.user,admin:!!state.isAdmin,sheet:!!state.activeOrderData||!!document.getElementById('legal-modal'),
       balance:signedIn&&state.userProfile?'₵'+parseFloat(state.userProfile.balance||0).toFixed(2):'',
-      initials:signedIn?appInitials():'',agents:agentsPhase()!=='closed'};
+      initials:signedIn?appInitials():'',agents:false};
     const j=JSON.stringify(s);if(j===appLastState) return;appLastState=j;
     const n=appNative();if(n&&n.onState) n.onState(j);
   }catch(e){}
@@ -4137,7 +3151,7 @@ window.TruAppBridge={
     if(state.isAdmin){navigateTo('admin-dashboard');return;}
     if(!state.user&&tab!=='home'){navigateTo('login');return;}
     const to={home:state.user?'home':'landing',orders:'my-orders',wallet:'wallet',
-      agent:state.agentProfile?.status==='active'?'agent-dashboard':'agent-portal',account:'account'}[tab];
+      agent:'home',account:'account'}[tab];
     if(!to) return;
     closeLegal();
     if(state.activeOrderData){state.activeOrderData=null;if(state.view===to) render();}
@@ -4186,7 +3200,7 @@ function appTilesHtml(){
   const n=appNet(),list=NORMAL_BUNDLES.filter(b=>b.network===n&&b.active!==false);
   if(!list.length) return`<p class="app-empty">No ${APP_NET[n].short} bundles right now. Please check again soon.</p>`;
   const shown=state.appAllBundles?list:list.slice(0,9);
-  return`<div class="app-tiles">${shown.map(b=>{const dp=getBundleDisplayPrice(b);return`<button type="button" class="app-tile" onclick="appHaptic();initiateOrder('${n}','${b.id}')"><b>${esc(b.size)}</b><small>${esc(b.validity)}</small><em>₵${dp.price.toFixed(2)}</em></button>`;}).join('')}</div>${list.length>shown.length?`<button type="button" class="app-more tap" style="margin-top:12px" onclick="state.appAllBundles=true;appPaintBundles()">Show all ${list.length} ${APP_NET[n].short} bundles</button>`:''}`;
+  return`<div class="app-tiles">${shown.map(b=>{const dp={price:b.price};return`<button type="button" class="app-tile" onclick="appHaptic();initiateOrder('${n}','${b.id}')"><b>${esc(b.size)}</b><small>${esc(b.validity)}</small><em>₵${dp.price.toFixed(2)}</em></button>`;}).join('')}</div>${list.length>shown.length?`<button type="button" class="app-more tap" style="margin-top:12px" onclick="state.appAllBundles=true;appPaintBundles()">Show all ${list.length} ${APP_NET[n].short} bundles</button>`:''}`;
 }
 function appPaintBundles(){
   if(!document.getElementById('app-bundles')) return;
@@ -4250,8 +3264,7 @@ function renderAppHome(){
   </div>`;
 }
 function appInvite(){
-  const ap=state.agentProfile;
-  const link=location.origin+location.pathname+(ap&&ap.status==='active'&&agentsPhase()!=='closed'?'?agent='+encodeURIComponent(ap.agent_id||ap.id):'');
+  const link=location.origin+location.pathname;
   appShare('Buy cheap MTN, AirtelTigo and Telecel data with TRU Data: '+link);
 }
 function renderAppWelcome(){
@@ -4266,7 +3279,6 @@ function renderAppWelcome(){
       <div id="announcement-slot">${announcementHtml(state.announcement)}</div>
       ${feat('zap','Instant delivery','Most orders arrive within minutes')}
       ${feat('wallet','Top up with MoMo','Send to our MoMo number, we credit your wallet')}
-      ${feat('trending','Earn as an agent','Sell data at your own prices')}
       <div class="app-cta">
         <button type="button" class="app-btn-primary" onclick="navigateTo('register')">Create free account</button>
         <button type="button" class="app-btn-secondary" onclick="navigateTo('login')">I already have an account</button>
@@ -4276,14 +3288,14 @@ function renderAppWelcome(){
   </div>`;
 }
 function renderAppAccount(){
-  const p=state.userProfile||{},ap=state.agentProfile;
+  const p=state.userProfile||{};
   const row=(icon,t,s,on)=>`<button type="button" class="app-row" onclick="${on}"><span class="ic">${appIcon(icon,20)}</span><span class="tx"><b>${t}</b><small>${s}</small></span><span class="app-chev">${appIcon('chevron',20)}</span></button>`;
   const ver=appVersion();
   return`<div class="app-screen"><div class="app-body">
     <div class="app-card app-profile"><span class="app-avatar">${esc(appInitials()||'TD')}</span><span class="tx"><b>${esc(p.full_name||'Your account')}</b><small>${esc(p.email||state.user?.email||'')}</small>${p.phone?`<small>${esc(p.phone)}</small>`:''}</span></div>
     <div data-bind="app-update">${appUpdateHtml()}</div>
     <p class="app-ovl">Shortcuts</p>
-    <div class="app-card">${row('wallet','Wallet','Balance, top-ups and history',"navigateTo('wallet')")}${row('orders','My orders','Every bundle you have bought',"navigateTo('my-orders')")}${agentsPhase()==='closed'?'':ap?row('agent','Agent hub',ap.status==='active'?'Earnings, prices and your link':'Application: '+esc(ap.status),"navigateTo('agent-dashboard')"):row('trending','Become an agent','Sell data at your own prices',"navigateTo('agent-portal')")}${row('share','Invite a friend','Share TRU Data','appInvite()')}</div>
+    <div class="app-card">${row('wallet','Wallet','Balance, top-ups and history',"navigateTo('wallet')")}${row('orders','My orders','Every bundle you have bought',"navigateTo('my-orders')")}${row('share','Invite a friend','Share TRU Data','appInvite()')}</div>
     <p class="app-ovl">Help &amp; legal</p>
     <div class="app-card">${row('message','Contact support','WhatsApp +233 59 757 8538',"location.href='https://wa.me/233597578538'")}${row('file','Terms of Service','How TRU Data works',"openLegal('terms')")}${row('shield','Privacy Policy','What we keep and why',"openLegal('privacy')")}${row('smartphone','App version',ver?'v'+esc(ver):'TRU Data app',"appUpdateAvailable()?downloadLatestApk(event):showToast('You have the latest version of the app.',2500,'info')")}</div>
     <p class="app-ovl">Account</p>
@@ -4323,8 +3335,6 @@ function render(){
       if(!state.isAdmin){navigateTo(state.user?'home':'landing',null,{replace:true});return;}
       app.innerHTML=renderAdminDashboard();extended.innerHTML='';
       break;
-    case 'agent-portal': app.innerHTML=renderAgentPortal();extended.innerHTML='';break;
-    case 'agent-dashboard': app.innerHTML=renderAgentDashboard();extended.innerHTML='';break;
     case 'account': app.innerHTML=renderAppAccount();extended.innerHTML='';break;
     default: navigateTo('landing');return;
   }
@@ -4346,13 +3356,6 @@ async function refreshProfile(force){
   const after=JSON.stringify([state.userProfile?.role,state.userProfile?.deposit_code,!!state.userProfile]);
   if(before!==after&&['wallet','home','admin-dashboard'].includes(state.view)) navigateTo(state.view,state.params,{replace:true,keepScroll:true});
 }
-async function refreshAgentProfile(force){
-  if(!state.user||!stale('agent',8000,force)) return;
-  const before=state.agentProfile?.status;
-  await fetchAgentProfile();
-  if(state.agentProfile) remember('agent_profiles',[state.agentProfile],'status');
-  if(state.agentProfile?.status!==before&&(state.view==='agent-portal'||state.view==='agent-dashboard')) navigateTo(state.view,state.params,{replace:true,keepScroll:true});
-}
 async function refreshPaymentSettings(force){
   if(!stale('pay',15000,force)) return;
   const was=state.paystackEnabled+'|'+state.seevEnabled;
@@ -4363,26 +3366,14 @@ function loadViewData(force){
   const v=state.view;
   if(v==='landing') loadAnnouncement();
   else if(v==='home'||v==='success'){refreshProfile(force);refreshBundles(force);if(APP_SHELL&&v==='home'){loadAppRecent();loadAnnouncement();}}
-  else if(v==='account'){refreshProfile(force);refreshAgentProfile(force);loadMyDeletion();checkLatestApk();}
+  else if(v==='account'){refreshProfile(force);loadMyDeletion();checkLatestApk();}
   else if(v==='network') refreshBundles(force);
   else if(v==='wallet'){refreshProfile(force);refreshPaymentSettings(force);fetchUserTransactions();loadMyDepositRequests();loadMyDeletion();loadSeevPayments();syncSeevPayments();}
   else if(v==='my-orders') loadMyOrders();
-  else if(v==='agent-portal') refreshAgentProfile(force);
-  else if(v==='agent-dashboard'){
-    refreshAgentProfile(force);fetchAgentStats();
-    const t=state.agentTab||'dashboard';
-    if(t==='pricing') loadAgentPricingPanel();
-    else if(t==='orders') loadAgentOrdersPanel();
-    else if(t==='withdraw'){loadWithdrawalOverride();loadAgentWithdrawalHistory();}
-    else loadAgentRequests();
-  }
   else if(v==='admin-dashboard'){
     if(!state.ordersLoaded||stale('orders',20000,force)) fetchOrders();
     const t=state.adminTab||'orders';
-    if(t==='agent-prices') loadAdminAgentPricesTable();
-    else if(t==='agents') loadAdminAgentsList();
-    else if(t==='withdrawals'){loadWithdrawalOverride();loadAdminWithdrawals();}
-    else if(t==='deposits') loadAdminDepositsTab();
+    if(t==='deposits') loadAdminDepositsTab();
     else if(t==='sms') loadAdminSmsTab();
     else if(t==='bundles'){loadAdminBundles();loadAdminUnverified();}
     else if(t==='deletions') loadAdminDeletions();
@@ -4427,16 +3418,6 @@ function announce(table,r){
   }else if(table==='deposit_requests'){
     if(r.status==='approved') showToast('✅ '+money(r.credited_amount??r.amount)+' has been added to your wallet.',7000,'success');
     else if(r.status==='rejected') showToast('We could not confirm your deposit of '+money(r.amount)+(r.admin_note?': '+r.admin_note:'.'),8000,'error');
-  }else if(table==='agent_withdrawals'){
-    if(r.status==='paid') showToast('💸 Your withdrawal of '+money(r.net_amount||r.amount)+' has been paid'+(r.phone?' to '+r.phone:'')+'.',8000,'success');
-    else if(r.status==='rejected') showToast('Your withdrawal request of '+money(r.net_amount||r.amount)+' was not approved.',8000,'error');
-  }else if(table==='price_unlock_requests'){
-    if(r.status==='approved') showToast('🔓 Your price-change request was approved. Your prices are open now.',8000,'success');
-    else if(r.status==='rejected') showToast('Your price-change request was not approved.',8000,'error');
-  }else if(table==='agent_profiles'){
-    if(r.status==='active') showToast('🎉 Your agent account is approved! Your dashboard is ready.',8000,'success');
-    else if(r.status==='rejected') showToast('Your agent application was not approved. You can update it and apply again.',8000,'error');
-    else if(r.status==='suspended') showToast('Your agent account has been suspended. Please contact the admin.',8000,'error');
   }
 }
 function adminAlert(msg){showToast('🔔 '+msg,6000,'info');}
@@ -4447,22 +3428,9 @@ function onMyProfile(row){
   cacheUserState();paintBalance();
   if(roleBefore!==state.userProfile.role) updateAuthUI();
 }
-function onMyAgentProfile(row){
-  if(!row) return;
-  const prev=state.agentProfile;
-  state.agentProfile={...(prev||{}),...row,_pending:false};cacheUserState();updateAuthUI();
-  remember('agent_profiles',[state.agentProfile],'status');
-  if(!prev||prev.status!==row.status){
-    if(state.view==='agent-portal'||state.view==='agent-dashboard') navigateTo(state.view,state.params,{replace:true,keepScroll:true});
-    soon('restart-live',startLive,500);
-  }else if(prev.price_unlock_until!==row.price_unlock_until){soon('agent-pricing',loadAgentPricingPanel);soon('agent-requests',loadAgentRequests);}
-  if(state.view==='agent-dashboard') paintHtml('agent-stats',agentStatsHtml());
-}
 function onSettingChange(row){
   if(!row||!row.key) return;
-  if(row.key==='agent_shutdown') setAgentShutdown(row.value);
-  else if(row.key==='withdrawal_override'){state.withdrawalOverride=row.value===true;paintWithdrawWindow();paintHtml('admin-wd-window',adminWindowHtml());}
-  else if(row.key==='unverified_enabled'||row.key==='unverified_surcharge') soon('pay',()=>{refreshPaymentSettings(true).then(()=>{repaint('admin-unverified');paintOrderPrice();});});
+  if(row.key==='unverified_enabled'||row.key==='unverified_surcharge') soon('pay',()=>{refreshPaymentSettings(true).then(()=>{repaint('admin-unverified');paintOrderPrice();});});
   else if(row.key.startsWith('paystack')||row.key.startsWith('seevplus')) soon('pay',()=>{refreshPaymentSettings(true).then(()=>repaint('admin-seev'));});
   else if(row.key==='online_fee_percent'&&typeof row.value==='number'){ONLINE_FEE=row.value;paintHtml('online-fee-label',pctText(ONLINE_FEE));const i=document.getElementById('deposit-amount');updateDepositCalculation(i?i.value:0);}
   else if(row.key==='momo_number'&&typeof row.value==='string') setMomo(row.value,null);
@@ -4477,7 +3445,7 @@ function stopLive(){
 function startLive(){
   stopLive();
   if(typeof supa.channel!=='function') return;
-  const uid=state.user?.id,ap=state.agentProfile,admin=state.isAdmin;
+  const uid=state.user?.id,admin=state.isAdmin;
   const ch=supa.channel('tru-live-'+(uid||'guest')+'-'+Date.now());
   const on=(table,filter,fn)=>ch.on('postgres_changes',Object.assign({event:'*',schema:'public',table},filter?{filter}:{}),p=>{try{fn(p);}catch(e){console.warn('live update',e);}});
   on('announcements',null,()=>soon('ann',loadAnnouncement));
@@ -4490,15 +3458,7 @@ function startLive(){
     on('orders','user_id=eq.'+uid,p=>{remember('orders',[p.new],'Status');soon('my-orders',()=>{loadMyOrders();loadAppRecent();},400);});
     on('transactions','user_id=eq.'+uid,()=>soon('tx',fetchUserTransactions,400));
     on('deposit_requests','user_id=eq.'+uid,p=>{remember('deposit_requests',[p.new],'status');soon('my-deposits',loadMyDepositRequests,400);});
-    on('agent_profiles','user_id=eq.'+uid,p=>onMyAgentProfile(p.new));
     on('account_deletion_requests','user_id=eq.'+uid,()=>soon('my-deletion',loadMyDeletion,400));
-    on('agent_withdrawals','user_id=eq.'+uid,p=>{remember('agent_withdrawals',[p.new],'status');soon('agent-wd',()=>{loadAgentWithdrawalHistory();loadAgentRequests();fetchAgentStats();},400);});
-    if(ap&&ap.id&&ap.id!=='tmp'){
-      on('price_unlock_requests','agent_profile_id=eq.'+ap.id,p=>{remember('price_unlock_requests',[p.new],'status');soon('agent-unlock',()=>{loadAgentPricingPanel();loadAgentRequests();},400);});
-      on('agent_prices','agent_id=eq.'+ap.id,()=>soon('agent-pricing',loadAgentPricingPanel,400));
-      on('orders','agent_id=eq.'+ap.id,()=>soon('agent-orders',()=>{loadAgentOrdersPanel();fetchAgentStats();},400));
-      if(ap.status==='active') on('agent_base_prices',null,()=>soon('agent-pricing',loadAgentPricingPanel,400));
-    }
   }
   if(admin){
     on('orders',null,p=>{
@@ -4506,10 +3466,6 @@ function startLive(){
       if(p.eventType==='INSERT'&&p.new) adminAlert('New order '+(p.new.ref||'')+': '+(p.new.bundle_name||'')+' '+String(p.new.Network||'').toUpperCase()+' to '+(p.new.Phone||''));
     });
     on('deposit_requests',null,p=>{soon('admin-deposits',loadAdminDepositRequests,400);if(p.eventType==='INSERT'&&p.new) adminAlert('New MoMo deposit to check: ₵'+Number(p.new.amount||0).toFixed(2));});
-    on('agent_withdrawals',null,p=>{soon('admin-wd',loadAdminWithdrawals,400);if(p.eventType==='INSERT'&&p.new) adminAlert('New withdrawal request: ₵'+Number(p.new.net_amount||p.new.amount||0).toFixed(2));});
-    on('agent_profiles',null,p=>{soon('admin-agents',loadAdminAgentsList,400);soon('admin-unlock',loadAdminPriceUnlockRequests,400);if(p.eventType==='INSERT'&&p.new) adminAlert('New agent application from '+(p.new.name||'an agent'));});
-    on('price_unlock_requests',null,p=>{soon('admin-unlock',loadAdminPriceUnlockRequests,400);if(p.eventType==='INSERT') adminAlert('An agent asked to change their prices');});
-    on('agent_base_prices',null,()=>soon('admin-abp',()=>{if(document.getElementById('admin-agent-prices-container')) loadAdminAgentPricesTable();},600));
     on('sms_outbox',null,()=>soon('admin-sms',loadAdminSmsLog,1000));
     on('account_deletion_requests',null,p=>{soon('admin-del',loadAdminDeletions,400);if(p.eventType==='INSERT'&&p.new) adminAlert('New account deletion request from '+(p.new.label||'a user'));});
   }
@@ -4566,17 +3522,6 @@ window.addEventListener('online',()=>{refreshEverything();if(liveStatus!=='SUBSC
 setInterval(()=>{if(document.visibilityState==='visible'&&liveStatus!=='SUBSCRIBED') refreshEverything();},30000);
 
 // Load the lists people are most likely to open next, so they appear at once.
-function fetchAgentRequestsQuiet(){
-  const ap=state.agentProfile;if(!ap||ap.id==='tmp') return;
-  Promise.all([
-    supa.from('price_unlock_requests').select('id,status,note,hours,created_at,reviewed_at').eq('agent_profile_id',ap.id).order('created_at',{ascending:false}).limit(5),
-    supa.from('agent_withdrawals').select('id,status,amount,net_amount,phone,network,created_at,processed_at').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(5)
-  ]).then(([u,w])=>{
-    if(u.error||w.error) return;
-    remember('price_unlock_requests',u.data,'status');remember('agent_withdrawals',w.data,'status');
-    viewCache.set('agent-requests',{unlocks:u.data||[],withdrawals:w.data||[]});repaint('agent-requests');
-  }).catch(()=>{});
-}
 function prefetchUserData(){
   if(!state.user||state.isAdmin) return;
   const idle=window.requestIdleCallback||(f=>setTimeout(f,400));
@@ -4585,7 +3530,6 @@ function prefetchUserData(){
     const pre=(key,fn)=>fn().then(d=>{if(!viewCache.has(key)){viewCache.set(key,d);repaint(key);}}).catch(()=>{});
     pre('my-orders',fetchMyOrders);
     pre('my-deposits',fetchMyDeposits);
-    if(state.agentProfile){remember('agent_profiles',[state.agentProfile],'status');fetchAgentRequestsQuiet();}
   });
 }
 
@@ -4627,10 +3571,10 @@ window.addEventListener('scroll',cancelPress,{passive:true});
    repeated taps until it has finished. */
 ['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
  'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminSaveUnverifiedFee','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
- 'adminToggleWithdrawalOverride','saveAnnouncement','saveAdminAgentBasePrice','saveEditAgentPrice','globalToggleAgentPriceLock','toggleRowPriceLock',
- 'toggleAgentBasePrice','deleteAgentBasePrice','registerAsAgent','reapplyAsAgent','requestPriceUnlock','saveAgentProfit','submitWithdrawal',
- 'adminApproveDeposit','adminRejectDeposit','adminApprovePriceUnlock','adminRejectPriceUnlock','adminLockAgentPricing','processWithdrawal',
- 'updateAgentStatus','adminAuth','updateStatus','deleteOrder','handleOrderButton','adminAddBundle','adminSaveBundle','adminToggleBundle','adminDeleteBundle','adminDeleteSms','adminClearSms','adminUnlockLogin','agentDeletePriceRequest','requestAccountDeletion','cancelAccountDeletion','adminApproveDeletion','adminRejectDeletion','adminSaveMomoDetails','sendAgentMessage'
+ 'saveAnnouncement',
+ 
+ 'adminApproveDeposit','adminRejectDeposit',
+ 'adminAuth','updateStatus','deleteOrder','handleOrderButton','adminAddBundle','adminSaveBundle','adminToggleBundle','adminDeleteBundle','adminDeleteSms','adminClearSms','adminUnlockLogin','requestAccountDeletion','cancelAccountDeletion','adminApproveDeletion','adminRejectDeletion','adminSaveMomoDetails'
 ].forEach(n=>{if(typeof window[n]==='function') window[n]=action(window[n]);});
 
 /* ===== INIT =====
@@ -4638,22 +3582,9 @@ window.addEventListener('scroll',cancelPress,{passive:true});
       user, wallet balance, agent status), at the address in the URL.
    2. Confirm the session with Supabase and refresh that information.
    3. Redraw only if something that changes the page is different. */
-function userSig(){return JSON.stringify([state.user?.id||null,state.isAdmin,state.agentProfile?.status||null,state.agentProfile?.id||null,state.agentPricingMode]);}
-// Agent-link prices from earlier in this visit, so the first paint already shows them.
-function restoreAgentLink(){
-  try{
-    const code=new URLSearchParams(location.search).get('agent')||sessionStorage.getItem('tru_agent_id');
-    const saved=JSON.parse(sessionStorage.getItem('tru_agent_prices')||'null');
-    if(code&&saved&&saved.code===code&&saved.prices&&Object.keys(saved.prices).length){
-      state.agentId=code;state.agentPricingMode=true;state.agentLinkPrices=saved.prices;
-      const banner=document.getElementById('agent-session-banner'),idEl=document.getElementById('agent-banner-id');
-      if(banner) banner.style.display='block';if(idEl) idEl.textContent=code;
-    }
-  }catch(e){}
-}
+function userSig(){return JSON.stringify([state.user?.id||null,state.isAdmin]);}
 document.addEventListener('DOMContentLoaded',async()=>{
   restoreCachedSession();
-  restoreAgentLink();
   state.announcement=store.get('announcement')||null;
   document.getElementById('global-fulfill-btn').addEventListener('click',()=>{if(state.activeOrderData) handleOrderButton();});
   const recovering=/type=recovery/.test(location.hash);
@@ -4667,16 +3598,15 @@ document.addEventListener('DOMContentLoaded',async()=>{
     if(error) console.error('Session error:',error);
     if(session){
       state.user=session.user;
-      await Promise.all([fetchUserProfile(),fetchAgentProfile()]);
+      await fetchUserProfile();
       cacheUserState();
     }else if(state.user&&navigator.onLine!==false){
       // The saved session has ended: show the signed-out page.
-      state.user=null;state.userProfile=null;state.isAdmin=false;state.agentProfile=null;
+      state.user=null;state.userProfile=null;state.isAdmin=false;
       store.clearUser();viewCache.clear();seenStatus.clear();
     }
   }catch(err){showToast('Connection problem. Showing your last saved details.',5000,'error');}
-  // Detect ?agent= param in URL → activate agent pricing mode
-  await Promise.all([detectAgentLink(),loadPaymentSettings(),refreshBundles(true)]);
+  await Promise.all([loadPaymentSettings(),refreshBundles(true)]);
   startLive();
   if(!recovering){
     if(userSig()!==before) navigateTo(state.view,state.params,{replace:true,keepScroll:true});
@@ -4703,10 +3633,8 @@ supa.auth.onAuthStateChange((event,session)=>{
       if(!changed) return;
       // Signed in from another tab or by a sign-in link: load this account.
       viewCache.clear();
-      Promise.all([fetchUserProfile(),fetchAgentProfile()]).then(()=>{
+      fetchUserProfile().then(()=>{
         cacheUserState();startLive();
-        // Link prices depend on who is logged in (agents see normal prices on their own link).
-        return detectAgentLink();
       }).then(()=>{navigateTo(state.view,state.params,{replace:true,keepScroll:true});ensureTermsAccepted();});
     }
   },0);
