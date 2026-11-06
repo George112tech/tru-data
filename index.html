@@ -1139,10 +1139,21 @@ function selectConfirmationProvider(p){
 }
 function closeAdminConfirmation(){document.getElementById('admin-order-confirmation').style.display='none';state.currentProcessingOrder=null;}
 function confirmProcessOrder(){
-  if(!state.currentProcessingOrder) return;
-  updateStatus(state.currentProcessingOrder.ref,'Processing');
-  window.open('https://patupaa.com','_blank');
+  const o=state.currentProcessingOrder;if(!o) return;
+  updateStatus(o.ref,'Processing');
   closeAdminConfirmation();
+  openPatupaa(o);
+}
+// Patupaa opens in a panel inside the app (2.1.5+), over this page, with the
+// order's number ready to paste; elsewhere it opens in a new tab.
+function openPatupaa(o){
+  const info=o?`${o.Phone} · ${String(o.Network||'').toUpperCase()} ${o.bundle_name||''}`.trim():'';
+  const n=appNative();
+  if(n&&typeof n.openPanel==='function'){
+    try{n.openPanel(JSON.stringify({url:'https://patupaa.com',title:'Patupaa',info,copy:o?String(o.Phone||''):''}));showToast('Order marked as Processing. Opening Patupaa…',3000,'success');return;}catch(e){}
+  }
+  if(o&&o.Phone) copyText(String(o.Phone),'Number');
+  window.open('https://patupaa.com','_blank');
   showToast('Order marked as Processing. Redirecting...');
 }
 

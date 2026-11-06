@@ -28,6 +28,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -112,6 +114,8 @@ public class MainActivity extends Activity {
     // site, every web page (including a bank or MoMo page the gateway sends
     // them to) stays inside the app, with no tabs, ads or pull-to-refresh.
     private static final String[] PAYMENT_HOSTS = {"seevplus.com", "checkout.paystack.com", "standard.paystack.co"};
+    // Opened in a panel over the site (the admin's order stays open underneath).
+    private static final String[] PANEL_HOSTS = {"patupaa.com"};
 
     // ----- Design tokens (res/values/colors.xml) -----
     // Shades of red, used together (gradients) rather than one flat bright red.
@@ -157,6 +161,15 @@ public class MainActivity extends Activity {
     private String selectedTab = "";
     private boolean keyboardOpen = false;
     private boolean inPayment = false;        // a payment page is open
+    // The Patupaa panel: its own WebView over the site, kept (signed in, on
+    // the same page) between openings.
+    private FrameLayout panel;
+    private WebView panelWeb;
+    private TextView panelTitle;
+    private TextView panelInfo;
+    private TextView panelCopy;
+    private ProgressBar panelProgress;
+    private String panelCopyText;
     private boolean clearHistoryOnSite = false;
     private boolean adLoaded = false;
 
@@ -568,6 +581,203 @@ public class MainActivity extends Activity {
         public String version() {
             return versionName;
         }
+
+        // {"url": "https://patupaa.com", "title": "Patupaa", "info": "0241234567 · MTN 2GB", "copy": "0241234567"}
+        @JavascriptInterface
+        public void openPanel(final String json) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!onSite()) return;
+                    try {
+                        JSONObject o = new JSONObject(json);
+                        showPanel(o.optString("url", ""), o.optString("title", ""), o.optString("info", ""), o.optString("copy", ""));
+                    } catch (Exception e) {
+                        // ignore a bad request from the page
+                    }
+                }
+            });
+        }
+    }
+
+    // =====================================================================
+    // Patupaa panel: patupaa.com in its own WebView over the site, with a red
+    // bar (back to TRU Data, the order being processed, "Copy number").
+    // Closing it only hides it, so Patupaa stays signed in and on the same
+    // page; the site underneath refreshes its orders.
+    // =====================================================================
+
+    private boolean panelOpen() {
+        return panel != null && panel.getVisibility() == View.VISIBLE;
+    }
+
+    private void showPanel(String url, String title, String info, String copy) {
+        Uri u = Uri.parse(url == null ? "" : url);
+        if (!"https".equals(u.getScheme()) || !hostIn(u.getHost(), PANEL_HOSTS)) return;
+        if (panel == null) buildPanel();
+        panelTitle.setText(title == null || title.length() == 0 ? getString(R.string.panel_patupaa) : title);
+        panelInfo.setText(info == null ? "" : info);
+        panelInfo.setVisibility(info == null || info.length() == 0 ? View.GONE : View.VISIBLE);
+        panelCopyText = copy == null || copy.length() == 0 ? null : copy;
+        panelCopy.setVisibility(panelCopyText == null ? View.GONE : View.VISIBLE);
+        String current = panelWeb.getUrl();
+        if (current == null || !hostIn(Uri.parse(current).getHost(), PANEL_HOSTS)) panelWeb.loadUrl(u.toString());
+        panel.setVisibility(View.VISIBLE);
+        panel.bringToFront();
+        if (panelCopyText != null) copyToClipboard(panelCopyText);
+    }
+
+    private void hidePanel() {
+        if (panel == null) return;
+        panel.setVisibility(View.GONE);
+        if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().flush();
+        // The order may have been delivered meanwhile.
+        webView.evaluateJavascript("window.TruAppBridge&&TruAppBridge.refresh()", null);
+    }
+
+    private void copyToClipboard(String text) {
+        ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (cm == null) return;
+        cm.setPrimaryClip(ClipData.newPlainText("number", text));
+        Toast.makeText(this, getString(R.string.panel_copied, text), Toast.LENGTH_SHORT).show();
+    }
+
+    private void buildPanel() {
+        panel = new FrameLayout(this);
+        panel.setBackgroundColor(Color.parseColor("#F5F6F8"));
+        panel.setClickable(true);
+        if (Build.VERSION.SDK_INT >= 21) panel.setElevation(dp(12));
+
+        LinearLayout column = new LinearLayout(this);
+        column.setOrientation(LinearLayout.VERTICAL);
+        panel.addView(column, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        LinearLayout bar = new LinearLayout(this);
+        bar.setOrientation(LinearLayout.HORIZONTAL);
+        bar.setGravity(Gravity.CENTER_VERTICAL);
+        bar.setBackgroundResource(R.drawable.bg_top_bar);
+        bar.setPadding(dp(8), 0, dp(12), 0);
+        column.addView(bar, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56)));
+
+        ImageButton close = new ImageButton(this);
+        close.setImageResource(R.drawable.ic_back);
+        close.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN);
+        close.setBackgroundResource(R.drawable.bg_circle_ripple);
+        close.setPadding(dp(8), dp(8), dp(8), dp(8));
+        close.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        close.setContentDescription(getString(R.string.panel_back));
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                haptic("tick");
+                hidePanel();
+            }
+        });
+        bar.addView(close, new LinearLayout.LayoutParams(dp(40), dp(40)));
+
+        LinearLayout texts = new LinearLayout(this);
+        texts.setOrientation(LinearLayout.VERTICAL);
+        texts.setPadding(dp(8), 0, dp(8), 0);
+        LinearLayout.LayoutParams tl = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        bar.addView(texts, tl);
+        panelTitle = new TextView(this);
+        panelTitle.setTextColor(Color.WHITE);
+        panelTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+        panelTitle.setTypeface(fontBold);
+        panelTitle.setSingleLine(true);
+        texts.addView(panelTitle);
+        panelInfo = new TextView(this);
+        panelInfo.setTextColor(Color.parseColor("#FFE4E4"));
+        panelInfo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        panelInfo.setTypeface(fontSemiBold);
+        panelInfo.setSingleLine(true);
+        texts.addView(panelInfo);
+
+        panelCopy = new TextView(this);
+        panelCopy.setText(R.string.panel_copy);
+        panelCopy.setTextColor(Color.WHITE);
+        panelCopy.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        panelCopy.setTypeface(fontBold);
+        panelCopy.setBackgroundResource(R.drawable.bg_chip);
+        panelCopy.setPadding(dp(12), dp(7), dp(12), dp(7));
+        panelCopy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                haptic("tick");
+                if (panelCopyText != null) copyToClipboard(panelCopyText);
+            }
+        });
+        bar.addView(panelCopy);
+
+        panelProgress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        panelProgress.setMax(100);
+        panelProgress.setIndeterminate(false);
+        if (Build.VERSION.SDK_INT >= 21) panelProgress.setProgressTintList(android.content.res.ColorStateList.valueOf(RED_600));
+        column.addView(panelProgress, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3)));
+
+        panelWeb = new WebView(this);
+        WebSettings ws = panelWeb.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setDatabaseEnabled(true);
+        ws.setLoadWithOverviewMode(true);
+        ws.setUseWideViewPort(true);
+        ws.setSupportMultipleWindows(false);
+        ws.setJavaScriptCanOpenWindowsAutomatically(true);
+        ws.setUserAgentString(ws.getUserAgentString() + " TruDataApp/" + versionName);
+        if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().setAcceptThirdPartyCookies(panelWeb, true);
+        panelWeb.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int p) {
+                panelProgress.setProgress(p);
+                panelProgress.setVisibility(p < 100 ? View.VISIBLE : View.INVISIBLE);
+            }
+        });
+        panelWeb.setWebViewClient(new WebViewClient() {
+            @Override
+            @SuppressWarnings("deprecation")
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return panelLink(Uri.parse(url));
+            }
+
+            @Override
+            @TargetApi(21)
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return panelLink(request.getUrl());
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().flush();
+            }
+        });
+        panelWeb.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long length) {
+                openExternal(Uri.parse(url));
+            }
+        });
+        column.addView(panelWeb, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+
+        panel.setVisibility(View.GONE);
+        ((ViewGroup) findViewById(android.R.id.content)).addView(panel,
+                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    // Inside the panel every web page stays in the panel (Patupaa, its payment
+    // pages); calls, WhatsApp and other apps open outside.
+    private boolean panelLink(Uri uri) {
+        String scheme = uri.getScheme() == null ? "" : uri.getScheme();
+        if (scheme.equals("http") || scheme.equals("https")) {
+            // A link back to TRU Data closes the panel instead of opening the site in it.
+            if (SITE_HOST.equals(uri.getHost())) {
+                hidePanel();
+                return true;
+            }
+            return false;
+        }
+        openExternal(uri);
+        return true;
     }
 
     // =====================================================================
@@ -859,6 +1069,10 @@ public class MainActivity extends Activity {
         String scheme = uri.getScheme() == null ? "" : uri.getScheme();
         String host = uri.getHost() == null ? "" : uri.getHost();
         if (scheme.equals("http") || scheme.equals("https")) {
+            if (!inPayment && hostIn(host, PANEL_HOSTS)) {
+                showPanel(uri.toString(), "", "", "");
+                return true;
+            }
             if (hostIn(host, IN_APP_HOSTS)) return false;
             // During a payment, any page the gateway sends the customer to stays
             // in the app, so the gateway can send them back here when they are done.
@@ -1062,7 +1276,7 @@ public class MainActivity extends Activity {
     }
 
     private void showInterstitial() {
-        if (inPayment) return;
+        if (inPayment || panelOpen()) return;
         navigationCount++;
         long now = System.currentTimeMillis();
         if (navigationCount % INTERSTITIAL_EVERY == 0
@@ -1165,6 +1379,11 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        if (panelOpen()) {
+            if (panelWeb.canGoBack()) panelWeb.goBack();
+            else hidePanel();
+            return;
+        }
         if (offlineShown) {
             if (webView.canGoBack()) {
                 hideOffline();
@@ -1228,7 +1447,7 @@ public class MainActivity extends Activity {
         // Back after a while (not from something the app opened itself): app open ad.
         long away = backgroundAt > 0 ? System.currentTimeMillis() - backgroundAt : 0;
         // Not while paying: the customer may have just approved the payment in their MoMo app.
-        if (away >= APP_OPEN_RETURN_AFTER_MS && !leftAppOnPurpose && !showingFullScreenAd && !inPayment) showAppOpenAd();
+        if (away >= APP_OPEN_RETURN_AFTER_MS && !leftAppOnPurpose && !showingFullScreenAd && !inPayment && !panelOpen()) showAppOpenAd();
         backgroundAt = 0;
         leftAppOnPurpose = false;
     }
@@ -1245,6 +1464,7 @@ public class MainActivity extends Activity {
         super.onResume();
         updateCacheMode();
         webView.onResume();
+        if (panelWeb != null) panelWeb.onResume();
         if (bannerAd != null) bannerAd.resume();
         // Ask the page for the bars' state again (balance may have changed meanwhile).
         webView.evaluateJavascript("window.TruAppBridge&&TruAppBridge.state()", null);
@@ -1254,6 +1474,7 @@ public class MainActivity extends Activity {
     protected void onPause() {
         if (bannerAd != null) bannerAd.pause();
         webView.onPause();
+        if (panelWeb != null) panelWeb.onPause();
         if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().flush();
         super.onPause();
     }
@@ -1270,6 +1491,7 @@ public class MainActivity extends Activity {
         }
         if (heartbeat != null) heartbeat.cancel();
         if (bannerAd != null) bannerAd.destroy();
+        if (panelWeb != null) panelWeb.destroy();
         webView.destroy();
         super.onDestroy();
     }

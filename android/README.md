@@ -50,14 +50,15 @@ The APK is in `app/build/outputs/apk/release/`.
 Same package (`com.trudata.app`), same AdMob app ID and ad unit IDs as before, plus an app open ad (2.1.1). 2.1.2 hides the Agent tab once agent accounts
 are deactivated. 2.1.3 keeps the SeevPlus payment page inside the app. 2.1.4 keeps every
 page of a payment inside the app (no tabs, ads or pull-to-refresh there),
-asks before leaving a payment, and returns to the signed-in wallet.
-Version: `versionCode 29`, `versionName 2.1.4` in `app/build.gradle`. Raise
+asks before leaving a payment, and returns to the signed-in wallet. 2.1.5
+opens patupaa.com (admin: Process order) in a panel inside the app.
+Version: `versionCode 30`, `versionName 2.1.5` in `app/build.gradle`. Raise
 both for every new APK.
 
 ## Publish the update
 
 Upload the APK to the Supabase bucket `app-updates` named exactly
-`trudata-v2.1.4.apk` (no extra dot after the `v`). The site picks the newest
+`trudata-v2.1.5.apk` (no extra dot after the `v`). The site picks the newest
 file by itself: the download button on the website and the "Update available"
 card inside older-version apps point to it. Update `update.json` too if you
 still use it.
