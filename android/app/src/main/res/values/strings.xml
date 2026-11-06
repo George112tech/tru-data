@@ -21,4 +21,8 @@
     <string name="leave_payment">Leave this payment? If you have already approved it, your wallet will still be credited.</string>
     <string name="leave_payment_yes">Leave</string>
     <string name="leave_payment_no">Stay</string>
+    <string name="panel_patupaa">Patupaa</string>
+    <string name="panel_back">Back to TRU Data</string>
+    <string name="panel_copy">Copy number</string>
+    <string name="panel_copied">%1$s copied</string>
 </resources>

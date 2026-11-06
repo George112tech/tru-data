@@ -1003,7 +1003,7 @@ const LEGAL={
     ['1. The service','TRU Data lets you buy MTN, Telecel and AirtelTigo data bundles for any Ghana number from a prepaid wallet. TRU Data is an independent reseller. We are <strong>not affiliated with MTN, Telecel or AirtelTigo</strong>, and the bundle itself (speed, coverage, validity, expiry) is provided by the network under its own terms.'],
     ['2. Your account','You must give a real name, a working email address and a Ghana phone number. Keep your password private: you are responsible for everything done with your account. Tell us straight away if you think someone else has used it. One person may not hold several accounts to get around limits or offers.'],
     ['3. Wallet and payments','<ul class="list-disc pl-5 space-y-1"><li><strong>Mobile Money:</strong> send money to the TRU Data MoMo number shown on your wallet page (registered in the name shown there) using your personal reference. Your wallet is credited after we confirm the payment on our statement. Sending to any other number, or without your reference, may delay or prevent crediting.</li><li><strong>Deposit fee:</strong> a fee (currently 3%) is taken off each Mobile Money deposit when it is credited, to cover the charges we pay when we deliver your bundles. For example, if you send GH₵41.00, GH₵39.77 is added to your wallet. The current fee and the amount you will receive are shown on your wallet page before you send.</li><li><strong>Online payments</strong> (card or mobile money through our payment provider Paystack, when available): a payment fee (currently 3.5%) is added and shown before you pay, so that the full amount you chose reaches your wallet. Your wallet is credited once Paystack confirms the payment.</li><li><strong>SeevPlus</strong> (mobile money on the secure SeevPlus payment page, when available): a payment fee is added and shown before you pay, so the full amount you chose reaches your wallet. Your wallet is credited once SeevPlus confirms the payment.</li><li>Wallet money can only be used to buy bundles on TRU Data. It does not earn interest and is not a bank account.</li><li>If we credit your wallet by mistake, we may remove that amount.</li></ul>'],
-    ['4. Orders and delivery','Check the phone number before you confirm: bundles are sent to the number you enter and <strong>cannot be moved to another number</strong> once delivered. Most orders are delivered within minutes, but delivery can take longer when a network is busy or down. Prices shown at checkout are the prices you pay; we may change prices for future orders at any time.'],
+    ['4. Orders and delivery','Check the phone number before you confirm: bundles are sent to the number you enter and <strong>cannot be moved to another number</strong> once delivered. Most orders are delivered within minutes, but delivery can take longer when a network is busy or down. Prices shown at checkout are the prices you pay; we may change prices for future orders at any time. We check MTN numbers before you pay: a number we have not been able to verify costs a fixed amount more (shown before you confirm), and delivery to it may take longer.'],
     ['5. Refunds and complaints','<ul class="list-disc pl-5 space-y-1"><li>If an order cannot be delivered, or we cancel it, the amount is refunded to your TRU Data wallet.</li><li>If a delivered bundle did not arrive or is wrong, report it from <em>My Orders</em> within <strong>36 hours of delivery</strong>. Reports after that window cannot be investigated.</li><li>We do not refund orders sent to a wrong number you entered, or bundles already used.</li><li>Wallet balances are not normally paid back out as cash. Contact us if you have a special case.</li></ul>'],
     ['6. Agents','<ul class="list-disc pl-5 space-y-1"><li>Agent accounts are approved by us and may be refused, suspended or closed, for example for misuse, complaints from customers or false details.</li><li>Agents set their profit on top of the agent base price. Saved prices are locked; changes need an approved price-change request.</li><li>Agents earn profit only on orders placed by other customers through their own link. Orders an agent places for themselves earn no profit.</li><li>Withdrawals: minimum ₵10, during the withdrawal window (normally Monday to Thursday, 8AM to 12PM), with a 1% fee deducted. We may hold or reverse profit from orders that were refunded, cancelled or fraudulent.</li><li>Agents must not misrepresent TRU Data, the networks or prices to their customers.</li></ul>'],
     ['7. Things you must not do','Do not use TRU Data for fraud or money laundering, pay with money that is not yours, try to get bundles or wallet credit without paying, interfere with the site or app, access other people\'s accounts or data, or resell in a way that breaks a network\'s rules. We may suspend accounts, cancel orders and keep records where we see this, and may report it to the authorities.'],
@@ -1111,13 +1111,15 @@ function loadPaystackScript(){
 }
 async function loadPaymentSettings(){
   try{
-    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent','online_fee_percent','agent_shutdown','seevplus_enabled','seevplus_fee_percent']);
+    const{data}=await supa.from('app_settings').select('key,value').in('key',['paystack_enabled','paystack_public_key','momo_number','momo_name','momo_network','deposit_fee_percent','online_fee_percent','agent_shutdown','seevplus_enabled','seevplus_fee_percent','unverified_enabled','unverified_surcharge']);
     const m=Object.fromEntries((data||[]).map(r=>[r.key,r.value]));
     setMomo(typeof m.momo_number==='string'?m.momo_number:null,typeof m.momo_name==='string'?m.momo_name:null,
       typeof m.momo_network==='string'?m.momo_network:null,typeof m.deposit_fee_percent==='number'?m.deposit_fee_percent:null);
     if(typeof m.online_fee_percent==='number'&&m.online_fee_percent>=0&&m.online_fee_percent<=10) ONLINE_FEE=m.online_fee_percent;
     setAgentShutdown(m.agent_shutdown||null);
     state.seevEnabled=m.seevplus_enabled===true;
+    state.unverifiedEnabled=m.unverified_enabled===true;
+    if(typeof m.unverified_surcharge==='number'&&m.unverified_surcharge>=0) state.unverifiedFee=m.unverified_surcharge;
     if(typeof m.seevplus_fee_percent==='number'&&m.seevplus_fee_percent>=0&&m.seevplus_fee_percent<=10) SEEV_FEE=m.seevplus_fee_percent;
     state.paystackEnabled=m.paystack_enabled===true;
     state.paystackPublicKey=typeof m.paystack_public_key==='string'?m.paystack_public_key:'';
@@ -1137,10 +1139,21 @@ function selectConfirmationProvider(p){
 }
 function closeAdminConfirmation(){document.getElementById('admin-order-confirmation').style.display='none';state.currentProcessingOrder=null;}
 function confirmProcessOrder(){
-  if(!state.currentProcessingOrder) return;
-  updateStatus(state.currentProcessingOrder.ref,'Processing');
-  window.open('https://patupaa.com','_blank');
+  const o=state.currentProcessingOrder;if(!o) return;
+  updateStatus(o.ref,'Processing');
   closeAdminConfirmation();
+  openPatupaa(o);
+}
+// Patupaa opens in a panel inside the app (2.1.5+), over this page, with the
+// order's number ready to paste; elsewhere it opens in a new tab.
+function openPatupaa(o){
+  const info=o?`${o.Phone} · ${String(o.Network||'').toUpperCase()} ${o.bundle_name||''}`.trim():'';
+  const n=appNative();
+  if(n&&typeof n.openPanel==='function'){
+    try{n.openPanel(JSON.stringify({url:'https://patupaa.com',title:'Patupaa',info,copy:o?String(o.Phone||''):''}));showToast('Order marked as Processing. Opening Patupaa…',3000,'success');return;}catch(e){}
+  }
+  if(o&&o.Phone) copyText(String(o.Phone),'Number');
+  window.open('https://patupaa.com','_blank');
   showToast('Order marked as Processing. Redirecting...');
 }
 
@@ -2256,7 +2269,7 @@ function renderNetworkView(networkId){
       :`<div class="price-tag">₵${bundle.price.toFixed(2)}</div>`;
     return`<div class="card-theme p-6 rounded-2xl hover:border-red-500 transition-all cursor-pointer group animate-slide-up stagger-${(idx%5)+1}" style="animation-fill-mode:both;" onclick="initiateOrder('${networkId}','${bundle.id}')"><div class="flex justify-between items-start mb-4"><div><h3 class="text-2xl font-black text-slate-900 group-hover:text-red-600 transition-colors">${bundle.size}</h3><p class="text-sm text-muted-theme">${bundle.validity} Validity</p></div>${priceHTML}</div><div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200"><span class="text-xs font-bold text-slate-500 uppercase">Click to Purchase</span><svg class="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div></div>`;
   }).join('');
-  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8"><div class="mb-8 flex items-center justify-between flex-wrap gap-3"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Networks</button>${modeBadge}</div><div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div><img src="${network.logo}" alt="${network.name}" width="${network.logoW}" height="${network.logoH}" decoding="async" class="w-auto h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10"><h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1><p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${bundleCards}</div></div>`;
+  return`<div class="animate__animated animate__fadeIn max-w-6xl mx-auto px-4 py-8"><div class="mb-8 flex items-center justify-between flex-wrap gap-3"><button onclick="navigateTo('home')" class="font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2 group"><svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Back to Networks</button>${modeBadge}</div><div class="${network.color} ${network.text} rounded-3xl p-8 md:p-12 mb-12 text-center relative overflow-hidden animate-scale-in"><div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div><img src="${network.logo}" alt="${network.name}" width="${network.logoW}" height="${network.logoH}" decoding="async" class="w-auto h-20 mx-auto mb-6 bg-white p-4 rounded-2xl shadow-xl relative z-10"><h1 class="text-3xl md:text-4xl font-black uppercase relative z-10 mb-2">${network.name}</h1><p class="text-sm md:text-base opacity-90 relative z-10 max-w-2xl mx-auto">${network.description}</p></div>${networkId==='mtn'&&state.unverifiedEnabled?`<div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"><strong>We check every MTN number before you pay.</strong> Verified numbers pay the prices below. Unverified numbers pay ₵${unvFee().toFixed(2)} more, and delivery to them may take longer.</div>`:''}<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${bundleCards}</div></div>`;
 }
 function initiateOrder(networkId,bundleId){
   if(state.isAdmin) return;
@@ -2274,8 +2287,62 @@ function initiateOrder(networkId,bundleId){
 }
 function renderOrderForm(){
   if(!state.activeOrderData) return '';
-  const{network,bundle}=state.activeOrderData,netInfo=NETWORKS[network],balance=state.userProfile?parseFloat(state.userProfile.balance||0):0,hasBal=balance>=bundle.price;
-  return`<div class="order-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn" onclick="if(event.target===this)appCloseSheet()"><div class="order-card card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in"><button onclick="appCloseSheet()" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="text-center mb-6"><div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><span class="text-2xl font-black">${netInfo.name.charAt(0)}</span></div><h3 class="text-2xl font-black mb-1">Purchase ${bundle.size}</h3><p class="text-muted-theme text-sm">${netInfo.name} &bull; ${bundle.validity}</p></div><div class="bg-slate-50 rounded-2xl p-6 mb-6"><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Bundle Price</span><span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span></div><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Your Balance</span><span class="font-bold text-lg ${hasBal?'text-green-600':'text-red-500'}">₵${balance.toFixed(2)}</span></div><div class="border-t border-slate-200 mt-2 pt-2 flex justify-between items-center"><span class="font-bold">Total</span><span class="font-black text-xl text-red-600">₵${bundle.price.toFixed(2)}</span></div></div><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="p-num" maxlength="10" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"><p class="text-xs text-muted-theme mt-2">Enter 10-digit Ghana number</p></div><button id="confirm-purchase-btn" onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${hasBal?'':'opacity-50 cursor-not-allowed'}" ${hasBal?'':'disabled'}>${hasBal?'Confirm Purchase':'Insufficient Balance'}</button>${!hasBal?`<button onclick="state.activeOrderData=null;navigateTo('wallet')" class="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-300 transition-all">Add Funds to Wallet</button>`:''}</div></div></div>`;
+  const{network,bundle}=state.activeOrderData,netInfo=NETWORKS[network],balance=state.userProfile?parseFloat(state.userProfile.balance||0):0;
+  const checks=unvChecks(network),fee=orderUnvFee(),hasBal=balance>=bundle.price+fee;
+  return`<div class="order-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn" onclick="if(event.target===this)appCloseSheet()"><div class="order-card card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in"><button onclick="appCloseSheet()" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="text-center mb-6"><div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"><span class="text-2xl font-black">${netInfo.name.charAt(0)}</span></div><h3 class="text-2xl font-black mb-1">Purchase ${bundle.size}</h3><p class="text-muted-theme text-sm">${netInfo.name} &bull; ${bundle.validity}</p></div><div class="bg-slate-50 rounded-2xl p-6 mb-6"><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Bundle Price</span><span class="font-bold text-lg">₵${bundle.price.toFixed(2)}</span></div><div id="unv-row" class="flex justify-between items-center mb-2 text-amber-700" style="${fee>0?'':'display:none'}"><span class="text-sm">Unverified number</span><span class="font-bold text-lg">+₵<span id="unv-fee">${fee.toFixed(2)}</span></span></div><div class="flex justify-between items-center mb-2"><span class="text-sm text-muted-theme">Your Balance</span><span id="order-bal" class="font-bold text-lg ${hasBal?'text-green-600':'text-red-500'}">₵${balance.toFixed(2)}</span></div><div class="border-t border-slate-200 mt-2 pt-2 flex justify-between items-center"><span class="font-bold">Total</span><span id="order-total" class="font-black text-xl text-red-600">₵${(bundle.price+fee).toFixed(2)}</span></div></div><div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Phone Number</label><input type="tel" id="p-num" maxlength="10" oninput="onOrderNumberInput(this.value)" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="024xxxxxxx"><p class="text-xs text-muted-theme mt-2">${checks?'Enter 10-digit Ghana number. We check MTN numbers before you pay.':'Enter 10-digit Ghana number'}</p><div id="num-status" class="mt-2">${numStatusHtml()}</div></div><button id="confirm-purchase-btn" onclick="handleOrderButton()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all ${hasBal?'':'opacity-50 cursor-not-allowed'}" ${hasBal?'':'disabled'}>${hasBal?'Confirm Purchase':'Insufficient Balance'}</button>${!hasBal?`<button onclick="state.activeOrderData=null;navigateTo('wallet')" class="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-300 transition-all">Add Funds to Wallet</button>`:''}</div></div></div>`;
+}
+
+/* ===== UNVERIFIED MTN NUMBERS =====
+   MTN numbers we have not delivered to yet (and that the admin has not marked
+   verified) cost a fixed extra (Admin -> Bundles; default ₵1.80) and may take
+   longer. The order form checks the number as it is typed; place_order adds
+   the extra on the server either way. */
+function unvFee(){return typeof state.unverifiedFee==='number'?state.unverifiedFee:1.8;}
+function unvChecks(network){return network==='mtn'&&!!state.unverifiedEnabled;}
+let numCheckTimer=null,numCheckSeq=0;
+function orderUnvFee(){
+  const o=state.activeOrderData;if(!o||!o.numStatus||o.numStatus.phone!==o.numPhone) return 0;
+  return Number(o.numStatus.fee)||0;
+}
+function numStatusHtml(){
+  const o=state.activeOrderData;if(!o||!unvChecks(o.network)||!o.numPhone) return'';
+  const st=o.numStatus;
+  if(!st||st.phone!==o.numPhone) return`<p class="text-xs font-semibold text-slate-500 flex items-center gap-2"><span class="spinner" style="width:12px;height:12px;border-width:2px"></span>Checking the number…</p>`;
+  if(st.error) return`<p class="text-xs font-semibold text-slate-500">Could not check the number. It is checked again when you confirm.</p>`;
+  if(Number(st.fee)>0) return`<div class="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs text-amber-900"><p class="font-black">${esc(o.numPhone)} is not verified.</p><p class="mt-0.5">You can still buy at the unverified price (+₵${Number(st.fee).toFixed(2)}). Delivery to unverified numbers may take longer.</p></div>`;
+  return`<p class="text-xs font-bold text-green-700 flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Verified number: normal price.</p>`;
+}
+function paintOrderPrice(){
+  const o=state.activeOrderData;if(!o) return;
+  const fee=orderUnvFee(),total=o.bundle.price+fee,balance=parseFloat(state.userProfile?.balance||0),ok=balance>=total;
+  const row=document.getElementById('unv-row');if(row) row.style.display=fee>0?'':'none';
+  const f=document.getElementById('unv-fee');if(f) f.textContent=fee.toFixed(2);
+  const t=document.getElementById('order-total');if(t) t.textContent='₵'+total.toFixed(2);
+  const b=document.getElementById('order-bal');if(b){b.classList.toggle('text-green-600',ok);b.classList.toggle('text-red-500',!ok);}
+  const btn=document.getElementById('confirm-purchase-btn');
+  if(btn&&!state.orderInFlight){btn.disabled=!ok;btn.classList.toggle('opacity-50',!ok);btn.classList.toggle('cursor-not-allowed',!ok);btn.textContent=ok?(fee>0?'Buy at unverified price':'Confirm Purchase'):'Insufficient Balance';}
+  paintHtml('num-status',numStatusHtml());
+}
+function onOrderNumberInput(v){
+  const o=state.activeOrderData;if(!o) return;
+  const phone=String(v||'').replace(/\D/g,'');
+  clearTimeout(numCheckTimer);
+  o.numPhone=unvChecks(o.network)&&/^0\d{9}$/.test(phone)?phone:null;
+  paintOrderPrice();
+  if(o.numPhone) numCheckTimer=setTimeout(()=>checkOrderNumber(phone),300);
+}
+async function checkOrderNumber(phone){
+  const o=state.activeOrderData;if(!o) return null;
+  const seq=++numCheckSeq;
+  let st;
+  try{
+    const{data,error}=await supa.rpc('number_status',{p_phone:phone,p_network:o.network});
+    if(error) throw error;
+    st={phone,fee:Number(data?.fee)||0,verified:!!data?.verified};
+  }catch(e){st={phone,fee:0,error:true};}
+  if(seq!==numCheckSeq||state.activeOrderData!==o) return st;
+  o.numStatus=st;paintOrderPrice();
+  return st;
 }
 
 /* ===== ORDER FUNCTIONS ===== */
@@ -2290,13 +2357,20 @@ async function handleOrderButton(){
   const order=state.activeOrderData;
   const{bundle,requestId,network}=order;
   if(!state.user){showToast('Please login first',3000,'error');navigateTo('login');return;}
+  // MTN: make sure the customer has seen whether the number is verified before paying.
+  if(unvChecks(network)&&(!order.numStatus||order.numStatus.phone!==phone||order.numStatus.error)){
+    order.numPhone=phone;paintOrderPrice();
+    const st=await checkOrderNumber(phone);
+    if(st&&!st.error&&st.fee>0){showToast(`${phone} is not verified: it costs ₵${st.fee.toFixed(2)} more and delivery may take longer. Tap the button again to buy.`,6000,'info');return;}
+  }
+  const fee=orderUnvFee(),price=+(bundle.price+fee).toFixed(2);
   const balance=parseFloat(state.userProfile?.balance||0);
-  if(balance<bundle.price){showToast('Insufficient balance. Please deposit funds.',4000,'error');navigateTo('wallet');return;}
+  if(balance<price){showToast('Insufficient balance. Please deposit funds.',4000,'error');navigateTo('wallet');return;}
   state.orderInFlight=true;
   const back={view:state.view,params:state.params};
   // Optimistic: take the price off the balance and show the order as being placed.
-  state.userProfile.balance=+(balance-bundle.price).toFixed(2);
-  const placing={_pending:true,ref:null,Phone:phone,Network:network,bundle_name:bundle.size,Amount:bundle.price,Status:'Placing',created_at:new Date().toISOString(),_req:requestId};
+  state.userProfile.balance=+(balance-price).toFixed(2);
+  const placing={_pending:true,ref:null,Phone:phone,Network:network,bundle_name:bundle.size,Amount:price,Status:'Placing',created_at:new Date().toISOString(),_req:requestId};
   if(viewCache.has('my-orders')) viewCache.set('my-orders',[placing,...viewCache.get('my-orders')]);
   state.activeOrderData=null;
   navigateTo('success',{bundle_name:bundle.size,Phone:phone,ref:null,pending:true});
@@ -2311,7 +2385,7 @@ async function handleOrderButton(){
     state.userProfile.balance=res.new_balance;cacheUserState();paintBalance();
     placing._pending=false;placing.ref=res.ref;placing.Status='Pending';placing.Amount=res.amount??placing.Amount;
     if(state.view==='success'&&state.params?.pending){state.params={bundle_name:bundle.size,Phone:phone,ref:res.ref};render();}
-    showToast(res.duplicate?'This order was already placed.':'Order placed! It will be delivered shortly.',3000,res.duplicate?'info':'success');
+    showToast(res.duplicate?'This order was already placed.':Number(res.unverified_fee)>0?'Order placed for an unverified number. Delivery may take a little longer.':'Order placed! It will be delivered shortly.',res.unverified_fee>0?5000:3000,res.duplicate?'info':'success');
     if(document.getElementById('my-orders-container')) loadMyOrders();
   }catch(err){
     // Put everything back and let the customer try again with the same form.
@@ -2320,7 +2394,7 @@ async function handleOrderButton(){
     state.activeOrderData=order;
     if(state.view==='success'&&state.params?.pending) navigateTo(back.view==='success'?'home':back.view,back.view==='success'?null:back.params,{replace:true});
     else render();
-    const input=document.getElementById('p-num');if(input) input.value=phone;
+    const input=document.getElementById('p-num');if(input){input.value=phone;paintOrderPrice();}
     showToast('Order not placed: '+(err.message||'Unknown error'),6000,'error');
   }
   finally{state.orderInFlight=false;}
@@ -2355,7 +2429,9 @@ async function refuseSignIn(msg){
 // The admin's order list. Only the columns the dashboard shows are fetched.
 async function fetchOrders(){
   try{
-    const{data,error}=await supa.from('orders').select('id,ref,Phone,Network,bundle_name,Amount,Status,pricing_mode,created_at,updated_at,api_reference,user_id').order('created_at',{ascending:false}).limit(1000);
+    const cols='id,ref,Phone,Network,bundle_name,Amount,Status,pricing_mode,created_at,updated_at,api_reference,user_id';
+    let{data,error}=await supa.from('orders').select(cols+',unverified_fee').order('created_at',{ascending:false}).limit(1000);
+    if(error&&/unverified_fee/.test(error.message||'')) ({data,error}=await supa.from('orders').select(cols).order('created_at',{ascending:false}).limit(1000));
     if(error) throw error;
     // Rows the admin is changing right now keep their new values until the server confirms.
     const pending=new Map(state.orders.filter(o=>o._pending).map(o=>[o.ref,o]));
@@ -2421,7 +2497,7 @@ function adminOrdersTableHtml(){
   const filtered=state.orders.filter(o=>{const ms=(o.Phone||'').includes(state.searchQuery||'')||(o.ref||'').toLowerCase().includes(q);const mn=state.networkFilter==='all'||o.Network===state.networkFilter;return ms&&mn;});
   const limit=state.adminOrdersShown||100;
   const shown=filtered.slice(0,limit);
-  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Mode</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${shown.length===0?`<tr><td colspan="9" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:shown.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0 ${order._pending?'row-pending':''}"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}</td><td class="p-4"><span class="pricing-mode-badge ${order.pricing_mode==='agent'?'pricing-mode-agent':'pricing-mode-system'}">${order.pricing_mode==='agent'?'Agent':'System'}</span></td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
+  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Mode</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${shown.length===0?`<tr><td colspan="9" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:shown.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0 ${order._pending?'row-pending':''}"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}${Number(order.unverified_fee)>0?`<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800" title="Includes ₵${Number(order.unverified_fee).toFixed(2)} for an unverified number">Unverified +₵${Number(order.unverified_fee).toFixed(2)}</span></div>`:''}</td><td class="p-4"><span class="pricing-mode-badge ${order.pricing_mode==='agent'?'pricing-mode-agent':'pricing-mode-system'}">${order.pricing_mode==='agent'?'Agent':'System'}</span></td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
 ${order.Status==='Pending'&&!order.api_reference?`<button data-ref="${esc(order.ref)}" onclick="showProcessConfirmation(this.dataset.ref)" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button>`:''}
 <button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button data-ref="${esc(order.ref)}" onclick="deleteOrder(this.dataset.ref)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div>${filtered.length>shown.length?`<div class="p-4 text-center border-t border-slate-100"><button onclick="state.adminOrdersShown=(state.adminOrdersShown||100)+100;paintAdminOrders()" class="text-sm bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-xl font-bold">Show more (${filtered.length-shown.length} more)</button></div>`:''}`;
 }
@@ -2676,6 +2752,7 @@ const NET_LABEL={mtn:'MTN',telecel:'Telecel',airteltigo:'AirtelTigo'};
 function bundleSortKey(size){const n=parseFloat(String(size||'').replace(/[^0-9.]/g,''));return isFinite(n)?Math.round(n*10):0;}
 function renderAdminBundlesTab(){
   return`<div class="space-y-6">
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Unverified MTN numbers</h2><p class="text-xs text-muted-theme mb-4">MTN numbers are checked when a customer orders. A number is <strong>verified</strong> once a bundle to it has been delivered, or when you mark it below (for example after checking it with Patupaa's "Verify number"). Other MTN numbers pay a fixed extra and are told delivery may take longer. Telecel and AirtelTigo always pay the normal price.</p><div id="admin-unverified">${SK.form(2)}</div></div>
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Add a bundle</h2><p class="text-xs text-muted-theme mb-4">It appears in the shop straight away. Bundles are listed by size.</p>
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3"><select id="nb-network" class="p-3 border-2 rounded-xl font-bold"><option value="mtn">MTN</option><option value="telecel">Telecel</option><option value="airteltigo">AirtelTigo</option></select><input id="nb-size" type="text" maxlength="20" placeholder="Size (e.g. 1GB)" class="p-3 border-2 rounded-xl font-bold"><input id="nb-price" type="number" min="0.01" step="0.01" placeholder="Price (₵)" class="p-3 border-2 rounded-xl font-bold"><input id="nb-validity" type="text" maxlength="30" value="30 Days" placeholder="Validity" class="p-3 border-2 rounded-xl font-bold"><button onclick="adminAddBundle()" class="col-span-2 md:col-span-1 bg-green-600 text-white rounded-xl font-black py-3">Add Bundle</button></div>
     </div>
@@ -2688,6 +2765,59 @@ function adminBundlesHtml(list){
     const rows=list.filter(b=>b.network===net).sort((a,b)=>(a.sort_order-b.sort_order)||(a.price-b.price));
     return`<div class="mb-6"><h3 class="font-black mb-2">${NET_LABEL[net]} <span class="text-xs font-bold text-muted-theme">${rows.filter(b=>b.active!==false).length} in the shop</span></h3>${rows.length?`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-2 text-xs font-black uppercase text-slate-500">Size</th><th class="p-2 text-xs font-black uppercase text-slate-500">Price (₵)</th><th class="p-2 text-xs font-black uppercase text-slate-500">Validity</th><th class="p-2 text-xs font-black uppercase text-slate-500">Shop</th><th class="p-2 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${rows.map(b=>{const id=esc(b.id);return`<tr class="border-b ${b._pending?'row-pending':''} ${b.active===false?'bg-slate-50':''}"><td class="p-2"><input id="bd-size-${id}" value="${esc(b.size)}" maxlength="20" class="w-24 p-2 border-2 rounded-lg font-bold"></td><td class="p-2"><input id="bd-price-${id}" type="number" min="0.01" step="0.01" value="${Number(b.price).toFixed(2)}" class="w-24 p-2 border-2 rounded-lg font-bold"></td><td class="p-2"><input id="bd-val-${id}" value="${esc(b.validity||'')}" maxlength="30" class="w-28 p-2 border-2 rounded-lg"></td><td class="p-2"><span class="px-2 py-1 rounded-full text-xs font-bold ${b.active===false?'bg-slate-200 text-slate-600':'bg-green-100 text-green-700'}">${b.active===false?'Hidden':'Showing'}</span></td><td class="p-2"><div class="flex gap-2 flex-wrap"><button data-id="${id}" onclick="adminSaveBundle(this.dataset.id)" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-bold">Save</button><button data-id="${id}" onclick="adminToggleBundle(this.dataset.id)" class="text-xs ${b.active===false?'bg-green-100 text-green-700':'bg-amber-100 text-amber-700'} px-3 py-1.5 rounded-lg font-bold">${b.active===false?'Show':'Hide'}</button><button data-id="${id}" onclick="adminDeleteBundle(this.dataset.id)" class="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete</button></div></td></tr>`;}).join('')}</tbody></table></div>`:'<p class="text-sm text-muted-theme">No bundles for this network.</p>'}</div>`;
   }).join('');
+}
+function adminUnverifiedHtml(d){
+  const on=!!state.unverifiedEnabled,fee=unvFee();
+  const rows=(d&&d.list)||[];
+  const q=(state.unvSearch||'').trim();
+  const shown=q?rows.filter(r=>r.phone.includes(q)):rows;
+  return`<div class="space-y-4">
+    <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4 gap-3 flex-wrap"><div><div class="font-black">Unverified price is ${on?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${on?`Unverified MTN numbers pay ₵${fee.toFixed(2)} extra.`:'Every number pays the normal price.'}</div></div><button onclick="adminToggleUnverified()" class="px-5 py-2.5 rounded-xl font-black text-white ${on?'bg-slate-600':'bg-green-600'}">${on?'Turn Off':'Turn On'}</button></div>
+    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Extra for an unverified number (₵)</label><div class="flex gap-2"><input id="unv-amount" type="number" min="0" max="50" step="0.01" value="${fee.toFixed(2)}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-bold"><button onclick="adminSaveUnverifiedFee()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div></div>
+    <div class="border-t border-slate-200 pt-4"><div class="flex items-center justify-between gap-3 flex-wrap mb-2"><p class="text-xs font-bold uppercase text-slate-500">Verified numbers (${rows.length})</p></div>
+      <div class="grid sm:grid-cols-3 gap-2 mb-3"><input id="unv-phone" type="tel" maxlength="10" placeholder="Number to mark verified" class="p-3 border-2 rounded-xl font-bold"><input id="unv-note" type="text" maxlength="80" placeholder="Note (optional)" class="p-3 border-2 rounded-xl text-sm"><button onclick="adminAddVerifiedNumber()" class="px-4 py-3 rounded-xl bg-green-600 text-white font-bold text-sm">Mark verified</button></div>
+      <input type="search" value="${esc(q)}" oninput="state.unvSearch=this.value;repaint('admin-unverified')" placeholder="Search numbers" class="w-full p-2.5 border-2 rounded-xl text-sm mb-2">
+      ${d?(shown.length?`<div class="max-h-80 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl">${shown.slice(0,200).map(r=>`<div class="flex items-center justify-between gap-3 px-3 py-2"><div class="min-w-0"><span class="font-mono font-bold">${esc(r.phone)}</span> <span class="text-xs text-muted-theme">${r.source==='order'?'delivered before':'marked by you'}${r.note?' · '+esc(r.note):''} · ${new Date(r.verified_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span></div><button data-phone="${esc(r.phone)}" onclick="adminRemoveVerifiedNumber(this.dataset.phone)" class="shrink-0 text-xs font-bold text-red-600">Remove</button></div>`).join('')}</div>`:'<p class="text-sm text-muted-theme">No numbers match.</p>'):'<p class="text-sm text-muted-theme">Not set up yet. Run the unverified numbers SQL first.</p>'}
+    </div>
+  </div>`;
+}
+async function loadAdminUnverified(){
+  await paint('admin-unverified','admin-unverified',async()=>{
+    await loadPaymentSettings();
+    const{data,error}=await supa.from('verified_numbers').select('phone,source,note,verified_at').order('verified_at',{ascending:false}).limit(2000);
+    if(error){if(/verified_numbers/.test(error.message||'')||error.code==='42P01') return null;throw error;}
+    return{list:data||[]};
+  },adminUnverifiedHtml,SK.form(2),()=>errorBox('Could not load verified numbers.','loadAdminUnverified()'));
+}
+async function adminToggleUnverified(){
+  const next=!state.unverifiedEnabled;state.unverifiedEnabled=next;repaint('admin-unverified');
+  const{error}=await supa.from('app_settings').upsert({key:'unverified_enabled',value:next,updated_at:new Date().toISOString()});
+  if(error){state.unverifiedEnabled=!next;repaint('admin-unverified');showToast('Could not change it: '+error.message,5000,'error');return;}
+  showToast(next?'Unverified MTN numbers now pay the extra.':'Every number now pays the normal price.',4000,'success');
+}
+async function adminSaveUnverifiedFee(){
+  const fee=Math.round(parseFloat(document.getElementById('unv-amount')?.value)*100)/100;
+  if(!(fee>=0&&fee<=50)){showToast('Enter an amount between ₵0 and ₵50',4000,'error');return;}
+  const before=state.unverifiedFee;state.unverifiedFee=fee;
+  const{error}=await supa.from('app_settings').upsert({key:'unverified_surcharge',value:fee,updated_at:new Date().toISOString()});
+  if(error){state.unverifiedFee=before;showToast('Save failed: '+error.message,5000,'error');return;}
+  repaint('admin-unverified');showToast(`Saved: unverified MTN numbers pay ₵${fee.toFixed(2)} extra.`,4000,'success');
+}
+async function adminAddVerifiedNumber(){
+  const el=document.getElementById('unv-phone'),phone=(el?.value||'').replace(/\D/g,'');
+  const note=(document.getElementById('unv-note')?.value||'').trim()||null;
+  if(!/^0\d{9}$/.test(phone)){showToast('Enter a 10-digit number, like 0241234567',4000,'error');return;}
+  const{error}=await supa.from('verified_numbers').upsert({phone,network:'mtn',source:'admin',note,verified_by:state.user?.id||null,verified_at:new Date().toISOString()});
+  if(error){showToast('Could not save: '+error.message,5000,'error');return;}
+  showToast(phone+' is now verified: it pays the normal price.',4000,'success');
+  loadAdminUnverified();
+}
+async function adminRemoveVerifiedNumber(phone){
+  if(!confirm(`Remove ${phone} from verified numbers? It will pay the unverified price until a bundle to it is delivered again.`)) return;
+  const undo=mutate('admin-unverified',d=>({...d,list:(d.list||[]).filter(r=>r.phone!==phone)}));
+  const{error}=await supa.from('verified_numbers').delete().eq('phone',phone);
+  if(error){undo();showToast('Could not remove: '+error.message,5000,'error');return;}
+  showToast(phone+' removed from verified numbers.',3000,'success');
 }
 async function loadAdminBundles(){
   await paint('admin-bundles','admin-bundles',async()=>{
@@ -4254,7 +4384,7 @@ function loadViewData(force){
     else if(t==='withdrawals'){loadWithdrawalOverride();loadAdminWithdrawals();}
     else if(t==='deposits') loadAdminDepositsTab();
     else if(t==='sms') loadAdminSmsTab();
-    else if(t==='bundles') loadAdminBundles();
+    else if(t==='bundles'){loadAdminBundles();loadAdminUnverified();}
     else if(t==='deletions') loadAdminDeletions();
     else if(t==='security') loadAdminSecurity();
     else if(t==='audit') loadAdminAudit(!state.audit.rows.length||force);
@@ -4332,6 +4462,7 @@ function onSettingChange(row){
   if(!row||!row.key) return;
   if(row.key==='agent_shutdown') setAgentShutdown(row.value);
   else if(row.key==='withdrawal_override'){state.withdrawalOverride=row.value===true;paintWithdrawWindow();paintHtml('admin-wd-window',adminWindowHtml());}
+  else if(row.key==='unverified_enabled'||row.key==='unverified_surcharge') soon('pay',()=>{refreshPaymentSettings(true).then(()=>{repaint('admin-unverified');paintOrderPrice();});});
   else if(row.key.startsWith('paystack')||row.key.startsWith('seevplus')) soon('pay',()=>{refreshPaymentSettings(true).then(()=>repaint('admin-seev'));});
   else if(row.key==='online_fee_percent'&&typeof row.value==='number'){ONLINE_FEE=row.value;paintHtml('online-fee-label',pctText(ONLINE_FEE));const i=document.getElementById('deposit-amount');updateDepositCalculation(i?i.value:0);}
   else if(row.key==='momo_number'&&typeof row.value==='string') setMomo(row.value,null);
@@ -4495,7 +4626,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
    Every action shows a spinner on the tapped button at once and ignores
    repeated taps until it has finished. */
 ['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
- 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
+ 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminSaveUnverifiedFee','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
  'adminToggleWithdrawalOverride','saveAnnouncement','saveAdminAgentBasePrice','saveEditAgentPrice','globalToggleAgentPriceLock','toggleRowPriceLock',
  'toggleAgentBasePrice','deleteAgentBasePrice','registerAsAgent','reapplyAsAgent','requestPriceUnlock','saveAgentProfit','submitWithdrawal',
  'adminApproveDeposit','adminRejectDeposit','adminApprovePriceUnlock','adminRejectPriceUnlock','adminLockAgentPricing','processWithdrawal',
