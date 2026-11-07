@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Inside the Android app: switch to app mode before anything is drawn, so the website's own bar and footer never flash up while the page loads. -->
+<script>(function(u,c){if(/TruDataApp/.test(u))c.add('in-app');if(/TruShell\/\d/.test(u))c.add('app-shell');})(navigator.userAgent,document.documentElement.classList)</script>
 <title>TRU Data Network | Buy Data Bundles in Ghana - MTN, Telecel, AirtelTigo</title>
 <meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. Data top up service across Ghana.">
 <!-- Replaced with the build id when the site is published (scripts/build-site.mjs). -->
@@ -2389,13 +2391,12 @@ function unvPriceNote(b,rows){
   return`Unverified price: <strong>₵${unvPriceOf(b).toFixed(2)}</strong>`;
 }
 function adminUnverifiedHtml(d){
-  const on=!!state.unverifiedEnabled,fee=unvFee();
+  const on=!!state.unverifiedEnabled;
   const rows=(d&&d.list)||[];
   const q=(state.unvSearch||'').trim();
   const shown=q?rows.filter(r=>r.phone.includes(q)):rows;
   return`<div class="space-y-4">
     <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4 gap-3 flex-wrap"><div><div class="font-black">Unverified price is ${on?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${on?'Unverified MTN numbers pay the unverified prices.':'Every number pays the normal price.'}</div></div><button onclick="adminToggleUnverified()" class="px-5 py-2.5 rounded-xl font-black text-white ${on?'bg-slate-600':'bg-green-600'}">${on?'Turn Off':'Turn On'}</button></div>
-    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Default extra (₵), for MTN bundles without their own</label><div class="flex gap-2"><input id="unv-amount" type="number" min="0" max="50" step="0.01" value="${fee.toFixed(2)}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-bold"><button onclick="adminSaveUnverifiedFee()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div></div>
     <div class="border-t border-slate-200 pt-4"><div class="flex items-center justify-between gap-3 flex-wrap mb-2"><p class="text-xs font-bold uppercase text-slate-500">Verified numbers (${rows.length})</p></div>
       <div class="grid sm:grid-cols-3 gap-2 mb-3"><input id="unv-phone" type="tel" maxlength="10" placeholder="Number to mark verified" class="p-3 border-2 rounded-xl font-bold"><input id="unv-note" type="text" maxlength="80" placeholder="Note (optional)" class="p-3 border-2 rounded-xl text-sm"><button onclick="adminAddVerifiedNumber()" class="px-4 py-3 rounded-xl bg-green-600 text-white font-bold text-sm">Mark verified</button></div>
       <input type="search" value="${esc(q)}" oninput="state.unvSearch=this.value;repaint('admin-unverified')" placeholder="Search numbers" class="w-full p-2.5 border-2 rounded-xl text-sm mb-2">
@@ -2416,14 +2417,6 @@ async function adminToggleUnverified(){
   const{error}=await supa.from('app_settings').upsert({key:'unverified_enabled',value:next,updated_at:new Date().toISOString()});
   if(error){state.unverifiedEnabled=!next;repaint('admin-unverified');showToast('Could not change it: '+error.message,5000,'error');return;}
   showToast(next?'Unverified MTN numbers now pay the extra.':'Every number now pays the normal price.',4000,'success');
-}
-async function adminSaveUnverifiedFee(){
-  const fee=Math.round(parseFloat(document.getElementById('unv-amount')?.value)*100)/100;
-  if(!(fee>=0&&fee<=50)){showToast('Enter an amount between ₵0 and ₵50',4000,'error');return;}
-  const before=state.unverifiedFee;state.unverifiedFee=fee;
-  const{error}=await supa.from('app_settings').upsert({key:'unverified_surcharge',value:fee,updated_at:new Date().toISOString()});
-  if(error){state.unverifiedFee=before;showToast('Save failed: '+error.message,5000,'error');return;}
-  repaint('admin-unverified');repaint('admin-bundles');showToast(`Saved: MTN bundles without their own extra add ₵${fee.toFixed(2)} for unverified numbers.`,4000,'success');
 }
 async function adminAddVerifiedNumber(){
   const el=document.getElementById('unv-phone'),phone=(el?.value||'').replace(/\D/g,'');
@@ -3763,7 +3756,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
    Every action shows a spinner on the tapped button at once and ignores
    repeated taps until it has finished. */
 ['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
- 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminSendSmsCompose','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminSaveUnverifiedFee','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
+ 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminSendSmsCompose','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
  'saveAnnouncement','takeDownAnnouncement','deleteAnnouncement',
  
  'adminApproveDeposit','adminRejectDeposit',
