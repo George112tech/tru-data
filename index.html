@@ -2090,8 +2090,7 @@ function numStatusHtml(){
   const st=o.numStatus;
   if(!st||st.phone!==o.numPhone) return`<p class="text-xs font-semibold text-slate-500 flex items-center gap-2"><span class="spinner" style="width:12px;height:12px;border-width:2px"></span>Checking the number…</p>`;
   if(st.error) return`<p class="text-xs font-semibold text-slate-500">Could not check the number. It is checked again when you confirm.</p>`;
-  if(st.combo) return`<div class="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs text-amber-900"><p class="font-black">${esc(o.numPhone)} is not verified.</p><p class="mt-0.5">${esc(o.bundle.size)} is not sold to unverified numbers on its own, so you get it as two bundles: <strong>${esc(st.combo)}</strong> (${esc(o.bundle.size)} in total)${Number(st.fee)>0?`, at the unverified price (+₵${Number(st.fee).toFixed(2)})`:''}. Delivery to unverified numbers may take longer.</p></div>`;
-  if(Number(st.fee)>0) return`<div class="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs text-amber-900"><p class="font-black">${esc(o.numPhone)} is not verified.</p><p class="mt-0.5">You can still buy at the unverified price (+₵${Number(st.fee).toFixed(2)}). Delivery to unverified numbers may take longer.</p></div>`;
+  if(Number(st.fee)>0||st.combo) return`<div class="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs text-amber-900"><p class="font-black">${esc(o.numPhone)} is not verified.</p><p class="mt-0.5">You can still buy at the unverified price${Number(st.fee)>0?` (+₵${Number(st.fee).toFixed(2)})`:''}. Delivery to unverified numbers may take longer.</p></div>`;
   return`<p class="text-xs font-bold text-green-700 flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Verified number: normal price.</p>`;
 }
 function paintOrderPrice(){
@@ -2143,7 +2142,7 @@ async function handleOrderButton(){
   if(unvChecks(network)&&(!order.numStatus||order.numStatus.phone!==phone||order.numStatus.error)){
     order.numPhone=phone;paintOrderPrice();
     const st=await checkOrderNumber(phone);
-    if(st&&!st.error&&(st.fee>0||st.combo)){showToast(st.combo?`${phone} is not verified: you get ${bundle.size} as ${st.combo}${st.fee>0?` for ₵${st.fee.toFixed(2)} more`:''}. Tap the button again to buy.`:`${phone} is not verified: it costs ₵${st.fee.toFixed(2)} more and delivery may take longer. Tap the button again to buy.`,6000,'info');return;}
+    if(st&&!st.error&&(st.fee>0||st.combo)){showToast(`${phone} is not verified: ${st.fee>0?`it costs ₵${st.fee.toFixed(2)} more and `:''}delivery may take longer. Tap the button again to buy.`,6000,'info');return;}
   }
   const fee=orderUnvFee(),price=+(bundle.price+fee).toFixed(2);
   const balance=parseFloat(state.userProfile?.balance||0);
@@ -2167,7 +2166,7 @@ async function handleOrderButton(){
     state.userProfile.balance=res.new_balance;cacheUserState();paintBalance();
     placing._pending=false;placing.ref=res.ref;placing.Status='Pending';placing.Amount=res.amount??placing.Amount;
     if(state.view==='success'&&state.params?.pending){state.params={bundle_name:bundle.size,Phone:phone,ref:res.ref};render();}
-    showToast(res.duplicate?'This order was already placed.':res.unverified_combo?`Order placed. ${bundle.size} comes as two bundles: ${res.unverified_combo}.`:Number(res.unverified_fee)>0?'Order placed for an unverified number. Delivery may take a little longer.':'Order placed! It will be delivered shortly.',res.unverified_fee>0||res.unverified_combo?5000:3000,res.duplicate?'info':'success');
+    showToast(res.duplicate?'This order was already placed.':Number(res.unverified_fee)>0||res.unverified_combo?'Order placed for an unverified number. Delivery may take a little longer.':'Order placed! It will be delivered shortly.',res.unverified_fee>0||res.unverified_combo?5000:3000,res.duplicate?'info':'success');
     if(document.getElementById('my-orders-container')) loadMyOrders();
   }catch(err){
     // Put everything back and let the customer try again with the same form.

@@ -10,7 +10,7 @@
 -- gets them as the cheapest two bundles that add up to the size, at our
 -- unverified prices (8GB = 6GB + 2GB). The order keeps the pair in
 -- orders.unverified_combo, and the admin's new-order SMS says which two
--- bundles to send.
+-- bundles to send (the customer just sees an unverified order).
 
 begin;
 
@@ -183,7 +183,7 @@ begin
 end;
 $function$;
 
--- Order texts: a combo is spelled out for the customer and the admin.
+-- Order texts: the admin's new-order text says which two bundles to send.
 create or replace function public.sms_on_order()
 returns trigger
 language plpgsql
@@ -198,10 +198,7 @@ begin
   if tg_op = 'INSERT' then
     perform public.sms_enqueue('order_placed', v_to,
       'TRU Data: Order ' || new.ref || ' received. ' || v_bundle || ' to ' || coalesce(new."Phone", '') ||
-      ', ' || public.sms_money(new."Amount") || '.' ||
-      case when new.unverified_combo is not null
-           then ' It comes as two bundles: ' || new.unverified_combo || '.' else '' end ||
-      ' We will text you when it is delivered.');
+      ', ' || public.sms_money(new."Amount") || '. We will text you when it is delivered.');
     perform public.sms_enqueue('admin_new_order', null,
       'TRU Data admin: New order ' || new.ref || ' - ' || v_bundle || ' to ' || coalesce(new."Phone", '') ||
       ', ' || public.sms_money(new."Amount") || '.' ||
