@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
 
     // ----- AdMob (unchanged) -----
     private static final String BANNER_AD_UNIT_ID = "ca-app-pub-8934706810849620/7330461846";
-    private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-8934706810849620/6017380172";
+    private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-8934706810849620/5752352606";
     private static final String APP_OPEN_AD_UNIT_ID = "ca-app-pub-8934706810849620/8105276792";
     // App open ad: as the splash fades (if it is ready within 5 s of launch), and when
     // someone comes back after 30 s or more away. At most once every 4 minutes, never
@@ -100,9 +100,14 @@ public class MainActivity extends Activity {
     private static final long APP_OPEN_MIN_GAP_MS = 4 * 60 * 1000;
     private static final long APP_OPEN_EXPIRES_MS = 4 * 60 * 60 * 1000; // AdMob: 4 hours
     private static final long FULLSCREEN_SPACING_MS = 60 * 1000;
-    // Full-screen ad: every 3rd Back press, and never more than once a minute.
-    private static final int INTERSTITIAL_EVERY = 3;
+    // Full-screen ad: every 4th screen change (a tab, Back, or a link on the page),
+    // never more than once a minute, never during a payment, an open sheet or the
+    // order receipt. If an ad fails to load it is tried again after 30 s, 1, 2 and
+    // at most 5 minutes.
+    private static final int INTERSTITIAL_EVERY = 4;
     private static final long INTERSTITIAL_MIN_GAP_MS = 60 * 1000;
+    private static final long INTERSTITIAL_RETRY_MIN_MS = 30 * 1000;
+    private static final long INTERSTITIAL_RETRY_MAX_MS = 5 * 60 * 1000;
 
     // ----- The site -----
     private static final String HOME = "https://trudata.rvhssystems.com/";
@@ -178,6 +183,10 @@ public class MainActivity extends Activity {
     private boolean adsStarted = false;
     private int navigationCount = 0;
     private long lastInterstitialAt = 0;
+    private long interstitialRetryMs = 0;
+    private boolean interstitialLoading = false;
+    private String lastView = null;
+    private boolean sheetOpen = false;
     private long lastBackPress = 0;
 
     private AppOpenAd appOpenAd;
@@ -203,6 +212,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        installCrashCatcher();
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawableResource(R.drawable.bg_splash);
         setContentView(R.layout.activity_main);
@@ -244,6 +254,13 @@ public class MainActivity extends Activity {
                 startAds();
             }
         }, 4000);
+        // If the app crashed last time, show what went wrong (once the splash is gone).
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showLastCrash();
+            }
+        }, 2500);
     }
 
     // Inter, the font used on the site and in the design (app/src/main/assets/fonts).
@@ -533,6 +550,11 @@ public class MainActivity extends Activity {
             tabBar.getChildAt(agentTab).setVisibility(s.optBoolean("agents", true) ? View.VISIBLE : View.GONE);
         }
         selectTab(s.optString("tab", ""), false);
+        String view = s.optString("view", "");
+        sheetOpen = s.optBoolean("sheet");
+        String previousView = lastView;
+        lastView = view;
+        if (previousView != null && !view.equals(previousView)) onScreenChange(view);
         // No pull-to-refresh while a sheet or dialog is open (it is dragged down to close).
         swipe.setEnabled(!s.optBoolean("sheet"));
         updateChrome();
@@ -1238,14 +1260,88 @@ public class MainActivity extends Activity {
     }
 
     // =====================================================================
+    // Crash report: if the app ever crashes, the error is kept and shown the
+    // next time it opens, with a Copy button, so it can be sent to support.
+    // =====================================================================
+
+    private static final String CRASH_PREFS = "crash";
+
+    private void installCrashCatcher() {
+        final Thread.UncaughtExceptionHandler previous = Thread.getDefaultUncaughtExceptionHandler();
+        if (previous instanceof CrashSaver) return;
+        Thread.setDefaultUncaughtExceptionHandler(new CrashSaver(getApplicationContext(), previous));
+    }
+
+    private static class CrashSaver implements Thread.UncaughtExceptionHandler {
+        private final Context context;
+        private final Thread.UncaughtExceptionHandler previous;
+
+        CrashSaver(Context context, Thread.UncaughtExceptionHandler previous) {
+            this.context = context;
+            this.previous = previous;
+        }
+
+        @Override
+        public void uncaughtException(Thread thread, Throwable error) {
+            try {
+                java.io.StringWriter sw = new java.io.StringWriter();
+                error.printStackTrace(new java.io.PrintWriter(sw));
+                String version = "";
+                try {
+                    version = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+                } catch (Exception ignored) {
+                }
+                String report = "TRU Data " + version + ", Android " + Build.VERSION.RELEASE
+                        + " (" + Build.MANUFACTURER + " " + Build.MODEL + ")\n" + sw;
+                if (report.length() > 6000) report = report.substring(0, 6000);
+                context.getSharedPreferences(CRASH_PREFS, Context.MODE_PRIVATE)
+                        .edit().putString("last", report).commit();
+            } catch (Throwable ignored) {
+            }
+            if (previous != null) previous.uncaughtException(thread, error);
+        }
+    }
+
+    private void showLastCrash() {
+        try {
+            final android.content.SharedPreferences prefs = getSharedPreferences(CRASH_PREFS, Context.MODE_PRIVATE);
+            final String report = prefs.getString("last", null);
+            if (report == null) return;
+            prefs.edit().remove("last").apply();
+            new AlertDialog.Builder(this)
+                    .setTitle("The app closed unexpectedly")
+                    .setMessage("Sorry about that. Tap Copy and send this to TRU Data support so we can fix it:\n\n"
+                            + (report.length() > 1500 ? report.substring(0, 1500) + "…" : report))
+                    .setPositiveButton("Copy", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface d, int w) {
+                            try {
+                                ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                if (cm != null) cm.setPrimaryClip(ClipData.newPlainText("TRU Data crash", report));
+                                Toast.makeText(MainActivity.this, "Copied", Toast.LENGTH_SHORT).show();
+                            } catch (Throwable ignored) {
+                            }
+                        }
+                    })
+                    .setNegativeButton("Close", null)
+                    .show();
+        } catch (Throwable ignored) {
+        }
+    }
+
+    // =====================================================================
     // Ads
     // =====================================================================
 
     private void startAds() {
         if (adsStarted || isFinishing()) return;
         adsStarted = true;
-        MobileAds.initialize(this);
-        setupAds();
+        try {
+            MobileAds.initialize(this);
+            setupAds();
+        } catch (Throwable t) {
+            // No ads this time rather than a crash.
+        }
     }
 
     private void setupAds() {
@@ -1267,28 +1363,84 @@ public class MainActivity extends Activity {
         interstitialAd.setAdUnitId(INTERSTITIAL_AD_UNIT_ID);
         interstitialAd.setAdListener(new AdListener() {
             @Override
+            public void onAdLoaded() {
+                interstitialLoading = false;
+                interstitialRetryMs = 0;
+            }
+
+            @Override
+            public void onAdFailedToLoad(LoadAdError error) {
+                // No ad this time (no fill, no network, new ad unit): try again later.
+                interstitialLoading = false;
+                interstitialRetryMs = interstitialRetryMs == 0 ? INTERSTITIAL_RETRY_MIN_MS
+                        : Math.min(interstitialRetryMs * 2, INTERSTITIAL_RETRY_MAX_MS);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadInterstitial();
+                    }
+                }, interstitialRetryMs);
+            }
+
+            @Override
+            public void onAdOpened() {
+                showingFullScreenAd = true;
+            }
+
+            @Override
             public void onAdClosed() {
                 showingFullScreenAd = false;
-                interstitialAd.loadAd(new AdRequest.Builder().build());
+                loadInterstitial();
             }
         });
-        interstitialAd.loadAd(new AdRequest.Builder().build());
+        loadInterstitial();
+    }
+
+    private void loadInterstitial() {
+        try {
+            if (interstitialAd == null || isFinishing() || interstitialLoading || interstitialAd.isLoaded()) return;
+            interstitialLoading = true;
+            interstitialAd.loadAd(new AdRequest.Builder().build());
+        } catch (Throwable t) {
+            // An ad must never crash the app.
+            interstitialLoading = false;
+        }
+    }
+
+    // The page moved to another screen (tab, Back or a link).
+    private void onScreenChange(String view) {
+        navigationCount++;
+        if (navigationCount % INTERSTITIAL_EVERY == 0) {
+            // Let the new screen appear first.
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        showInterstitial();
+                    } catch (Throwable t) {
+                        // An ad must never crash the app.
+                    }
+                }
+            }, 400);
+        }
     }
 
     private void showInterstitial() {
-        if (inPayment || panelOpen()) return;
-        navigationCount++;
+        if (isFinishing() || !hasWindowFocus()) return;
+        if (inPayment || panelOpen() || sheetOpen || "success".equals(lastView) || !onSite()) return;
         long now = System.currentTimeMillis();
-        if (navigationCount % INTERSTITIAL_EVERY == 0
-                && now - lastInterstitialAt > INTERSTITIAL_MIN_GAP_MS
-                && now - lastAppOpenAt > FULLSCREEN_SPACING_MS
-                && !showingFullScreenAd
-                && interstitialAd != null
-                && interstitialAd.isLoaded()) {
-            lastInterstitialAt = now;
-            showingFullScreenAd = true;
-            interstitialAd.show();
+        if (now - lastInterstitialAt <= INTERSTITIAL_MIN_GAP_MS
+                || now - lastAppOpenAt <= FULLSCREEN_SPACING_MS
+                || showingFullScreenAd
+                || interstitialAd == null) return;
+        if (!interstitialAd.isLoaded()) {
+            // Not ready: make sure one is on its way, and try at the next screen change.
+            navigationCount--;
+            loadInterstitial();
+            return;
         }
+        lastInterstitialAt = now;
+        interstitialAd.show();
     }
 
     // ----- App open ad -----
@@ -1408,12 +1560,11 @@ public class MainActivity extends Activity {
                     public void onReceiveValue(String value) {
                         String r = value == null ? "" : value.replace("\"", "");
                         if (r.equals("handled")) {
-                            showInterstitial();
+                            // counted when the page reports its new screen
                         } else if (r.equals("exit")) {
                             if (fromSystem) confirmExit();
                         } else if (webView.canGoBack()) {
                             webView.goBack();
-                            showInterstitial();
                         } else if (fromSystem) {
                             confirmExit();
                         }
