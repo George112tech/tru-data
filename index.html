@@ -2689,10 +2689,12 @@ async function adminUnlockLogin(email){
   }catch(err){undo();showToast('Unlock failed: '+(err.message||'error'),4000,'error');}
 }
 function renderAdminSmsTab(){
-  const c=state.smsCompose||(state.smsCompose={to:'all',numbers:'',message:'',sign:true});
+  const c=smsCompose();
+  const tabBtn=(k,label)=>`<button type="button" onclick="smsComposeSet('to','${k}')" class="py-2.5 px-1 rounded-xl text-xs sm:text-sm font-bold ${c.to===k?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">${label}</button>`;
   return`<div class="space-y-6">
-    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Send a text</h2><p class="text-xs text-muted-theme mb-4">Send an SMS from TRU Data to all your registered customers, or to numbers you type in.</p>
-      <div class="flex gap-2 mb-4"><button type="button" onclick="smsComposeSet('to','all')" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${c.to==='all'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">All customers <span id="sms-audience">${state.smsAudience!=null?'('+state.smsAudience+')':''}</span></button><button type="button" onclick="smsComposeSet('to','numbers')" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${c.to==='numbers'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Phone numbers</button></div>
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Send a text</h2><p class="text-xs text-muted-theme mb-4">Send an SMS from TRU Data to all your customers, to customers you pick, or to numbers you type in.</p>
+      <div class="grid grid-cols-3 gap-2 mb-4">${tabBtn('all',`All customers <span id="sms-audience">${state.smsAudience!=null?'('+state.smsAudience+')':''}</span>`)}${tabBtn('pick','Pick customers')}${tabBtn('numbers','Type numbers')}</div>
+      ${c.to==='pick'?`<div class="mb-4"><div id="sms-picked">${smsPickedHtml()}</div><input id="sms-search" type="search" value="${esc(c.search)}" oninput="smsComposeSet('search',this.value,true)" class="w-full p-3 border-2 rounded-xl font-semibold focus:border-red-600 outline-none" placeholder="Search name, email or phone" autocomplete="off"><div id="sms-pick-list" class="mt-2 max-h-72 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">${smsPickListHtml()}</div></div>`:''}
       ${c.to==='numbers'?`<div class="mb-4"><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Numbers</label><textarea id="sms-numbers" rows="2" oninput="smsComposeSet('numbers',this.value,true)" class="ann-input w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none" placeholder="0241234567, 0551234567">${esc(c.numbers)}</textarea><p id="sms-numbers-info" class="text-xs text-muted-theme mt-1">${smsNumbersInfo()}</p></div>`:''}
       <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Message</label><textarea id="sms-message" rows="4" maxlength="470" oninput="smsComposeSet('message',this.value,true)" class="ann-input w-full p-3 border-2 rounded-xl font-semibold focus:border-red-600 outline-none" placeholder="e.g. New MTN bundles are now available. Buy at trudata.rvhssystems.com">${esc(c.message)}</textarea>
       <label class="flex items-center gap-2 text-sm font-semibold mt-2"><input type="checkbox" ${c.sign?'checked':''} onchange="smsComposeSet('sign',this.checked,true)"> Start the text with "TRU Data:"</label>
@@ -2705,6 +2707,7 @@ function renderAdminSmsTab(){
 async function loadAdminSmsTab(){
   loadAdminSmsSettings();
   loadAdminSmsLog();
+  if(smsCompose().to==='pick') loadSmsCustomers();
   supa.rpc('admin_sms_audience').then(({data,error})=>{if(!error&&typeof data==='number'){state.smsAudience=data;paintHtml('sms-audience','('+data+')');}}).catch(()=>{});
 }
 /* ===== ADMIN: SEND A TEXT ===== */
@@ -2731,20 +2734,65 @@ function smsPreviewHtml(){
   const per=gsm?(len>160?153:160):(len>70?67:70),parts=Math.ceil(len/per);
   return`<div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs font-bold uppercase text-slate-500 mb-1">Customers will get</p><p class="text-sm whitespace-pre-line break-words">${esc(t)}</p><p class="text-xs text-muted-theme mt-2">${len} characters · ${parts} SMS${parts>1?' each (counts as '+parts+' texts)':''}${gsm?'':' · emoji or special letters make each SMS shorter'}</p></div>`;
 }
+function smsCompose(){return state.smsCompose||(state.smsCompose={to:'all',numbers:'',message:'',sign:true,search:'',picked:{}});}
+function smsPhone(x){const d=String(x||'').replace(/[^\d+]/g,'').replace(/^\+?233/,'0');return /^0[2-5]\d{8}$/.test(d)?d:null;}
+async function loadSmsCustomers(){
+  if(state.smsCustomers&&Date.now()-state.smsCustomers.at<120000){paintHtml('sms-pick-list',smsPickListHtml());return;}
+  try{
+    const{data,error}=await supa.from('profiles').select('id,full_name,email,phone,role,is_admin').limit(5000);
+    if(error) throw error;
+    const list=(data||[]).filter(u=>u.role!=='admin'&&!u.is_admin).map(u=>({id:u.id,name:(u.full_name||'').trim(),email:u.email||'',phone:smsPhone(u.phone),raw:u.phone||''}));
+    list.sort((a,b)=>(a.name||a.email).localeCompare(b.name||b.email));
+    state.smsCustomers={at:Date.now(),list};
+  }catch(err){state.smsCustomers={at:0,list:[],error:err.message||'error'};}
+  paintHtml('sms-pick-list',smsPickListHtml());
+}
+function smsPickListHtml(){
+  const sc=state.smsCustomers;
+  if(!sc) return'<p class="p-3 text-sm text-muted-theme">Loading customers…</p>';
+  if(sc.error) return`<p class="p-3 text-sm text-red-500">Could not load customers: ${esc(sc.error)}</p>`;
+  const c=smsCompose(),q=String(c.search||'').trim().toLowerCase(),qd=q.replace(/\D/g,'');
+  const hits=sc.list.filter(u=>!q||u.name.toLowerCase().includes(q)||u.email.toLowerCase().includes(q)||(qd.length>=3&&(u.raw.replace(/\D/g,'').includes(qd)||(u.phone||'').includes(qd))));
+  if(!hits.length) return`<p class="p-3 text-sm text-muted-theme">${sc.list.length?'No customer matches that search.':'No customers yet.'}</p>`;
+  const shown=hits.slice(0,60);
+  return shown.map(u=>{const on=!!c.picked[u.id];
+    return u.phone?`<button type="button" onclick="smsTogglePick('${u.id}')" class="w-full flex items-center gap-3 p-3 text-left ${on?'bg-red-50':''}"><span class="w-5 h-5 shrink-0 rounded border-2 flex items-center justify-center text-xs font-black ${on?'bg-red-600 border-red-600 text-white':'border-slate-300'}">${on?'✓':''}</span><span class="min-w-0 flex-1"><span class="block text-sm font-bold truncate">${esc(u.name||u.email||'Customer')}</span><span class="block text-xs text-muted-theme truncate">${esc(u.phone)}${u.name&&u.email?' · '+esc(u.email):''}</span></span></button>`
+      :`<div class="w-full flex items-center gap-3 p-3 opacity-60"><span class="w-5 h-5 shrink-0 rounded border-2 border-slate-200"></span><span class="min-w-0 flex-1"><span class="block text-sm font-bold truncate">${esc(u.name||u.email||'Customer')}</span><span class="block text-xs text-muted-theme truncate">No valid phone number${u.email?' · '+esc(u.email):''}</span></span></div>`;}).join('')
+    +(hits.length>shown.length?`<p class="p-3 text-xs text-muted-theme">${hits.length-shown.length} more. Search to find them.</p>`:'');
+}
+function smsPickedHtml(){
+  const ids=Object.keys(smsCompose().picked);
+  if(!ids.length) return'<p class="text-xs text-muted-theme mb-2">Tap customers below to choose who gets the text.</p>';
+  return`<div class="flex flex-wrap items-center gap-2 mb-2">${ids.map(id=>{const u=smsCompose().picked[id];return`<span class="inline-flex items-center gap-1 max-w-full bg-red-50 text-red-700 rounded-full pl-3 pr-1 py-1 text-xs font-bold"><span class="truncate">${esc(u.name||u.email||u.phone)}</span><button type="button" onclick="smsTogglePick('${id}')" class="w-5 h-5 rounded-full hover:bg-red-100" aria-label="Remove">×</button></span>`;}).join('')}<button type="button" onclick="smsClearPicks()" class="text-xs font-bold text-slate-500 underline">Clear</button></div><p class="text-xs font-bold mb-2">${ids.length} customer${ids.length===1?'':'s'} chosen</p>`;
+}
+function smsTogglePick(id){
+  const c=smsCompose();
+  if(c.picked[id]) delete c.picked[id];
+  else{const u=(state.smsCustomers?.list||[]).find(x=>x.id===id);if(!u||!u.phone) return;c.picked[id]={name:u.name,email:u.email,phone:u.phone};}
+  paintHtml('sms-picked',smsPickedHtml());paintHtml('sms-pick-list',smsPickListHtml());
+}
+function smsClearPicks(){smsCompose().picked={};paintHtml('sms-picked',smsPickedHtml());paintHtml('sms-pick-list',smsPickListHtml());}
 function smsComposeSet(k,v,soft){
-  const c=state.smsCompose||(state.smsCompose={to:'all',numbers:'',message:'',sign:true});
+  const c=smsCompose();
   c[k]=v;
-  if(!soft){render();return;}
+  if(k==='search'){paintHtml('sms-pick-list',smsPickListHtml());return;}
+  if(!soft){render();if(k==='to'&&v==='pick') loadSmsCustomers();return;}
   growAnnInput(document.getElementById(k==='numbers'?'sms-numbers':'sms-message'));
   paintHtml('sms-preview',smsPreviewHtml());
   if(k==='numbers') paintHtml('sms-numbers-info',smsNumbersInfo());
 }
 async function adminSendSmsCompose(){
-  const c=state.smsCompose||{};const text=smsFinalText();
+  const c=smsCompose();const text=smsFinalText();
   if(!text){showToast('Type a message first',3000,'error');return;}
   if([...text].length>480){showToast('The message is too long (480 characters at most)',4000,'error');return;}
   let data,error;
-  if(c.to==='numbers'){
+  if(c.to==='pick'){
+    const list=Object.values(c.picked),to=[...new Set(list.map(u=>u.phone))];
+    if(!to.length){showToast('Choose at least one customer',3000,'error');return;}
+    const who=list.length===1?(list[0].name||list[0].email||list[0].phone):list.length+' customers';
+    if(!confirm(`Send this text to ${who}?\n\n${text}`)) return;
+    ({data,error}=await supa.rpc('admin_send_sms',{p_to:to,p_message:text}));
+  }else if(c.to==='numbers'){
     const{ok,bad}=smsNumbers();
     if(!ok.length){showToast('Enter at least one valid Ghana number, like 0241234567',4000,'error');return;}
     if(bad.length&&!confirm(`${bad.length} number${bad.length===1?' is':'s are'} not valid and will be skipped. Send to the other ${ok.length}?`)) return;
@@ -2756,7 +2804,7 @@ async function adminSendSmsCompose(){
     ({data,error}=await supa.rpc('admin_sms_customers',{p_message:text}));
   }
   if(error){showToast((error.code==='PGRST202'?'Run the SMS SQL first. ':'Not sent: ')+(error.message||'error'),6000,'error');return;}
-  state.smsCompose={...c,message:'',numbers:c.to==='numbers'?'':c.numbers};
+  state.smsCompose={...c,message:'',numbers:c.to==='numbers'?'':c.numbers,picked:c.to==='pick'?{}:c.picked};
   render();loadAdminSmsLog();
   showToast(`Text queued for ${data} number${data===1?'':'s'}. It goes out from the SMS phone in the next minute.`,5000,'success');
 }
