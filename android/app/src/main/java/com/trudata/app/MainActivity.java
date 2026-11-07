@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
 
     // ----- AdMob (unchanged) -----
     private static final String BANNER_AD_UNIT_ID = "ca-app-pub-8934706810849620/7330461846";
-    private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-8934706810849620/6017380172";
+    private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-8934706810849620/5752352606";
     private static final String APP_OPEN_AD_UNIT_ID = "ca-app-pub-8934706810849620/8105276792";
     // App open ad: as the splash fades (if it is ready within 5 s of launch), and when
     // someone comes back after 30 s or more away. At most once every 4 minutes, never
@@ -100,9 +100,14 @@ public class MainActivity extends Activity {
     private static final long APP_OPEN_MIN_GAP_MS = 4 * 60 * 1000;
     private static final long APP_OPEN_EXPIRES_MS = 4 * 60 * 60 * 1000; // AdMob: 4 hours
     private static final long FULLSCREEN_SPACING_MS = 60 * 1000;
-    // Full-screen ad: every 3rd Back press, and never more than once a minute.
-    private static final int INTERSTITIAL_EVERY = 3;
+    // Full-screen ad: every 4th screen change (a tab, Back, or a link on the page),
+    // never more than once a minute, never during a payment, an open sheet or the
+    // order receipt. If an ad fails to load it is tried again after 30 s, 1, 2 and
+    // at most 5 minutes.
+    private static final int INTERSTITIAL_EVERY = 4;
     private static final long INTERSTITIAL_MIN_GAP_MS = 60 * 1000;
+    private static final long INTERSTITIAL_RETRY_MIN_MS = 30 * 1000;
+    private static final long INTERSTITIAL_RETRY_MAX_MS = 5 * 60 * 1000;
 
     // ----- The site -----
     private static final String HOME = "https://trudata.rvhssystems.com/";
@@ -178,6 +183,10 @@ public class MainActivity extends Activity {
     private boolean adsStarted = false;
     private int navigationCount = 0;
     private long lastInterstitialAt = 0;
+    private long interstitialRetryMs = 0;
+    private boolean interstitialLoading = false;
+    private String lastView = null;
+    private boolean sheetOpen = false;
     private long lastBackPress = 0;
 
     private AppOpenAd appOpenAd;
@@ -533,6 +542,10 @@ public class MainActivity extends Activity {
             tabBar.getChildAt(agentTab).setVisibility(s.optBoolean("agents", true) ? View.VISIBLE : View.GONE);
         }
         selectTab(s.optString("tab", ""), false);
+        String view = s.optString("view", "");
+        sheetOpen = s.optBoolean("sheet");
+        if (lastView != null && !view.equals(lastView)) onScreenChange(view);
+        lastView = view;
         // No pull-to-refresh while a sheet or dialog is open (it is dragged down to close).
         swipe.setEnabled(!s.optBoolean("sheet"));
         updateChrome();
@@ -1267,28 +1280,74 @@ public class MainActivity extends Activity {
         interstitialAd.setAdUnitId(INTERSTITIAL_AD_UNIT_ID);
         interstitialAd.setAdListener(new AdListener() {
             @Override
+            public void onAdLoaded() {
+                interstitialLoading = false;
+                interstitialRetryMs = 0;
+            }
+
+            @Override
+            public void onAdFailedToLoad(LoadAdError error) {
+                // No ad this time (no fill, no network, new ad unit): try again later.
+                interstitialLoading = false;
+                interstitialRetryMs = interstitialRetryMs == 0 ? INTERSTITIAL_RETRY_MIN_MS
+                        : Math.min(interstitialRetryMs * 2, INTERSTITIAL_RETRY_MAX_MS);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadInterstitial();
+                    }
+                }, interstitialRetryMs);
+            }
+
+            @Override
+            public void onAdOpened() {
+                showingFullScreenAd = true;
+            }
+
+            @Override
             public void onAdClosed() {
                 showingFullScreenAd = false;
-                interstitialAd.loadAd(new AdRequest.Builder().build());
+                loadInterstitial();
             }
         });
+        loadInterstitial();
+    }
+
+    private void loadInterstitial() {
+        if (interstitialAd == null || isFinishing() || interstitialLoading || interstitialAd.isLoaded()) return;
+        interstitialLoading = true;
         interstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
-    private void showInterstitial() {
-        if (inPayment || panelOpen()) return;
+    // The page moved to another screen (tab, Back or a link).
+    private void onScreenChange(String view) {
         navigationCount++;
-        long now = System.currentTimeMillis();
-        if (navigationCount % INTERSTITIAL_EVERY == 0
-                && now - lastInterstitialAt > INTERSTITIAL_MIN_GAP_MS
-                && now - lastAppOpenAt > FULLSCREEN_SPACING_MS
-                && !showingFullScreenAd
-                && interstitialAd != null
-                && interstitialAd.isLoaded()) {
-            lastInterstitialAt = now;
-            showingFullScreenAd = true;
-            interstitialAd.show();
+        if (navigationCount % INTERSTITIAL_EVERY == 0) {
+            // Let the new screen appear first.
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    showInterstitial();
+                }
+            }, 400);
         }
+    }
+
+    private void showInterstitial() {
+        if (inPayment || panelOpen() || sheetOpen || "success".equals(lastView) || !onSite()) return;
+        long now = System.currentTimeMillis();
+        if (now - lastInterstitialAt <= INTERSTITIAL_MIN_GAP_MS
+                || now - lastAppOpenAt <= FULLSCREEN_SPACING_MS
+                || showingFullScreenAd
+                || interstitialAd == null) return;
+        if (!interstitialAd.isLoaded()) {
+            // Not ready: make sure one is on its way, and try at the next screen change.
+            navigationCount--;
+            loadInterstitial();
+            return;
+        }
+        lastInterstitialAt = now;
+        interstitialAd.show();
     }
 
     // ----- App open ad -----
@@ -1408,12 +1467,11 @@ public class MainActivity extends Activity {
                     public void onReceiveValue(String value) {
                         String r = value == null ? "" : value.replace("\"", "");
                         if (r.equals("handled")) {
-                            showInterstitial();
+                            // counted when the page reports its new screen
                         } else if (r.equals("exit")) {
                             if (fromSystem) confirmExit();
                         } else if (webView.canGoBack()) {
                             webView.goBack();
-                            showInterstitial();
                         } else if (fromSystem) {
                             confirmExit();
                         }
