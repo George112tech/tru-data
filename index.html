@@ -2551,6 +2551,7 @@ async function adminSaveMomoDetails(){
 /* ===== ADMIN: SMS NOTIFICATIONS (httpSMS) ===== */
 const SMS_EVENTS=[
   ['Customers','order_placed','Order received'],
+  ['Customers','order_processing','Order being processed (Process pressed)'],
   ['Customers','order_processed','Order processed (Complete pressed)'],
   ['Customers','order_delivered','Order delivered (Delivered pressed)'],
   ['Customers','order_cancelled','Order cancelled / refunded'],
@@ -2688,7 +2689,15 @@ async function adminUnlockLogin(email){
   }catch(err){undo();showToast('Unlock failed: '+(err.message||'error'),4000,'error');}
 }
 function renderAdminSmsTab(){
+  const c=state.smsCompose||(state.smsCompose={to:'all',numbers:'',message:'',sign:true});
   return`<div class="space-y-6">
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">Send a text</h2><p class="text-xs text-muted-theme mb-4">Send an SMS from TRU Data to all your registered customers, or to numbers you type in.</p>
+      <div class="flex gap-2 mb-4"><button type="button" onclick="smsComposeSet('to','all')" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${c.to==='all'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">All customers <span id="sms-audience">${state.smsAudience!=null?'('+state.smsAudience+')':''}</span></button><button type="button" onclick="smsComposeSet('to','numbers')" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${c.to==='numbers'?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">Phone numbers</button></div>
+      ${c.to==='numbers'?`<div class="mb-4"><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Numbers</label><textarea id="sms-numbers" rows="2" oninput="smsComposeSet('numbers',this.value,true)" class="ann-input w-full p-3 border-2 rounded-xl font-bold focus:border-red-600 outline-none" placeholder="0241234567, 0551234567">${esc(c.numbers)}</textarea><p id="sms-numbers-info" class="text-xs text-muted-theme mt-1">${smsNumbersInfo()}</p></div>`:''}
+      <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Message</label><textarea id="sms-message" rows="4" maxlength="470" oninput="smsComposeSet('message',this.value,true)" class="ann-input w-full p-3 border-2 rounded-xl font-semibold focus:border-red-600 outline-none" placeholder="e.g. New MTN bundles are now available. Buy at trudata.rvhssystems.com">${esc(c.message)}</textarea>
+      <label class="flex items-center gap-2 text-sm font-semibold mt-2"><input type="checkbox" ${c.sign?'checked':''} onchange="smsComposeSet('sign',this.checked,true)"> Start the text with "TRU Data:"</label>
+      <div id="sms-preview" class="mt-3">${smsPreviewHtml()}</div>
+      <button onclick="adminSendSmsCompose()" class="mt-4 cta-button text-white px-6 py-3 rounded-xl font-bold text-sm">Send text</button></div>
     <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">SMS notifications</h2><p class="text-xs text-muted-theme mb-4">Texts go out through <a href="https://httpsms.com" target="_blank" rel="noopener" class="underline">httpSMS</a> from the Android phone running the httpSMS app, using that phone's SIM airtime.</p><div id="admin-sms-settings">${SK.form(4)}</div></div>
     <div class="card-theme rounded-2xl p-6"><div class="flex items-center justify-between mb-4 gap-2 flex-wrap"><h2 class="text-lg font-black">Recent messages</h2><div class="flex gap-2 flex-wrap"><button onclick="adminClearSms('sent')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete sent</button><button onclick="adminClearSms('failed')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete failed</button><button onclick="loadAdminSmsLog()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold">Refresh</button></div></div><div id="admin-sms-log">${SK.table(4,4)}</div></div>
   </div>`;
@@ -2696,6 +2705,60 @@ function renderAdminSmsTab(){
 async function loadAdminSmsTab(){
   loadAdminSmsSettings();
   loadAdminSmsLog();
+  supa.rpc('admin_sms_audience').then(({data,error})=>{if(!error&&typeof data==='number'){state.smsAudience=data;paintHtml('sms-audience','('+data+')');}}).catch(()=>{});
+}
+/* ===== ADMIN: SEND A TEXT ===== */
+function smsFinalText(){
+  const c=state.smsCompose||{};const m=String(c.message||'').trim();
+  if(!m) return'';
+  return c.sign&&!/^tru\s*data\b/i.test(m)?'TRU Data: '+m:m;
+}
+function smsNumbers(){
+  const raw=String(state.smsCompose?.numbers||'').split(/[\s,;]+/).map(x=>x.replace(/[^\d+]/g,'')).filter(Boolean);
+  const ok=[],bad=[];
+  raw.forEach(n=>{const d=n.replace(/^\+?233/,'0');(/^0[2-5]\d{8}$/.test(d)?ok:bad).push(d);});
+  return{ok:[...new Set(ok)],bad};
+}
+function smsNumbersInfo(){
+  const{ok,bad}=smsNumbers();
+  if(!ok.length&&!bad.length) return'Separate numbers with commas, spaces or new lines.';
+  return`${ok.length} number${ok.length===1?'':'s'}`+(bad.length?` · <span class="text-red-600 font-bold">not valid: ${bad.slice(0,5).map(esc).join(', ')}${bad.length>5?'…':''}</span>`:'');
+}
+function smsPreviewHtml(){
+  const t=smsFinalText();
+  if(!t) return'';
+  const len=[...t].length,gsm=/^[\x20-\x7E\n\r£¥èéùìòÇØøÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉÄÖÑÜ§¿äöñüà€]*$/.test(t);
+  const per=gsm?(len>160?153:160):(len>70?67:70),parts=Math.ceil(len/per);
+  return`<div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><p class="text-xs font-bold uppercase text-slate-500 mb-1">Customers will get</p><p class="text-sm whitespace-pre-line break-words">${esc(t)}</p><p class="text-xs text-muted-theme mt-2">${len} characters · ${parts} SMS${parts>1?' each (counts as '+parts+' texts)':''}${gsm?'':' · emoji or special letters make each SMS shorter'}</p></div>`;
+}
+function smsComposeSet(k,v,soft){
+  const c=state.smsCompose||(state.smsCompose={to:'all',numbers:'',message:'',sign:true});
+  c[k]=v;
+  if(!soft){render();return;}
+  growAnnInput(document.getElementById(k==='numbers'?'sms-numbers':'sms-message'));
+  paintHtml('sms-preview',smsPreviewHtml());
+  if(k==='numbers') paintHtml('sms-numbers-info',smsNumbersInfo());
+}
+async function adminSendSmsCompose(){
+  const c=state.smsCompose||{};const text=smsFinalText();
+  if(!text){showToast('Type a message first',3000,'error');return;}
+  if([...text].length>480){showToast('The message is too long (480 characters at most)',4000,'error');return;}
+  let data,error;
+  if(c.to==='numbers'){
+    const{ok,bad}=smsNumbers();
+    if(!ok.length){showToast('Enter at least one valid Ghana number, like 0241234567',4000,'error');return;}
+    if(bad.length&&!confirm(`${bad.length} number${bad.length===1?' is':'s are'} not valid and will be skipped. Send to the other ${ok.length}?`)) return;
+    if(!confirm(`Send this text to ${ok.length} number${ok.length===1?'':'s'}?\n\n${text}`)) return;
+    ({data,error}=await supa.rpc('admin_send_sms',{p_to:ok,p_message:text}));
+  }else{
+    const n=state.smsAudience;
+    if(!confirm(`Send this text to all ${n!=null?n+' ':''}registered customers?\n\n${text}`)) return;
+    ({data,error}=await supa.rpc('admin_sms_customers',{p_message:text}));
+  }
+  if(error){showToast((error.code==='PGRST202'?'Run the SMS SQL first. ':'Not sent: ')+(error.message||'error'),6000,'error');return;}
+  state.smsCompose={...c,message:'',numbers:c.to==='numbers'?'':c.numbers};
+  render();loadAdminSmsLog();
+  showToast(`Text queued for ${data} number${data===1?'':'s'}. It goes out from the SMS phone in the next minute.`,5000,'success');
 }
 function adminSmsSettingsHtml(s){
   const local=p=>p?'0'+String(p).replace(/^\+233/,''):'';
@@ -3626,7 +3689,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
    Every action shows a spinner on the tapped button at once and ignores
    repeated taps until it has finished. */
 ['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
- 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminSaveUnverifiedFee','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
+ 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminSendSmsCompose','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminSaveUnverifiedFee','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
  'saveAnnouncement','takeDownAnnouncement','deleteAnnouncement',
  
  'adminApproveDeposit','adminRejectDeposit',
