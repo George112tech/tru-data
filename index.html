@@ -330,8 +330,17 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 .withdrawal-window-closed{background:#fefce8;border:2px solid #fde047;border-radius:1rem;padding:1rem;color:#854d0e;}
 
 /* Announcement banner - attention grabbing */
-.announcement-banner{position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem 1.5rem;margin-bottom:2rem;border-left:6px solid var(--accent-primary);background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);box-shadow:0 10px 40px -10px rgba(220,38,38,.3);animation:pulse-border 2s infinite;}
-@keyframes pulse-border{0%,100%{border-left-color:var(--accent-primary);}50%{border-left-color:#f87171;}}
+.announcement-banner{position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem 1.5rem;margin-bottom:2rem;border-left:6px solid var(--accent-primary);background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);box-shadow:0 10px 40px -10px rgba(220,38,38,.3);}
+/* The red edge glows (opacity only, so the phone does not repaint the banner on every frame). */
+.announcement-banner::before{content:'';position:absolute;left:0;top:0;bottom:0;width:10px;background:linear-gradient(90deg,rgba(248,113,113,.9),rgba(248,113,113,0));animation:ann-glow 2s ease-in-out infinite;will-change:opacity;pointer-events:none;}
+@keyframes ann-glow{0%,100%{opacity:0;}50%{opacity:1;}}
+/* Landing page: the announcement floats over the bottom of the screen, so it never pushes the page down when it arrives. */
+#ann-float{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:120;max-width:560px;margin:0 auto;animation:ann-up .35s cubic-bezier(.2,.9,.3,1) both;}
+#ann-float .announcement-banner{margin:0;padding:1rem 2.75rem 1rem 1.25rem;}
+#ann-float .announcement-main{font-size:1.05rem;}#ann-float .announcement-sub{font-size:.9rem;}
+.ann-close{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#991b1b;background:rgba(255,255,255,.7);border:0;z-index:1;}
+@keyframes ann-up{from{transform:translateY(120%);opacity:0;}to{transform:none;opacity:1;}}
+html.ann-floating .apk-float{display:none!important;}
 .announcement-main{font-size:1.25rem;font-weight:800;margin-bottom:.5rem;color:#991b1b;line-height:1.4;white-space:pre-line;overflow-wrap:anywhere;}
 .announcement-sub{font-size:1rem;color:#7f1d1d;opacity:.9;font-weight:600;white-space:pre-line;overflow-wrap:anywhere;}
 .ann-input{resize:none;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45;}
@@ -1631,7 +1640,6 @@ function startOrderCountdowns(data){
 function renderLandingPage(){
   if(APP_SHELL) return state.user?renderAppHome():renderAppWelcome();
   return`<div class="min-h-screen animate__animated animate__fadeIn">
-    <div id="announcement-slot">${announcementHtml(state.announcement)}</div>
     <section class="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-20 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50">
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-float"></div>
@@ -3306,6 +3314,22 @@ async function loadAnnouncement(){
   const ann=await fetchAnnouncement();
   state.announcement=ann;store.set('announcement',ann);
   paintHtml('announcement-slot',announcementHtml(ann));
+  syncLandingAnnouncement();
+}
+// The floating announcement on the website's landing page (closed ones stay closed).
+function annKey(a){return a?String(a.id)+'|'+String(a.created_at||''):'';}
+function syncLandingAnnouncement(){
+  const ann=state.announcement,show=state.view==='landing'&&!APP_SHELL&&!!ann;
+  let closed='';try{closed=sessionStorage.getItem('tru:ann-closed')||'';}catch(e){}
+  let el=document.getElementById('ann-float');
+  if(!show||closed===annKey(ann)){if(el) el.remove();document.documentElement.classList.remove('ann-floating');return;}
+  const html=announcementHtml(ann).replace('<div class="announcement-banner animate-scale-in">','<div class="announcement-banner" role="status"><button type="button" class="ann-close" aria-label="Close announcement" onclick="closeLandingAnnouncement()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>').replace('<div class="max-w-4xl mx-auto px-4 pt-6">','<div>');
+  if(!el){el=document.createElement('div');el.id='ann-float';document.body.appendChild(el);}
+  paintHtml(el,html);document.documentElement.classList.add('ann-floating');
+}
+function closeLandingAnnouncement(){
+  try{sessionStorage.setItem('tru:ann-closed',annKey(state.announcement));}catch(e){}
+  syncLandingAnnouncement();
 }
 
 /* ===== ADMIN: ANNOUNCEMENTS =====
@@ -3729,6 +3753,7 @@ function render(){
     default: navigateTo('landing');return;
   }
   if(state.activeOrderData){const m=document.createElement('div');m.innerHTML=renderOrderForm();app.appendChild(m.firstElementChild);appSheetDrag();}
+  syncLandingAnnouncement();
   if(focusId){const el=document.getElementById(focusId);if(el){try{el.focus({preventScroll:true});}catch(e){}}}
   paintBalance();
   loadViewData();

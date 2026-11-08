@@ -72,15 +72,30 @@ writeFileSync(join(out, "version.json"), JSON.stringify({ build }) + "\n");
 for (const f of readdirSync(root)) {
   if (/\.(webp|png|jpe?g|svg|ico)$/i.test(f)) cpSync(join(root, f), join(out, f));
 }
-// The web app manifest (Add to Home Screen).
-if (existsSync(join(root, "manifest.webmanifest"))) cpSync(join(root, "manifest.webmanifest"), join(out, "manifest.webmanifest"));
+// The web app manifest (Add to Home Screen), and robots.txt / sitemap.xml for search engines.
+for (const f of ["manifest.webmanifest", "robots.txt", "sitemap.xml"]) {
+  if (existsSync(join(root, f))) cpSync(join(root, f), join(out, f));
+}
 if (existsSync(join(root, "fonts"))) cpSync(join(root, "fonts"), join(out, "fonts"), { recursive: true });
 
 // Response headers (Cloudflare Pages reads dist/_headers).
+// Security headers:
+//   HSTS: browsers only ever use HTTPS for this site (1 year).
+//   Cross-Origin-Opener-Policy: other sites' windows cannot reach into this page;
+//     popups (payments) still work.
+//   Content-Security-Policy: no plugins, no <base> tricks, nobody else may frame
+//     the site, and any http:// request is upgraded to https://. (Scripts are not
+//     restricted further: the page uses inline onclick handlers.)
+//   Permissions-Policy: the site never uses the camera, microphone or location.
+//   (Payment is left alone: card checkouts may need it in their own frame.)
 writeFileSync(join(out, "_headers"), `/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  Content-Security-Policy: object-src 'none'; base-uri 'self'; frame-ancestors 'self'; upgrade-insecure-requests
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
 /
   Cache-Control: no-cache
 /index.html
@@ -89,6 +104,12 @@ writeFileSync(join(out, "_headers"), `/*
   Cache-Control: no-store
 /manifest.webmanifest
   Content-Type: application/manifest+json
+  Cache-Control: public, max-age=86400
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=86400
+/sitemap.xml
+  Content-Type: application/xml; charset=utf-8
   Cache-Control: public, max-age=86400
 /app.*.js
   Cache-Control: public, max-age=31536000, immutable

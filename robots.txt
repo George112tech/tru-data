@@ -1,0 +1,5 @@
+# TRU Data: the whole site may be indexed.
+User-agent: *
+Allow: /
+
+Sitemap: https://trudata.rvhssystems.com/sitemap.xml
