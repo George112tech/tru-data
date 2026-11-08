@@ -1,0 +1,24 @@
+# TRU Data
+
+> TRU Data is a website and Android app for buying mobile data bundles in Ghana for MTN, Telecel and AirtelTigo numbers. Customers top up a wallet with Mobile Money and pay for bundles from it; most orders are delivered within minutes.
+
+## What customers can do
+
+- Create a free account and sign in
+- Top up the wallet with Mobile Money (MoMo) or an online payment
+- Buy MTN, Telecel and AirtelTigo data bundles for any Ghana number
+- Follow their orders and receive SMS updates when an order is being processed and delivered
+- Install the Android app, or add the site to the iPhone home screen
+
+## Links
+
+- [TRU Data home page](https://trudata.rvhssystems.com/): buy data bundles
+- [Create an account](https://trudata.rvhssystems.com/#/register)
+- [Sign in](https://trudata.rvhssystems.com/#/login)
+- [About TRU Data](https://trudata.rvhssystems.com/#/about)
+- [Terms of Service](https://trudata.rvhssystems.com/#/terms)
+- [Privacy Policy](https://trudata.rvhssystems.com/#/privacy)
+
+## Contact
+
+- WhatsApp support: [+233 59 757 8538](https://wa.me/233597578538)

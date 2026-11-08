@@ -46,11 +46,25 @@ const open = "\n<script>\n", close = "\n</script>\n</body>";
 const start = html.indexOf(open), end = html.lastIndexOf(close);
 if (start < 0 || end < start) throw new Error("index.html: main inline <script> not found");
 let js = html.slice(start + open.length, end);
-if (esbuild) {
+
+// The admin dashboard's code (between //@admin-begin and //@admin-end lines) goes
+// into its own file, admin.<hash>.js. Customers never download it; the admin's
+// browser loads it after signing in (loadAdminCode in the page). Both files are
+// plain scripts sharing the page's globals.
+const adminParts = [];
+js = js.replace(/^\/\/@admin-begin\n([\s\S]*?)^\/\/@admin-end\n/gm, (_, code) => { adminParts.push(code); return ""; });
+if (adminParts.length < 3 || /^\/\/@admin-(begin|end)$/m.test(js)) throw new Error("index.html: //@admin-begin / //@admin-end markers do not pair up");
+const minify = async (code) => esbuild
   // Top-level names are not renamed (esbuild keeps them in a plain script), so the
   // page's onclick="..." handlers still find their functions.
-  js = (await esbuild.transform(js, { loader: "js", minify: true, target: "es2019", legalComments: "none" })).code;
-}
+  ? (await esbuild.transform(code, { loader: "js", minify: true, target: "es2019", legalComments: "none" })).code
+  : code;
+const adminJs = await minify(adminParts.join("\n"));
+const adminFile = `admin.${hash(adminJs)}.js`;
+writeFileSync(join(out, adminFile), adminJs);
+if (!js.includes("const ADMIN_SRC='';")) throw new Error("index.html: const ADMIN_SRC=''; not found");
+js = js.replace("const ADMIN_SRC='';", `const ADMIN_SRC='${adminFile}';`);
+js = await minify(js);
 const appFile = `app.${hash(js)}.js`;
 writeFileSync(join(out, appFile), js);
 html = html.slice(0, start) + `\n<script src="${appFile}" defer></script>\n</body>` + html.slice(end + close.length);
@@ -72,8 +86,10 @@ writeFileSync(join(out, "version.json"), JSON.stringify({ build }) + "\n");
 for (const f of readdirSync(root)) {
   if (/\.(webp|png|jpe?g|svg|ico)$/i.test(f)) cpSync(join(root, f), join(out, f));
 }
-// The web app manifest (Add to Home Screen), and robots.txt / sitemap.xml for search engines.
-for (const f of ["manifest.webmanifest", "robots.txt", "sitemap.xml"]) {
+// The web app manifest (Add to Home Screen), robots.txt / sitemap.xml for search
+// engines, llms.txt for AI assistants, and 404.html: Cloudflare Pages answers
+// addresses that do not exist with it (status 404) instead of the home page.
+for (const f of ["manifest.webmanifest", "robots.txt", "sitemap.xml", "llms.txt", "404.html"]) {
   if (existsSync(join(root, f))) cpSync(join(root, f), join(out, f));
 }
 if (existsSync(join(root, "fonts"))) cpSync(join(root, "fonts"), join(out, "fonts"), { recursive: true });
@@ -111,7 +127,12 @@ writeFileSync(join(out, "_headers"), `/*
 /sitemap.xml
   Content-Type: application/xml; charset=utf-8
   Cache-Control: public, max-age=86400
+/llms.txt
+  Content-Type: text/markdown; charset=utf-8
+  Cache-Control: public, max-age=86400
 /app.*.js
+  Cache-Control: public, max-age=31536000, immutable
+/admin.*.js
   Cache-Control: public, max-age=31536000, immutable
 /tailwind.*.css
   Cache-Control: public, max-age=31536000, immutable
@@ -123,4 +144,4 @@ writeFileSync(join(out, "_headers"), `/*
   Cache-Control: public, max-age=2592000
 `);
 
-console.log(`Built dist/ (build ${build}): index.html ${(html.length / 1024).toFixed(0)} KB, ${appFile} ${(js.length / 1024).toFixed(0)} KB:`, readdirSync(out).join(", "));
+console.log(`Built dist/ (build ${build}): index.html ${(html.length / 1024).toFixed(0)} KB, ${appFile} ${(js.length / 1024).toFixed(0)} KB, ${adminFile} ${(adminJs.length / 1024).toFixed(0)} KB:`, readdirSync(out).join(", "));
