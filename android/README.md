@@ -51,7 +51,8 @@ Same package (`com.trudata.app`), same AdMob app ID and ad unit IDs as before, p
 page of a payment inside the app (no tabs, ads or pull-to-refresh there),
 asks before leaving a payment, and returns to the signed-in wallet. 2.1.5
 opens patupaa.com (admin: Process order) in a panel inside the app. 2.1.6
-and 2.1.7 fix the full-screen ad and report crashes; 2.1.8 removes the Agent tab.
+and 2.1.7 fix the full-screen ad and report crashes; 2.1.8 removes the Agent tab,
+uses an adaptive banner and retries the banner when no ad loads.
 Version: `versionCode 33`, `versionName 2.1.8` in `app/build.gradle`. Raise
 both for every new APK.
 

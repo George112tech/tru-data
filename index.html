@@ -2868,12 +2868,12 @@ function renderAdminSmsTab(){
       <label class="flex items-center gap-2 text-sm font-semibold mt-2"><input type="checkbox" ${c.sign?'checked':''} onchange="smsComposeSet('sign',this.checked,true)"> Start the text with "TRU Data:"</label>
       <div id="sms-preview" class="mt-3">${smsPreviewHtml()}</div>
       <button onclick="adminSendSmsCompose()" class="mt-4 cta-button text-white px-6 py-3 rounded-xl font-bold text-sm">Send text</button></div>
-    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">SMS notifications</h2><p class="text-xs text-muted-theme mb-4">Texts go out through <a href="https://httpsms.com" target="_blank" rel="noopener" class="underline">httpSMS</a> from the Android phone running the httpSMS app, using that phone's SIM airtime.</p><div id="admin-sms-settings">${SK.form(4)}</div></div>
+    <div class="card-theme rounded-2xl p-6"><h2 class="text-lg font-black mb-1">SMS notifications</h2><p class="text-xs text-muted-theme mb-4">Texts go out from an Android phone's SIM: your own phone running the TRU SMS app (no monthly limit), or <a href="https://httpsms.com" target="_blank" rel="noopener" class="underline">httpSMS</a>.</p><div id="admin-sms-settings">${SK.form(4)}</div></div>
     <div class="card-theme rounded-2xl p-6"><div class="flex items-center justify-between mb-4 gap-2 flex-wrap"><h2 class="text-lg font-black">Recent messages</h2><div class="flex gap-2 flex-wrap"><button onclick="adminClearSms('sent')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete sent</button><button onclick="adminClearSms('failed')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">Delete failed</button><button onclick="loadAdminSmsLog()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold">Refresh</button></div></div><div id="admin-sms-log">${SK.table(4,4)}</div></div>
   </div>`;
 }
 async function loadAdminSmsTab(){
-  loadAdminSmsSettings();
+  loadAdminSmsSettings();watchSmsDevice();
   loadAdminSmsLog();
   if(smsCompose().to==='pick') loadSmsCustomers();
   supa.rpc('admin_sms_audience').then(({data,error})=>{if(!error&&typeof data==='number'){state.smsAudience=data;paintHtml('sms-audience','('+data+')');}}).catch(()=>{});
@@ -2982,15 +2982,73 @@ function adminSmsSettingsHtml(s){
   const groups=[...new Set(SMS_EVENTS.map(e=>e[0]))];
   return`<div class="space-y-4">
     <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4"><div><div class="font-black">SMS notifications are ${s.enabled?'<span class="text-green-600">ON</span>':'<span class="text-slate-500">OFF</span>'}</div><div class="text-xs text-muted-theme">${s.enabled?'Texts are sent for the events ticked below.':'No texts are sent.'}</div></div><label class="flex items-center gap-2 font-bold text-sm"><input id="sms-enabled" type="checkbox" class="w-5 h-5" ${s.enabled?'checked':''}> On</label></div>
+    <div><p class="text-xs font-bold uppercase text-slate-500 mb-2">Who sends the texts</p><div class="grid grid-cols-2 gap-2">${[['device','My phone (TRU SMS)','No monthly limit'],['httpsms','httpSMS','httpsms.com']].map(([v,t,sub])=>`<label class="flex items-start gap-2 p-3 rounded-xl border-2 cursor-pointer ${(s.provider||'httpsms')===v?'border-red-500 bg-red-50':'border-slate-200'}"><input type="radio" name="sms-provider" value="${v}" class="mt-1" ${(s.provider||'httpsms')===v?'checked':''} onchange="smsProviderPick(this.value)"><span><b class="block text-sm">${t}</b><small class="text-xs text-muted-theme">${sub}</small></span></label>`).join('')}</div></div>
+    <div id="sms-device-fields" style="${(s.provider||'httpsms')==='device'?'':'display:none'}">${smsDevicePanelHtml(s)}</div>
+    <div id="sms-httpsms-fields" class="space-y-4" style="${(s.provider||'httpsms')==='device'?'display:none':''}">
     <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">httpSMS API key</label><input id="sms-api-key" type="password" autocomplete="off" placeholder="${s.api_key_set?'Saved (ends in '+esc(s.api_key_last4)+'). Paste a new one to replace it':'From httpsms.com → Settings → API Key'}" class="w-full p-3 border-2 rounded-xl font-mono text-sm"></div>
     <div class="grid md:grid-cols-2 gap-3">
       <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Sending phone (has the httpSMS app)</label><input id="sms-from" type="tel" maxlength="16" value="${esc(local(s.from_number))}" placeholder="0505175472" class="w-full p-3 border-2 rounded-xl font-bold"></div>
+    </div></div>
+    <div class="grid md:grid-cols-2 gap-3">
       <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Admin alert phone</label><input id="sms-admin" type="tel" maxlength="16" value="${esc(local(s.admin_phone))}" placeholder="Where admin alerts go" class="w-full p-3 border-2 rounded-xl font-bold"></div>
     </div>
     <div class="grid md:grid-cols-3 gap-4">${groups.map(g=>`<div><p class="text-xs font-black uppercase text-slate-500 mb-2">${g}</p>${SMS_EVENTS.filter(e=>e[0]===g).map(e=>`<label class="flex items-start gap-2 text-sm mb-1.5"><input type="checkbox" class="sms-event mt-0.5" data-event="${e[1]}" ${ev[e[1]]===false?'':'checked'}> <span>${e[2]}</span></label>`).join('')}</div>`).join('')}</div>
     <button id="sms-save-btn" onclick="adminSaveSmsSettings()" class="w-full bg-slate-900 text-white py-3 rounded-xl font-black">Save SMS settings</button>
     <div class="border-t pt-4"><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Send a test SMS</label><div class="flex gap-2"><input id="sms-test-to" type="tel" maxlength="16" placeholder="0241234567" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-bold"><button onclick="adminSendTestSms()" class="px-4 whitespace-nowrap rounded-xl bg-green-600 text-white font-bold text-sm">Send test</button></div></div>
   </div>`;
+}
+/* ===== ADMIN: TRU SMS (send from your own phone) =====
+   The TRU SMS app on an Android phone collects waiting texts every few
+   seconds (gateway_poll) and sends them from its SIM. Pair it with a code
+   made here; the phone's status refreshes while this tab is open. */
+function smsProviderPick(v){
+  const d=document.getElementById('sms-device-fields'),h=document.getElementById('sms-httpsms-fields');
+  if(d) d.style.display=v==='device'?'':'none';
+  if(h) h.style.display=v==='device'?'none':'';
+  document.querySelectorAll('input[name=sms-provider]').forEach(i=>{const l=i.closest('label');if(l){l.classList.toggle('border-red-500',i.checked);l.classList.toggle('bg-red-50',i.checked);l.classList.toggle('border-slate-200',!i.checked);}});
+}
+function smsAgo(t){
+  const s=Math.max(0,Math.round((Date.now()-new Date(t).getTime())/1000));
+  if(s<60) return s+' s ago';if(s<3600) return Math.round(s/60)+' min ago';if(s<86400) return Math.round(s/3600)+' h ago';
+  return new Date(t).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+}
+function smsDeviceStatusHtml(s){
+  if(!s.device_paired) return`<div class="rounded-xl bg-slate-50 p-4 text-sm"><b>No phone paired yet.</b> <span class="text-muted-theme">Install the TRU SMS app on the phone that will send the texts, then press <b>Pair a phone</b> and enter the code in the app.</span></div>`;
+  const info=s.device_info||{},seen=s.device_seen_at,online=seen&&(Date.now()-new Date(seen).getTime())<90000;
+  const bits=[info.model,info.sim,info.battery!=null?('Battery '+info.battery+'%'+(info.charging?' (charging)':'')):null,info.app?('TRU SMS '+info.app):null].filter(Boolean).map(esc).join(' · ');
+  return`<div class="rounded-xl p-4 ${online?'bg-green-50 border border-green-200':'bg-amber-50 border border-amber-200'}"><div class="flex items-center gap-2 font-black"><span class="w-2.5 h-2.5 rounded-full ${online?'bg-green-500':'bg-amber-500'}"></span>${online?'Phone online':'Phone offline'}<span class="text-xs font-semibold text-muted-theme">${seen?'· last checked '+smsAgo(seen):'· not connected yet'}</span></div>${bits?`<p class="text-xs text-slate-600 mt-1">${bits}</p>`:''}${s.waiting?`<p class="text-xs font-bold mt-1 ${online?'text-slate-700':'text-amber-800'}">${s.waiting} text${s.waiting===1?'':'s'} waiting to go out</p>`:''}${!online&&seen?'<p class="text-xs text-amber-800 mt-1">Texts wait until the phone is back: open TRU SMS, check it is on, has signal and internet, and is not in power saving.</p>':''}</div>`;
+}
+function smsDevicePanelHtml(s){
+  return`<div class="space-y-3"><div id="sms-device-status">${smsDeviceStatusHtml(s)}</div>
+    <div id="sms-pair-code"></div>
+    <div class="flex gap-2 flex-wrap"><button type="button" onclick="adminSmsPair()" class="px-4 py-2.5 rounded-xl bg-red-600 text-white font-bold text-sm">${s.device_paired?'Pair a new phone':'Pair a phone'}</button>${s.device_paired?`<button type="button" onclick="adminSmsUnpair()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm">Disconnect phone</button>`:''}</div>
+    <p class="text-xs text-muted-theme">Texts go out from that phone's SIM and cost what an SMS costs on it. Keep the phone on, charged and connected. A SIM used only for TRU Data is safest: networks may block a number that sends many texts.</p></div>`;
+}
+async function adminSmsPair(){
+  const cur=viewCache.get('admin-sms-settings');
+  if(cur&&cur.device_paired&&!confirm('Make a new pairing code? The phone paired now stops sending until it gets the new code.')) return;
+  const{data,error}=await supa.rpc('admin_sms_pair_device');
+  if(error){showToast((error.code==='PGRST202'?'Run the TRU SMS SQL first. ':'Could not pair: ')+(error.message||''),6000,'error');return;}
+  const code=String(data||'');
+  paintHtml('sms-pair-code',`<div class="rounded-xl border-2 border-dashed border-red-300 bg-white p-4 text-center"><p class="text-xs font-bold uppercase text-slate-500">Pairing code</p><p id="sms-code-text" class="font-mono font-black text-xl sm:text-2xl tracking-wide my-2 select-all break-words">${esc(code)}</p><button type="button" onclick="copyText(document.getElementById('sms-code-text').textContent,'Pairing code')" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-sm">Copy code</button><ol class="text-left text-xs text-slate-600 mt-3 space-y-1 list-decimal list-inside"><li>Open <b>TRU SMS</b> on the sending phone.</li><li>Paste or type this code and tap <b>Connect</b>.</li><li>Choose <b>My phone (TRU SMS)</b> above, turn SMS on and save.</li></ol><p class="text-xs text-amber-700 font-semibold mt-2">Shown only now. Keep it private: anyone with it can collect your texts.</p></div>`);
+  if(cur) viewCache.set('admin-sms-settings',{...cur,device_paired:true,device_seen_at:null,device_info:{}});
+  paintHtml('sms-device-status',smsDeviceStatusHtml({...(cur||{}),device_paired:true,device_seen_at:null,device_info:{}}));
+}
+async function adminSmsUnpair(){
+  if(!confirm('Disconnect the phone? It stops sending texts until you pair it again.')) return;
+  const{error}=await supa.rpc('admin_sms_unpair_device');
+  if(error){showToast('Could not disconnect: '+(error.message||''),5000,'error');return;}
+  showToast('Phone disconnected',3000,'info');loadAdminSmsSettings();
+}
+// While the SMS tab is open, keep the phone's status fresh (without redrawing the form).
+let smsStatusTimer=null;
+function watchSmsDevice(){
+  clearInterval(smsStatusTimer);
+  smsStatusTimer=setInterval(async()=>{
+    if(state.view!=='admin-dashboard'||state.adminTab!=='sms'||!document.getElementById('sms-device-status')){clearInterval(smsStatusTimer);smsStatusTimer=null;return;}
+    if(document.hidden) return;
+    try{const{data}=await supa.rpc('get_sms_settings');if(data){viewCache.set('admin-sms-settings',data);paintHtml('sms-device-status',smsDeviceStatusHtml(data));}}catch(e){}
+  },15000);
 }
 async function loadAdminSmsSettings(){
   await paint('admin-sms-settings','admin-sms-settings',async()=>{
@@ -3006,7 +3064,8 @@ async function adminSaveSmsSettings(){
       p_from_number:document.getElementById('sms-from').value.trim(),
       p_admin_phone:document.getElementById('sms-admin').value.trim(),
       p_events:events,
-      p_api_key:document.getElementById('sms-api-key').value.trim()||null
+      p_api_key:document.getElementById('sms-api-key').value.trim()||null,
+      p_provider:document.querySelector('input[name=sms-provider]:checked')?.value||null
     });
     if(error) throw error;
     showToast('SMS settings saved',3000,'success');
@@ -3027,11 +3086,13 @@ async function adminSendTestSms(){
 function adminSmsLogHtml(data){
   if(!data||!data.length) return'<p class="text-sm text-muted-theme text-center py-4">No messages yet.</p>';
   const badge={sent:'bg-green-100 text-green-700',failed:'bg-red-100 text-red-700',pending:'bg-amber-100 text-amber-700',sending:'bg-blue-100 text-blue-700',skipped:'bg-slate-100 text-slate-600'};
-  return`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Time</th><th class="p-3 text-xs font-black uppercase text-slate-500">To</th><th class="p-3 text-xs font-black uppercase text-slate-500">Message</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3"></th></tr></thead><tbody>${data.map(m=>`<tr class="border-b align-top"><td class="p-3 text-xs whitespace-nowrap">${new Date(m.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3 font-mono text-xs whitespace-nowrap">${esc(m.to_phone)}</td><td class="p-3 text-xs">${esc(m.content)}${m.error?`<div class="text-red-500 mt-1">${esc(m.error)}</div>`:''}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${badge[m.status]||''}">${esc(m.status)}</span>${m.status==='failed'||(m.status==='pending'&&m.attempts>0)?`<button data-id="${esc(m.id)}" onclick="adminRetrySms(this.dataset.id)" class="block mt-1 text-xs underline font-bold">Retry</button>`:''}</td><td class="p-3"><button data-id="${esc(m.id)}" onclick="adminDeleteSms(this.dataset.id)" title="${m.status==='pending'||m.status==='sending'?'Cancel and delete':'Delete'}" aria-label="Delete message" class="text-slate-400 hover:text-red-600 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button></td></tr>`).join('')}</tbody></table></div>`;
+  return`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-3 text-xs font-black uppercase text-slate-500">Time</th><th class="p-3 text-xs font-black uppercase text-slate-500">To</th><th class="p-3 text-xs font-black uppercase text-slate-500">Message</th><th class="p-3 text-xs font-black uppercase text-slate-500">Status</th><th class="p-3"></th></tr></thead><tbody>${data.map(m=>`<tr class="border-b align-top"><td class="p-3 text-xs whitespace-nowrap">${new Date(m.created_at).toLocaleString('en-GH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td class="p-3 font-mono text-xs whitespace-nowrap">${esc(m.to_phone)}</td><td class="p-3 text-xs">${esc(m.content)}${m.error?`<div class="text-red-500 mt-1">${esc(m.error)}</div>`:''}</td><td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${badge[m.status]||''}">${esc(m.status)}</span>${m.delivered_at?'<span class="block mt-1 text-[11px] font-bold text-green-700">✓ delivered</span>':''}${m.status==='failed'||(m.status==='pending'&&m.attempts>0)?`<button data-id="${esc(m.id)}" onclick="adminRetrySms(this.dataset.id)" class="block mt-1 text-xs underline font-bold">Retry</button>`:''}</td><td class="p-3"><button data-id="${esc(m.id)}" onclick="adminDeleteSms(this.dataset.id)" title="${m.status==='pending'||m.status==='sending'?'Cancel and delete':'Delete'}" aria-label="Delete message" class="text-slate-400 hover:text-red-600 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button></td></tr>`).join('')}</tbody></table></div>`;
 }
 async function loadAdminSmsLog(){
   await paint('admin-sms-log','admin-sms-log',async()=>{
-    const{data,error}=await supa.from('sms_outbox').select('id,event,to_phone,content,status,attempts,error,created_at').order('created_at',{ascending:false}).limit(50);
+    const q=c=>supa.from('sms_outbox').select(c).order('created_at',{ascending:false}).limit(50);
+    let{data,error}=await q('id,event,to_phone,content,status,attempts,error,created_at,delivered_at');
+    if(error&&/delivered_at/.test(error.message||'')) ({data,error}=await q('id,event,to_phone,content,status,attempts,error,created_at'));
     if(error) throw error;return data||[];
   },adminSmsLogHtml,SK.table(4,4),()=>'<p class="text-sm text-red-500">Failed to load messages</p>');
 }
@@ -4013,7 +4074,7 @@ window.addEventListener('scroll',cancelPress,{passive:true});
    repeated taps until it has finished. The admin's actions are wrapped again
    when the admin code arrives (loadAdminCode). */
 const ACTION_NAMES=['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
- 'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminSendSmsCompose','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
+ 'adminCreditWallet','adminSaveSmsSettings','adminSmsPair','adminSmsUnpair','adminSendTestSms','adminSendSmsCompose','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
  'saveAnnouncement','takeDownAnnouncement','deleteAnnouncement',
  
  'adminApproveDeposit','adminRejectDeposit',

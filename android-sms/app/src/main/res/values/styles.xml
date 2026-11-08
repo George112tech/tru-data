@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TruSmsTheme" parent="android:Theme.Material.Light.DarkActionBar">
+        <item name="android:colorPrimary">@color/red_700</item>
+        <item name="android:colorPrimaryDark">@color/red_800</item>
+        <item name="android:colorAccent">@color/red_700</item>
+        <item name="android:windowBackground">@color/canvas</item>
+    </style>
+</resources>
