@@ -72,6 +72,8 @@ writeFileSync(join(out, "version.json"), JSON.stringify({ build }) + "\n");
 for (const f of readdirSync(root)) {
   if (/\.(webp|png|jpe?g|svg|ico)$/i.test(f)) cpSync(join(root, f), join(out, f));
 }
+// The web app manifest (Add to Home Screen).
+if (existsSync(join(root, "manifest.webmanifest"))) cpSync(join(root, "manifest.webmanifest"), join(out, "manifest.webmanifest"));
 if (existsSync(join(root, "fonts"))) cpSync(join(root, "fonts"), join(out, "fonts"), { recursive: true });
 
 // Response headers (Cloudflare Pages reads dist/_headers).
@@ -85,6 +87,9 @@ writeFileSync(join(out, "_headers"), `/*
   Cache-Control: no-cache
 /version.json
   Cache-Control: no-store
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=86400
 /app.*.js
   Cache-Control: public, max-age=31536000, immutable
 /tailwind.*.css
