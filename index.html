@@ -3001,11 +3001,29 @@ function adminSmsSettingsHtml(s){
    The TRU SMS app on an Android phone collects waiting texts every few
    seconds (gateway_poll) and sends them from its SIM. Pair it with a code
    made here; the phone's status refreshes while this tab is open. */
-function smsProviderPick(v){
+function smsShowProvider(v){
   const d=document.getElementById('sms-device-fields'),h=document.getElementById('sms-httpsms-fields');
   if(d) d.style.display=v==='device'?'':'none';
   if(h) h.style.display=v==='device'?'none':'';
-  document.querySelectorAll('input[name=sms-provider]').forEach(i=>{const l=i.closest('label');if(l){l.classList.toggle('border-red-500',i.checked);l.classList.toggle('bg-red-50',i.checked);l.classList.toggle('border-slate-200',!i.checked);}});
+  document.querySelectorAll('input[name=sms-provider]').forEach(i=>{i.checked=i.value===v;const l=i.closest('label');if(l){l.classList.toggle('border-red-500',i.checked);l.classList.toggle('bg-red-50',i.checked);l.classList.toggle('border-slate-200',!i.checked);}});
+}
+// Choosing who sends is saved at once (no need to press Save). Choosing your
+// phone before one is paired just shows the pairing steps; pairing switches to it.
+async function smsProviderPick(v){
+  smsShowProvider(v);
+  const cur=viewCache.get('admin-sms-settings')||{};
+  if(v===(cur.provider||'httpsms')) return;
+  if(v==='device'&&!cur.device_paired){showToast('Pair your phone below. Texts switch to it as soon as it is paired.',5000,'info');return;}
+  await saveSmsProvider(v);
+}
+async function saveSmsProvider(v){
+  const cur=viewCache.get('admin-sms-settings')||{};
+  const local=p=>p?'0'+String(p).replace(/^\+233/,''):'';
+  const{error}=await supa.rpc('save_sms_settings',{p_enabled:!!cur.enabled,p_from_number:local(cur.from_number),p_admin_phone:local(cur.admin_phone),p_events:cur.events||{},p_api_key:null,p_provider:v});
+  if(error){smsShowProvider(cur.provider||'httpsms');showToast('Could not switch: '+(error.message||'error'),6000,'error');return false;}
+  viewCache.set('admin-sms-settings',{...cur,provider:v});
+  showToast(v==='device'?'Saved: texts now go out from your phone (TRU SMS).':'Saved: texts now go out through httpSMS.',4000,'success');
+  return true;
 }
 function smsAgo(t){
   const s=Math.max(0,Math.round((Date.now()-new Date(t).getTime())/1000));
@@ -3020,24 +3038,35 @@ function smsDeviceStatusHtml(s){
 }
 function smsDevicePanelHtml(s){
   return`<div class="space-y-3"><div id="sms-device-status">${smsDeviceStatusHtml(s)}</div>
-    <div id="sms-pair-code"></div>
+    <div id="sms-pair-code">${smsPairCodeHtml()}</div>
     <div class="flex gap-2 flex-wrap"><button type="button" onclick="adminSmsPair()" class="px-4 py-2.5 rounded-xl bg-red-600 text-white font-bold text-sm">${s.device_paired?'Pair a new phone':'Pair a phone'}</button>${s.device_paired?`<button type="button" onclick="adminSmsUnpair()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm">Disconnect phone</button>`:''}</div>
     <p class="text-xs text-muted-theme">Texts go out from that phone's SIM and cost what an SMS costs on it. Keep the phone on, charged and connected. A SIM used only for TRU Data is safest: networks may block a number that sends many texts.</p></div>`;
+}
+function smsPairCodeHtml(){
+  const pc=state.smsPairCode;
+  if(!pc||Date.now()-pc.at>15*60000) return'';
+  const code=pc.code;
+  return`<div class="rounded-xl border-2 border-dashed border-red-300 bg-white p-4 text-center"><p class="text-xs font-bold uppercase text-slate-500">Pairing code</p><p id="sms-code-text" class="font-mono font-black text-xl sm:text-2xl tracking-wide my-2 select-all break-words">${esc(code)}</p><button type="button" onclick="copyText(document.getElementById('sms-code-text').textContent,'Pairing code')" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-sm">Copy code</button><ol class="text-left text-xs text-slate-600 mt-3 space-y-1 list-decimal list-inside"><li>Open <b>TRU SMS</b> on the sending phone.</li><li>Paste or type this code and tap <b>Connect</b>.</li><li>Texts now go out from that phone (make sure SMS is <b>On</b>).</li></ol><p class="text-xs text-amber-700 font-semibold mt-2">Shown here for 15 minutes. Keep it private: anyone with it can collect your texts.</p></div>`;
 }
 async function adminSmsPair(){
   const cur=viewCache.get('admin-sms-settings');
   if(cur&&cur.device_paired&&!confirm('Make a new pairing code? The phone paired now stops sending until it gets the new code.')) return;
   const{data,error}=await supa.rpc('admin_sms_pair_device');
   if(error){showToast((error.code==='PGRST202'?'Run the TRU SMS SQL first. ':'Could not pair: ')+(error.message||''),6000,'error');return;}
-  const code=String(data||'');
-  paintHtml('sms-pair-code',`<div class="rounded-xl border-2 border-dashed border-red-300 bg-white p-4 text-center"><p class="text-xs font-bold uppercase text-slate-500">Pairing code</p><p id="sms-code-text" class="font-mono font-black text-xl sm:text-2xl tracking-wide my-2 select-all break-words">${esc(code)}</p><button type="button" onclick="copyText(document.getElementById('sms-code-text').textContent,'Pairing code')" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-sm">Copy code</button><ol class="text-left text-xs text-slate-600 mt-3 space-y-1 list-decimal list-inside"><li>Open <b>TRU SMS</b> on the sending phone.</li><li>Paste or type this code and tap <b>Connect</b>.</li><li>Choose <b>My phone (TRU SMS)</b> above, turn SMS on and save.</li></ol><p class="text-xs text-amber-700 font-semibold mt-2">Shown only now. Keep it private: anyone with it can collect your texts.</p></div>`);
+  // Kept on screen for 15 minutes, even if the page refreshes (switching to TRU SMS to type it).
+  state.smsPairCode={code:String(data||''),at:Date.now()};
+  paintHtml('sms-pair-code',smsPairCodeHtml());
+
   if(cur) viewCache.set('admin-sms-settings',{...cur,device_paired:true,device_seen_at:null,device_info:{}});
   paintHtml('sms-device-status',smsDeviceStatusHtml({...(cur||{}),device_paired:true,device_seen_at:null,device_info:{}}));
+  // Pairing a phone means sending from it.
+  if((cur?.provider||'httpsms')!=='device'){smsShowProvider('device');await saveSmsProvider('device');}
 }
 async function adminSmsUnpair(){
   if(!confirm('Disconnect the phone? It stops sending texts until you pair it again.')) return;
   const{error}=await supa.rpc('admin_sms_unpair_device');
   if(error){showToast('Could not disconnect: '+(error.message||''),5000,'error');return;}
+  state.smsPairCode=null;
   showToast('Phone disconnected',3000,'info');loadAdminSmsSettings();
 }
 // While the SMS tab is open, keep the phone's status fresh (without redrawing the form).
