@@ -707,6 +707,24 @@ function pageLock(name,acquireTimeout,fn){
   authLocks[name]=run.catch(()=>{});
   return run;
 }
+/* Password reset links.
+   The reset email links to /?token_hash=...&type=recovery. Opening that only
+   shows the "choose a new password" page; the one-time code is used when the
+   person presses the button. Email scanners (Gmail checks links before people
+   tap them) only open the page, so they no longer use up the link.
+   Older links (#access_token=...&type=recovery) still work, and an expired
+   or used link (#error_code=otp_expired) shows a page that says so. */
+const RESET_LINK=(()=>{
+  try{
+    const q=new URLSearchParams(location.search),h=new URLSearchParams(location.hash.replace(/^#\/?/,''));
+    const clean=()=>{q.delete('token_hash');q.delete('type');['error','error_code','error_description'].forEach(k=>q.delete(k));const qs=q.toString();history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+'#/reset-password');};
+    if(q.get('token_hash')&&q.get('type')==='recovery'){const t=q.get('token_hash');clean();return{mode:'token',tokenHash:t};}
+    const code=h.get('error_code')||q.get('error_code'),err=h.get('error')||q.get('error');
+    if(code||err){const msg=h.get('error_description')||q.get('error_description')||'';clean();return{mode:'expired',reason:code||err,message:msg};}
+    if(h.get('type')==='recovery'&&h.get('access_token')) return{mode:'session'};
+  }catch(e){}
+  return null;
+})();
 const supa=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,lock:pageLock}});
 // A request that gets no answer is treated as failed, so nothing waits forever.
 function withTimeout(promise,ms,what){
@@ -1218,7 +1236,7 @@ function updateAuthUI(){
    anything newer is fetched in the background and painted in when it arrives.
    Each page has its own address (#/wallet, #/orders, ...) so refreshing or
    pressing Back keeps you where you were. */
-const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet','my-orders':'orders','admin-dashboard':'admin',account:'account'};
+const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',wallet:'wallet','my-orders':'orders','admin-dashboard':'admin',account:'account'};
 function viewToHash(view,params){
   if(!(view in ROUTES)) return null;
   if(view==='network'&&params) return '#/buy/'+params;
@@ -1228,7 +1246,7 @@ function hashToView(h){
   if(!h||!h.startsWith('#/')) return null;
   const[a,b]=h.slice(2).split('/');
   if(a==='buy') return b&&NETWORKS[b]?{view:'network',params:b}:{view:'home',params:null};
-  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password',wallet:'wallet',orders:'my-orders',admin:'admin-dashboard',account:'account'};
+  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',wallet:'wallet',orders:'my-orders',admin:'admin-dashboard',account:'account'};
   return m[a]?{view:m[a],params:null}:null;
 }
 function syncUrl(view,params,replace){
@@ -1688,11 +1706,44 @@ function togglePasswordVisibility(inputId,iconId){
   const eyeSlash=`<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.059 10.059 0 011.574-2.99M9.88 9.88l4.24 4.24m-4.24 0l4.24-4.24M3 3l18 18"/></svg>`;
   icon.innerHTML=isHidden?eyeSlash:eyeOpen;
 }
-function renderResetPassword(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><h2 class="text-2xl font-black">Set New Password</h2><p class="text-sm text-muted-theme mt-2">Choose a new password for your account</p></div><form onsubmit="handleResetPassword(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">New Password</label><input type="password" id="new-password" required minlength="8" autocomplete="new-password" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Update Password</button></form></div></div>`;}
+function resetPwField(id,label,auto){
+  return`<div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">${label}</label><div class="relative"><input type="password" id="${id}" required minlength="8" autocomplete="${auto}" class="w-full p-4 pr-12 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"><button type="button" id="${id}-eye" onclick="togglePasswordVisibility('${id}','${id}-eye')" aria-label="Show password" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer bg-transparent border-none p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div></div>`;
+}
+function renderResetPassword(){
+  const r=state.reset||{},card=inner=>`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in">${inner}</div></div>`;
+  const icon=(bg,path)=>`<div class="w-16 h-16 ${bg} rounded-2xl mx-auto mb-4 flex items-center justify-center text-white"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${path}"/></svg></div>`;
+  const lock='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z';
+  if(r.mode==='expired') return card(`<div class="text-center">${icon('bg-gradient-to-br from-amber-500 to-amber-400','M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')}<h2 class="text-2xl font-black">This link has expired</h2><p class="text-sm text-muted-theme mt-3">Password reset links work once and only for a short time. This one has expired or was already used.</p><p class="text-sm text-muted-theme mt-2">Ask for a new link and open it straight away.</p><button onclick="state.reset=null;navigateTo('forgot-password')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-8">Send me a new link</button><button onclick="state.reset=null;navigateTo('login')" class="w-full mt-3 py-3 rounded-2xl font-bold text-slate-600 border-2 border-slate-200">Back to sign in</button></div>`);
+  if(r.mode==='done') return card(`<div class="text-center">${icon('bg-gradient-to-br from-green-600 to-green-500','M5 13l4 4L19 7')}<h2 class="text-2xl font-black">Password changed</h2><p class="text-sm text-muted-theme mt-3">You are signed in with your new password.</p><button onclick="state.reset=null;navigateTo(state.isAdmin?'admin-dashboard':'home')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-8">Continue</button></div>`);
+  if(r.mode==='token'||r.mode==='session'||state.user) return card(`<div class="text-center mb-8">${icon('bg-gradient-to-br from-red-600 to-red-500',lock)}<h2 class="text-2xl font-black">Choose a new password</h2><p class="text-sm text-muted-theme mt-2">${state.user&&r.mode!=='token'&&state.user.email?'For '+esc(state.user.email)+'. ':''}At least 8 characters.</p></div><form onsubmit="handleResetPassword(event)" class="space-y-4">${resetPwField('new-password','New password','new-password')}${resetPwField('new-password2','Type it again','new-password')}<button type="submit" id="reset-btn" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Save new password</button></form>`);
+  return card(`<div class="text-center">${icon('bg-gradient-to-br from-red-600 to-red-500',lock)}<h2 class="text-2xl font-black">Reset your password</h2><p class="text-sm text-muted-theme mt-3">To choose a new password, open the reset link we email you. It brings you back to this page.</p><button onclick="navigateTo('forgot-password')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-8">Email me a reset link</button><button onclick="navigateTo('login')" class="w-full mt-3 py-3 rounded-2xl font-bold text-slate-600 border-2 border-slate-200">Back to sign in</button></div>`);
+}
 async function handleResetPassword(e){
-  e.preventDefault();const password=document.getElementById('new-password').value;
-  try{const{error}=await supa.auth.updateUser({password});if(error) throw error;showToast('Password updated',3000,'success');navigateTo('home');}
-  catch(err){showToast(''+(err.message||'Failed to update password'),4000,'error');}
+  e.preventDefault();
+  const password=document.getElementById('new-password').value,again=document.getElementById('new-password2').value;
+  if(password.length<8){showToast('Use at least 8 characters',3000,'error');return;}
+  if(password!==again){showToast('The two passwords are not the same',3000,'error');document.getElementById('new-password2').focus();return;}
+  const btn=document.getElementById('reset-btn');if(btn){btn.disabled=true;btn.textContent='Saving…';}
+  const r=state.reset||{};
+  try{
+    // The link's one-time code is used now, when the person asks for it.
+    if(r.mode==='token'){
+      state.resetting=true;
+      const{error}=await withTimeout(supa.auth.verifyOtp({token_hash:r.tokenHash,type:'recovery'}),20000);
+      if(error){state.reset={mode:'expired',reason:error.code||'otp',message:error.message};render();return;}
+      state.reset={mode:'session'};
+    }
+    const{data,error}=await withTimeout(supa.auth.updateUser({password}),20000);
+    if(error) throw error;
+    if(data?.user) state.user=data.user;
+    try{await fetchUserProfile();cacheUserState();}catch(e){}
+    state.reset={mode:'done'};render();
+    showToast('Password changed',3000,'success');
+  }catch(err){
+    const m=String(err.message||'');
+    showToast(/different from the old/i.test(m)?'Choose a password you have not used before':/weak|short|characters/i.test(m)?m:'Could not change the password: '+(m||'please try again'),5000,'error');
+    if(btn){btn.disabled=false;btn.textContent='Save new password';}
+  }finally{state.resetting=false;}
 }
 function renderForgotPassword(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Reset Password</h2><p class="text-sm text-muted-theme mt-2">Enter your email to receive reset instructions</p></div><form onsubmit="handleForgotPassword(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="forgot-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Send Reset Link</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Remember your password? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
 
@@ -3773,7 +3824,9 @@ document.addEventListener('DOMContentLoaded',async()=>{
   restoreCachedSession();
   state.announcement=store.get('announcement')||null;
   document.getElementById('global-fulfill-btn').addEventListener('click',()=>{if(state.activeOrderData) handleOrderButton();});
-  const recovering=/type=recovery/.test(location.hash);
+  if(RESET_LINK) state.reset=RESET_LINK;
+  const recovering=!!RESET_LINK;
+  if(RESET_LINK) navigateTo('reset-password',null,{replace:true});
   // Back from SeevPlus: /?seev=<session id>. Take it out of the address bar.
   const seevBack=(()=>{try{const u=new URL(location.href),id=u.searchParams.get('seev');if(!id) return null;u.searchParams.delete('seev');history.replaceState(history.state,'',u.pathname+u.search+u.hash);return /^[0-9a-f-]{36}$/i.test(id)?id:null;}catch(e){return null;}})();
   const fromUrl=hashToView(location.hash);
@@ -3807,7 +3860,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
 supa.auth.onAuthStateChange((event,session)=>{
   // Supabase asks that no other Supabase calls run inside this callback.
   setTimeout(()=>{
-    if(event==='PASSWORD_RECOVERY'){state.user=session.user;state.view='reset-password';state.params=null;render();return;}
+    if(event==='PASSWORD_RECOVERY'){state.user=session.user;state.reset={mode:'session'};navigateTo('reset-password',null,{replace:true});return;}
     if(event==='SIGNED_OUT'){
       if(state.user){resetUserState();navigateTo('landing',null,{replace:true});}
       return;
@@ -3816,7 +3869,7 @@ supa.auth.onAuthStateChange((event,session)=>{
     if(event==='SIGNED_IN'&&session){
       const changed=state.user?.id!==session.user.id;
       state.user=session.user;
-      if(!changed) return;
+      if(!changed||state.resetting) return;
       // Signed in from another tab or by a sign-in link: load this account.
       viewCache.clear();
       fetchUserProfile().then(()=>{
