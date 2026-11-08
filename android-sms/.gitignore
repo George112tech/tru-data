@@ -1,0 +1,16 @@
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+*.apk
+
+# The ready-made, signed APK is kept.
+!release/*.apk
+
+# The signing key never goes into the repository.
+signing/
+*.keystore
+*.jks
+keystore.properties
