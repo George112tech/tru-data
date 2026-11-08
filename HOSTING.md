@@ -1,8 +1,7 @@
 # Hosting the website on Cloudflare Pages
 
 GitHub Pages publishes the whole repository on the website's domain (the
-`android/` project, `supabase/` SQL and server code, `deploy_database.sql`,
-config files). Cloudflare Pages publishes only what
+`android/` project, `supabase/` SQL and server code, config files). Cloudflare Pages publishes only what
 `scripts/build-site.mjs` puts in `dist/`:
 
 - `index.html`, with a build id stamped in, and its script moved to a
@@ -55,8 +54,8 @@ Only after step 2 works:
 1. GitHub → the repository → **Settings → Pages**, and unpublish or turn
    off the site.
 2. **Settings → General → Danger zone → Change visibility → Private.**
-3. Check that `https://trudata.rvhssystems.com/deploy_database.sql` and
-   `https://trudata.rvhssystems.com/android/README.md` now say "Not found".
+3. Check that `https://trudata.rvhssystems.com/android/README.md` now says
+   "Not found".
 
 The `CNAME` file in the repository was only for GitHub Pages. It is not
 published to Cloudflare and can be deleted afterwards.

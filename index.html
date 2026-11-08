@@ -326,8 +326,6 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 .admin-tab-btn.active{background:linear-gradient(135deg,#dc2626,#ef4444);color:white;box-shadow:0 4px 12px rgba(220,38,38,.3);}
 .admin-tab-btn:not(.active){background:var(--bg-tertiary);color:var(--text-secondary);}
 .admin-tab-btn:not(.active):hover{background:var(--border-color);}
-.withdrawal-window-open{background:#f0fdf4;border:2px solid #86efac;border-radius:1rem;padding:1rem;color:#166534;}
-.withdrawal-window-closed{background:#fefce8;border:2px solid #fde047;border-radius:1rem;padding:1rem;color:#854d0e;}
 
 /* Announcement banner - attention grabbing */
 .announcement-banner{position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem 1.5rem;margin-bottom:2rem;border-left:6px solid var(--accent-primary);background:linear-gradient(135deg,#fef2f2 0%,#fee2e2 100%);box-shadow:0 10px 40px -10px rgba(220,38,38,.3);}
@@ -796,7 +794,7 @@ function withTimeout(promise,ms,what){
 }
 
 /* ===== LOCAL CACHE =====
-   The profile (wallet balance), agent profile and agent stats are kept on the
+   The profile (wallet balance) is kept on the
    device, so a returning visitor sees their account straight away while it is
    checked with the server in the background. */
 const store={
@@ -808,7 +806,6 @@ function cacheUserState(){
   if(!state.user) return;
   store.set('u:user',{id:state.user.id,email:state.user.email});
   store.set('u:profile',state.userProfile);
-  store.set('u:agent',null);store.set('u:agentStats',null);
 }
 // Read the saved session synchronously so the first paint already shows the
 // signed-in page; the server confirms it a moment later.
@@ -822,6 +819,7 @@ function restoreCachedSession(){
     if(cached&&cached.id===u.id){
       state.userProfile=store.get('u:profile');
       state.isAdmin=state.userProfile?.role==='admin';
+      if(state.isAdmin) loadAdminCode().catch(()=>{});
     }
     return true;
   }catch(e){return false;}
@@ -1088,7 +1086,7 @@ function openLegal(kind){
   postAppState();
 }
 function closeLegal(){const m=document.getElementById('legal-modal');if(m){m.remove();postAppState();}}
-/* Customers and agents agree to the current Terms and Privacy Policy once.
+/* Customers agree to the current Terms and Privacy Policy once.
    Anyone signed in who has not (including accounts made before the terms
    existed, or after they change) sees them and must agree or log out. The
    agreement is saved with the account (terms_version in the user metadata). */
@@ -1340,8 +1338,6 @@ async function navigateTo(view,params=null,opts={}){
     // In the app, signed-in people start on Home and the Account tab needs a sign-in.
     if(APP_SHELL&&view==='landing'&&state.user) view='home';
     if(view==='account'&&!state.user) view='login';
-    // Agent accounts were removed: old agent links and pages go to Home.
-    if(view==='agent-portal'||view==='agent-dashboard'){view=state.user?'home':'landing';params=null;opts={...opts,replace:true};}
     state.view=view;state.params=params;
     if(view==='my-orders') state.announcement=null;
     if(!opts.fromHistory) syncUrl(view,params,opts.replace);
@@ -2038,6 +2034,7 @@ async function fetchUserProfile(){
     const{data,error}=await supa.from('profiles').select('*').eq('id',state.user.id).single();
     if(error){if(error.code==='PGRST116'){state.userProfile=null;state.isAdmin=false;}return;} // keep what we had when offline
     state.userProfile=data;state.isAdmin=data.role==='admin';
+    if(state.isAdmin) loadAdminCode().catch(()=>{});
     cacheUserState();
   }catch(err){}
 }
@@ -2294,7 +2291,6 @@ async function handleOrderButton(){
     // place_order prices the bundle, debits the wallet and saves the order in one step.
     const{data:res,error}=await supa.rpc('place_order',{
       p_bundle_id:bundle.id,p_phone:phone,
-      p_agent_code:null,
       p_request_id:requestId
     });
     if(error) throw error;
@@ -2316,7 +2312,24 @@ async function handleOrderButton(){
   finally{state.orderInFlight=false;}
 }
 
-/* ===== ADMIN ===== */
+/* ===== ADMIN =====
+   The admin dashboard's code (between //@admin-begin and //@admin-end) is put in
+   its own file by scripts/build-site.mjs (admin.<hash>.js), so customers never
+   download it. The admin's browser fetches it after signing in, or when the
+   dashboard opens. In index.html as written it is inline, so it is already here. */
+const ADMIN_SRC='';
+let adminCodeLoad=null;
+function adminLoaded(){return typeof renderAdminDashboard==='function';}
+function loadAdminCode(){
+  if(adminLoaded()) return Promise.resolve();
+  if(!adminCodeLoad) adminCodeLoad=new Promise((resolve,reject)=>{
+    const sc=document.createElement('script');sc.src=ADMIN_SRC;
+    sc.onload=()=>{wrapActions();resolve();};
+    sc.onerror=()=>{adminCodeLoad=null;sc.remove();reject(new Error('Could not load the admin dashboard'));};
+    document.head.appendChild(sc);
+  });
+  return adminCodeLoad;
+}
 window.adminAuth=async(e)=>{
   e.preventDefault();
   const email=document.getElementById('adm-u').value.trim(),password=document.getElementById('adm-p').value;
@@ -2345,7 +2358,7 @@ async function refuseSignIn(msg){
 // The admin's order list. Only the columns the dashboard shows are fetched.
 async function fetchOrders(){
   try{
-    const cols='id,ref,Phone,Network,bundle_name,Amount,Status,pricing_mode,created_at,updated_at,api_reference,user_id';
+    const cols='id,ref,Phone,Network,bundle_name,Amount,Status,created_at,updated_at,api_reference,user_id';
     let{data,error}=await supa.from('orders').select(cols+',unverified_fee,unverified_combo').order('created_at',{ascending:false}).limit(1000);
     if(error&&/unverified_combo/.test(error.message||'')) ({data,error}=await supa.from('orders').select(cols+',unverified_fee').order('created_at',{ascending:false}).limit(1000));
     if(error&&/unverified_fee/.test(error.message||'')) ({data,error}=await supa.from('orders').select(cols).order('created_at',{ascending:false}).limit(1000));
@@ -2374,6 +2387,7 @@ function applyAdminOrderChange(row,type){
 }
 function renderAdminLogin(){return`<div class="min-h-screen flex items-center justify-center p-4"><div class="card-theme max-w-md w-full p-8 rounded-3xl shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black shadow-lg">A</div><h2 class="text-2xl font-black">Admin Access</h2><p class="text-sm text-muted-theme mt-2">Restricted area - Authorized personnel only</p></div><form onsubmit="adminAuth(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email</label><input type="email" id="adm-u" required autocomplete="username" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="admin@example.com"></div><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Password</label><input type="password" id="adm-p" required autocomplete="current-password" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="••••••••"></div><button type="submit" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all">Access Dashboard</button></form><div class="mt-6 text-center"><button onclick="navigateTo('landing')" class="text-sm text-muted-theme hover:text-red-600 transition-colors">&larr; Back to website</button></div></div></div>`;}
 
+//@admin-begin
 /* ===== FIX 2: Delivered counts as Completed ===== */
 function adminStatsHtml(){
   const card=(inner,label,color)=>`<div class="card-theme p-4 rounded-2xl text-center"><div class="text-2xl font-black ${color}">${inner}</div><div class="text-xs font-bold text-muted-theme uppercase">${label}</div></div>`;
@@ -2448,6 +2462,7 @@ function renderAdminDepositsTab(){
       <div class="flex items-center justify-between gap-3 mt-6 mb-2"><h3 class="text-sm font-black">Recent SeevPlus payments</h3><button onclick="adminSyncSeev()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-bold hover:bg-slate-200">Check waiting payments</button></div><div id="admin-seev-payments">${SK.table(5,3)}</div></div>
   </div>`;
 }
+//@admin-end
 /* ===== ACCOUNT DELETION =====
    A request goes to the admin. Once approved, the account and everything in
    it is deleted. Money in the wallet is not refunded. */
@@ -2487,6 +2502,7 @@ async function cancelAccountDeletion(){
   }catch(err){undo();showToast(err.message||'Could not cancel',5000,'error');}
 }
 
+//@admin-begin
 /* ===== ADMIN: BUNDLES AND PRICES =====
    Add, edit, hide or delete the bundles customers can buy. Prices here are the
    prices place_order charges; changes show on every open shop page at once. */
@@ -2715,13 +2731,13 @@ const SMS_EVENTS=[
   ['Admin alerts','admin_online_deposit','Online payment received'],
 ];
 /* ===== ADMIN: AUDIT LOG =====
-   The database writes a line for every important change (money, orders, agents,
+   The database writes a line for every important change (money, orders,
    settings, messages, accounts, security). Nobody can edit or delete lines from
    the site. Newest first; "Load more" pages back by id. */
 const AUDIT_PAGE=50;
-const AUDIT_CATS=[['','Everything'],['money','Money'],['orders','Orders'],['agents','Agents'],['catalog','Bundles & prices'],['settings','Settings'],['messages','Messages'],['accounts','Accounts'],['security','Security']];
-const AUDIT_WHO=[['','Anyone'],['admin','Admin'],['system','Server (automatic)'],['customer','Customers'],['agent','Agents'],['visitor','Not signed in'],['database','Supabase dashboard']];
-const AUDIT_STYLE={money:'bg-green-100 text-green-800',orders:'bg-blue-100 text-blue-800',agents:'bg-indigo-100 text-indigo-800',catalog:'bg-amber-100 text-amber-800',settings:'bg-slate-200 text-slate-800',messages:'bg-purple-100 text-purple-800',accounts:'bg-cyan-100 text-cyan-800',security:'bg-red-100 text-red-800'};
+const AUDIT_CATS=[['','Everything'],['money','Money'],['orders','Orders'],['catalog','Bundles & prices'],['settings','Settings'],['messages','Messages'],['accounts','Accounts'],['security','Security']];
+const AUDIT_WHO=[['','Anyone'],['admin','Admin'],['system','Server (automatic)'],['customer','Customers'],['visitor','Not signed in'],['database','Supabase dashboard']];
+const AUDIT_STYLE={money:'bg-green-100 text-green-800',orders:'bg-blue-100 text-blue-800',catalog:'bg-amber-100 text-amber-800',settings:'bg-slate-200 text-slate-800',messages:'bg-purple-100 text-purple-800',accounts:'bg-cyan-100 text-cyan-800',security:'bg-red-100 text-red-800'};
 state.audit={cat:'',who:'',q:'',rows:[],more:false,loading:false,error:null,missing:false,seq:0};
 let auditSearchTimer=null;
 function renderAdminAuditTab(){
@@ -2749,7 +2765,7 @@ function auditWhen(t){
   return rel?rel+' · '+abs:abs;
 }
 function auditWhoLabel(r){
-  const k={admin:'Admin',system:'Server',customer:'Customer',agent:'Agent',visitor:'Not signed in',database:'Dashboard'}[r.actor_kind]||r.actor_kind;
+  const k={admin:'Admin',system:'Server',customer:'Customer',visitor:'Not signed in',database:'Dashboard'}[r.actor_kind]||r.actor_kind;
   const cls={admin:'bg-slate-900 text-white',system:'bg-slate-200 text-slate-700',database:'bg-orange-100 text-orange-800'}[r.actor_kind]||'bg-slate-100 text-slate-700';
   return`<span class="px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${cls}">${esc(k)}</span>`;
 }
@@ -3281,6 +3297,7 @@ window.updateStatus=async function(ref,status){
   }catch(err){Object.assign(o,prev,{_pending:false});paintAdminOrders();showToast('Update failed: '+(err.message||'Unknown error'),4000,'error');}
 };
 
+//@admin-end
 /* ========== CHANGE 7: renderSuccessView – "View My Orders" as primary CTA ========== */
 function renderSuccessView(params){
   const pending=!!params?.pending;
@@ -3332,6 +3349,7 @@ function closeLandingAnnouncement(){
   syncLandingAnnouncement();
 }
 
+//@admin-begin
 /* ===== ADMIN: ANNOUNCEMENTS =====
    Every announcement is kept. Exactly one (or none) is live; customers see it.
    Post makes a new live one; Edit & repost changes an old one, makes it live
@@ -3393,6 +3411,7 @@ async function deleteAnnouncement(id){
   showToast('Announcement deleted.',3000,'success');
 }
 
+//@admin-end
 /* ===== WHATSAPP REPORT ORDER ===== */
 function reportOrder(order){
   const wa='233597578538';
@@ -3417,10 +3436,10 @@ function reportOrder(order){
 let lastRenderSig='';
 /* ===== APP MODE =====
    Inside the TRU Data Android app (2.1 and later) the app itself draws the
-   top bar, the tab bar (Home, Orders, Wallet, Agent, Account), the splash and
+   top bar, the tab bar (Home, Orders, Wallet, Account), the splash and
    the offline screen. The page hides its own menu and shows app screens for
-   Home, Welcome and Account; everything else (buying, wallet, orders, agent
-   hub, admin) is the normal site, so changes made on the site or in the admin
+   Home, Welcome and Account; everything else (buying, wallet, orders,
+   admin) is the normal site, so changes made on the site or in the admin
    dashboard reach the app at once without a new APK.
    Page -> app: window.TruApp.onState(json), .haptic(kind), .share(text)
    App -> page: window.TruAppBridge.go(tab), .back(), .refresh() */
@@ -3429,7 +3448,6 @@ const APP_ICONS={
   plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
   orders:'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>',
   wallet:'<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
-  agent:'<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
   share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/>',
   clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
   trending:'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
@@ -3474,7 +3492,9 @@ function postAppState(){
       title:v==='network'&&NETWORKS[state.params]?NETWORKS[state.params].name:(APP_TITLE[v]||''),
       loggedIn:!!state.user,admin:!!state.isAdmin,sheet:!!state.activeOrderData||!!document.getElementById('legal-modal'),
       balance:signedIn&&state.userProfile?'₵'+parseFloat(state.userProfile.balance||0).toFixed(2):'',
-      initials:signedIn?appInitials():'',agents:false};
+      initials:signedIn?appInitials():'',
+      // App 2.1.7 and older still have an Agent tab, shown unless told otherwise.
+      agents:false};
     const j=JSON.stringify(s);if(j===appLastState) return;appLastState=j;
     const n=appNative();if(n&&n.onState) n.onState(j);
   }catch(e){}
@@ -3484,9 +3504,8 @@ window.TruAppBridge={
   go(tab){
     if(state.isAdmin){navigateTo('admin-dashboard');return;}
     if(!state.user&&tab!=='home'){navigateTo('login');return;}
-    const to={home:state.user?'home':'landing',orders:'my-orders',wallet:'wallet',
-      agent:'home',account:'account'}[tab];
-    if(!to) return;
+    // A tab this page does not know (an old app's) goes Home.
+    const to={orders:'my-orders',wallet:'wallet',account:'account'}[tab]||(state.user?'home':'landing');
     closeLegal();
     if(state.activeOrderData){state.activeOrderData=null;if(state.view===to) render();}
     if(state.view===to){window.scrollTo({top:0,behavior:'smooth'});loadViewData(true);return;}
@@ -3747,10 +3766,16 @@ function render(){
     case 'admin-login': app.innerHTML=renderAdminLogin();extended.innerHTML='';break;
     case 'admin-dashboard':
       if(!state.isAdmin){navigateTo(state.user?'home':'landing',null,{replace:true});return;}
+      if(!adminLoaded()){
+        app.innerHTML=pageSkeleton();extended.innerHTML='';
+        loadAdminCode().then(()=>{if(state.view==='admin-dashboard'){lastRenderSig='';render();}})
+          .catch(()=>{if(state.view==='admin-dashboard') app.innerHTML=errorBox('Could not load the admin dashboard. Check your connection.','render()');});
+        break;
+      }
       app.innerHTML=renderAdminDashboard();extended.innerHTML='';
       break;
     case 'account': app.innerHTML=renderAppAccount();extended.innerHTML='';break;
-    default: navigateTo('landing');return;
+    default: navigateTo(state.user?'home':'landing',null,{replace:true});return;
   }
   if(state.activeOrderData){const m=document.createElement('div');m.innerHTML=renderOrderForm();app.appendChild(m.firstElementChild);appSheetDrag();}
   syncLandingAnnouncement();
@@ -3786,6 +3811,7 @@ function loadViewData(force){
   else if(v==='wallet'){refreshProfile(force);refreshPaymentSettings(force);fetchUserTransactions();loadMyDepositRequests();loadMyDeletion();loadSeevPayments();syncSeevPayments();}
   else if(v==='my-orders') loadMyOrders();
   else if(v==='admin-dashboard'){
+    if(!adminLoaded()) return; // loads with the admin code (render)
     if(!state.ordersLoaded||stale('orders',20000,force)) fetchOrders();
     const t=state.adminTab||'orders';
     if(t==='broadcast'){loadAdminAnnouncements();requestAnimationFrame(growAnnInputs);}
@@ -3864,7 +3890,7 @@ function startLive(){
   const uid=state.user?.id,admin=state.isAdmin;
   const ch=supa.channel('tru-live-'+(uid||'guest')+'-'+Date.now());
   const on=(table,filter,fn)=>ch.on('postgres_changes',Object.assign({event:'*',schema:'public',table},filter?{filter}:{}),p=>{try{fn(p);}catch(e){console.warn('live update',e);}});
-  on('announcements',null,()=>soon('ann',()=>{loadAnnouncement();if(state.isAdmin&&document.getElementById('admin-announcements')) loadAdminAnnouncements();}));
+  on('announcements',null,()=>soon('ann',()=>{loadAnnouncement();if(state.isAdmin&&adminLoaded()&&document.getElementById('admin-announcements')) loadAdminAnnouncements();}));
   on('bundles',null,()=>soon('bundles',()=>refreshBundles(true),400));
   on('app_settings',null,p=>onSettingChange(p.eventType==='DELETE'?{key:p.old&&p.old.key,value:null}:p.new));
   if(uid){
@@ -3878,12 +3904,12 @@ function startLive(){
   }
   if(admin){
     on('orders',null,p=>{
-      applyAdminOrderChange(p.eventType==='DELETE'?p.old:p.new,p.eventType);
+      if(adminLoaded()) applyAdminOrderChange(p.eventType==='DELETE'?p.old:p.new,p.eventType);
       if(p.eventType==='INSERT'&&p.new) adminAlert('New order '+(p.new.ref||'')+': '+(p.new.bundle_name||'')+' '+String(p.new.Network||'').toUpperCase()+' to '+(p.new.Phone||''));
     });
-    on('deposit_requests',null,p=>{soon('admin-deposits',loadAdminDepositRequests,400);if(p.eventType==='INSERT'&&p.new) adminAlert('New MoMo deposit to check: ₵'+Number(p.new.amount||0).toFixed(2));});
-    on('sms_outbox',null,()=>soon('admin-sms',loadAdminSmsLog,1000));
-    on('account_deletion_requests',null,p=>{soon('admin-del',loadAdminDeletions,400);if(p.eventType==='INSERT'&&p.new) adminAlert('New account deletion request from '+(p.new.label||'a user'));});
+    on('deposit_requests',null,p=>{soon('admin-deposits',()=>{if(adminLoaded()) loadAdminDepositRequests();},400);if(p.eventType==='INSERT'&&p.new) adminAlert('New MoMo deposit to check: ₵'+Number(p.new.amount||0).toFixed(2));});
+    on('sms_outbox',null,()=>soon('admin-sms',()=>{if(adminLoaded()) loadAdminSmsLog();},1000));
+    on('account_deletion_requests',null,p=>{soon('admin-del',()=>{if(adminLoaded()) loadAdminDeletions();},400);if(p.eventType==='INSERT'&&p.new) adminAlert('New account deletion request from '+(p.new.label||'a user'));});
   }
   ch.subscribe(status=>{
     liveStatus=status;paintHtml('live-indicator',liveIndicatorHtml());
@@ -3950,7 +3976,7 @@ function prefetchUserData(){
 }
 
 /* ===== HIDDEN ADMIN ENTRY =====
-   There is no Admin link for customers or agents. Double-click (or, on a
+   There is no Admin link for customers. Double-click (or, on a
    phone, press and hold) an empty part of the page to open the admin login.
    The admin's own nav shows an Admin button once signed in. */
 function openAdminEntry(){
@@ -3984,18 +4010,21 @@ window.addEventListener('scroll',cancelPress,{passive:true});
 
 /* ===== BUTTONS THAT TALK TO THE SERVER =====
    Every action shows a spinner on the tapped button at once and ignores
-   repeated taps until it has finished. */
-['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
+   repeated taps until it has finished. The admin's actions are wrapped again
+   when the admin code arrives (loadAdminCode). */
+const ACTION_NAMES=['handleLogin','handleRegister','handleForgotPassword','handleResetPassword','submitDepositRequest','initiateDeposit',
  'adminCreditWallet','adminSaveSmsSettings','adminSendTestSms','adminSendSmsCompose','adminRetrySms','adminSavePaystackPublicKey','adminSavePaystackSecretKey','adminTogglePaystack','adminSaveOnlineFee','startSeevPayment','adminToggleSeev','adminSaveSeevFee','adminSaveSeevKey','adminToggleUnverified','adminAddVerifiedNumber','adminSaveSeevWebhookSecret','adminCheckSeev','adminSyncSeev',
  'saveAnnouncement','takeDownAnnouncement','deleteAnnouncement',
  
  'adminApproveDeposit','adminRejectDeposit',
  'adminAuth','updateStatus','deleteOrder','handleOrderButton','adminAddBundle','adminSaveBundle','adminToggleBundle','adminDeleteBundle','adminDeleteSms','adminClearSms','adminUnlockLogin','requestAccountDeletion','cancelAccountDeletion','adminApproveDeletion','adminRejectDeletion','adminSaveMomoDetails'
-].forEach(n=>{if(typeof window[n]==='function') window[n]=action(window[n]);});
+];
+function wrapActions(){ACTION_NAMES.forEach(n=>{const f=window[n];if(typeof f==='function'&&!f.__action){const w=action(f);w.__action=true;window[n]=w;}});}
+wrapActions();
 
 /* ===== INIT =====
    1. Draw the page straight away from what this device remembers (signed-in
-      user, wallet balance, agent status), at the address in the URL.
+      user, wallet balance), at the address in the URL.
    2. Confirm the session with Supabase and refresh that information.
    3. Redraw only if something that changes the page is different. */
 function userSig(){return JSON.stringify([state.user?.id||null,state.isAdmin]);}
