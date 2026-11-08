@@ -35,7 +35,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Agent links (https://trudata.rvhssystems.com/?agent=...) open in the app. -->
+            <!-- Links to https://trudata.rvhssystems.com open in the app (for example after a password reset). -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

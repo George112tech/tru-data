@@ -9,8 +9,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         // Raise both for every new APK.
-        versionCode 32
-        versionName "2.1.7"
+        versionCode 33
+        versionName "2.1.8"
     }
 
     buildTypes {

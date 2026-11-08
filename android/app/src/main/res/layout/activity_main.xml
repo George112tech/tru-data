@@ -5,7 +5,7 @@
     content     the website (WebView) with pull-to-refresh, the loading line and
                 the native "You're offline" screen
     ad_container AdMob banner (hidden until an ad has loaded)
-    tab_bar     native tabs: Home, Orders, Wallet, Agent, Account
+    tab_bar     native tabs: Home, Orders, Wallet, Account
   The bars stay hidden until the site says it is ready (app mode), so an older
   version of the site still works with its own menu.
 -->

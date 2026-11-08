@@ -6,11 +6,11 @@ package com.trudata.app;
 //
 // The app draws these itself, so they always look and feel like an app:
 //   - the red top bar (logo, or back arrow + page title, wallet balance, avatar)
-//   - the tab bar (Home, Orders, Wallet, Agent, Account) with haptic feedback
+//   - the tab bar (Home, Orders, Wallet, Account) with haptic feedback
 //   - the red heartbeat splash screen and the "You're offline" screen
 //   - pull to refresh, AdMob banner + interstitial + app open ad, sharing, deep links
 //
-// Everything inside (buying, wallet, orders, agent hub, admin) is the website
+// Everything inside (buying, wallet, orders, admin) is the website
 // https://trudata.rvhssystems.com in "app mode". Changes merged on GitHub or
 // made in the admin dashboard show up in the app straight away; a new APK is
 // only needed to change this file, the layout, the icons or the ads.
@@ -130,10 +130,10 @@ public class MainActivity extends Activity {
     private static final int INK_500 = Color.parseColor("#64748B");
 
     // ----- Tabs: key (as the site names them), label, icon, address -----
-    private static final String[] TAB_KEYS = {"home", "orders", "wallet", "agent", "account"};
-    private static final int[] TAB_LABELS = {R.string.tab_home, R.string.tab_orders, R.string.tab_wallet, R.string.tab_agent, R.string.tab_account};
-    private static final int[] TAB_ICONS = {R.drawable.ic_tab_home, R.drawable.ic_tab_orders, R.drawable.ic_tab_wallet, R.drawable.ic_tab_agent, R.drawable.ic_tab_account};
-    private static final String[] TAB_HASH = {"", "#/orders", "#/wallet", "#/agent", "#/account"};
+    private static final String[] TAB_KEYS = {"home", "orders", "wallet", "account"};
+    private static final int[] TAB_LABELS = {R.string.tab_home, R.string.tab_orders, R.string.tab_wallet, R.string.tab_account};
+    private static final int[] TAB_ICONS = {R.drawable.ic_tab_home, R.drawable.ic_tab_orders, R.drawable.ic_tab_wallet, R.drawable.ic_tab_account};
+    private static final String[] TAB_HASH = {"", "#/orders", "#/wallet", "#/account"};
 
     private static final long SPLASH_MIN_MS = 1200; // long enough to see the heartbeat
 
@@ -498,7 +498,7 @@ public class MainActivity extends Activity {
     // State from the site
     // =====================================================================
 
-    // {"view","tab","title","root","logo","loggedIn","admin","sheet","balance","initials","agents"}
+    // {"view","tab","title","root","logo","loggedIn","admin","sheet","balance","initials"}
     private void applyState(String json) {
         if (!onSite()) return;
         JSONObject s;
@@ -544,11 +544,6 @@ public class MainActivity extends Activity {
         avatar.setVisibility(showAvatar ? View.VISIBLE : View.GONE);
 
         tabsAllowed = loggedIn && !admin;
-        // The Agent tab goes away when the admin has deactivated agent accounts.
-        int agentTab = java.util.Arrays.asList(TAB_KEYS).indexOf("agent");
-        if (agentTab >= 0) {
-            tabBar.getChildAt(agentTab).setVisibility(s.optBoolean("agents", true) ? View.VISIBLE : View.GONE);
-        }
         selectTab(s.optString("tab", ""), false);
         String view = s.optString("view", "");
         sheetOpen = s.optBoolean("sheet");
@@ -1074,7 +1069,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    // Links like https://trudata.rvhssystems.com/?agent=AGT-123 open in the app.
+    // Links to https://trudata.rvhssystems.com (for example from the password reset page) open in the app.
     private void loadWebApp(Intent intent) {
         Uri data = intent != null ? intent.getData() : null;
         if (data != null && SITE_HOST.equals(data.getHost())) webView.loadUrl(data.toString());

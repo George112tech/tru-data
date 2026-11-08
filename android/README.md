@@ -1,4 +1,4 @@
-# TRU Data Android app (2.1.0)
+# TRU Data Android app (2.1.8)
 
 This folder is the complete Android project. Open it in AIDE (or Android Studio)
 and build it as it is.
@@ -11,8 +11,8 @@ https://www.figma.com/design/BNCeJWwtcRPB3IHV3sZHYn
 | The app (needs a new APK to change)          | The website (changes reach the app at once)          |
 |----------------------------------------------|------------------------------------------------------|
 | Red top bar: logo or back arrow + page title, wallet balance, initials | Home: greeting, balance card, quick actions, network switcher, bundles, recent orders |
-| Tab bar: Home, Orders, Wallet, Agent, Account | Buy sheet (slides up, drag down to close)            |
-| Red heartbeat splash screen                  | Wallet, MoMo top-up, orders, agent hub, account      |
+| Tab bar: Home, Orders, Wallet, Account       | Buy sheet (slides up, drag down to close)            |
+| Red heartbeat splash screen                  | Wallet, MoMo top-up, orders, account                 |
 | "You're offline" screen, retries by itself   | Bundles, prices, MoMo number, announcements (admin)  |
 | Pull to refresh, haptics, share sheet        | Terms, privacy, account deletion                     |
 | AdMob banner + interstitial (same IDs)       | "Update available" prompt for new APKs               |
@@ -47,12 +47,12 @@ chmod +x gradlew        # only if the file lost its permission when copied
 ```
 The APK is in `app/build/outputs/apk/release/`.
 
-Same package (`com.trudata.app`), same AdMob app ID and ad unit IDs as before, plus an app open ad (2.1.1). 2.1.2 hides the Agent tab once agent accounts
-are deactivated. 2.1.3 keeps the SeevPlus payment page inside the app. 2.1.4 keeps every
+Same package (`com.trudata.app`), same AdMob app ID and ad unit IDs as before, plus an app open ad (2.1.1). 2.1.3 keeps the SeevPlus payment page inside the app. 2.1.4 keeps every
 page of a payment inside the app (no tabs, ads or pull-to-refresh there),
 asks before leaving a payment, and returns to the signed-in wallet. 2.1.5
-opens patupaa.com (admin: Process order) in a panel inside the app.
-Version: `versionCode 30`, `versionName 2.1.5` in `app/build.gradle`. Raise
+opens patupaa.com (admin: Process order) in a panel inside the app. 2.1.6
+and 2.1.7 fix the full-screen ad and report crashes; 2.1.8 removes the Agent tab.
+Version: `versionCode 33`, `versionName 2.1.8` in `app/build.gradle`. Raise
 both for every new APK.
 
 ## Publish the update

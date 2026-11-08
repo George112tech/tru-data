@@ -1,9 +1,9 @@
 # Security and payment fixes: deployment
 
-Wallet balances, deposits, orders, agent markups and withdrawals used to be
+Wallet balances, deposits and orders used to be
 written straight from the browser. Anyone could open the browser console and
 change their own balance, credit a deposit without paying, buy data at any
-price, approve themselves as an agent, or make themselves admin. All of that
+price, or make themselves admin. All of that
 now happens in the database or in Edge Functions, and the page only asks.
 
 ## Deploy in this order, back to back
@@ -46,8 +46,8 @@ you switch Paystack off are still credited.
 
 ## SMS notifications (httpSMS)
 
-Customers, agents and the admin get text messages for orders, deposits,
-withdrawals, agent applications and price-change requests. They are sent
+Customers and the admin get text messages for orders, deposits and
+account requests, and the admin can text customers from the SMS tab. They are sent
 through [httpSMS](https://httpsms.com), which sends each text from an Android
 phone running the httpSMS app, using that phone's SIM.
 
@@ -87,12 +87,9 @@ checks for changes every 30 seconds and whenever it comes back into view.
 | Purchases | Browser debited itself, then saved the order; repeated taps charged repeatedly | `place_order()` prices, debits and saves in one step; repeated taps return the same order |
 | Refer2Bundle API | Any signed-in user could order any data for free | Removed. Orders stay Pending; the admin fulfils them on patupaa.com |
 | Order delete | Deleted the row, no refund | Cancels and refunds the wallet (admin chooses) |
-| Agent approval and totals | Agents could approve themselves and edit totals | Admin only (database trigger) |
-| Agent markups | One agent saving a price locked it for every agent | Each agent's lock is their own; admin lock or unlock applies to all |
-| Withdrawals | Insert crashed (uuid = text); paid amounts counted twice; window override only in the admin's browser | Fixed trigger; server checks profit, window and pending requests; shared override |
-| Phone numbers | MoMo and agent numbers lost their leading 0 | Stored as text |
+| Phone numbers | MoMo numbers lost their leading 0 | Stored as text |
 | Announcements | Old ones were never cleared | Clearing works |
-| XSS | Order, agent and announcement data put into the page unescaped | Escaped everywhere; order refs passed via `data-` attributes |
+| XSS | Order and announcement data put into the page unescaped | Escaped everywhere; order refs passed via `data-` attributes |
 | Password reset | Link logged you in with no way to set a password | Shows a "Set New Password" form |
 
 ## Still worth doing

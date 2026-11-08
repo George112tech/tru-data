@@ -7,7 +7,6 @@
     <string name="tab_home">Home</string>
     <string name="tab_orders">Orders</string>
     <string name="tab_wallet">Wallet</string>
-    <string name="tab_agent">Agent</string>
     <string name="tab_account">Account</string>
     <string name="offline_title">You\'re offline</string>
     <string name="offline_text">Check your mobile data or Wi-Fi. Your wallet and orders are safe.</string>
