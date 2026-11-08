@@ -177,6 +177,9 @@ public class MainActivity extends Activity {
     private String panelCopyText;
     private boolean clearHistoryOnSite = false;
     private boolean adLoaded = false;
+    private long bannerRetryMs = 0;
+    private static final long BANNER_RETRY_MIN_MS = 30 * 1000;
+    private static final long BANNER_RETRY_MAX_MS = 5 * 60 * 1000;
 
     private AdView bannerAd;
     private InterstitialAd interstitialAd;
@@ -1342,13 +1345,34 @@ public class MainActivity extends Activity {
     private void setupAds() {
         bannerAd = new AdView(this);
         bannerAd.setAdUnitId(BANNER_AD_UNIT_ID);
-        bannerAd.setAdSize(AdSize.SMART_BANNER);
+        bannerAd.setAdSize(bannerSize());
         // The banner area stays hidden until an ad has loaded, so there is no empty gap.
         bannerAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 adLoaded = true;
+                bannerRetryMs = 0;
                 updateChrome();
+            }
+
+            @Override
+            public void onAdFailedToLoad(LoadAdError error) {
+                // Once a banner is showing, AdMob keeps it and refreshes by itself.
+                if (adLoaded) return;
+                // No banner yet (no ad for this phone right now, or no network):
+                // try again after 30 s, then 1, 2, at most 5 minutes.
+                bannerRetryMs = bannerRetryMs == 0 ? BANNER_RETRY_MIN_MS
+                        : Math.min(bannerRetryMs * 2, BANNER_RETRY_MAX_MS);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (!isFinishing() && bannerAd != null && !adLoaded) bannerAd.loadAd(new AdRequest.Builder().build());
+                        } catch (Throwable t) {
+                            // An ad must never crash the app.
+                        }
+                    }
+                }, bannerRetryMs);
             }
         });
         adContainer.addView(bannerAd);
@@ -1389,6 +1413,24 @@ public class MainActivity extends Activity {
             }
         });
         loadInterstitial();
+    }
+
+    // The banner's size: Google's "anchored adaptive" banner, as wide as the screen
+    // with the best height for this phone. (The old SMART_BANNER asked for a size
+    // that depends on the screen and often had no ad on some phones.) If this
+    // version of the ads library does not have it, the standard 320x50 banner.
+    private AdSize bannerSize() {
+        android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+        int widthDp = Math.round(dm.widthPixels / dm.density);
+        try {
+            java.lang.reflect.Method m = AdSize.class.getMethod(
+                    "getCurrentOrientationAnchoredAdaptiveBannerAdSize", Context.class, int.class);
+            Object size = m.invoke(null, this, widthDp);
+            if (size instanceof AdSize) return (AdSize) size;
+        } catch (Throwable t) {
+            // fall back below
+        }
+        return AdSize.BANNER;
     }
 
     private void loadInterstitial() {
