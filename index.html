@@ -725,6 +725,11 @@ const RESET_LINK=(()=>{
   }catch(e){}
   return null;
 })();
+// ?go=login&why=reset: the website handed over to the app after a password
+// reset, so the app opens on Sign in. Taken out of the address straight away.
+const GO_LOGIN=(()=>{
+  try{const u=new URL(location.href);if(u.searchParams.get('go')!=='login') return null;const why=u.searchParams.get('why');u.searchParams.delete('go');u.searchParams.delete('why');history.replaceState(null,'',u.pathname+u.search+u.hash);return{why};}catch(e){return null;}
+})();
 const supa=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,lock:pageLock}});
 // A request that gets no answer is treated as failed, so nothing waits forever.
 function withTimeout(promise,ms,what){
@@ -1714,9 +1719,25 @@ function renderResetPassword(){
   const icon=(bg,path)=>`<div class="w-16 h-16 ${bg} rounded-2xl mx-auto mb-4 flex items-center justify-center text-white"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${path}"/></svg></div>`;
   const lock='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z';
   if(r.mode==='expired') return card(`<div class="text-center">${icon('bg-gradient-to-br from-amber-500 to-amber-400','M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')}<h2 class="text-2xl font-black">This link has expired</h2><p class="text-sm text-muted-theme mt-3">Password reset links work once and only for a short time. This one has expired or was already used.</p><p class="text-sm text-muted-theme mt-2">Ask for a new link and open it straight away.</p><button onclick="state.reset=null;navigateTo('forgot-password')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-8">Send me a new link</button><button onclick="state.reset=null;navigateTo('login')" class="w-full mt-3 py-3 rounded-2xl font-bold text-slate-600 border-2 border-slate-200">Back to sign in</button></div>`);
-  if(r.mode==='done') return card(`<div class="text-center">${icon('bg-gradient-to-br from-green-600 to-green-500','M5 13l4 4L19 7')}<h2 class="text-2xl font-black">Password changed</h2><p class="text-sm text-muted-theme mt-3">You are signed in with your new password.</p><button onclick="state.reset=null;navigateTo(state.isAdmin?'admin-dashboard':'home')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-8">Continue</button></div>`);
+  if(r.mode==='done') return(appHandoffOffered()?appHandoffHtml():'')+card(`<div class="text-center">${icon('bg-gradient-to-br from-green-600 to-green-500','M5 13l4 4L19 7')}<h2 class="text-2xl font-black">Password changed</h2><p class="text-sm text-muted-theme mt-3">You are signed in with your new password.</p><button onclick="state.reset=null;navigateTo(state.isAdmin?'admin-dashboard':'home')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-8">Continue</button></div>`);
   if(r.mode==='token'||r.mode==='session'||state.user) return card(`<div class="text-center mb-8">${icon('bg-gradient-to-br from-red-600 to-red-500',lock)}<h2 class="text-2xl font-black">Choose a new password</h2><p class="text-sm text-muted-theme mt-2">${state.user&&r.mode!=='token'&&state.user.email?'For '+esc(state.user.email)+'. ':''}At least 8 characters.</p></div><form onsubmit="handleResetPassword(event)" class="space-y-4">${resetPwField('new-password','New password','new-password')}${resetPwField('new-password2','Type it again','new-password')}<button type="submit" id="reset-btn" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Save new password</button></form>`);
   return card(`<div class="text-center">${icon('bg-gradient-to-br from-red-600 to-red-500',lock)}<h2 class="text-2xl font-black">Reset your password</h2><p class="text-sm text-muted-theme mt-3">To choose a new password, open the reset link we email you. It brings you back to this page.</p><button onclick="navigateTo('forgot-password')" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-8">Email me a reset link</button><button onclick="navigateTo('login')" class="w-full mt-3 py-3 rounded-2xl font-bold text-slate-600 border-2 border-slate-200">Back to sign in</button></div>`);
+}
+/* After a password reset in a phone browser: offer to open the TRU Data app
+   (Android). The intent link opens the app if it is installed, on its Sign in
+   screen; if not, the browser just stays on this site. */
+const IS_ANDROID=/Android/i.test(navigator.userAgent);
+function appHandoffOffered(){return IS_ANDROID&&!IN_APP&&!state.appHandoffClosed;}
+function appHandoffHtml(){
+  return`<div id="app-handoff" class="fixed inset-0 z-[150] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate__animated animate__fadeIn" onclick="if(event.target===this)closeAppHandoff()"><div class="card-theme w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl animate-scale-in" role="dialog" aria-modal="true" aria-labelledby="app-handoff-title"><img src="apple-touch-icon.png" alt="" width="64" height="64" class="w-16 h-16 rounded-2xl mx-auto mb-4 shadow-lg"><h3 id="app-handoff-title" class="text-xl font-black">Use the TRU Data app?</h3><p class="text-sm text-muted-theme mt-2">Your password has been changed. If you have the TRU Data app, open it and sign in with your new password.</p><button onclick="openAppToSignIn()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-6">Open the app</button><button onclick="closeAppHandoff()" class="w-full mt-3 py-3 rounded-2xl font-bold text-slate-600 border-2 border-slate-200">Stay on the website</button></div></div>`;
+}
+function closeAppHandoff(){state.appHandoffClosed=true;const el=document.getElementById('app-handoff');if(el) el.remove();}
+function openAppToSignIn(){
+  state.appHandoffClosed=true;
+  const fallback=encodeURIComponent(location.origin+location.pathname);
+  location.href='intent://trudata.rvhssystems.com/?go=login&why=reset#Intent;scheme=https;package=com.trudata.app;S.browser_fallback_url='+fallback+';end';
+  // If the app is not installed and the browser stays here, just close the popup.
+  setTimeout(()=>{if(document.visibilityState==='visible'){const el=document.getElementById('app-handoff');if(el) el.remove();}},1500);
 }
 async function handleResetPassword(e){
   e.preventDefault();
@@ -1738,7 +1759,8 @@ async function handleResetPassword(e){
     if(data?.user) state.user=data.user;
     try{await fetchUserProfile();cacheUserState();}catch(e){}
     state.reset={mode:'done'};render();
-    showToast('Password changed',3000,'success');
+    // The popup (Android) or the page itself says it; a toast would cover the popup's button.
+    if(!appHandoffOffered()) showToast('Password changed',3000,'success');
   }catch(err){
     const m=String(err.message||'');
     showToast(/different from the old/i.test(m)?'Choose a password you have not used before':/weak|short|characters/i.test(m)?m:'Could not change the password: '+(m||'please try again'),5000,'error');
@@ -3830,7 +3852,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   // Back from SeevPlus: /?seev=<session id>. Take it out of the address bar.
   const seevBack=(()=>{try{const u=new URL(location.href),id=u.searchParams.get('seev');if(!id) return null;u.searchParams.delete('seev');history.replaceState(history.state,'',u.pathname+u.search+u.hash);return /^[0-9a-f-]{36}$/i.test(id)?id:null;}catch(e){return null;}})();
   const fromUrl=hashToView(location.hash);
-  if(!recovering) navigateTo(fromUrl?fromUrl.view:'landing',fromUrl?fromUrl.params:null,{replace:true});
+  if(GO_LOGIN&&!recovering) navigateTo(state.user?'home':'login',null,{replace:true});
+  else if(!recovering) navigateTo(fromUrl?fromUrl.view:'landing',fromUrl?fromUrl.params:null,{replace:true});
   const before=userSig();
   try{
     const{data:{session},error}=await supa.auth.getSession();
@@ -3850,6 +3873,10 @@ document.addEventListener('DOMContentLoaded',async()=>{
   if(!recovering){
     if(userSig()!==before) navigateTo(state.view,state.params,{replace:true,keepScroll:true});
     else{updateAuthUI();paintBalance();}
+  }
+  if(GO_LOGIN&&!recovering){
+    if(state.user&&state.view==='login') navigateTo('home',null,{replace:true});
+    else if(!state.user&&GO_LOGIN.why==='reset') showToast('Sign in with your new password',5000,'info');
   }
   if(!recovering) ensureTermsAccepted();
   if(seevBack) handleSeevReturn(seevBack);
