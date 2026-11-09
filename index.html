@@ -1307,7 +1307,7 @@ function updateAuthUI(){
    anything newer is fetched in the background and painted in when it arrives.
    Each page has its own address (#/wallet, #/orders, ...) so refreshing or
    pressing Back keeps you where you were. */
-const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',wallet:'wallet','my-orders':'orders','admin-dashboard':'admin',account:'account'};
+const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',guest:'guest',wallet:'wallet','my-orders':'orders','admin-dashboard':'admin',account:'account'};
 function viewToHash(view,params){
   if(!(view in ROUTES)) return null;
   if(view==='network'&&params) return '#/buy/'+params;
@@ -1317,7 +1317,7 @@ function hashToView(h){
   if(!h||!h.startsWith('#/')) return null;
   const[a,b]=h.slice(2).split('/');
   if(a==='buy') return b&&NETWORKS[b]?{view:'network',params:b}:{view:'home',params:null};
-  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',wallet:'wallet',orders:'my-orders',admin:'admin-dashboard',account:'account'};
+  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',guest:'guest',wallet:'wallet',orders:'my-orders',admin:'admin-dashboard',account:'account'};
   return m[a]?{view:m[a],params:null}:null;
 }
 function syncUrl(view,params,replace){
@@ -2348,6 +2348,20 @@ async function guestCheckPending(){
       showToast(`Your payment went through: order ${data.order_ref} is placed.`,7000,'success');
     }else if(data&&['failed','abandoned','reversed','not_found'].includes(data.status)&&Date.now()-(p.at||0)>30*60000) guestStore(GUEST_PENDING,null);
   }catch(e){}
+}
+/* Buy without an account: pick a network (then a bundle), or track an order. */
+function renderGuestStart(){
+  const sub={mtn:'MTN Ghana',airteltigo:'AirtelTigo Ghana',telecel:'Telecel Ghana'};
+  if(APP_SHELL) return`<div class="app-screen">
+    <section class="app-hero"><h1 style="font-size:26px;font-weight:900;letter-spacing:-.01em">Buy without an account</h1><p>Choose a network and a bundle, then pay with MoMo or card. No account needed.</p></section>
+    <div class="app-body" style="padding:22px 20px 28px">
+      <p class="app-ovl">Choose a network</p>
+      <div class="app-card">${Object.keys(APP_NET).map(n=>`<button type="button" class="app-row" onclick="navigateTo('network','${n}')">${appMono(n,38)}<span class="tx"><b>${APP_NET[n].short}</b><small>${sub[n]||''} data bundles</small></span><span class="app-chev">${appIcon('chevron',20)}</span></button>`).join('')}</div>
+      <p class="app-ovl" style="margin-top:8px">Already paid?</p>
+      <button type="button" class="app-btn-secondary app-btn-icon" onclick="navigateTo('track')"><span class="ic">${appIcon('orders',18)}</span>Track an order</button>
+      <p class="app-fine">Have an account? <button type="button" onclick="navigateTo('login')" style="font-weight:800;color:#B91C1C">Sign in</button> to pay from your wallet.</p>
+    </div></div>`;
+  return`<div class="min-h-screen flex items-center justify-center px-4 py-16"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><h2 class="text-2xl font-black mb-2">Buy without an account</h2><p class="text-muted-theme mb-6">Choose a network and a bundle, then pay with MoMo or card.</p><div class="grid grid-cols-3 gap-2">${Object.keys(NETWORKS).map(n=>`<button onclick="navigateTo('network','${n}')" class="py-3 rounded-xl border-2 border-slate-200 font-bold text-sm hover:border-red-500">${esc(NETWORKS[n].name.replace(' Ghana',''))}</button>`).join('')}</div><button onclick="navigateTo('track')" class="w-full mt-5 py-4 rounded-2xl font-bold text-red-700 bg-red-50 border-2 border-red-200">Track an order</button><p class="text-sm text-muted-theme mt-5">Have an account? <button onclick="navigateTo('login')" class="font-bold text-red-600">Sign in</button></p></div></div>`;
 }
 function renderGuestReceipt(params){
   const p=params||{},r=p.result;
@@ -3760,9 +3774,9 @@ function appInitials(){
 }
 const APP_TAB={home:'home',landing:'home',network:'home',success:'home','my-orders':'orders',wallet:'wallet',account:'account'};
 const APP_ROOT=new Set(['home','landing','my-orders','wallet','account','admin-dashboard']);
-const APP_TITLE={'my-orders':'My orders',wallet:'Wallet',account:'Account',terms:'Terms of Service',privacy:'Privacy Policy',about:'About us',login:'Sign in',register:'Create account','forgot-password':'Reset password','reset-password':'New password',track:'Track an order','guest-receipt':'Your order','admin-dashboard':'Admin','admin-login':'Admin',success:'Your order'};
+const APP_TITLE={'my-orders':'My orders',wallet:'Wallet',account:'Account',terms:'Terms of Service',privacy:'Privacy Policy',about:'About us',login:'Sign in',register:'Create account','forgot-password':'Reset password','reset-password':'New password',track:'Track an order','guest-receipt':'Your order',guest:'Buy without an account','admin-dashboard':'Admin','admin-login':'Admin',success:'Your order'};
 // Where Back goes from pages that are not one of the tabs.
-const APP_PARENT={network:'home',success:'home',login:'landing',register:'landing','forgot-password':'login','reset-password':'home','admin-login':'landing',track:'landing','guest-receipt':'landing',terms:'account',privacy:'account',about:'account'};
+const APP_PARENT={network:'home',success:'home',login:'landing',register:'landing','forgot-password':'login','reset-password':'home','admin-login':'landing',track:'landing','guest-receipt':'landing',guest:'landing',terms:'account',privacy:'account',about:'account'};
 let appLastState='';
 // Tell the app what to show in its top bar and tab bar.
 function postAppState(){
@@ -3800,6 +3814,8 @@ window.TruAppBridge={
     if(state.view===home||document.getElementById('terms-gate')) return 'exit';
     let to=APP_ROOT.has(state.view)?home:(APP_PARENT[state.view]||home);
     if((to==='account'&&!state.user)||(to==='landing'&&state.user)) to=home;
+    // Signed out, the bundles are reached from the guest page: Back returns there.
+    if(to==='home'&&!state.user) to='guest';
     navigateTo(to);return 'handled';
   },
   // Pull to refresh.
@@ -3916,8 +3932,7 @@ function renderAppWelcome(){
       <div class="app-cta">
         <button type="button" class="app-btn-primary" onclick="navigateTo('register')">Create free account</button>
         <button type="button" class="app-btn-secondary" onclick="navigateTo('login')">I already have an account</button>
-        <button type="button" class="app-btn-guest" onclick="navigateTo('network','mtn')"><span class="ic">${appIcon('zap',18)}</span>Buy without an account</button>
-        <button type="button" class="app-btn-secondary app-btn-icon" onclick="navigateTo('track')"><span class="ic">${appIcon('orders',18)}</span>Track an order</button>
+        <button type="button" class="app-btn-guest" onclick="navigateTo('guest')"><span class="ic">${appIcon('zap',18)}</span>Buy without an account</button>
         <p class="app-fine">By continuing you agree to our <button type="button" onclick="openLegal('terms')">Terms</button> and <button type="button" onclick="openLegal('privacy')">Privacy Policy</button>.</p>
       </div>
     </div>
@@ -4048,6 +4063,7 @@ function render(){
     case 'success': app.innerHTML=renderSuccessView(state.params);extended.innerHTML='';break;
     case 'guest-receipt': app.innerHTML=renderGuestReceipt(state.params);extended.innerHTML='';break;
     case 'track': app.innerHTML=renderTrack(state.params);extended.innerHTML='';break;
+    case 'guest': if(state.user){navigateTo('home',null,{replace:true});return;} app.innerHTML=renderGuestStart();extended.innerHTML='';break;
     case 'admin-login': app.innerHTML=renderAdminLogin();extended.innerHTML='';break;
     case 'admin-dashboard':
       if(!state.isAdmin){navigateTo(state.user?'home':'landing',null,{replace:true});return;}
