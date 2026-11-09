@@ -2308,9 +2308,22 @@ async function guestPay(){
     const handler=PaystackPop.setup({key:state.paystackPublicKey,email:r.email,amount:Number(r.amount_pesewas),currency:'GHS',ref:r.reference,
       metadata:{guest:true,custom_fields:[{display_name:'Order',variable_name:'order',value:label},{display_name:'Phone for updates',variable_name:'contact',value:contact}]},
       callback:function(resp){guestConfirm(r.reference,contact);},
-      onClose:function(){if(!state.guestConfirming) showToast('Payment not finished. Nothing was charged.',4000,'info');}});
+      onClose:function(){if(!state.guestConfirming) guestAfterClose(r.reference,contact);}});
     handler.openIframe();
   }catch(e){showToast('Could not open Paystack. Please try again.',5000,'error');}
+}
+// The popup was closed without Paystack's success callback. A MoMo payment can
+// still go through (approved on the phone after closing), so ask once now and
+// once more later; the server (Paystack's webhook) makes the order either way.
+async function guestAfterClose(ref,contact){
+  const ask=async()=>{try{const{data}=await supa.functions.invoke('guest-checkout',{body:{reference:ref}});return data||null;}catch(e){return null;}};
+  let d=await ask();
+  if(d&&d.paid){if(!state.guestConfirming) guestConfirm(ref,contact);return;}
+  if(d&&['failed','abandoned','reversed'].includes(d.status)){showToast('Payment not finished. Nothing was charged.',4000,'info');return;}
+  showToast('Payment not finished. If you approved it on your phone, your order will be placed as soon as it comes through.',7000,'info');
+  await new Promise(res=>setTimeout(res,20000));
+  d=await ask();
+  if(d&&d.paid&&!state.guestConfirming) guestConfirm(ref,contact);
 }
 // After paying: ask the server (which asks Paystack) until the order exists.
 async function guestConfirm(ref,contact){
@@ -2556,8 +2569,25 @@ async function refuseSignIn(msg){
   store.clearUser();viewCache.clear();updateAuthUI();
   showToast(msg,5000,'error');
 }
+// Guest payments still waiting to be confirmed (the customer closed the page
+// before it was): the server asks Paystack about each and makes the paid ones'
+// orders. Run when the admin's order list loads, at most once a minute.
+async function reconcileGuestPayments(){
+  if(!state.isAdmin||state.guestReconciling||Date.now()-(state.guestReconciledAt||0)<60000) return;
+  state.guestReconciling=true;
+  try{
+    const{data,error}=await supa.functions.invoke('guest-checkout',{body:{reconcile:true}});
+    state.guestReconciledAt=Date.now();
+    if(!error&&data&&Array.isArray(data.created)&&data.created.length){
+      showToast(data.created.length===1?`A paid guest order was added: ${data.created[0]}`:`${data.created.length} paid guest orders were added`,7000,'success');
+      state.guestReconciling=false;fetchOrders();return;
+    }
+  }catch(e){}
+  state.guestReconciling=false;
+}
 // The admin's order list. Only the columns the dashboard shows are fetched.
 async function fetchOrders(){
+  reconcileGuestPayments();
   try{
     const cols='id,ref,Phone,Network,bundle_name,Amount,Status,created_at,updated_at,api_reference,user_id';
     let{data,error}=await supa.from('orders').select(cols+',unverified_fee,unverified_combo,guest_phone,paystack_reference').order('created_at',{ascending:false}).limit(1000);
@@ -3417,6 +3447,7 @@ function adminPaystackHtml(d){
     <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Online payment fee (%)</label><div class="flex gap-2"><input id="ps-fee" type="number" min="0" max="10" step="0.01" value="${esc(ONLINE_FEE)}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-bold"><button onclick="adminSaveOnlineFee()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">Set this to the percentage Paystack charges you. Customers pay deposit ÷ (1 − fee), so after Paystack takes its cut you receive exactly what is credited. Example at ${pctText(ONLINE_FEE)}: to add ₵100.00 they pay ₵${onlineCharge(100).total.toFixed(2)}.</p></div>
     <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Public key</label><div class="flex gap-2"><input id="ps-public" type="text" value="${esc(d.publicKey||'')}" placeholder="pk_live_..." class="flex-1 min-w-0 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSavePaystackPublicKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div></div>
     <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Secret key</label><div class="flex gap-2"><input id="ps-secret" type="password" autocomplete="off" placeholder="${status.set?'Saved (ends in '+esc(status.last4)+'). Paste a new one to replace it':'sk_live_...'}" class="flex-1 min-w-0 p-3 border-2 rounded-xl font-mono text-sm"><button onclick="adminSavePaystackSecretKey()" class="px-4 rounded-xl bg-slate-900 text-white font-bold text-sm">Save</button></div><p class="text-xs text-muted-theme mt-1">${status.set?`Secret key saved (${esc(status.mode)} mode, ends in ${esc(status.last4)}).`:'No secret key saved yet. Paystack deposits cannot be confirmed until you add one.'} It is stored privately and never shown again.</p></div>
+    <div><label class="block text-xs font-bold uppercase text-slate-500 mb-1">Webhook URL</label><div class="flex gap-2"><code class="flex-1 min-w-0 bg-slate-100 px-3 py-2.5 rounded-xl text-xs font-mono break-all">${esc(PAYSTACK_WEBHOOK_URL)}</code><button onclick="copyText(PAYSTACK_WEBHOOK_URL,'Webhook URL')" class="px-4 rounded-xl bg-slate-100 font-bold text-sm">Copy</button></div><p class="text-xs text-muted-theme mt-1">Paste it in Paystack: Settings → API Keys &amp; Webhooks → <b>Live Webhook URL</b>, then Save. Paystack then tells TRU Data about each payment itself, so a guest's order is made even if they close the page before it is confirmed.</p></div>
   </div>`;
 }
 async function loadAdminPaystackSettings(){
@@ -3528,6 +3559,7 @@ async function adminToggleSeev(){
   showToast(next?'SeevPlus is ON':'SeevPlus is OFF',3000,'success');
 }
 const SEEV_WEBHOOK_URL=SB_URL+'/functions/v1/seevplus';
+const PAYSTACK_WEBHOOK_URL=SB_URL+'/functions/v1/paystack-webhook';
 async function adminSaveSeevWebhookSecret(){
   const input=document.getElementById('seev-whsec');
   const key=input?.value.trim();
