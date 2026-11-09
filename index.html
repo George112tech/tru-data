@@ -504,6 +504,10 @@ body:has(.order-modal) .apk-float{display:none!important;}
 .app-btn-primary,.app-btn-secondary{height:52px;border-radius:14px;font-size:14px;font-weight:800;transition:transform .12s;}
 .app-btn-primary{background:var(--grad-btn);color:#fff;box-shadow:0 8px 20px -6px rgba(142,22,22,.45);}
 .app-btn-secondary{background:#fff;color:#0F172A;border:1.5px solid #E2E8F0;}
+/* Guest checkout: a third, clearly visible choice on the welcome screen. */
+.app-btn-guest{height:52px;border-radius:14px;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;background:#FEF2F2;color:#B91C1C;border:1.5px dashed #F5A3A3;transition:transform .12s;}
+.app-btn-guest .ic{display:inline-flex;}
+.app-btn-guest:active{transform:scale(.97);}
 .app-fine{font-size:12px;font-weight:500;color:#64748B;text-align:center;}
 .app-fine button{color:#B91C1C;font-weight:700;}
 .app-body #announcement-slot>div{padding:0!important;max-width:none!important;}
@@ -3911,7 +3915,8 @@ function renderAppWelcome(){
       <div class="app-cta">
         <button type="button" class="app-btn-primary" onclick="navigateTo('register')">Create free account</button>
         <button type="button" class="app-btn-secondary" onclick="navigateTo('login')">I already have an account</button>
-        <p class="app-fine" style="margin-top:6px">Just one bundle? <button type="button" onclick="navigateTo('network','mtn')" style="font-weight:800;color:#B91C1C">Buy without an account</button> · <button type="button" onclick="navigateTo('track')" style="font-weight:800;color:#B91C1C">Track an order</button></p>
+        <button type="button" class="app-btn-guest" onclick="navigateTo('network','mtn')"><span class="ic">${appIcon('zap',18)}</span>Buy without an account</button>
+        <p class="app-fine" style="margin-top:2px">Bought as a guest? <button type="button" onclick="navigateTo('track')" style="font-weight:800;color:#B91C1C">Track an order</button></p>
         <p class="app-fine">By continuing you agree to our <button type="button" onclick="openLegal('terms')">Terms</button> and <button type="button" onclick="openLegal('privacy')">Privacy Policy</button>.</p>
       </div>
     </div>
