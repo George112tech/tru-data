@@ -506,7 +506,8 @@ body:has(.order-modal) .apk-float{display:none!important;}
 .app-btn-secondary{background:#fff;color:#0F172A;border:1.5px solid #E2E8F0;}
 /* Guest checkout: a third, clearly visible choice on the welcome screen. */
 .app-btn-guest{height:52px;border-radius:14px;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;background:#FEF2F2;color:#B91C1C;border:1.5px dashed #F5A3A3;transition:transform .12s;}
-.app-btn-guest .ic{display:inline-flex;}
+.app-btn-guest .ic,.app-btn-icon .ic{display:inline-flex;}
+.app-btn-icon{display:flex;align-items:center;justify-content:center;gap:8px;}
 .app-btn-guest:active{transform:scale(.97);}
 .app-fine{font-size:12px;font-weight:500;color:#64748B;text-align:center;}
 .app-fine button{color:#B91C1C;font-weight:700;}
@@ -1306,7 +1307,7 @@ function updateAuthUI(){
    anything newer is fetched in the background and painted in when it arrives.
    Each page has its own address (#/wallet, #/orders, ...) so refreshing or
    pressing Back keeps you where you were. */
-const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',wallet:'wallet','my-orders':'orders','admin-dashboard':'admin',account:'account'};
+const ROUTES={terms:'terms',privacy:'privacy',landing:'',home:'buy',network:'buy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',guest:'guest',wallet:'wallet','my-orders':'orders','admin-dashboard':'admin',account:'account'};
 function viewToHash(view,params){
   if(!(view in ROUTES)) return null;
   if(view==='network'&&params) return '#/buy/'+params;
@@ -1316,7 +1317,7 @@ function hashToView(h){
   if(!h||!h.startsWith('#/')) return null;
   const[a,b]=h.slice(2).split('/');
   if(a==='buy') return b&&NETWORKS[b]?{view:'network',params:b}:{view:'home',params:null};
-  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',wallet:'wallet',orders:'my-orders',admin:'admin-dashboard',account:'account'};
+  const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',guest:'guest',wallet:'wallet',orders:'my-orders',admin:'admin-dashboard',account:'account'};
   return m[a]?{view:m[a],params:null}:null;
 }
 function syncUrl(view,params,replace){
@@ -1358,7 +1359,7 @@ async function navigateTo(view,params=null,opts={}){
 /* ========== CHANGE 3: renderHome – wallet card with My Orders + Sign Out ========== */
 function renderHome(){
   if(APP_SHELL&&state.user) return renderAppHome();
-  if(!state.user) return `<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-500 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><h2 class="text-2xl font-black mb-4">Login Required</h2><p class="text-muted-theme mb-8">Please sign in or create an account to purchase data bundles.</p><div class="flex flex-col gap-3"><button onclick="navigateTo('login')" class="cta-button text-white py-4 rounded-2xl font-bold text-lg">Sign In</button><button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 border-2 border-slate-200 hover:border-red-500 transition-all">Create Account</button></div><div class="mt-6 pt-6 border-t border-slate-200"><p class="text-xs font-bold uppercase text-slate-500 mb-3">Or buy without an account</p><div class="grid grid-cols-3 gap-2">${Object.keys(NETWORKS).map(n=>`<button onclick="navigateTo('network','${n}')" class="py-3 rounded-xl border-2 border-slate-200 font-bold text-sm hover:border-red-500">${esc(NETWORKS[n].name.replace(' Ghana',''))}</button>`).join('')}</div><p class="text-xs text-muted-theme mt-3">Pay with MoMo or card. <button onclick="navigateTo('track')" class="font-bold text-red-600">Track an order</button></p></div></div></div>`;
+  if(!state.user) return `<div class="min-h-screen flex items-center justify-center px-4"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-500 rounded-full mx-auto mb-6 flex items-center justify-center"><svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div><h2 class="text-2xl font-black mb-4">Login Required</h2><p class="text-muted-theme mb-8">Please sign in or create an account to purchase data bundles.</p><div class="flex flex-col gap-3"><button onclick="navigateTo('login')" class="cta-button text-white py-4 rounded-2xl font-bold text-lg">Sign In</button><button onclick="navigateTo('register')" class="py-4 rounded-2xl font-bold text-slate-600 border-2 border-slate-200 hover:border-red-500 transition-all">Create Account</button><button onclick="navigateTo('track')" class="py-4 rounded-2xl font-bold text-red-700 bg-red-50 border-2 border-red-200 hover:border-red-500 transition-all flex items-center justify-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>Track an order</button></div><div class="mt-6 pt-6 border-t border-slate-200"><p class="text-xs font-bold uppercase text-slate-500 mb-3">Or buy without an account</p><div class="grid grid-cols-3 gap-2">${Object.keys(NETWORKS).map(n=>`<button onclick="navigateTo('network','${n}')" class="py-3 rounded-xl border-2 border-slate-200 font-bold text-sm hover:border-red-500">${esc(NETWORKS[n].name.replace(' Ghana',''))}</button>`).join('')}</div><p class="text-xs text-muted-theme mt-3">Pay with MoMo or card. No account needed.</p></div></div></div>`;
   const bal=state.userProfile?parseFloat(state.userProfile.balance||0):0;
   return `<div class="animate__animated animate__fadeIn">
     ${state.isDirectMode?'<div class="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 text-center text-xs font-black uppercase tracking-widest animate-pulse shadow-lg">Direct Order Mode Active</div>':''}
@@ -2347,6 +2348,20 @@ async function guestCheckPending(){
       showToast(`Your payment went through: order ${data.order_ref} is placed.`,7000,'success');
     }else if(data&&['failed','abandoned','reversed','not_found'].includes(data.status)&&Date.now()-(p.at||0)>30*60000) guestStore(GUEST_PENDING,null);
   }catch(e){}
+}
+/* Buy without an account: pick a network (then a bundle), or track an order. */
+function renderGuestStart(){
+  const sub={mtn:'MTN Ghana',airteltigo:'AirtelTigo Ghana',telecel:'Telecel Ghana'};
+  if(APP_SHELL) return`<div class="app-screen">
+    <section class="app-hero"><h1 style="font-size:26px;font-weight:900;letter-spacing:-.01em">Buy without an account</h1><p>Choose a network and a bundle, then pay with MoMo or card. No account needed.</p></section>
+    <div class="app-body" style="padding:22px 20px 28px">
+      <p class="app-ovl">Choose a network</p>
+      <div class="app-card">${Object.keys(APP_NET).map(n=>`<button type="button" class="app-row" onclick="navigateTo('network','${n}')">${appMono(n,38)}<span class="tx"><b>${APP_NET[n].short}</b><small>${sub[n]||''} data bundles</small></span><span class="app-chev">${appIcon('chevron',20)}</span></button>`).join('')}</div>
+      <p class="app-ovl" style="margin-top:8px">Already paid?</p>
+      <button type="button" class="app-btn-secondary app-btn-icon" onclick="navigateTo('track')"><span class="ic">${appIcon('orders',18)}</span>Track an order</button>
+      <p class="app-fine">Have an account? <button type="button" onclick="navigateTo('login')" style="font-weight:800;color:#B91C1C">Sign in</button> to pay from your wallet.</p>
+    </div></div>`;
+  return`<div class="min-h-screen flex items-center justify-center px-4 py-16"><div class="max-w-md w-full card-theme p-8 rounded-3xl text-center animate-scale-in"><h2 class="text-2xl font-black mb-2">Buy without an account</h2><p class="text-muted-theme mb-6">Choose a network and a bundle, then pay with MoMo or card.</p><div class="grid grid-cols-3 gap-2">${Object.keys(NETWORKS).map(n=>`<button onclick="navigateTo('network','${n}')" class="py-3 rounded-xl border-2 border-slate-200 font-bold text-sm hover:border-red-500">${esc(NETWORKS[n].name.replace(' Ghana',''))}</button>`).join('')}</div><button onclick="navigateTo('track')" class="w-full mt-5 py-4 rounded-2xl font-bold text-red-700 bg-red-50 border-2 border-red-200">Track an order</button><p class="text-sm text-muted-theme mt-5">Have an account? <button onclick="navigateTo('login')" class="font-bold text-red-600">Sign in</button></p></div></div>`;
 }
 function renderGuestReceipt(params){
   const p=params||{},r=p.result;
@@ -3759,9 +3774,9 @@ function appInitials(){
 }
 const APP_TAB={home:'home',landing:'home',network:'home',success:'home','my-orders':'orders',wallet:'wallet',account:'account'};
 const APP_ROOT=new Set(['home','landing','my-orders','wallet','account','admin-dashboard']);
-const APP_TITLE={'my-orders':'My orders',wallet:'Wallet',account:'Account',terms:'Terms of Service',privacy:'Privacy Policy',about:'About us',login:'Sign in',register:'Create account','forgot-password':'Reset password','reset-password':'New password',track:'Track an order','guest-receipt':'Your order','admin-dashboard':'Admin','admin-login':'Admin',success:'Your order'};
+const APP_TITLE={'my-orders':'My orders',wallet:'Wallet',account:'Account',terms:'Terms of Service',privacy:'Privacy Policy',about:'About us',login:'Sign in',register:'Create account','forgot-password':'Reset password','reset-password':'New password',track:'Track an order','guest-receipt':'Your order',guest:'Buy without an account','admin-dashboard':'Admin','admin-login':'Admin',success:'Your order'};
 // Where Back goes from pages that are not one of the tabs.
-const APP_PARENT={network:'home',success:'home',login:'landing',register:'landing','forgot-password':'login','reset-password':'home','admin-login':'landing',track:'landing','guest-receipt':'landing',terms:'account',privacy:'account',about:'account'};
+const APP_PARENT={network:'home',success:'home',login:'landing',register:'landing','forgot-password':'login','reset-password':'home','admin-login':'landing',track:'landing','guest-receipt':'landing',guest:'landing',terms:'account',privacy:'account',about:'account'};
 let appLastState='';
 // Tell the app what to show in its top bar and tab bar.
 function postAppState(){
@@ -3799,6 +3814,8 @@ window.TruAppBridge={
     if(state.view===home||document.getElementById('terms-gate')) return 'exit';
     let to=APP_ROOT.has(state.view)?home:(APP_PARENT[state.view]||home);
     if((to==='account'&&!state.user)||(to==='landing'&&state.user)) to=home;
+    // Signed out, the bundles are reached from the guest page: Back returns there.
+    if(to==='home'&&!state.user) to='guest';
     navigateTo(to);return 'handled';
   },
   // Pull to refresh.
@@ -3915,8 +3932,7 @@ function renderAppWelcome(){
       <div class="app-cta">
         <button type="button" class="app-btn-primary" onclick="navigateTo('register')">Create free account</button>
         <button type="button" class="app-btn-secondary" onclick="navigateTo('login')">I already have an account</button>
-        <button type="button" class="app-btn-guest" onclick="navigateTo('network','mtn')"><span class="ic">${appIcon('zap',18)}</span>Buy without an account</button>
-        <p class="app-fine" style="margin-top:2px">Bought as a guest? <button type="button" onclick="navigateTo('track')" style="font-weight:800;color:#B91C1C">Track an order</button></p>
+        <button type="button" class="app-btn-guest" onclick="navigateTo('guest')"><span class="ic">${appIcon('zap',18)}</span>Buy without an account</button>
         <p class="app-fine">By continuing you agree to our <button type="button" onclick="openLegal('terms')">Terms</button> and <button type="button" onclick="openLegal('privacy')">Privacy Policy</button>.</p>
       </div>
     </div>
@@ -4047,6 +4063,7 @@ function render(){
     case 'success': app.innerHTML=renderSuccessView(state.params);extended.innerHTML='';break;
     case 'guest-receipt': app.innerHTML=renderGuestReceipt(state.params);extended.innerHTML='';break;
     case 'track': app.innerHTML=renderTrack(state.params);extended.innerHTML='';break;
+    case 'guest': if(state.user){navigateTo('home',null,{replace:true});return;} app.innerHTML=renderGuestStart();extended.innerHTML='';break;
     case 'admin-login': app.innerHTML=renderAdminLogin();extended.innerHTML='';break;
     case 'admin-dashboard':
       if(!state.isAdmin){navigateTo(state.user?'home':'landing',null,{replace:true});return;}
