@@ -3517,7 +3517,7 @@ async function loadAdminSeevSettings(){
 function adminSeevPaymentsHtml(rows){
   if(!rows) return'<p class="text-sm text-muted-theme">Not set up yet. Run the SeevPlus SQL first.</p>';
   if(!rows.length) return'<p class="text-sm text-muted-theme">No SeevPlus payments yet.</p>';
-  return`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-2 text-xs font-black uppercase text-slate-500">Customer</th><th class="p-2 text-xs font-black uppercase text-slate-500">Credit / paid</th><th class="p-2 text-xs font-black uppercase text-slate-500">Status</th><th class="p-2 text-xs font-black uppercase text-slate-500">When</th><th class="p-2"></th></tr></thead><tbody>${rows.map(r=>{const st=SEEV_STATUS[r.status]||[r.status,'bg-slate-100 text-slate-600'];return`<tr class="border-b"><td class="p-2 text-xs">${esc(r.email||r.user_id)}<div class="font-mono text-[11px] text-slate-400">${esc(r.reference||'')}</div></td><td class="p-2 font-bold">₵${Number(r.deposit).toFixed(2)}<div class="text-xs text-slate-400">paid ₵${Number(r.charge).toFixed(2)}</div></td><td class="p-2"><span class="px-2 py-1 rounded-full text-xs font-bold ${st[1]}">${st[0]}</span>${r.error?`<div class="text-xs text-red-600 mt-1">${esc(r.error)}</div>`:''}</td><td class="p-2 text-xs text-muted-theme">${new Date(r.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</td><td class="p-2">${r.status==='pending'?`<button data-id="${esc(r.id)}" onclick="adminCheckSeev(this.dataset.id)" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold">Check</button>`:''}</td></tr>`;}).join('')}</tbody></table></div>`;
+  return`<div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b"><tr><th class="p-2 text-xs font-black uppercase text-slate-500">Customer</th><th class="p-2 text-xs font-black uppercase text-slate-500">Credit / paid</th><th class="p-2 text-xs font-black uppercase text-slate-500">Status</th><th class="p-2 text-xs font-black uppercase text-slate-500">When</th><th class="p-2"></th></tr></thead><tbody>${rows.map(r=>{const st=SEEV_STATUS[r.status]||[r.status,'bg-slate-100 text-slate-600'];return`<tr class="border-b"><td class="p-2 text-xs">${esc(r.email||r.user_id)}<div class="font-mono text-[11px] text-slate-400">${esc(r.reference||'')}</div></td><td class="p-2 font-bold">₵${Number(r.deposit).toFixed(2)}<div class="text-xs text-slate-400">paid ₵${Number(r.charge).toFixed(2)}</div></td><td class="p-2"><span class="px-2 py-1 rounded-full text-xs font-bold ${st[1]}">${st[0]}</span>${r.error?`<div class="text-xs text-red-600 mt-1">${esc(r.error)}</div>`:''}</td><td class="p-2 text-xs text-muted-theme">${new Date(r.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</td><td class="p-2"><div class="flex gap-2 justify-end">${r.status==='pending'?`<button data-id="${esc(r.id)}" onclick="adminCheckSeev(this.dataset.id)" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold">Check</button>`:''}${seevCanDelete(r)?`<button data-id="${esc(r.id)}" onclick="adminDeleteSeev(this.dataset.id,this)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200" title="Delete this record">Delete</button>`:''}</div></td></tr>`;}).join('')}</tbody></table></div>`;
 }
 async function loadAdminSeevPayments(){
   await paint('admin-seev-payments','admin-seev-payments',async()=>{
@@ -3533,6 +3533,18 @@ async function adminCheckSeev(id){
   const{data,error}=await supa.functions.invoke('seevplus',{body:{action:'verify',session:id}});
   if(error||!data){showToast('Could not check with SeevPlus right now.',4000,'error');return;}
   showToast(data.status==='paid'?(data.credited?`Confirmed: ₵${Number(data.amount).toFixed(2)} credited.`:'Already credited.'):data.error||('Status: '+data.status),5000,data.status==='paid'?'success':'info');
+  loadAdminSeevPayments();
+}
+// A record can be deleted once it is finished; one still waiting for SeevPlus only after a day.
+function seevCanDelete(r){return !['creating','pending'].includes(r.status)||Date.now()-new Date(r.created_at).getTime()>864e5;}
+async function adminDeleteSeev(id,btn){
+  const r=(viewCache.get('admin-seev-payments')||[]).find(x=>x.id===id);
+  const what=r?`₵${Number(r.deposit).toFixed(2)} from ${r.email||'this customer'} (${(SEEV_STATUS[r.status]||[r.status])[0]})`:'this payment';
+  if(!confirm(`Delete the SeevPlus record for ${what}?\n\nThis only removes it from this list. A wallet credit already made is kept, and the record cannot be credited again.`)) return;
+  if(btn){btn.disabled=true;btn.textContent='Deleting…';}
+  const{error}=await supa.rpc('admin_delete_seev_payment',{p_id:id});
+  if(error){if(btn){btn.disabled=false;btn.textContent='Delete';}showToast(/admin_delete_seev_payment|does not exist|schema cache/i.test(error.message||'')?'Run the SeevPlus delete SQL first.':error.message||'Could not delete it',6000,'error');return;}
+  showToast('SeevPlus record deleted',3000,'success');
   loadAdminSeevPayments();
 }
 async function adminSyncSeev(){
