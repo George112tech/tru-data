@@ -13,7 +13,7 @@
      in the Android app (TruShell), or opened from the home screen (web-shell: the page draws the app's bars itself). -->
 <script>(function(u,c){var sa=navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);if(/iPhone|iPad|iPod/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1))c.add('is-ios');if(/TruDataApp/.test(u))c.add('in-app');else if(sa){c.add('app-shell');c.add('web-shell');}if(/TruShell\/\d/.test(u))c.add('app-shell');})(navigator.userAgent,document.documentElement.classList)</script>
 <title>TRU Data Network | Buy Data Bundles in Ghana - MTN, Telecel, AirtelTigo</title>
-<meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure Paystack payments. Data top up service across Ghana.">
+<meta name="description" content="Buy affordable data bundles in Ghana. Instant delivery for MTN, Telecel, and AirtelTigo. Secure online payments. Data top up service across Ghana.">
 <!-- Replaced with the build id when the site is published (scripts/build-site.mjs). -->
 <meta name="tru-build" content="dev">
 <meta name="keywords" content="buy data Ghana, MTN data bundles, Telecel data, AirtelTigo data, cheap data Ghana, mobile data Ghana, internet bundles, data top up Ghana, TRU Data Network">
@@ -1370,7 +1370,7 @@ function renderHome(){
         <!-- Left: text content -->
         <div class="flex-1 animate-slide-up">
           <h1 class="text-3xl md:text-5xl font-black mb-3 tracking-tight leading-tight">Buy Data<br>Bundles <span style="color:#f87171;">in Ghana</span></h1>
-          <p class="text-white/80 text-sm md:text-base mb-5 leading-relaxed max-w-xs">Convenient access to MTN, Telecel, and AirtelTigo data bundles. Secure Paystack payments. Nationwide service across Ghana.</p>
+          <p class="text-white/80 text-sm md:text-base mb-5 leading-relaxed max-w-xs">Convenient access to MTN, Telecel, and AirtelTigo data bundles. Secure online payments. Nationwide service across Ghana.</p>
           <div class="flex items-center gap-2 text-xs font-semibold text-white/70">
             <svg class="w-4 h-4 text-white/60" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"></path></svg>
             <span>Fast</span><span class="text-white/40">•</span><span>Secure</span><span class="text-white/40">•</span><span>Reliable</span>
@@ -1428,7 +1428,7 @@ function renderHome(){
         </span>
         <span class="flex items-center gap-2 bg-white border border-slate-100 shadow-sm px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-700">
           <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-          Paystack Verified
+          Verified Payments
         </span>
         <span class="flex items-center gap-2 bg-white border border-slate-100 shadow-sm px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-700">
           <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
@@ -1835,13 +1835,20 @@ async function handleResetPassword(e){
 }
 function renderForgotPassword(){return`<div class="min-h-screen flex items-center justify-center px-4 py-20"><div class="max-w-md w-full card-theme p-8 md:p-10 rounded-[2.5rem] shadow-2xl animate-scale-in"><div class="text-center mb-8"><div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">TRU</div><h2 class="text-2xl font-black">Reset Password</h2><p class="text-sm text-muted-theme mt-2">Enter your email to receive reset instructions</p></div><form onsubmit="handleForgotPassword(event)" class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Email Address</label><input type="email" id="forgot-email" required class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none transition-all" placeholder="you@example.com"></div><button type="submit" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg hover:shadow-xl transition-all mt-6">Send Reset Link</button></form><div class="mt-6 text-center"><p class="text-sm text-muted-theme">Remember your password? <button onclick="navigateTo('login')" class="text-red-600 font-bold hover:underline">Sign in</button></p></div></div></div>`;}
 
+/* What customers call the online payment options: "Online" when only one is
+   on, "Online 1" (Paystack) and "Online 2" (SeevPlus) when both are. The
+   admin pages keep the real names. */
+function payLabel(p,both){
+  if(both===undefined) both=!!(state.paystackEnabled&&state.seevEnabled);
+  return both?(p==='seevplus'?'Online 2':'Online 1'):'Online';
+}
 /* ===== WALLET ===== */
 function renderWallet(){
   const balance=state.userProfile?parseFloat(state.userProfile.balance||0):0;
   const code=state.userProfile?.deposit_code||'';
   const method=state.paystackEnabled&&state.depositMethod==='paystack'?'paystack':state.seevEnabled&&state.depositMethod==='seev'?'seev':'momo';
   const tab=(id,label)=>`<button onclick="state.depositMethod='${id}';render()" class="flex-1 py-2.5 rounded-xl text-sm font-bold ${method===id?'bg-red-600 text-white':'bg-slate-100 text-slate-600'}">${label}</button>`;
-  const methodTabs=state.paystackEnabled||state.seevEnabled?`<div class="flex gap-2 mb-6">${tab('momo','Mobile Money')}${state.paystackEnabled?tab('paystack','Online'):''}${state.seevEnabled?tab('seev','SeevPlus'):''}</div>`:'';
+  const methodTabs=state.paystackEnabled||state.seevEnabled?`<div class="flex gap-2 mb-6">${tab('momo','Mobile Money')}${state.paystackEnabled?tab('paystack',payLabel('paystack')):''}${state.seevEnabled?tab('seev',payLabel('seevplus')):''}</div>`:'';
   const momo=`<div class="space-y-5">
     <div data-bind="deposit-fee-box" class="rounded-2xl p-4 border border-red-200" style="background:linear-gradient(135deg,#FFF5F5,#FFE4E4);${DEPOSIT_FEE>0?'':'display:none'}">
       <p class="text-sm font-black text-red-800">A <span data-bind="deposit-fee">${pctText(DEPOSIT_FEE)}</span> fee is taken off every deposit</p>
@@ -2072,10 +2079,10 @@ async function handleForgotPassword(e){
 function seevPanelHtml(){
   const ex=seevCharge(100);
   return`<div class="space-y-4"><div><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Amount to add to your wallet (₵)</label><input type="number" id="seev-amount" min="5" max="5000" step="0.01" oninput="updateSeevCalculation(this.value)" class="w-full p-4 border-2 rounded-2xl text-2xl font-black focus:border-red-600 outline-none transition-all" placeholder="0.00"></div>
-    <div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Added to your wallet:</span><span class="font-bold" id="seev-calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">SeevPlus payment fee (<span id="seev-fee-label">${pctText(SEEV_FEE)}</span>):</span><span class="font-bold" id="seev-calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="seev-calc-total">₵0.00</span></div></div>
-    <button onclick="startSeevPayment()" id="seev-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">Pay with SeevPlus</button>
-    <p class="text-xs text-muted-theme">You go to SeevPlus's secure page to pay with Mobile Money, then come back here. The full amount you enter is added to your wallet once SeevPlus confirms the payment${SEEV_FEE>0?`; the fee covers SeevPlus's charge (to add ₵100.00 you pay ₵${ex.total.toFixed(2)})`:''}.</p>
-    <div><h4 class="text-sm font-black mb-2">Your SeevPlus payments</h4><div id="seev-payments-list" class="space-y-2">${SK.list(2,40)}</div></div></div>`;
+    <div class="bg-slate-50 p-4 rounded-xl space-y-2"><div class="flex justify-between text-sm"><span class="text-muted-theme">Added to your wallet:</span><span class="font-bold" id="seev-calc-amount">₵0.00</span></div><div class="flex justify-between text-sm"><span class="text-muted-theme">Online payment fee (<span id="seev-fee-label">${pctText(SEEV_FEE)}</span>):</span><span class="font-bold" id="seev-calc-fee">₵0.00</span></div><div class="border-t border-slate-200 pt-2 flex justify-between"><span class="font-bold">Total to Pay:</span><span class="font-black text-lg text-red-600" id="seev-calc-total">₵0.00</span></div></div>
+    <button onclick="startSeevPayment()" id="seev-btn" disabled class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">Continue to payment</button>
+    <p class="text-xs text-muted-theme">You go to a secure payment page to pay with Mobile Money, then come back here. The full amount you enter is added to your wallet once the payment is confirmed${SEEV_FEE>0?`; the fee covers the payment provider's charge (to add ₵100.00 you pay ₵${ex.total.toFixed(2)})`:''}.</p>
+    <div><h4 class="text-sm font-black mb-2">Your ${payLabel('seevplus')} payments</h4><div id="seev-payments-list" class="space-y-2">${SK.list(2,40)}</div></div></div>`;
 }
 function updateSeevCalculation(amount){
   const c=seevCharge(amount);
@@ -2085,7 +2092,7 @@ function updateSeevCalculation(amount){
 }
 const SEEV_STATUS={paid:['Paid','bg-green-100 text-green-700'],pending:['Waiting for payment','bg-amber-100 text-amber-700'],creating:['Starting','bg-slate-100 text-slate-600'],failed:['Not completed','bg-red-100 text-red-700'],expired:['Expired','bg-slate-100 text-slate-600']};
 function seevPaymentsHtml(rows){
-  if(!rows||!rows.length) return'<p class="text-xs text-muted-theme">No SeevPlus payments yet.</p>';
+  if(!rows||!rows.length) return`<p class="text-xs text-muted-theme">No ${payLabel('seevplus')} payments yet.</p>`;
   return rows.map(r=>{const st=SEEV_STATUS[r.status]||[r.status,'bg-slate-100 text-slate-600'];
     return`<div class="flex items-center justify-between gap-3 border border-slate-200 rounded-xl px-4 py-3"><div class="min-w-0"><div class="font-bold text-sm">₵${Number(r.deposit).toFixed(2)} <span class="text-xs font-semibold text-muted-theme">(paid ₵${Number(r.charge).toFixed(2)})</span></div><div class="text-xs text-muted-theme">${new Date(r.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</div></div><div class="flex items-center gap-2 shrink-0"><span class="px-2 py-1 rounded-full text-xs font-bold ${st[1]}">${st[0]}</span>${r.status==='pending'?`<button data-id="${esc(r.id)}" onclick="checkSeevPayment(this.dataset.id)" class="text-xs font-bold text-blue-600">Check</button>`:''}</div></div>`;}).join('');
 }
@@ -2094,7 +2101,7 @@ async function loadSeevPayments(){
   await paint('seev-payments-list','seev-payments',async()=>{
     const{data,error}=await supa.from('seev_payments').select('id,deposit,charge,status,created_at').eq('user_id',state.user.id).order('created_at',{ascending:false}).limit(5);
     if(error) throw error;return data||[];
-  },seevPaymentsHtml,SK.list(2,40),()=>'<p class="text-xs text-red-500">Could not load SeevPlus payments.</p>');
+  },seevPaymentsHtml,SK.list(2,40),()=>'<p class="text-xs text-red-500">Could not load your online payments.</p>');
 }
 function appVersionAtLeast(v){
   const m=navigator.userAgent.match(/TruDataApp\/([\d.]+)/);if(!m) return false;
@@ -2103,7 +2110,7 @@ function appVersionAtLeast(v){
   return true;
 }
 async function startSeevPayment(){
-  if(!state.seevEnabled){showToast('SeevPlus payments are currently unavailable. Please use another way to pay.',4000,'error');return;}
+  if(!state.seevEnabled){showToast('This payment option is currently unavailable. Please use another way to pay.',4000,'error');return;}
   if(!state.user||!state.userProfile){showToast('Please sign in again.',4000,'error');return;}
   const amount=Math.round(parseFloat(document.getElementById('seev-amount')?.value)*100)/100;
   if(!(amount>=5&&amount<=5000)){showToast('Enter an amount between ₵5.00 and ₵5,000.00',3000,'error');return;}
@@ -2111,13 +2118,13 @@ async function startSeevPayment(){
   if(error||!data?.checkout_url){
     let msg=data?.error;
     if(!msg&&error?.context?.json){try{msg=(await error.context.json()).error;}catch(e){}}
-    showToast(msg||'Could not start the SeevPlus payment. Please try again.',6000,'error');loadSeevPayments();return;
+    showToast(msg||'Could not start the payment. Please try again.',6000,'error');loadSeevPayments();return;
   }
   try{localStorage.setItem('tru:seev',data.session);}catch(e){}
   // App 2.1.3+ opens the payment page inside the app and comes back here when it is done;
   // older apps open it in the phone's browser.
   const inApp=!APP_SHELL||WEB_SHELL||appVersionAtLeast('2.1.3');
-  showToast(inApp?'Opening SeevPlus…':'Finish the payment on the SeevPlus page, then come back to the app.',5000,'info');
+  showToast(inApp?'Opening the payment page…':'Finish the payment on the payment page, then come back to the app.',5000,'info');
   location.href=data.checkout_url;
   if(!inApp) setTimeout(()=>{loadSeevPayments();},1500);
 }
@@ -2130,14 +2137,14 @@ async function checkSeevPayment(id,opts={}){
     try{if(localStorage.getItem('tru:seev')===id) localStorage.removeItem('tru:seev');}catch(e){}
     if(state.user){refreshProfile(true);fetchUserTransactions();}
   }else if(!opts.quiet){
-    showToast(data.status==='failed'?'The payment was not completed. Nothing was taken from your wallet.':data.status==='expired'?'This payment link has expired. Start a new payment.':(data.error||'SeevPlus has not confirmed this payment yet. We check again when you open your wallet.'),6000,data.status==='pending'?'info':'error');
+    showToast(data.status==='failed'?'The payment was not completed. Nothing was taken from your wallet.':data.status==='expired'?'This payment link has expired. Start a new payment.':(data.error||'The payment has not been confirmed this payment yet. We check again when you open your wallet.'),6000,data.status==='pending'?'info':'error');
   }
   if(state.user) loadSeevPayments();
   return data;
 }
 async function handleSeevReturn(id){
   if(state.user&&state.view!=='wallet') navigateTo('wallet');
-  showToast('Checking your SeevPlus payment…',3000,'info');
+  showToast('Checking your payment…',3000,'info');
   // SeevPlus can take a few seconds to confirm Mobile Money: check for up to a minute.
   for(let i=0;i<12;i++){
     const r=await checkSeevPayment(id,{quiet:i<11});
@@ -2157,7 +2164,7 @@ async function syncSeevPayments(){
     const{data:open}=await supa.from('seev_payments').select('id').eq('user_id',state.user.id).eq('status','pending').gte('created_at',new Date(Date.now()-2*864e5).toISOString()).limit(1);
     if(!open||!open.length) return;
     const{data}=await supa.functions.invoke('seevplus',{body:{action:'sync'}});
-    if(data&&data.credited>0){showToast(`SeevPlus payment confirmed! ₵${Number(data.credited).toFixed(2)} added to your wallet.`,6000,'success');refreshProfile(true);fetchUserTransactions();}
+    if(data&&data.credited>0){showToast(`Payment confirmed! ₵${Number(data.credited).toFixed(2)} added to your wallet.`,6000,'success');refreshProfile(true);fetchUserTransactions();}
     if(state.view==='wallet') loadSeevPayments();
   }catch(e){}
 }
@@ -2176,7 +2183,7 @@ async function initiateDeposit(){
 }
 async function processDeposit(response,netAmount,fee){
   if(!state.user||!state.userProfile){showToast('Session error. Please login again.',4000,'error');return;}
-  showToast('Payment received. Confirming with Paystack...',3000,'info');
+  showToast('Payment received. Confirming it...',3000,'info');
   try{
     // The wallet is credited server-side only after Paystack confirms the payment.
     const{data,error}=await supa.functions.invoke('verify-deposit',{body:{reference:response.reference}});
@@ -2228,11 +2235,11 @@ function renderOrderForm(){
 const GUEST_PENDING='tru:guest-pending',GUEST_ORDERS='tru:guest-orders';
 function guestStore(k,v){try{if(v===undefined) return JSON.parse(localStorage.getItem(k)||'null');if(v===null) localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
 // The ways a guest can pay right now (each switched on by the admin).
-const GUEST_PAY={paystack:{name:'Paystack',sub:'MoMo or card',note:'No account needed. Pay with MoMo or card through Paystack.'},seevplus:{name:'SeevPlus',sub:'Mobile Money',note:'No account needed. You pay with Mobile Money on SeevPlus\'s secure page, then come back here for your receipt.'}};
+const GUEST_PAY={paystack:{sub:'MoMo or card',note:'No account needed. Pay with MoMo or card on a secure payment page.'},seevplus:{sub:'Mobile Money',note:'No account needed. You pay with Mobile Money on a secure payment page, then come back here for your receipt.'}};
 function guestProviders(){const a=[];if(state.paystackEnabled&&/^pk_(live|test)_/.test(state.paystackPublicKey||'')) a.push('paystack');if(state.seevEnabled) a.push('seevplus');return a;}
 function guestCan(){return guestProviders().length>0;}
 function guestProv(o){o=o||state.activeOrderData;const a=guestProviders();return o&&a.includes(o.provider)?o.provider:(a[0]||'paystack');}
-function guestPayName(p){return(GUEST_PAY[p]||GUEST_PAY.paystack).name;}
+function guestPayName(p){return payLabel(p==='seevplus'?'seevplus':'paystack',guestProviders().length>1);}
 function guestLocalQuote(bundle,prov){
   const fee=prov==='seevplus'?SEEV_FEE:ONLINE_FEE;
   const sub=Number(bundle.price)||0,pct=typeof fee==='number'?fee:3;
@@ -2246,7 +2253,7 @@ function renderGuestOrderForm(){
   const wrap=inner=>`<div class="order-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn" onclick="if(event.target===this)appCloseSheet()"><div class="order-card card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in">${head}${inner}</div></div>`;
   if(!guestCan()) return wrap(`<div class="rounded-2xl bg-slate-50 p-5 text-center text-sm text-slate-600 mb-4">Sign in to buy this bundle. Paying without an account is not available right now.</div><div class="flex flex-col gap-3"><button onclick="state.activeOrderData=null;navigateTo('login')" class="w-full cta-button text-white py-4 rounded-2xl font-black">Sign in</button><button onclick="state.activeOrderData=null;navigateTo('register')" class="w-full py-3 rounded-2xl font-bold text-slate-700 border-2 border-slate-200">Create a free account</button></div>`);
   const provs=guestProviders(),prov=guestProv(o);
-  const pick=provs.length>1?`<p class="text-xs font-bold uppercase text-slate-500 mb-2">Pay with</p><div class="grid grid-cols-2 gap-2 mb-4">${provs.map(p=>`<button type="button" data-prov="${p}" onclick="guestSetProvider('${p}')" class="g-prov py-3 rounded-xl border-2 font-black text-sm transition-colors ${p===prov?'border-red-600 bg-red-50 text-red-700':'border-slate-200 text-slate-700'}">${GUEST_PAY[p].name}<span class="block text-[11px] font-semibold opacity-75">${GUEST_PAY[p].sub}</span></button>`).join('')}</div>`:'';
+  const pick=provs.length>1?`<p class="text-xs font-bold uppercase text-slate-500 mb-2">Pay with</p><div class="grid grid-cols-2 gap-2 mb-4">${provs.map(p=>`<button type="button" data-prov="${p}" onclick="guestSetProvider('${p}')" class="g-prov py-3 rounded-xl border-2 font-black text-sm transition-colors ${p===prov?'border-red-600 bg-red-50 text-red-700':'border-slate-200 text-slate-700'}">${guestPayName(p)}<span class="block text-[11px] font-semibold opacity-75">${GUEST_PAY[p].sub}</span></button>`).join('')}</div>`:'';
   return wrap(`${pick}<div class="bg-slate-50 rounded-2xl p-5 mb-5 space-y-2 text-sm">
       <div class="flex justify-between"><span class="text-muted-theme">Bundle price</span><b>₵${Number(bundle.price).toFixed(2)}</b></div>
       <div id="g-unv-row" class="flex justify-between text-amber-700" style="${q.unverified_fee>0?'':'display:none'}"><span>Unverified number</span><b>+₵<span id="g-unv">${Number(q.unverified_fee).toFixed(2)}</span></b></div>
@@ -2321,7 +2328,7 @@ async function guestPay(){
   if(btn) btn.disabled=false;
   if(error){showToast(error.message||'Could not start the payment',6000,'error');return;}
   if(prov==='seevplus') return guestPaySeev(r.reference,contact);
-  try{await loadPaystackScript();}catch(e){showToast('Could not open Paystack. Check your connection and try again.',5000,'error');return;}
+  try{await loadPaystackScript();}catch(e){showToast('Could not open the payment page. Check your connection and try again.',5000,'error');return;}
   guestStore(GUEST_PENDING,{ref:r.reference,contact,at:Date.now(),provider:'paystack'});
   const label=`${o.bundle.size} ${NETWORKS[o.network]?.name||o.network} to ${phone}`;
   try{
@@ -2330,24 +2337,24 @@ async function guestPay(){
       callback:function(resp){guestConfirm(r.reference,contact);},
       onClose:function(){if(!state.guestConfirming) guestAfterClose(r.reference,contact);}});
     handler.openIframe();
-  }catch(e){showToast('Could not open Paystack. Please try again.',5000,'error');}
+  }catch(e){showToast('Could not open the payment page. Please try again.',5000,'error');}
 }
 // SeevPlus: the server makes the checkout and the guest pays on SeevPlus's page.
 // They come back to /?gseev=<reference>, where the payment is confirmed.
 async function guestPaySeev(ref,contact){
   guestStore(GUEST_PENDING,{ref,contact,at:Date.now(),provider:'seevplus'});
-  const btn=document.getElementById('g-pay-btn');if(btn){btn.disabled=true;btn.textContent='Opening SeevPlus…';}
+  const btn=document.getElementById('g-pay-btn');if(btn){btn.disabled=true;btn.textContent='Opening the payment page…';}
   const{data,error}=await supa.functions.invoke('seevplus',{body:{action:'guest_create',reference:ref}});
   if(error||!data?.checkout_url){
     let msg=data?.error;
     if(!msg&&error?.context?.json){try{msg=(await error.context.json()).error;}catch(e){}}
     guestStore(GUEST_PENDING,null);
     if(btn){btn.disabled=false;btn.innerHTML=`Pay ₵<span id="g-pay-total">${Number(guestQuote().total).toFixed(2)}</span>`;}
-    showToast(msg||'Could not start the SeevPlus payment. Please try again.',6000,'error');return;
+    showToast(msg||'Could not start the payment. Please try again.',6000,'error');return;
   }
   // App 2.1.3+ opens the payment page inside the app and comes back here; older apps use the browser.
   const inApp=!APP_SHELL||WEB_SHELL||appVersionAtLeast('2.1.3');
-  showToast(inApp?'Opening SeevPlus…':'Finish the payment on the SeevPlus page, then come back to the app.',5000,'info');
+  showToast(inApp?'Opening the payment page…':'Finish the payment on the payment page, then come back to the app.',5000,'info');
   location.href=data.checkout_url;
 }
 // Ask the server (which asks Paystack or SeevPlus) about a guest payment.
@@ -2433,8 +2440,8 @@ function renderGuestReceipt(params){
       <p class="text-sm text-slate-600">We will text <b>${esc(p.contact||r.contact_phone||r.phone)}</b> when your order is being processed and when it is delivered. Keep your order number to track it.</p>
       <div class="flex flex-col gap-3 mt-6"><button onclick="navigateTo('track',{ref:'${esc(r.order_ref)}',phone:'${esc(p.contact||r.contact_phone||r.phone)}'});setTimeout(trackGuestOrder,0)" class="w-full cta-button text-white py-4 rounded-2xl font-black">Track this order</button><button onclick="navigateTo('network','${esc(r.network)}')" class="w-full py-3 rounded-2xl font-bold text-slate-700 border-2 border-slate-200">Buy another bundle</button><button onclick="navigateTo('register')" class="text-sm font-bold text-red-600 py-2">Create a free account to buy faster next time</button></div>`);
   }
-  if(r&&['failed','abandoned','reversed'].includes(r.status)) return card(`<h2 class="text-2xl font-black">Payment not completed</h2><p class="text-sm text-muted-theme mt-2">${esc(guestPayName(p.provider))} says the payment was not completed, so no order was made and nothing was charged.</p><button onclick="navigateTo('home')" class="w-full cta-button text-white py-4 rounded-2xl font-black mt-6">Try again</button>`);
-  return card(`<h2 class="text-2xl font-black">Still confirming</h2><p class="text-sm text-muted-theme mt-2">${esc(r&&r.error?r.error:'We have not received the confirmation from '+guestPayName(p.provider)+' yet. If you approved the payment, it usually arrives within a minute.')}</p><p class="text-xs text-slate-500 mt-3">Payment reference: <b class="font-mono">${esc(p.ref||'')}</b></p><button onclick="guestConfirm('${esc(p.ref||'')}','${esc(p.contact||'')}','${esc(p.provider||'paystack')}')" class="w-full cta-button text-white py-4 rounded-2xl font-black mt-6">Check again</button><p class="text-xs text-muted-theme mt-3">You can close this page: we check again the next time you open TRU Data on this phone.</p>`);
+  if(r&&['failed','abandoned','reversed'].includes(r.status)) return card(`<h2 class="text-2xl font-black">Payment not completed</h2><p class="text-sm text-muted-theme mt-2">The payment was not completed, so no order was made and nothing was charged.</p><button onclick="navigateTo('home')" class="w-full cta-button text-white py-4 rounded-2xl font-black mt-6">Try again</button>`);
+  return card(`<h2 class="text-2xl font-black">Still confirming</h2><p class="text-sm text-muted-theme mt-2">${esc(r&&r.error?r.error:'We have not received the payment confirmation yet. If you approved the payment, it usually arrives within a minute.')}</p><p class="text-xs text-slate-500 mt-3">Payment reference: <b class="font-mono">${esc(p.ref||'')}</b></p><button onclick="guestConfirm('${esc(p.ref||'')}','${esc(p.contact||'')}','${esc(p.provider||'paystack')}')" class="w-full cta-button text-white py-4 rounded-2xl font-black mt-6">Check again</button><p class="text-xs text-muted-theme mt-3">You can close this page: we check again the next time you open TRU Data on this phone.</p>`);
 }
 /* Track a guest order: order number + the phone used. */
 function renderTrack(params){

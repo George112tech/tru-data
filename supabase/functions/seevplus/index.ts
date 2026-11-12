@@ -123,16 +123,16 @@ async function create(req: Request, body: any) {
     return json({ error: `Enter an amount between GHS ${MIN_DEPOSIT} and GHS ${MAX_DEPOSIT}` }, 400);
   }
   const s = await settings();
-  if (!s.enabled) return json({ error: "SeevPlus payments are switched off. Please use another way to pay." }, 503);
+  if (!s.enabled) return json({ error: "This payment option is switched off. Please use another way to pay." }, 503);
   const key = await secretKey();
-  if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
+  if (!key) return json({ error: "Online payment is not set up yet" }, 503);
 
   // At most 5 unfinished checkouts per customer per hour.
   const { count } = await admin.from("seev_payments").select("id", { count: "exact", head: true })
     .eq("user_id", user.id).in("status", ["creating", "pending"])
     .gte("created_at", new Date(Date.now() - 3600e3).toISOString());
   if ((count ?? 0) >= 5) {
-    return json({ error: "You have several unfinished SeevPlus payments. Finish one or wait a little, then try again." }, 429);
+    return json({ error: "You have several unfinished online payments. Finish one or wait a little, then try again." }, 429);
   }
 
   const { data: profile } = await admin.from("profiles").select("full_name,email").eq("id", user.id).maybeSingle();
@@ -164,7 +164,7 @@ async function create(req: Request, body: any) {
     out = await res.json().catch(() => ({}));
   } catch (e) {
     await admin.from("seev_payments").update({ status: "failed", error: "SeevPlus could not be reached", updated_at: new Date().toISOString() }).eq("id", id);
-    return json({ error: "SeevPlus could not be reached. Please try again." }, 502);
+    return json({ error: "The payment page could not be reached. Please try again." }, 502);
   }
   const p = payload(out);
   const url = typeof p.checkout_url === "string" ? p.checkout_url : "";
@@ -177,7 +177,7 @@ async function create(req: Request, body: any) {
       : !amountOk ? `SeevPlus amount ${p.amount} does not match ${chargeMinor} pesewas` : "SeevPlus sent no checkout link";
     console.error("seevplus create failed", res.status, JSON.stringify(out).slice(0, 800));
     await admin.from("seev_payments").update({ status: "failed", error: why, updated_at: new Date().toISOString() }).eq("id", id);
-    return json({ error: "SeevPlus could not start the payment: " + why }, 502);
+    return json({ error: "The payment could not be started: " + why }, 502);
   }
   await admin.from("seev_payments").update({
     reference: String(p.reference), checkout_url: url, status: "pending", env: p.env ?? null,
@@ -197,7 +197,7 @@ async function check(row: any, key: string) {
   if (!res.ok) {
     console.error("seevplus verify failed", row.reference, res.status, JSON.stringify(out).slice(0, 800));
     await admin.from("seev_payments").update({ checked_at: now, error: errorText(out, res.status) }).eq("id", row.id);
-    return { status: row.status, credited: false, amount: Number(row.deposit), error: "Could not check with SeevPlus right now" };
+    return { status: row.status, credited: false, amount: Number(row.deposit), error: "Could not check the payment right now" };
   }
   const p = payload(out);
   const st = String(p.status ?? p.payment_status ?? "").toLowerCase();
@@ -237,7 +237,7 @@ async function verify(body: any) {
   const { data: row } = await admin.from("seev_payments").select("*").eq("id", id).maybeSingle();
   if (!row) return json({ error: "Payment not found" }, 404);
   const key = await secretKey();
-  if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
+  if (!key) return json({ error: "Online payment is not set up yet" }, 503);
   // Payments are credited even if the admin switched SeevPlus off after the customer paid.
   return json(await check(row, key));
 }
@@ -283,9 +283,9 @@ async function guestCreate(body: any) {
   if (g.checkout_url) return json({ reference, checkout_url: g.checkout_url, total: Number(g.total) });
   if (Date.now() - new Date(g.created_at).getTime() > 3600e3) return json({ error: "This payment has expired. Please start again." }, 410);
   const s = await settings();
-  if (!s.enabled) return json({ error: "SeevPlus payments are switched off. Please choose another way to pay." }, 503);
+  if (!s.enabled) return json({ error: "This payment option is switched off. Please choose another way to pay." }, 503);
   const key = await secretKey();
-  if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
+  if (!key) return json({ error: "Online payment is not set up yet" }, 503);
 
   const total = round2(Number(g.total));
   const totalMinor = toPesewas(total);
@@ -306,7 +306,7 @@ async function guestCreate(body: any) {
     });
     out = await res.json().catch(() => ({}));
   } catch {
-    return json({ error: "SeevPlus could not be reached. Please try again." }, 502);
+    return json({ error: "The payment page could not be reached. Please try again." }, 502);
   }
   const p = payload(out);
   const url = typeof p.checkout_url === "string" ? p.checkout_url : "";
@@ -317,7 +317,7 @@ async function guestCreate(body: any) {
     const why = !res.ok || out?.success === false ? errorText(out, res.status)
       : !amountOk ? `SeevPlus amount ${p.amount} does not match ${totalMinor} pesewas` : "SeevPlus sent no checkout link";
     console.error("seevplus guest create failed", reference, res.status, JSON.stringify(out).slice(0, 800));
-    return json({ error: "SeevPlus could not start the payment: " + why }, 502);
+    return json({ error: "The payment could not be started: " + why }, 502);
   }
   const { data: attached } = await admin.rpc("guest_seev_attach", {
     p_reference: reference, p_provider_reference: String(p.reference), p_checkout_url: url,
@@ -339,7 +339,7 @@ async function guestCheck(g: any, key: string): Promise<{ body: Record<string, u
   const out = await res.json().catch(() => ({}));
   if (!res.ok) {
     console.error("seevplus guest verify failed", g.reference, res.status, JSON.stringify(out).slice(0, 800));
-    return { body: { error: "Could not check with SeevPlus right now. Try again in a moment." }, status: 502 };
+    return { body: { error: "Could not check the payment right now. Try again in a moment." }, status: 502 };
   }
   const p = payload(out);
   const st = String(p.status ?? p.payment_status ?? "").toLowerCase();
@@ -376,7 +376,7 @@ async function guestVerify(body: any) {
   const g = await guestInfo(reference);
   if (!g || g.provider !== "seevplus") return json({ error: "Payment not found" }, 404);
   const key = await secretKey();
-  if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
+  if (!key) return json({ error: "Online payment is not set up yet" }, 503);
   const r = await guestCheck(g, key);
   return json(r.body, r.status);
 }
@@ -419,13 +419,13 @@ async function webhook(req: Request, raw: string) {
     const g = await guestInfo(undefined, ref);
     if (!g || g.provider !== "seevplus") return json({ received: true, ignored: "unknown reference" });
     const gkey = await secretKey();
-    if (!gkey) return json({ error: "SeevPlus is not set up yet" }, 503);
+    if (!gkey) return json({ error: "Online payment is not set up yet" }, 503);
     const r = await guestCheck(g, gkey);
     // A 5xx makes SeevPlus send the event again later.
     return json({ received: true, guest: true, paid: r.body.paid === true }, r.status >= 500 ? r.status : 200);
   }
   const key = await secretKey();
-  if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
+  if (!key) return json({ error: "Online payment is not set up yet" }, 503);
   const r = await check(row, key);
   return json({ received: true, status: r.status, credited: r.credited });
 }
