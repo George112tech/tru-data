@@ -1942,10 +1942,21 @@ function updateDepositCalculation(amount){
 }
 
 /* ===== AUTH FUNCTIONS ===== */
+// Throwaway inboxes (anyone can read them). The database refuses these too
+// (private.blocked_email_domains); this copy only gives a clear message first.
+const DISPOSABLE_EMAIL_DOMAINS=new Set(['example.com','mailinator.com','mailinator.net','mailinator.org','mailinator2.com','guerrillamail.com','guerrillamail.net','guerrillamail.org','guerrillamail.biz','guerrillamail.de','guerrillamailblock.com','sharklasers.com','grr.la','pokemail.net','spam4.me','10minutemail.com','10minutemail.net','10minemail.com','20minutemail.com','tempmail.com','temp-mail.org','temp-mail.io','tempmail.net','tempmailo.com','tempmail.dev','tempail.com','tempr.email','discard.email','discardmail.com','yopmail.com','yopmail.net','yopmail.fr','cool.fr.nf','jetable.fr.nf','nospam.ze.tc','trashmail.com','trashmail.net','trashmail.de','trash-mail.com','getnada.com','nada.email','dispostable.com','maildrop.cc','mailnesia.com','mailcatch.com','mintemail.com','mohmal.com','emailondeck.com','fakeinbox.com','fakemail.net','throwawaymail.com','getairmail.com','mailpoof.com','moakt.com','mytemp.email','burnermail.io','spamgourmet.com','mailsac.com','inboxkitten.com','emailfake.com','email-fake.com','fakemailgenerator.com','armyspy.com','cuvox.de','dayrep.com','einrot.com','fleckens.hu','gustr.com','jourrapide.com','rhyta.com','superrito.com','teleworm.us','1secmail.com','1secmail.net','1secmail.org','kzccv.com','qiott.com','wuuvo.com','icznn.com','ezztt.com','vjuum.com','laafd.com','txcct.com','linshiyouxiang.net','33mail.com','anonaddy.me','spambox.us','mailtemp.info','tmpmail.org','tmpmail.net','tmails.net','emltmp.com','dropmail.me','minuteinbox.com','harakirimail.com','mvrht.net','byom.de']);
+function isDisposableEmail(email){
+  const d=String(email||'').toLowerCase().split('@')[1]||'';
+  if(!d) return false;
+  for(const x of DISPOSABLE_EMAIL_DOMAINS) if(d===x||d.endsWith('.'+x)) return true;
+  return false;
+}
+const DISPOSABLE_EMAIL_MSG='Please use your real email address. Temporary email addresses are not accepted.';
 async function handleRegister(e){
   e.preventDefault();
   const name=document.getElementById('reg-name').value.trim(),email=document.getElementById('reg-email').value.trim(),phone=document.getElementById('reg-phone').value.trim(),password=document.getElementById('reg-password').value;
   const pv=validateGhanaPhone(phone);if(!pv.isValid){showToast(''+pv.error,4000,'error');return;}
+  if(isDisposableEmail(email)){showToast(DISPOSABLE_EMAIL_MSG,6000,'error');document.getElementById('reg-email')?.focus();return;}
   if(!document.getElementById('reg-terms')?.checked){showToast('Please agree to the Terms of Service and Privacy Policy',4000,'error');return;}
   try{localStorage.setItem('tru-keep-signed-in','1');}catch(x){}
   try{
@@ -1963,7 +1974,8 @@ async function handleRegister(e){
     else{showToast('Account created! Check your email to confirm.',5000,'success');navigateTo('login');}
   }catch(err){
     // The database refuses a phone number that is already on another account.
-    const msg=/database error saving new user/i.test(err.message||'')?'This phone number is already linked to another account. Log in, or use a different number.':(err.message||'Registration failed.');
+    const msg=/temporary email/i.test(err.message||'')||(/database error saving new user/i.test(err.message||'')&&isDisposableEmail(email))?DISPOSABLE_EMAIL_MSG
+      :/database error saving new user/i.test(err.message||'')?'This phone number is already linked to another account. Log in, or use a different number.':(err.message||'Registration failed.');
     showToast(msg,5000,'error');
   }
 }
