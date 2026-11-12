@@ -17,6 +17,18 @@
 //   Re-checks open sessions from the last 2 days, for customers who closed the
 //   page before coming back.
 //
+// Guests (no account) buying a bundle, when the guest picks SeevPlus:
+// POST {action: "guest_create", reference}
+//   reference is a GST-... checkout made by guest_start(..., 'seevplus'). Makes
+//   the SeevPlus checkout for its total and returns checkout_url. The customer
+//   comes back to /?gseev=<reference>.
+// POST {action: "guest_verify", reference}
+//   Asks SeevPlus; when it is paid in full, guest_complete() makes the order
+//   (once per reference) and the receipt is returned, like guest-checkout:
+//   { paid: true, order_ref, ... } or { paid: false, status }.
+// POST {action: "guest_sync"}  (admin)
+//   Re-checks every SeevPlus guest payment still open from the last 3 days.
+//
 // Webhook: SeevPlus posts payment.succeeded / payment.failed to this same URL
 //   with X-Seev-Timestamp and X-Seev-Signature = "v1=" + hex(HMAC_SHA256(
 //   signing secret, timestamp + "." + raw body)). A valid event only triggers
@@ -251,6 +263,142 @@ async function sync(req: Request) {
   return json({ checked: (rows || []).length, paid, credited: round2(credited) });
 }
 
+// ===== Guests =====
+const GST = /^GST-[A-Z0-9]{12}$/;
+
+async function guestInfo(reference?: string, providerRef?: string) {
+  const { data } = await admin.rpc("guest_checkout_info", {
+    p_reference: reference ?? null, p_provider_reference: providerRef ?? null,
+  });
+  return (data as any) || null;
+}
+
+async function guestCreate(body: any) {
+  const reference = String(body?.reference ?? "");
+  if (!GST.test(reference)) return json({ error: "Invalid payment reference" }, 400);
+  const g = await guestInfo(reference);
+  if (!g || g.provider !== "seevplus") return json({ error: "Payment not found" }, 404);
+  if (g.status !== "pending") return json({ error: "This payment is already finished" }, 409);
+  // The same checkout again (double tap, page reloaded): send the same link.
+  if (g.checkout_url) return json({ reference, checkout_url: g.checkout_url, total: Number(g.total) });
+  if (Date.now() - new Date(g.created_at).getTime() > 3600e3) return json({ error: "This payment has expired. Please start again." }, 410);
+  const s = await settings();
+  if (!s.enabled) return json({ error: "SeevPlus payments are switched off. Please choose another way to pay." }, 503);
+  const key = await secretKey();
+  if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
+
+  const total = round2(Number(g.total));
+  const totalMinor = toPesewas(total);
+  const email = `guest-${String(g.contact_phone).replace(/\D/g, "")}@trudata.rvhssystems.com`;
+  let res: Response, out: any;
+  try {
+    res = await fetch(API, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Idempotency-Key": `tru_${reference}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "checkout",
+        amount: totalMinor,
+        currency: "GHS",
+        recipient: { name: "TRU Data customer", email },
+        redirect_url: `${SITE}?gseev=${reference}`,
+        meta: { guest_reference: reference, bundle: `${g.bundle_name} ${String(g.network).toUpperCase()}`, phone: g.phone },
+      }),
+    });
+    out = await res.json().catch(() => ({}));
+  } catch {
+    return json({ error: "SeevPlus could not be reached. Please try again." }, 502);
+  }
+  const p = payload(out);
+  const url = typeof p.checkout_url === "string" ? p.checkout_url : "";
+  let urlOk = false;
+  try { const h = new URL(url).hostname; urlOk = h === "seevplus.com" || h.endsWith(".seevplus.com"); } catch { /* bad URL */ }
+  const amountOk = p.amount === undefined || Number(p.amount) === totalMinor;
+  if (!res.ok || out?.success === false || !urlOk || !p.reference || !amountOk) {
+    const why = !res.ok || out?.success === false ? errorText(out, res.status)
+      : !amountOk ? `SeevPlus amount ${p.amount} does not match ${totalMinor} pesewas` : "SeevPlus sent no checkout link";
+    console.error("seevplus guest create failed", reference, res.status, JSON.stringify(out).slice(0, 800));
+    return json({ error: "SeevPlus could not start the payment: " + why }, 502);
+  }
+  const { data: attached } = await admin.rpc("guest_seev_attach", {
+    p_reference: reference, p_provider_reference: String(p.reference), p_checkout_url: url,
+  });
+  if (!attached) return json({ error: "Could not start the payment. Please try again." }, 500);
+  return json({ reference, checkout_url: url, total });
+}
+
+// Ask SeevPlus about one guest checkout and make its order once if paid in full.
+async function guestCheck(g: any, key: string): Promise<{ body: Record<string, unknown>; status: number }> {
+  if (g.status === "paid" && g.order_ref) {
+    const { data } = await admin.rpc("guest_complete", { p_reference: g.reference, p_paid_pesewas: 0, p_paystack_id: null });
+    return { body: { ...(data ?? {}), paid: true }, status: 200 };
+  }
+  if (g.status !== "pending") return { body: { paid: false, status: g.status }, status: 200 };
+  if (!g.provider_reference) return { body: { paid: false, status: "not_started" }, status: 200 };
+
+  const res = await fetch(`${API}/${encodeURIComponent(g.provider_reference)}`, { headers: { Authorization: `Bearer ${key}` } });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    console.error("seevplus guest verify failed", g.reference, res.status, JSON.stringify(out).slice(0, 800));
+    return { body: { error: "Could not check with SeevPlus right now. Try again in a moment." }, status: 502 };
+  }
+  const p = payload(out);
+  const st = String(p.status ?? p.payment_status ?? "").toLowerCase();
+  const paidAmount = Number(p.amount_paid ?? p.paid_amount ?? p.amount);
+  const sameRef = !p.reference || String(p.reference) === g.provider_reference;
+  const currencyOk = !p.currency || String(p.currency).toUpperCase() === "GHS";
+  if (PAID.has(st) && sameRef && currencyOk) {
+    // guest_complete checks the amount: less than the total makes no order.
+    const paid = Number.isFinite(paidAmount) ? Math.round(paidAmount) : toPesewas(Number(g.total));
+    const { data, error } = await admin.rpc("guest_complete", {
+      p_reference: g.reference, p_paid_pesewas: paid, p_paystack_id: String(g.provider_reference),
+    });
+    if (error) {
+      console.error("seevplus guest complete failed", g.reference, error.message);
+      return { body: { error: "Your payment was received but the order could not be created. Contact support with reference " + g.reference }, status: 500 };
+    }
+    if ((data as any)?.error === "underpaid") {
+      return { body: { error: "The amount paid is less than the price, so no order was made. Contact support with reference " + g.reference }, status: 400 };
+    }
+    return { body: { ...(data ?? {}), paid: true }, status: 200 };
+  }
+  if (PAID.has(st)) {
+    console.error("seevplus guest mismatch", g.reference, JSON.stringify(out).slice(0, 800));
+    return { body: { error: "Payment needs checking by the admin. Reference " + g.reference }, status: 409 };
+  }
+  const next = FAILED.has(st) ? "failed" : EXPIRED.has(st) ? "abandoned" : "pending";
+  if (next !== "pending") await admin.rpc("guest_mark_unpaid", { p_reference: g.reference, p_status: next });
+  return { body: { paid: false, status: next === "abandoned" ? "abandoned" : next === "failed" ? "failed" : (st || "pending") }, status: 200 };
+}
+
+async function guestVerify(body: any) {
+  const reference = String(body?.reference ?? "");
+  if (!GST.test(reference)) return json({ error: "Invalid payment reference" }, 400);
+  const g = await guestInfo(reference);
+  if (!g || g.provider !== "seevplus") return json({ error: "Payment not found" }, 404);
+  const key = await secretKey();
+  if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
+  const r = await guestCheck(g, key);
+  return json(r.body, r.status);
+}
+
+async function guestSync(req: Request) {
+  const user = await getUser(req);
+  if (!user) return json({ error: "Please sign in first" }, 401);
+  const { data: me } = await admin.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  if (me?.role !== "admin") return json({ error: "Admins only" }, 403);
+  const key = await secretKey();
+  if (!key) return json({ checked: 0, created: [] });
+  const { data: refs } = await admin.rpc("guest_pending_references", { p_days: 3, p_provider: "seevplus" });
+  const created: string[] = [];
+  for (const reference of (refs ?? []) as string[]) {
+    const g = await guestInfo(reference);
+    if (!g) continue;
+    const r = await guestCheck(g, key);
+    if (r.body.paid === true && !r.body.already && typeof r.body.order_ref === "string") created.push(r.body.order_ref);
+  }
+  return json({ checked: (refs ?? []).length, created });
+}
+
 async function webhook(req: Request, raw: string) {
   const secret = await webhookSecret();
   if (!secret) return json({ error: "Webhook secret not set" }, 503);
@@ -266,7 +414,16 @@ async function webhook(req: Request, raw: string) {
   const ref = String(tx.reference ?? tx.gatewaySessionRef ?? "");
   if (!ref || !/^payment\./.test(String(event?.event ?? ""))) return json({ received: true, ignored: "not a payment event" });
   const { data: row } = await admin.from("seev_payments").select("*").eq("reference", ref).maybeSingle();
-  if (!row) return json({ received: true, ignored: "unknown reference" });
+  if (!row) {
+    // Not a wallet top-up: maybe a guest's bundle payment.
+    const g = await guestInfo(undefined, ref);
+    if (!g || g.provider !== "seevplus") return json({ received: true, ignored: "unknown reference" });
+    const gkey = await secretKey();
+    if (!gkey) return json({ error: "SeevPlus is not set up yet" }, 503);
+    const r = await guestCheck(g, gkey);
+    // A 5xx makes SeevPlus send the event again later.
+    return json({ received: true, guest: true, paid: r.body.paid === true }, r.status >= 500 ? r.status : 200);
+  }
   const key = await secretKey();
   if (!key) return json({ error: "SeevPlus is not set up yet" }, 503);
   const r = await check(row, key);
@@ -289,6 +446,9 @@ Deno.serve(async (req) => {
     if (body?.action === "create") return await create(req, body);
     if (body?.action === "verify") return await verify(body);
     if (body?.action === "sync") return await sync(req);
+    if (body?.action === "guest_create") return await guestCreate(body);
+    if (body?.action === "guest_verify") return await guestVerify(body);
+    if (body?.action === "guest_sync") return await guestSync(req);
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("seevplus error", e);
