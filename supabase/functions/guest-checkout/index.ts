@@ -59,11 +59,11 @@ async function check(admin: SupabaseClient, secretKey: string, reference: string
     if (!res.ok) {
       // Paystack does not know the reference yet (payment not started or not finished).
       if (res.status === 400 || res.status === 404) return { kind: "unpaid", status: "not_found" };
-      return { kind: "error", status: 502, error: "Could not reach Paystack. Try again in a moment." };
+      return { kind: "error", status: 502, error: "Could not reach the payment provider. Try again in a moment." };
     }
     tx = body?.data ?? null;
   } catch {
-    return { kind: "error", status: 502, error: "Could not reach Paystack. Try again in a moment." };
+    return { kind: "error", status: 502, error: "Could not reach the payment provider. Try again in a moment." };
   }
 
   if (!tx || tx.reference !== reference) return { kind: "error", status: 400, error: "Payment not found" };
