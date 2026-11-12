@@ -2202,7 +2202,7 @@ function initiateOrder(networkId,bundleId){
   if(state.isAdmin) return;
   const bundle=NORMAL_BUNDLES.find(b=>b.network===networkId&&b.id===bundleId&&b.active!==false);
   if(!bundle){showToast('Bundle not found',3000,'error');return;}
-  // Signed out: buy this one bundle as a guest (pay with Paystack), or sign in.
+  // Signed out: buy this one bundle as a guest (pay with Paystack or SeevPlus), or sign in.
   if(!state.user){state.activeOrderData={network:networkId,bundle:{...bundle},guest:true,quote:null};render();return;}
   if(!state.userProfile){showToast('Profile loading... Try again shortly.',3000,'error');fetchUserProfile();return;}
   // requestId makes repeated taps on the same form resolve to one order.
@@ -2227,22 +2227,30 @@ function renderOrderForm(){
    checked again the next time the site opens on this device. */
 const GUEST_PENDING='tru:guest-pending',GUEST_ORDERS='tru:guest-orders';
 function guestStore(k,v){try{if(v===undefined) return JSON.parse(localStorage.getItem(k)||'null');if(v===null) localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v));}catch(e){return null;}}
-function guestCan(){return !!(state.paystackEnabled&&/^pk_(live|test)_/.test(state.paystackPublicKey||''));}
-function guestLocalQuote(bundle){
-  const sub=Number(bundle.price)||0,pct=typeof ONLINE_FEE==='number'?ONLINE_FEE:3;
+// The ways a guest can pay right now (each switched on by the admin).
+const GUEST_PAY={paystack:{name:'Paystack',sub:'MoMo or card',note:'No account needed. Pay with MoMo or card through Paystack.'},seevplus:{name:'SeevPlus',sub:'Mobile Money',note:'No account needed. You pay with Mobile Money on SeevPlus\'s secure page, then come back here for your receipt.'}};
+function guestProviders(){const a=[];if(state.paystackEnabled&&/^pk_(live|test)_/.test(state.paystackPublicKey||'')) a.push('paystack');if(state.seevEnabled) a.push('seevplus');return a;}
+function guestCan(){return guestProviders().length>0;}
+function guestProv(o){o=o||state.activeOrderData;const a=guestProviders();return o&&a.includes(o.provider)?o.provider:(a[0]||'paystack');}
+function guestPayName(p){return(GUEST_PAY[p]||GUEST_PAY.paystack).name;}
+function guestLocalQuote(bundle,prov){
+  const fee=prov==='seevplus'?SEEV_FEE:ONLINE_FEE;
+  const sub=Number(bundle.price)||0,pct=typeof fee==='number'?fee:3;
   const total=Math.ceil(Math.round(sub*(1+pct/100)*10000)/100)/100;
-  return{bundle_price:sub,unverified_fee:0,online_fee:Math.round((total-sub)*100)/100,total,fee_percent:pct};
+  return{bundle_price:sub,unverified_fee:0,online_fee:Math.round((total-sub)*100)/100,total,fee_percent:pct,provider:prov};
 }
-function guestQuote(){const o=state.activeOrderData;return (o&&o.quote&&o.quote.phone===o.numPhone)?o.quote:guestLocalQuote(o.bundle);}
+function guestQuote(){const o=state.activeOrderData,p=guestProv(o);return (o&&o.quote&&o.quote.phone===o.numPhone&&o.quote.provider===p)?o.quote:guestLocalQuote(o.bundle,p);}
 function renderGuestOrderForm(){
   const o=state.activeOrderData,{network,bundle}=o,netInfo=NETWORKS[network],q=guestQuote();
   const head=`<button onclick="appCloseSheet()" aria-label="Close" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button><div class="text-center mb-5"><div class="${netInfo.color} ${netInfo.text} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg"><span class="text-2xl font-black">${netInfo.name.charAt(0)}</span></div><h3 class="text-2xl font-black mb-1">Buy ${esc(bundle.size)}</h3><p class="text-muted-theme text-sm">${netInfo.name} &bull; ${esc(bundle.validity||'')}</p></div>`;
   const wrap=inner=>`<div class="order-modal fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate__animated animate__fadeIn" onclick="if(event.target===this)appCloseSheet()"><div class="order-card card-theme max-w-md w-full rounded-3xl p-8 relative animate-scale-in">${head}${inner}</div></div>`;
   if(!guestCan()) return wrap(`<div class="rounded-2xl bg-slate-50 p-5 text-center text-sm text-slate-600 mb-4">Sign in to buy this bundle. Paying without an account is not available right now.</div><div class="flex flex-col gap-3"><button onclick="state.activeOrderData=null;navigateTo('login')" class="w-full cta-button text-white py-4 rounded-2xl font-black">Sign in</button><button onclick="state.activeOrderData=null;navigateTo('register')" class="w-full py-3 rounded-2xl font-bold text-slate-700 border-2 border-slate-200">Create a free account</button></div>`);
-  return wrap(`<div class="bg-slate-50 rounded-2xl p-5 mb-5 space-y-2 text-sm">
+  const provs=guestProviders(),prov=guestProv(o);
+  const pick=provs.length>1?`<p class="text-xs font-bold uppercase text-slate-500 mb-2">Pay with</p><div class="grid grid-cols-2 gap-2 mb-4">${provs.map(p=>`<button type="button" data-prov="${p}" onclick="guestSetProvider('${p}')" class="g-prov py-3 rounded-xl border-2 font-black text-sm transition-colors ${p===prov?'border-red-600 bg-red-50 text-red-700':'border-slate-200 text-slate-700'}">${GUEST_PAY[p].name}<span class="block text-[11px] font-semibold opacity-75">${GUEST_PAY[p].sub}</span></button>`).join('')}</div>`:'';
+  return wrap(`${pick}<div class="bg-slate-50 rounded-2xl p-5 mb-5 space-y-2 text-sm">
       <div class="flex justify-between"><span class="text-muted-theme">Bundle price</span><b>₵${Number(bundle.price).toFixed(2)}</b></div>
       <div id="g-unv-row" class="flex justify-between text-amber-700" style="${q.unverified_fee>0?'':'display:none'}"><span>Unverified number</span><b>+₵<span id="g-unv">${Number(q.unverified_fee).toFixed(2)}</span></b></div>
-      <div class="flex justify-between"><span class="text-muted-theme">Online payment (${Number(q.fee_percent)}%)</span><b>+₵<span id="g-fee">${Number(q.online_fee).toFixed(2)}</span></b></div>
+      <div class="flex justify-between"><span class="text-muted-theme">Online payment (<span id="g-fee-pct">${Number(q.fee_percent)}</span>%)</span><b>+₵<span id="g-fee">${Number(q.online_fee).toFixed(2)}</span></b></div>
       <div class="border-t border-slate-200 pt-2 flex justify-between items-center"><span class="font-bold">Total</span><span id="g-total" class="font-black text-xl text-red-600">₵${Number(q.total).toFixed(2)}</span></div>
     </div>
     <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Number to receive the data</label>
@@ -2251,7 +2259,7 @@ function renderGuestOrderForm(){
     <label class="flex items-center gap-2 text-sm font-semibold mt-3"><input type="checkbox" id="g-same" ${o.contactOther?'':'checked'} onchange="guestToggleContact(this.checked)"> Text order updates to this number</label>
     <div id="g-contact-wrap" class="mt-3" style="${o.contactOther?'':'display:none'}"><label class="block text-xs font-bold uppercase text-slate-500 mb-2">Your phone for updates</label><input type="tel" id="g-contact" maxlength="10" value="${esc(o.contact||'')}" oninput="state.activeOrderData.contact=this.value.trim()" class="w-full p-4 border-2 rounded-2xl font-bold focus:border-red-600 outline-none" placeholder="024xxxxxxx"></div>
     <button id="g-pay-btn" onclick="guestPay()" class="w-full cta-button text-white py-4 rounded-2xl font-black text-lg shadow-lg mt-5">Pay ₵<span id="g-pay-total">${Number(q.total).toFixed(2)}</span></button>
-    <p class="text-xs text-muted-theme text-center mt-3">No account needed. Pay with MoMo or card through Paystack.</p>
+    <p id="g-pay-note" class="text-xs text-muted-theme text-center mt-3">${GUEST_PAY[prov].note}</p>
     <p class="text-xs text-center mt-2">Have an account? <button onclick="state.activeOrderData=null;navigateTo('login')" class="font-bold text-red-600">Sign in</button> to pay from your wallet.</p>`);
 }
 function guestNumberStatusHtml(){
@@ -2266,7 +2274,7 @@ function paintGuestPrice(){
   const q=guestQuote();
   const row=document.getElementById('g-unv-row');if(row) row.style.display=q.unverified_fee>0?'':'none';
   const set=(id,v)=>{const e=document.getElementById(id);if(e) e.textContent=v;};
-  set('g-unv',Number(q.unverified_fee).toFixed(2));set('g-fee',Number(q.online_fee).toFixed(2));set('g-total','₵'+Number(q.total).toFixed(2));set('g-pay-total',Number(q.total).toFixed(2));
+  set('g-unv',Number(q.unverified_fee).toFixed(2));set('g-fee',Number(q.online_fee).toFixed(2));set('g-fee-pct',String(Number(q.fee_percent)));set('g-total','₵'+Number(q.total).toFixed(2));set('g-pay-total',Number(q.total).toFixed(2));
   paintHtml('g-num-status',guestNumberStatusHtml());
 }
 let guestQuoteTimer=null,guestQuoteSeq=0;
@@ -2278,14 +2286,22 @@ function onGuestNumberInput(v){
   if(o.numPhone) guestQuoteTimer=setTimeout(()=>loadGuestQuote(o,phone),300);
 }
 async function loadGuestQuote(o,phone){
-  const seq=++guestQuoteSeq;
+  const seq=++guestQuoteSeq,prov=guestProv(o);
   try{
-    const{data,error}=await supa.rpc('guest_quote',{p_bundle_id:o.bundle.id,p_phone:phone});
+    const{data,error}=await supa.rpc('guest_quote',{p_bundle_id:o.bundle.id,p_phone:phone,p_provider:prov});
     if(seq!==guestQuoteSeq||state.activeOrderData!==o) return;
     if(error){o.quoteError=error.message||'Could not check the number';o.quote=null;}
-    else o.quote={...data,phone,bundle_price:Number(data.bundle_price),unverified_fee:Number(data.unverified_fee),online_fee:Number(data.online_fee),total:Number(data.total),fee_percent:Number(data.fee_percent)};
+    else o.quote={...data,phone,provider:data.provider||prov,bundle_price:Number(data.bundle_price),unverified_fee:Number(data.unverified_fee),online_fee:Number(data.online_fee),total:Number(data.total),fee_percent:Number(data.fee_percent)};
   }catch(e){if(seq===guestQuoteSeq) o.quoteError='Could not check the number. Check your connection.';}
   paintGuestPrice();
+}
+function guestSetProvider(p){
+  const o=state.activeOrderData;if(!o||!guestProviders().includes(p)) return;
+  o.provider=p;
+  document.querySelectorAll('.g-prov').forEach(b=>{const on=b.dataset.prov===p;b.classList.toggle('border-red-600',on);b.classList.toggle('bg-red-50',on);b.classList.toggle('text-red-700',on);b.classList.toggle('border-slate-200',!on);b.classList.toggle('text-slate-700',!on);});
+  const n=document.getElementById('g-pay-note');if(n) n.textContent=GUEST_PAY[p].note;
+  paintGuestPrice();
+  if(o.numPhone) loadGuestQuote(o,o.numPhone);
 }
 function guestToggleContact(same){
   const o=state.activeOrderData;if(!o) return;o.contactOther=!same;
@@ -2299,10 +2315,14 @@ async function guestPay(){
   let contact=phone;
   if(o.contactOther){contact=String(document.getElementById('g-contact')?.value||'').replace(/\D/g,'');if(!/^0\d{9}$/.test(contact)){showToast('Enter your 10-digit phone for updates',4000,'error');document.getElementById('g-contact')?.focus();return;}}
   if(!guestCan()){showToast('Paying without an account is not available right now. Please sign in.',5000,'error');return;}
-  const{data:r,error}=await supa.rpc('guest_start',{p_bundle_id:o.bundle.id,p_phone:phone,p_contact_phone:contact});
+  const prov=guestProv(o),btn=document.getElementById('g-pay-btn');
+  if(btn) btn.disabled=true;
+  const{data:r,error}=await supa.rpc('guest_start',{p_bundle_id:o.bundle.id,p_phone:phone,p_contact_phone:contact,p_provider:prov});
+  if(btn) btn.disabled=false;
   if(error){showToast(error.message||'Could not start the payment',6000,'error');return;}
+  if(prov==='seevplus') return guestPaySeev(r.reference,contact);
   try{await loadPaystackScript();}catch(e){showToast('Could not open Paystack. Check your connection and try again.',5000,'error');return;}
-  guestStore(GUEST_PENDING,{ref:r.reference,contact,at:Date.now()});
+  guestStore(GUEST_PENDING,{ref:r.reference,contact,at:Date.now(),provider:'paystack'});
   const label=`${o.bundle.size} ${NETWORKS[o.network]?.name||o.network} to ${phone}`;
   try{
     const handler=PaystackPop.setup({key:state.paystackPublicKey,email:r.email,amount:Number(r.amount_pesewas),currency:'GHS',ref:r.reference,
@@ -2311,6 +2331,30 @@ async function guestPay(){
       onClose:function(){if(!state.guestConfirming) guestAfterClose(r.reference,contact);}});
     handler.openIframe();
   }catch(e){showToast('Could not open Paystack. Please try again.',5000,'error');}
+}
+// SeevPlus: the server makes the checkout and the guest pays on SeevPlus's page.
+// They come back to /?gseev=<reference>, where the payment is confirmed.
+async function guestPaySeev(ref,contact){
+  guestStore(GUEST_PENDING,{ref,contact,at:Date.now(),provider:'seevplus'});
+  const btn=document.getElementById('g-pay-btn');if(btn){btn.disabled=true;btn.textContent='Opening SeevPlus…';}
+  const{data,error}=await supa.functions.invoke('seevplus',{body:{action:'guest_create',reference:ref}});
+  if(error||!data?.checkout_url){
+    let msg=data?.error;
+    if(!msg&&error?.context?.json){try{msg=(await error.context.json()).error;}catch(e){}}
+    guestStore(GUEST_PENDING,null);
+    if(btn){btn.disabled=false;btn.innerHTML=`Pay ₵<span id="g-pay-total">${Number(guestQuote().total).toFixed(2)}</span>`;}
+    showToast(msg||'Could not start the SeevPlus payment. Please try again.',6000,'error');return;
+  }
+  // App 2.1.3+ opens the payment page inside the app and comes back here; older apps use the browser.
+  const inApp=!APP_SHELL||WEB_SHELL||appVersionAtLeast('2.1.3');
+  showToast(inApp?'Opening SeevPlus…':'Finish the payment on the SeevPlus page, then come back to the app.',5000,'info');
+  location.href=data.checkout_url;
+}
+// Ask the server (which asks Paystack or SeevPlus) about a guest payment.
+function guestVerify(ref,prov){
+  return prov==='seevplus'
+    ?supa.functions.invoke('seevplus',{body:{action:'guest_verify',reference:ref}})
+    :supa.functions.invoke('guest-checkout',{body:{reference:ref}});
 }
 // The popup was closed without Paystack's success callback. A MoMo payment can
 // still go through (approved on the phone after closing), so ask once now and
@@ -2326,13 +2370,14 @@ async function guestAfterClose(ref,contact){
   if(d&&d.paid&&!state.guestConfirming) guestConfirm(ref,contact);
 }
 // After paying: ask the server (which asks Paystack) until the order exists.
-async function guestConfirm(ref,contact){
+async function guestConfirm(ref,contact,prov){
+  prov=prov==='seevplus'?'seevplus':'paystack';
   state.guestConfirming=true;state.activeOrderData=null;
-  navigateTo('guest-receipt',{ref,contact,pending:true});
+  navigateTo('guest-receipt',{ref,contact,pending:true,provider:prov});
   let last=null;
   for(let i=0;i<20;i++){
     try{
-      const{data,error}=await supa.functions.invoke('guest-checkout',{body:{reference:ref}});
+      const{data,error}=await guestVerify(ref,prov);
       if(error){let msg='';try{msg=(await error.context.json()).error;}catch(e){}last={error:msg||'We could not confirm your payment yet.'};}
       else if(data&&data.paid){last=data;break;}
       else{last={status:data?.status||'pending'};if(['failed','abandoned','reversed'].includes(last.status)) break;}
@@ -2345,21 +2390,21 @@ async function guestConfirm(ref,contact){
     const list=(guestStore(GUEST_ORDERS)||[]).filter(x=>x.ref!==last.order_ref);
     list.unshift({ref:last.order_ref,phone:contact||last.contact_phone,at:Date.now()});guestStore(GUEST_ORDERS,list.slice(0,10));
   }else if(last&&['failed','abandoned','reversed'].includes(last.status)) guestStore(GUEST_PENDING,null);
-  if(state.view==='guest-receipt'&&state.params?.ref===ref){state.params={ref,contact,result:last};render();}
+  if(state.view==='guest-receipt'&&state.params?.ref===ref){state.params={ref,contact,result:last,provider:prov};render();}
 }
 // A payment that was not confirmed (page closed): check it once when the site opens again.
 async function guestCheckPending(){
   const p=guestStore(GUEST_PENDING);if(!p||!p.ref) return;
   if(Date.now()-(p.at||0)>3*864e5){guestStore(GUEST_PENDING,null);return;}
   try{
-    const{data,error}=await supa.functions.invoke('guest-checkout',{body:{reference:p.ref}});
+    const{data,error}=await guestVerify(p.ref,p.provider);
     if(error) return;
     if(data&&data.paid){
       guestStore(GUEST_PENDING,null);
       const list=(guestStore(GUEST_ORDERS)||[]).filter(x=>x.ref!==data.order_ref);
       list.unshift({ref:data.order_ref,phone:p.contact,at:Date.now()});guestStore(GUEST_ORDERS,list.slice(0,10));
       showToast(`Your payment went through: order ${data.order_ref} is placed.`,7000,'success');
-    }else if(data&&['failed','abandoned','reversed','not_found'].includes(data.status)&&Date.now()-(p.at||0)>30*60000) guestStore(GUEST_PENDING,null);
+    }else if(data&&['failed','abandoned','reversed','not_found','not_started'].includes(data.status)&&Date.now()-(p.at||0)>30*60000) guestStore(GUEST_PENDING,null);
   }catch(e){}
 }
 /* Buy without an account: pick a network (then a bundle), or track an order. */
@@ -2388,8 +2433,8 @@ function renderGuestReceipt(params){
       <p class="text-sm text-slate-600">We will text <b>${esc(p.contact||r.contact_phone||r.phone)}</b> when your order is being processed and when it is delivered. Keep your order number to track it.</p>
       <div class="flex flex-col gap-3 mt-6"><button onclick="navigateTo('track',{ref:'${esc(r.order_ref)}',phone:'${esc(p.contact||r.contact_phone||r.phone)}'});setTimeout(trackGuestOrder,0)" class="w-full cta-button text-white py-4 rounded-2xl font-black">Track this order</button><button onclick="navigateTo('network','${esc(r.network)}')" class="w-full py-3 rounded-2xl font-bold text-slate-700 border-2 border-slate-200">Buy another bundle</button><button onclick="navigateTo('register')" class="text-sm font-bold text-red-600 py-2">Create a free account to buy faster next time</button></div>`);
   }
-  if(r&&['failed','abandoned','reversed'].includes(r.status)) return card(`<h2 class="text-2xl font-black">Payment not completed</h2><p class="text-sm text-muted-theme mt-2">Paystack says the payment was not completed, so no order was made and nothing was charged.</p><button onclick="navigateTo('home')" class="w-full cta-button text-white py-4 rounded-2xl font-black mt-6">Try again</button>`);
-  return card(`<h2 class="text-2xl font-black">Still confirming</h2><p class="text-sm text-muted-theme mt-2">${esc(r&&r.error?r.error:'We have not received the confirmation from Paystack yet. If you approved the payment, it usually arrives within a minute.')}</p><p class="text-xs text-slate-500 mt-3">Payment reference: <b class="font-mono">${esc(p.ref||'')}</b></p><button onclick="guestConfirm('${esc(p.ref||'')}','${esc(p.contact||'')}')" class="w-full cta-button text-white py-4 rounded-2xl font-black mt-6">Check again</button><p class="text-xs text-muted-theme mt-3">You can close this page: we check again the next time you open TRU Data on this phone.</p>`);
+  if(r&&['failed','abandoned','reversed'].includes(r.status)) return card(`<h2 class="text-2xl font-black">Payment not completed</h2><p class="text-sm text-muted-theme mt-2">${esc(guestPayName(p.provider))} says the payment was not completed, so no order was made and nothing was charged.</p><button onclick="navigateTo('home')" class="w-full cta-button text-white py-4 rounded-2xl font-black mt-6">Try again</button>`);
+  return card(`<h2 class="text-2xl font-black">Still confirming</h2><p class="text-sm text-muted-theme mt-2">${esc(r&&r.error?r.error:'We have not received the confirmation from '+guestPayName(p.provider)+' yet. If you approved the payment, it usually arrives within a minute.')}</p><p class="text-xs text-slate-500 mt-3">Payment reference: <b class="font-mono">${esc(p.ref||'')}</b></p><button onclick="guestConfirm('${esc(p.ref||'')}','${esc(p.contact||'')}','${esc(p.provider||'paystack')}')" class="w-full cta-button text-white py-4 rounded-2xl font-black mt-6">Check again</button><p class="text-xs text-muted-theme mt-3">You can close this page: we check again the next time you open TRU Data on this phone.</p>`);
 }
 /* Track a guest order: order number + the phone used. */
 function renderTrack(params){
@@ -2576,10 +2621,12 @@ async function reconcileGuestPayments(){
   if(!state.isAdmin||state.guestReconciling||Date.now()-(state.guestReconciledAt||0)<60000) return;
   state.guestReconciling=true;
   try{
-    const{data,error}=await supa.functions.invoke('guest-checkout',{body:{reconcile:true}});
+    const ask=body=>body.action?supa.functions.invoke('seevplus',{body}):supa.functions.invoke('guest-checkout',{body});
+    const res=await Promise.all([ask({reconcile:true}),ask({action:'guest_sync'})].map(p=>p.catch(()=>({}))));
     state.guestReconciledAt=Date.now();
-    if(!error&&data&&Array.isArray(data.created)&&data.created.length){
-      showToast(data.created.length===1?`A paid guest order was added: ${data.created[0]}`:`${data.created.length} paid guest orders were added`,7000,'success');
+    const created=res.flatMap(r=>(!r.error&&r.data&&Array.isArray(r.data.created))?r.data.created:[]);
+    if(created.length){
+      showToast(created.length===1?`A paid guest order was added: ${created[0]}`:`${created.length} paid guest orders were added`,7000,'success');
       state.guestReconciling=false;fetchOrders();return;
     }
   }catch(e){}
@@ -2590,7 +2637,8 @@ async function fetchOrders(){
   reconcileGuestPayments();
   try{
     const cols='id,ref,Phone,Network,bundle_name,Amount,Status,created_at,updated_at,api_reference,user_id';
-    let{data,error}=await supa.from('orders').select(cols+',unverified_fee,unverified_combo,guest_phone,paystack_reference').order('created_at',{ascending:false}).limit(1000);
+    let{data,error}=await supa.from('orders').select(cols+',unverified_fee,unverified_combo,guest_phone,paystack_reference,guest_paid_with').order('created_at',{ascending:false}).limit(1000);
+    if(error&&/guest_paid_with/.test(error.message||'')) ({data,error}=await supa.from('orders').select(cols+',unverified_fee,unverified_combo,guest_phone,paystack_reference').order('created_at',{ascending:false}).limit(1000));
     if(error&&/guest_phone|paystack_reference/.test(error.message||'')) ({data,error}=await supa.from('orders').select(cols+',unverified_fee,unverified_combo').order('created_at',{ascending:false}).limit(1000));
     if(error&&/unverified_combo/.test(error.message||'')) ({data,error}=await supa.from('orders').select(cols+',unverified_fee').order('created_at',{ascending:false}).limit(1000));
     if(error&&/unverified_fee/.test(error.message||'')) ({data,error}=await supa.from('orders').select(cols).order('created_at',{ascending:false}).limit(1000));
@@ -2660,7 +2708,7 @@ function adminOrdersTableHtml(){
   const filtered=state.orders.filter(o=>{const ms=(o.Phone||'').includes(state.searchQuery||'')||(o.ref||'').toLowerCase().includes(q);const mn=state.networkFilter==='all'||o.Network===state.networkFilter;return ms&&mn;});
   const limit=state.adminOrdersShown||100;
   const shown=filtered.slice(0,limit);
-  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${shown.length===0?`<tr><td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:shown.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0 ${order._pending?'row-pending':''}"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}${!order.user_id&&order.guest_phone?`<div class="mt-1 flex flex-wrap items-center gap-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-violet-100 text-violet-800" title="Bought without an account, paid with Paystack${order.paystack_reference?' ('+esc(order.paystack_reference)+')':''}">Guest</span>${order.guest_phone!==order.Phone?`<span class="text-[11px] font-semibold text-muted-theme">updates: ${esc(order.guest_phone)}</span>`:''}</div>`:''}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}${order.unverified_combo?`<div class="mt-1"><span class="inline-block px-2 py-1 rounded-lg text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="Unverified number: this size is not sold unverified. Send these two bundles at unverified prices.">Send 2 bundles: ${esc(order.unverified_combo)}</span></div>`:''}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}${Number(order.unverified_fee)>0?`<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800" title="Includes ₵${Number(order.unverified_fee).toFixed(2)} for an unverified number">Unverified +₵${Number(order.unverified_fee).toFixed(2)}</span></div>`:''}</td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
+  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${shown.length===0?`<tr><td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:shown.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0 ${order._pending?'row-pending':''}"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}${!order.user_id&&order.guest_phone?`<div class="mt-1 flex flex-wrap items-center gap-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-violet-100 text-violet-800" title="Bought without an account, paid with ${order.guest_paid_with==='seevplus'?'SeevPlus':'Paystack'}${order.paystack_reference?' ('+esc(order.paystack_reference)+')':''}">Guest${order.guest_paid_with==='seevplus'?' · SeevPlus':''}</span>${order.guest_phone!==order.Phone?`<span class="text-[11px] font-semibold text-muted-theme">updates: ${esc(order.guest_phone)}</span>`:''}</div>`:''}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}${order.unverified_combo?`<div class="mt-1"><span class="inline-block px-2 py-1 rounded-lg text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="Unverified number: this size is not sold unverified. Send these two bundles at unverified prices.">Send 2 bundles: ${esc(order.unverified_combo)}</span></div>`:''}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}${Number(order.unverified_fee)>0?`<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800" title="Includes ₵${Number(order.unverified_fee).toFixed(2)} for an unverified number">Unverified +₵${Number(order.unverified_fee).toFixed(2)}</span></div>`:''}</td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
 ${order.Status==='Pending'&&!order.api_reference?`<button data-ref="${esc(order.ref)}" onclick="showProcessConfirmation(this.dataset.ref)" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button>`:''}
 <button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button data-ref="${esc(order.ref)}" onclick="deleteOrder(this.dataset.ref)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div>${filtered.length>shown.length?`<div class="p-4 text-center border-t border-slate-100"><button onclick="state.adminOrdersShown=(state.adminOrdersShown||100)+100;paintAdminOrders()" class="text-sm bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-xl font-bold">Show more (${filtered.length-shown.length} more)</button></div>`:''}`;
 }
@@ -3609,9 +3657,9 @@ window.deleteOrder=async function(ref){
   const order=state.orders.find(o=>o.ref===ref);
   if(!order||!confirm(`Cancel order ${ref}?`)) return;
   const delivered=order.Status==='Delivered'||order.Status==='Completed';
-  // A guest has no wallet: their money goes back through Paystack.
-  const guest=!order.user_id&&!!order.guest_phone;
-  if(guest) alert(`This guest paid with Paystack${order.paystack_reference?' (reference '+order.paystack_reference+')':''}. To give the money back, refund that payment in your Paystack dashboard. The guest is texted that the order was cancelled.`);
+  // A guest has no wallet: their money goes back through Paystack or SeevPlus.
+  const guest=!order.user_id&&!!order.guest_phone,via=order.guest_paid_with==='seevplus'?'SeevPlus':'Paystack';
+  if(guest) alert(`This guest paid with ${via}${order.paystack_reference?' (reference '+order.paystack_reference+')':''}. To give the money back, refund that payment in your ${via} dashboard. The guest is texted that the order was cancelled.`);
   const refund=!guest&&confirm(delivered
     ?`This order is marked ${order.Status}. Refund ₵${parseFloat(order.Amount||0).toFixed(2)} to the customer anyway? (Cancel = no refund)`
     :`Refund ₵${parseFloat(order.Amount||0).toFixed(2)} to the customer's wallet? (Cancel = no refund)`);
@@ -4383,6 +4431,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   if(RESET_LINK) navigateTo('reset-password',null,{replace:true});
   // Back from SeevPlus: /?seev=<session id>. Take it out of the address bar.
   const seevBack=(()=>{try{const u=new URL(location.href),id=u.searchParams.get('seev');if(!id) return null;u.searchParams.delete('seev');history.replaceState(history.state,'',u.pathname+u.search+u.hash);return /^[0-9a-f-]{36}$/i.test(id)?id:null;}catch(e){return null;}})();
+  // Back from SeevPlus after a guest's payment: /?gseev=<GST reference>.
+  const gseevBack=(()=>{try{const u=new URL(location.href),r=u.searchParams.get('gseev');if(!r) return null;u.searchParams.delete('gseev');history.replaceState(history.state,'',u.pathname+u.search+u.hash);return /^GST-[A-Z0-9]{12}$/.test(r)?r:null;}catch(e){return null;}})();
   const fromUrl=hashToView(location.hash);
   if(GO_LOGIN&&!recovering) navigateTo(state.user?'home':'login',null,{replace:true});
   else if(!recovering) navigateTo(fromUrl?fromUrl.view:'landing',fromUrl?fromUrl.params:null,{replace:true});
@@ -4412,7 +4462,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   }
   if(!recovering) ensureTermsAccepted();
   if(seevBack) handleSeevReturn(seevBack);
-  guestCheckPending();
+  if(gseevBack) guestConfirm(gseevBack,(guestStore(GUEST_PENDING)||{}).contact||'','seevplus');
+  else guestCheckPending();
   maybeSuggestIosInstall();
   prefetchUserData();
   (window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>{checkLatestApk();checkForNewSite(true);});
