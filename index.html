@@ -281,6 +281,8 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg-card);color:var(--text-primary);padding:1rem 2rem;border-radius:1rem;box-shadow:var(--shadow-xl);border:1px solid var(--border-color);z-index:200;opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);font-weight:600;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .spinner{width:20px;height:20px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite;}
+.mini-spin{display:inline-block;width:10px;height:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-1px;margin-right:4px;}
+.order-status-initiating{background:#e0e7ff;color:#3730a3;}
 .price-tag{display:inline-flex;align-items:center;padding:.25rem .75rem;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;border-radius:9999px;font-weight:700;font-size:.875rem;box-shadow:0 4px 15px -3px rgba(220,38,38,.4);}
 @media(max-width:768px){.hero-logo{max-width:200px;}.wa-float{width:50px;height:50px;font-size:24px;bottom:20px;right:20px;}}
 @media print{.wa-float,#admin-actions-bar,nav{display:none!important;}}
@@ -473,7 +475,7 @@ body:has(.order-modal) .apk-float{display:none!important;}
 .app-order-r b{font-size:14px;font-weight:800;}
 .app-st{display:inline-flex;align-items:center;gap:5px;padding:3px 9px 3px 7px;border-radius:999px;font-size:12px;font-weight:700;}
 .app-st::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
-.st-pending{color:#D97706;background:#FFFBEB;}.st-processed{color:#2563EB;background:#EFF6FF;}.st-delivered{color:#059669;background:#ECFDF5;}.st-cancelled{color:#64748B;background:#F1F5F9;}
+.st-pending{color:#D97706;background:#FFFBEB;}.st-initiating{color:#4338CA;background:#EEF2FF;}.st-processed{color:#2563EB;background:#EFF6FF;}.st-delivered{color:#059669;background:#ECFDF5;}.st-cancelled{color:#64748B;background:#F1F5F9;}
 .app-card{background:#fff;border-radius:20px;box-shadow:0 2px 8px rgba(15,23,42,.06),0 8px 24px -4px rgba(15,23,42,.05);overflow:hidden;}
 .app-row{display:flex;align-items:center;gap:12px;padding:14px 16px 14px 14px;width:100%;text-align:left;background:#fff;}
 .app-row+.app-row{border-top:1px solid #F1F5F9;}
@@ -1191,7 +1193,9 @@ function selectConfirmationProvider(p){
 function closeAdminConfirmation(){document.getElementById('admin-order-confirmation').style.display='none';state.currentProcessingOrder=null;}
 function confirmProcessOrder(){
   const o=state.currentProcessingOrder;if(!o) return;
-  updateStatus(o.ref,'Processing');
+  // Orders move to Processing by themselves (and the customer is texted then);
+  // pressing Process on one that is already Processing changes nothing, so no second text.
+  if(o.Status!=='Processing') updateStatus(o.ref,'Processing');
   closeAdminConfirmation();
   openPatupaa(o);
 }
@@ -1547,6 +1551,7 @@ function myOrdersHtml(data){
   function customerStatus(raw){
     const s=(raw||'Pending').trim();
     if(s==='Placing') return{label:'Placing order…',cls:'order-status-pending',dot:'&#x23F3;'};
+    if(s==='Initiating') return{label:'Initiating',cls:'order-status-initiating',dot:'<span class="mini-spin" aria-hidden="true"></span>'};
     if(s==='Completed') return{label:'Processed · Delivering shortly',cls:'order-status-processing',dot:'&#x1F7E2;'};
     if(s==='Delivered') return{label:'Delivered',cls:'order-status-completed',dot:'&#x2705;'};
     if(s==='Processing') return{label:'Processing',cls:'order-status-processing',dot:'&#x1F535;'};
@@ -2458,7 +2463,7 @@ function renderGuestReceipt(params){
 /* Track a guest order: order number + the phone used. */
 function renderTrack(params){
   const p=params||{},mine=guestStore(GUEST_ORDERS)||[],r=state.trackResult;
-  const steps=[['Pending','Received'],['Processing','Being processed'],['Delivered','Delivered']];
+  const steps=[['Initiating','Initiating'],['Processing','Being processed'],['Delivered','Delivered']];
   const at=r?(r.status==='Completed'||r.status==='Delivered'?2:r.status==='Processing'?1:0):-1;
   const result=!r?'':r.status==='Deleted'?`<div class="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-800 mt-5"><b>Order ${esc(r.order_ref)} was cancelled.</b> If you paid, your money will be refunded.</div>`
     :`<div class="rounded-2xl bg-slate-50 p-4 mt-5 text-left"><p class="text-xs font-bold uppercase text-slate-500">Order ${esc(r.order_ref)}</p><p class="font-black text-lg">${esc(r.bundle_name)} ${esc(NETWORKS[r.network]?.name||r.network)} to ${esc(r.phone)}</p><ol class="mt-4 space-y-3">${steps.map(([k,t],i)=>`<li class="flex items-center gap-3"><span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${i<=at?'bg-green-600 text-white':'bg-slate-200 text-slate-500'}">${i<=at?'✓':i+1}</span><span class="text-sm ${i<=at?'font-bold':'text-slate-500'}">${t}</span></li>`).join('')}</ol>${at<2?'<p class="text-xs text-muted-theme mt-4">We text you at each step.</p>':''}</div>`;
@@ -2573,7 +2578,7 @@ async function handleOrderButton(){
     });
     if(error) throw error;
     state.userProfile.balance=res.new_balance;cacheUserState();paintBalance();
-    placing._pending=false;placing.ref=res.ref;placing.Status='Pending';placing.Amount=res.amount??placing.Amount;
+    placing._pending=false;placing.ref=res.ref;placing.Status='Initiating';placing.Amount=res.amount??placing.Amount;
     if(state.view==='success'&&state.params?.pending){state.params={bundle_name:bundle.size,Phone:phone,ref:res.ref};render();}
     showToast(res.duplicate?'This order was already placed.':Number(res.unverified_fee)>0||res.unverified_combo?'Order placed for an unverified number. Delivery may take a little longer.':'Order placed! It will be delivered shortly.',res.unverified_fee>0||res.unverified_combo?5000:3000,res.duplicate?'info':'success');
     if(document.getElementById('my-orders-container')) loadMyOrders();
@@ -2693,7 +2698,7 @@ function adminStatsHtml(){
   if(!state.ordersLoaded) return ['Total Orders','Pending','Completed','Revenue'].map(l=>card(SK.stat(),l,'')).join('');
   const completedCount=state.orders.filter(o=>o.Status==='Completed'||o.Status==='Delivered').length;
   return card(state.orders.length,'Total Orders','text-red-600')
-    +card(state.orders.filter(o=>o.Status==='Pending').length,'Pending','text-yellow-600')
+    +card(state.orders.filter(o=>['Initiating','Pending','Processing'].includes(o.Status)).length,'Pending','text-yellow-600')
     +card(completedCount,'Completed','text-green-600')
     +card('₵'+state.orders.filter(o=>o.Status!=='Deleted').reduce((a,o)=>a+(parseFloat(o.Amount)||0),0).toFixed(2),'Revenue','text-red-600');
 }
@@ -2727,9 +2732,9 @@ function adminOrdersTableHtml(){
   const filtered=state.orders.filter(o=>{const ms=(o.Phone||'').includes(state.searchQuery||'')||(o.ref||'').toLowerCase().includes(q);const mn=state.networkFilter==='all'||o.Network===state.networkFilter;return ms&&mn;});
   const limit=state.adminOrdersShown||100;
   const shown=filtered.slice(0,limit);
-  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${shown.length===0?`<tr><td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:shown.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0 ${order._pending?'row-pending':''}"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}${!order.user_id&&order.guest_phone?`<div class="mt-1 flex flex-wrap items-center gap-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-violet-100 text-violet-800" title="Bought without an account, paid with ${order.guest_paid_with==='seevplus'?'SeevPlus':'Paystack'}${order.paystack_reference?' ('+esc(order.paystack_reference)+')':''}">Guest${order.guest_paid_with==='seevplus'?' · SeevPlus':''}</span>${order.guest_phone!==order.Phone?`<span class="text-[11px] font-semibold text-muted-theme">updates: ${esc(order.guest_phone)}</span>`:''}</div>`:''}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}${order.unverified_combo?`<div class="mt-1"><span class="inline-block px-2 py-1 rounded-lg text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="Unverified number: this size is not sold unverified. Send these two bundles at unverified prices.">Send 2 bundles: ${esc(order.unverified_combo)}</span></div>`:''}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}${Number(order.unverified_fee)>0?`<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800" title="Includes ₵${Number(order.unverified_fee).toFixed(2)} for an unverified number">Unverified +₵${Number(order.unverified_fee).toFixed(2)}</span></div>`:''}</td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
-${order.Status==='Pending'&&!order.api_reference?`<button data-ref="${esc(order.ref)}" onclick="showProcessConfirmation(this.dataset.ref)" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button>`:''}
-<button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Completed')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-lg font-bold hover:bg-green-200 transition-colors">Complete</button><button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button data-ref="${esc(order.ref)}" onclick="deleteOrder(this.dataset.ref)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div>${filtered.length>shown.length?`<div class="p-4 text-center border-t border-slate-100"><button onclick="state.adminOrdersShown=(state.adminOrdersShown||100)+100;paintAdminOrders()" class="text-sm bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-xl font-bold">Show more (${filtered.length-shown.length} more)</button></div>`:''}`;
+  return`<div class="overflow-x-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="p-4 text-xs font-black uppercase text-slate-500">Reference</th><th class="p-4 text-xs font-black uppercase text-slate-500">Phone</th><th class="p-4 text-xs font-black uppercase text-slate-500">Network</th><th class="p-4 text-xs font-black uppercase text-slate-500">Bundle</th><th class="p-4 text-xs font-black uppercase text-slate-500">Amount</th><th class="p-4 text-xs font-black uppercase text-slate-500">Status</th><th class="p-4 text-xs font-black uppercase text-slate-500">Date</th><th class="p-4 text-xs font-black uppercase text-slate-500">Actions</th></tr></thead><tbody>${shown.length===0?`<tr><td colspan="8" class="p-8 text-center text-muted-theme">No orders found</td></tr>`:shown.map(order=>`<tr class="table-row border-b border-slate-200 last:border-0 ${order._pending?'row-pending':''}"><td class="p-4 font-mono text-xs font-bold">${esc(order.ref)}</td><td class="p-4 font-bold">${esc(order.Phone)}${!order.user_id&&order.guest_phone?`<div class="mt-1 flex flex-wrap items-center gap-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-violet-100 text-violet-800" title="Bought without an account, paid with ${order.guest_paid_with==='seevplus'?'SeevPlus':'Paystack'}${order.paystack_reference?' ('+esc(order.paystack_reference)+')':''}">Guest${order.guest_paid_with==='seevplus'?' · SeevPlus':''}</span>${order.guest_phone!==order.Phone?`<span class="text-[11px] font-semibold text-muted-theme">updates: ${esc(order.guest_phone)}</span>`:''}</div>`:''}</td><td class="p-4"><span class="px-2 py-1 rounded-lg text-xs font-bold ${order.Network==='mtn'?'bg-yellow-100 text-yellow-700':'bg-red-100 text-red-700'}">${esc(order.Network?.toUpperCase())}</span></td><td class="p-4 text-sm">${esc(order.bundle_name)}${order.unverified_combo?`<div class="mt-1"><span class="inline-block px-2 py-1 rounded-lg text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="Unverified number: this size is not sold unverified. Send these two bundles at unverified prices.">Send 2 bundles: ${esc(order.unverified_combo)}</span></div>`:''}</td><td class="p-4 font-bold">₵${parseFloat(order.Amount).toFixed(2)}${Number(order.unverified_fee)>0?`<div class="mt-1"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800" title="Includes ₵${Number(order.unverified_fee).toFixed(2)} for an unverified number">Unverified +₵${Number(order.unverified_fee).toFixed(2)}</span></div>`:''}</td><td class="p-4"><span class="status-badge px-2 py-1 rounded-full text-xs ${order.Status==='Completed'||order.Status==='Delivered'?'bg-green-100 text-green-700':order.Status==='Processing'?'bg-blue-100 text-blue-700':order.Status==='Initiating'?'bg-indigo-100 text-indigo-700':order.Status==='Deleted'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}">${order.Status==='Initiating'?'<span class="mini-spin" aria-hidden="true"></span>':''}${esc(order.Status||'Pending')}</span></td><td class="p-4 text-xs text-muted-theme">${new Date(order.created_at).toLocaleDateString()}</td><td class="p-4"><div class="flex gap-2 flex-wrap">${order.Status!=='Deleted'?`${order.api_reference?`<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-bold">API: ${esc(order.api_reference)}</span>`:''}
+${['Initiating','Pending','Processing'].includes(order.Status)&&!order.api_reference?`<button data-ref="${esc(order.ref)}" onclick="showProcessConfirmation(this.dataset.ref)" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors">Process</button>`:''}
+<button data-ref="${esc(order.ref)}" onclick="updateStatus(this.dataset.ref,'Delivered')" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg font-bold hover:bg-purple-200 transition-colors">Delivered</button><button data-ref="${esc(order.ref)}" onclick="deleteOrder(this.dataset.ref)" class="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors">Delete</button>`:'<span class="text-xs text-red-500 font-bold">DELETED</span>'}</div></td></tr>`).join('')}</tbody></table></div>${filtered.length>shown.length?`<div class="p-4 text-center border-t border-slate-100"><button onclick="state.adminOrdersShown=(state.adminOrdersShown||100)+100;paintAdminOrders()" class="text-sm bg-slate-100 hover:bg-slate-200 px-5 py-2 rounded-xl font-bold">Show more (${filtered.length-shown.length} more)</button></div>`:''}`;
 }
 
 function renderAdminBroadcastTab(){
@@ -3017,9 +3022,8 @@ async function adminSaveMomoDetails(){
 
 /* ===== ADMIN: SMS NOTIFICATIONS (httpSMS) ===== */
 const SMS_EVENTS=[
-  ['Customers','order_placed','Order received'],
-  ['Customers','order_processing','Order being processed (Process pressed)'],
-  ['Customers','order_processed','Order processed (Complete pressed)'],
+  ['Customers','order_placed','Order received (straight after ordering)'],
+  ['Customers','order_processing','Order being processed (about 30 seconds after ordering)'],
   ['Customers','order_delivered','Order delivered (Delivered pressed)'],
   ['Customers','order_cancelled','Order cancelled / refunded'],
   ['Customers','deposit_credited','Wallet credited'],
@@ -3977,7 +3981,9 @@ function appSetNet(n){
 function appStatus(raw){
   const s=(raw||'Pending').trim();
   if(s==='Placing') return['Placing','st-pending'];
-  if(s==='Completed'||s==='Processing') return['Processed','st-processed'];
+  if(s==='Initiating') return['<span class="mini-spin" aria-hidden="true"></span>Initiating','st-initiating'];
+  if(s==='Processing') return['Processing','st-processed'];
+  if(s==='Completed') return['Processed','st-processed'];
   if(s==='Delivered') return['Delivered','st-delivered'];
   if(s==='Deleted') return['Cancelled','st-cancelled'];
   return['Pending','st-pending'];
