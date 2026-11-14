@@ -10,8 +10,9 @@
 // Every call is checked: the x-paystack-signature header must be the
 // HMAC-SHA512 of the body with the Paystack secret key, so only Paystack can
 // use it. The payment is then looked up again with Paystack before the order
-// is made (guest_complete makes it once per reference). Events that are not
-// guest payments (GST-...) are acknowledged and ignored.
+// is made (guest_complete makes it once per reference). Refund events for
+// guest payments update the order's refund status (guest_refund_webhook).
+// Other events are acknowledged and ignored.
 //
 // Deployed with verify_jwt off: Paystack sends no Supabase token; the
 // signature is the check.
@@ -51,8 +52,23 @@ Deno.serve(async (req) => {
   const given = (req.headers.get("x-paystack-signature") ?? "").toLowerCase();
   if (!sameText(expected, given)) return new Response("Bad signature", { status: 401 });
 
-  let event: { event?: string; data?: { reference?: string } } = {};
+  let event: { event?: string; data?: Record<string, any> } = {};
   try { event = JSON.parse(raw); } catch { return new Response("ok"); }
+
+  // A guest refund made from the dashboard (guest-refund) moving on at Paystack.
+  if (/^refund\./.test(String(event.event ?? ""))) {
+    const d = event.data ?? {};
+    const txRef = String(d.transaction_reference ?? d.transaction?.reference ?? "");
+    const st = String(d.status ?? String(event.event).split(".")[1] ?? "").toLowerCase();
+    const status = st === "processed" ? "processed" : st === "failed" ? "failed"
+      : st === "processing" ? "processing" : st === "pending" ? "pending" : "";
+    if (REF.test(txRef) && status) {
+      const { error } = await admin.rpc("guest_refund_webhook", { p_reference: txRef, p_status: status });
+      if (error) return new Response("Could not record the refund", { status: 500 });
+    }
+    return new Response("ok");
+  }
+
   const reference = event?.data?.reference;
   if (event.event !== "charge.success" || typeof reference !== "string" || !REF.test(reference)) {
     return new Response("ok");
