@@ -283,6 +283,51 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 .spinner{width:20px;height:20px;border:2px solid transparent;border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite;}
 .mini-spin{display:inline-block;width:10px;height:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-1px;margin-right:4px;}
 .order-status-initiating{background:#e0e7ff;color:#3730a3;}
+/* Pop-up dialogs (uiDialog / uiConfirm / uiAlert) */
+.ui-dlg{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.58);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:uiDlgFade .18s ease-out;}
+.ui-dlg.ui-dlg-out{animation:uiDlgFade .16s ease-in reverse forwards;}
+.ui-dlg-card{position:relative;width:100%;max-width:430px;max-height:calc(100vh - 40px);overflow:auto;background:var(--bg-card);color:var(--text-primary);border-radius:28px;box-shadow:0 32px 80px -18px rgba(15,23,42,.5),0 0 0 1px rgba(15,23,42,.04);animation:uiDlgPop .3s cubic-bezier(.2,.9,.3,1.15);}
+.ui-dlg-out .ui-dlg-card{animation:uiDlgPop .16s ease-in reverse forwards;}
+.ui-dlg-card::before{content:"";position:absolute;inset:0 0 auto 0;height:120px;background:radial-gradient(120% 100% at 50% 0%,var(--dlg-wash) 0%,transparent 70%);pointer-events:none;}
+.ui-dlg-top{position:relative;padding:30px 26px 0;text-align:center;}
+.ui-dlg-ic{width:66px;height:66px;border-radius:22px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--dlg-grad);box-shadow:0 14px 30px -10px var(--dlg-glow),inset 0 1px 0 rgba(255,255,255,.35);}
+.ui-dlg-ic svg{width:32px;height:32px;}
+.ui-dlg-title{font-size:21px;font-weight:900;letter-spacing:-.015em;line-height:1.25;}
+.ui-dlg-msg{margin-top:8px;font-size:14.5px;line-height:1.6;color:var(--text-secondary);white-space:pre-line;}
+.ui-dlg-rows{margin:16px 22px 0;border-radius:16px;background:var(--bg-secondary);padding:4px 14px;}
+.ui-dlg-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px;border-bottom:1px dashed var(--border-color);}
+.ui-dlg-row:last-child{border-bottom:0;}
+.ui-dlg-row span{color:var(--text-secondary);}
+.ui-dlg-row b{font-weight:800;text-align:right;}
+.ui-dlg-row.ui-dlg-strong b{color:var(--dlg-text);font-size:15.5px;}
+.ui-dlg-quote{margin:16px 22px 0;padding:12px 14px;border-radius:16px;background:var(--bg-secondary);border-left:4px solid var(--dlg-solid);font-size:13.5px;line-height:1.55;text-align:left;white-space:pre-line;max-height:190px;overflow:auto;}
+.ui-dlg-note{margin:14px 22px 0;padding:10px 12px;border-radius:14px;font-size:12.5px;font-weight:700;line-height:1.45;background:var(--dlg-soft);color:var(--dlg-text);text-align:left;}
+.ui-dlg-btns{display:flex;gap:10px;padding:22px;}
+.ui-dlg-btns.ui-dlg-stack{flex-direction:column;}
+.ui-dlg-btn{flex:1;min-height:50px;padding:13px 16px;border-radius:16px;font-weight:800;font-size:15px;line-height:1.2;transition:transform .12s ease,filter .15s ease,box-shadow .15s ease;}
+.ui-dlg-btn:active{transform:scale(.97);}
+.ui-dlg-btn:focus-visible{outline:2px solid var(--dlg-solid);outline-offset:3px;}
+.ui-dlg-plain{background:var(--bg-secondary);color:var(--text-primary);}
+.ui-dlg-plain:hover{filter:brightness(.96);}
+.ui-dlg-soft{background:var(--dlg-soft);color:var(--dlg-text);}
+.ui-dlg-main{color:#fff;background:var(--dlg-grad);box-shadow:0 12px 24px -10px var(--dlg-glow);}
+.ui-dlg-main:hover{filter:brightness(1.06);box-shadow:0 16px 30px -10px var(--dlg-glow);}
+.ui-tone-danger{--dlg-grad:linear-gradient(135deg,#f43f5e 0%,#dc2626 55%,#b91c1c 100%);--dlg-glow:rgba(220,38,38,.6);--dlg-solid:#dc2626;--dlg-soft:#fee2e2;--dlg-text:#b91c1c;--dlg-wash:rgba(239,68,68,.16);}
+.ui-tone-warning{--dlg-grad:linear-gradient(135deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%);--dlg-glow:rgba(217,119,6,.55);--dlg-solid:#d97706;--dlg-soft:#fef3c7;--dlg-text:#92400e;--dlg-wash:rgba(245,158,11,.18);}
+.ui-tone-info{--dlg-grad:linear-gradient(135deg,#60a5fa 0%,#3b82f6 50%,#1d4ed8 100%);--dlg-glow:rgba(37,99,235,.55);--dlg-solid:#2563eb;--dlg-soft:#dbeafe;--dlg-text:#1e40af;--dlg-wash:rgba(59,130,246,.16);}
+.ui-tone-success{--dlg-grad:linear-gradient(135deg,#34d399 0%,#10b981 50%,#047857 100%);--dlg-glow:rgba(5,150,105,.55);--dlg-solid:#059669;--dlg-soft:#d1fae5;--dlg-text:#065f46;--dlg-wash:rgba(16,185,129,.16);}
+.ui-tone-brand{--dlg-grad:linear-gradient(135deg,#ef4444 0%,#dc2626 60%,#991b1b 100%);--dlg-glow:rgba(220,38,38,.55);--dlg-solid:#dc2626;--dlg-soft:#fee2e2;--dlg-text:#991b1b;--dlg-wash:rgba(220,38,38,.12);}
+@keyframes uiDlgFade{from{opacity:0;}to{opacity:1;}}
+@keyframes uiDlgPop{from{opacity:0;transform:translateY(14px) scale(.94);}to{opacity:1;transform:none;}}
+@keyframes uiDlgUp{from{transform:translateY(100%);}to{transform:none;}}
+@media (max-width:480px){
+  .ui-dlg{align-items:flex-end;padding:0;}
+  .ui-dlg-card{max-width:none;border-radius:28px 28px 0 0;padding-bottom:env(safe-area-inset-bottom);animation:uiDlgUp .3s cubic-bezier(.2,.9,.3,1);}
+  .ui-dlg-out .ui-dlg-card{animation:uiDlgUp .16s ease-in reverse forwards;}
+  .ui-dlg-card::after{content:"";position:absolute;top:8px;left:50%;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:var(--border-color);}
+  .ui-dlg-btns:not(.ui-dlg-stack){flex-direction:column-reverse;}
+}
+@media (prefers-reduced-motion:reduce){.ui-dlg,.ui-dlg-card{animation:none!important;}}
 .price-tag{display:inline-flex;align-items:center;padding:.25rem .75rem;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;border-radius:9999px;font-weight:700;font-size:.875rem;box-shadow:0 4px 15px -3px rgba(220,38,38,.4);}
 @media(max-width:768px){.hero-logo{max-width:200px;}.wa-float{width:50px;height:50px;font-size:24px;bottom:20px;right:20px;}}
 @media print{.wa-float,#admin-actions-bar,nav{display:none!important;}}
@@ -864,14 +909,92 @@ function setBusy(btn,on){
   if(on){btn.style.setProperty('--busy-c',getComputedStyle(btn).color);btn.classList.add('is-busy');btn.setAttribute('aria-busy','true');}
   else{btn.classList.remove('is-busy');btn.removeAttribute('aria-busy');}
 }
+/* ===== POP-UP DIALOGS =====
+   uiDialog({title, message, tone, rows, quote, note, buttons, dismiss}) -> the chosen value.
+   tone: danger | warning | info | success | brand. buttons: [{label, value, kind: main|soft|plain}].
+   Esc, the backdrop and the handle dismiss (value `dismiss`, false by default); Enter picks the main button.
+   uiConfirm(message, opts) -> true/false; uiAlert(message, opts) -> after OK. */
+const UI_DLG_ICONS={
+  danger:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>',
+  trash:'<path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
+  warning:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 8v5m0 3.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"/>',
+  info:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 11v5m0-8.5h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"/>',
+  success:'<path stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/>',
+  money:'<path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3zM7 12h.01M17 12h.01M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>',
+  refund:'<path stroke-linecap="round" stroke-linejoin="round" d="M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"/>',
+  send:'<path stroke-linecap="round" stroke-linejoin="round" d="m22 2-7 20-4-9-9-4 20-7zM22 2 11 13"/>',
+  phone:'<path stroke-linecap="round" stroke-linejoin="round" d="M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm4 16h.01"/>',
+  lock:'<path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0 1 9.9-1M5 11h14v10H5z"/>',
+  logout:'<path stroke-linecap="round" stroke-linejoin="round" d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/>',
+  cart:'<path stroke-linecap="round" stroke-linejoin="round" d="M6 6h15l-1.5 9h-12zM6 6 5 3H2m7 18a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>'
+};
+let uiDlgOpen=0,uiBusyLater=[],uiDlgSeq=0;
+function uiDialog(o){
+  return new Promise(resolve=>{
+    const tone=o.tone||'info',id='ui-dlg-'+(++uiDlgSeq);
+    const buttons=(o.buttons&&o.buttons.length)?o.buttons:[{label:'OK',value:true,kind:'main'}];
+    const dismiss=('dismiss' in o)?o.dismiss:false;
+    const icon=UI_DLG_ICONS[o.icon]||UI_DLG_ICONS[tone]||UI_DLG_ICONS.info;
+    const rows=(o.rows||[]).filter(Boolean).map(r=>`<div class="ui-dlg-row${r[2]?' ui-dlg-strong':''}"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join('');
+    // Main button first in a stack, last in a row (the right-hand side).
+    const stack=buttons.length>2||buttons.some(b=>String(b.label).length>22);
+    const rank={main:0,soft:1,plain:2};
+    const order=stack?[...buttons].sort((a,b)=>(rank[a.kind]??2)-(rank[b.kind]??2)):buttons;
+    const wrap=document.createElement('div');
+    wrap.className='ui-dlg';wrap.setAttribute('role','alertdialog');wrap.setAttribute('aria-modal','true');wrap.setAttribute('aria-labelledby',id+'-t');wrap.setAttribute('aria-describedby',id+'-m');
+    wrap.innerHTML=`<div class="ui-dlg-card ui-tone-${tone}">
+      <div class="ui-dlg-top"><div class="ui-dlg-ic"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">${icon}</svg></div>
+        <div class="ui-dlg-title" id="${id}-t">${esc(o.title||'')}</div>${o.message?`<div class="ui-dlg-msg" id="${id}-m">${esc(o.message)}</div>`:''}</div>
+      ${rows?`<div class="ui-dlg-rows">${rows}</div>`:''}
+      ${o.quote?`<div class="ui-dlg-quote">${esc(o.quote)}</div>`:''}
+      ${o.note?`<div class="ui-dlg-note">${esc(o.note)}</div>`:''}
+      <div class="ui-dlg-btns${stack?' ui-dlg-stack':''}">${order.map((b,i)=>`<button type="button" class="ui-dlg-btn ui-dlg-${b.kind||'plain'}" data-i="${buttons.indexOf(b)}">${esc(b.label)}</button>`).join('')}</div>
+    </div>`;
+    // A spinner already showing on the tapped button waits until the answer.
+    const paused=[...document.querySelectorAll('.is-busy')];paused.forEach(b=>setBusy(b,false));
+    uiDlgOpen++;
+    const before=document.activeElement;
+    let done=false;
+    const close=v=>{
+      if(done) return;done=true;uiDlgOpen--;
+      document.removeEventListener('keydown',onKey,true);
+      wrap.classList.add('ui-dlg-out');setTimeout(()=>wrap.remove(),170);
+      const later=uiBusyLater;uiBusyLater=[];
+      if(v!==dismiss&&v!==false&&v!==null){paused.forEach(b=>{if(b.isConnected) setBusy(b,true);});later.forEach(f=>f());}
+      try{before&&before.focus&&before.focus({preventScroll:true});}catch(e){}
+      resolve(v);
+    };
+    const onKey=e=>{
+      if(e.key==='Escape'){e.preventDefault();close(dismiss);}
+      else if(e.key==='Tab'){const f=[...wrap.querySelectorAll('button')];const i=f.indexOf(document.activeElement);e.preventDefault();f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus();}
+    };
+    wrap.addEventListener('click',e=>{
+      const b=e.target.closest('.ui-dlg-btn');
+      if(b){close(buttons[+b.dataset.i].value);return;}
+      if(e.target===wrap) close(dismiss);
+    });
+    document.addEventListener('keydown',onKey,true);
+    document.body.appendChild(wrap);
+    const main=wrap.querySelector('.ui-dlg-main')||wrap.querySelector('.ui-dlg-btn:last-child');
+    // Keyboard users start on the main button; on touch screens nothing is pre-selected.
+    if(!matchMedia('(hover: none)').matches) setTimeout(()=>{try{main&&main.focus({preventScroll:true});}catch(e){}},30);
+  });
+}
+function uiConfirm(message,o={}){
+  return uiDialog({...o,message,buttons:[{label:o.cancel||'Cancel',value:false,kind:'plain'},{label:o.ok||'OK',value:true,kind:'main'}],dismiss:false});
+}
+function uiAlert(message,o={}){
+  return uiDialog({tone:'info',...o,message,buttons:[{label:o.ok||'OK',value:true,kind:'main'}],dismiss:true});
+}
 function action(fn){
   const running=new Set();
   return async function(...args){
     const btn=eventButton();const key=btn||fn;
     if(running.has(key)) return;
     running.add(key);
-    // Shown after the current tick, so a confirm() that is cancelled never flashes a spinner.
-    setTimeout(()=>{if(running.has(key)) setBusy(btn,true);},0);
+    // Shown after the current tick, so a question that is cancelled never flashes a spinner;
+    // while a dialog waits for an answer, the spinner waits too (uiDialog).
+    setTimeout(()=>{if(!running.has(key)) return;if(uiDlgOpen) uiBusyLater.push(()=>{if(running.has(key)) setBusy(btn,true);});else setBusy(btn,true);},0);
     try{return await fn.apply(this,args);}
     finally{running.delete(key);setBusy(btn,false);}
   };
@@ -1893,7 +2016,7 @@ async function submitDepositRequest(){
   if(!amount||amount<5){showToast('Minimum deposit is ₵5.00',3000,'error');return;}
   if(!txn){showToast('Enter the MoMo transaction ID from your SMS',3000,'error');return;}
   if(sender){const v=validateGhanaPhone(sender);if(!v.isValid){showToast(v.error,3000,'error');return;}}
-  if(DEPOSIT_FEE>0){const x=depositAfterFee(amount,DEPOSIT_FEE);if(!confirm(`You sent ₵${x.amount.toFixed(2)}.\n\nA ${pctText(DEPOSIT_FEE)} fee (₵${x.fee.toFixed(2)}) is taken off, so ₵${x.credit.toFixed(2)} will be added to your wallet once we confirm the payment.\n\nSubmit?`)) return;}
+  if(DEPOSIT_FEE>0){const x=depositAfterFee(amount,DEPOSIT_FEE);if(!await uiConfirm('We add it to your wallet once we confirm your payment.',{title:'Submit this deposit?',tone:'brand',icon:'money',rows:[['You sent','₵'+x.amount.toFixed(2)],['Deposit fee ('+pctText(DEPOSIT_FEE)+')','− ₵'+x.fee.toFixed(2)],['Added to your wallet','₵'+x.credit.toFixed(2),1]],ok:'Submit deposit',cancel:'Go back'})) return;}
   const tempId='tmp-'+Date.now();
   if(!viewCache.has('my-deposits')) viewCache.set('my-deposits',[]);
   const undo=mutate('my-deposits',list=>[{id:tempId,amount,fee_percent:DEPOSIT_FEE,momo_txn_id:txn.toUpperCase(),status:'pending',created_at:new Date().toISOString(),_pending:true},...list]);
@@ -2785,7 +2908,7 @@ async function loadMyDeletion(){
 }
 async function requestAccountDeletion(){
   const bal=parseFloat(state.userProfile?.balance||0);
-  if(!confirm(`Delete your TRU Data account?\n\nOnce the admin approves, these are deleted for good:\n• Your account and login\n• Your wallet${bal>0?' (₵'+bal.toFixed(2)+')':''}\n• Your orders and payment history\n\nThere is NO REFUND of any money left in the account.`)) return;
+  if(!await uiConfirm(`Once the admin approves, these are deleted for good:\n• Your account and login\n• Your wallet${bal>0?' (₵'+bal.toFixed(2)+')':''}\n• Your orders and payment history`,{title:'Delete your TRU Data account?',tone:'danger',icon:'trash',note:'There is no refund of any money left in the account.',ok:'Yes, delete my account',cancel:'Keep my account'})) return;
   const reason=prompt('Why are you leaving? (optional)','');
   if(reason===null) return;
   if(!viewCache.has('my-deletion')) viewCache.set('my-deletion',null);
@@ -2798,7 +2921,7 @@ async function requestAccountDeletion(){
   }catch(err){undo();showToast(err.message||'Could not send the request',5000,'error');}
 }
 async function cancelAccountDeletion(){
-  if(!confirm('Cancel your account deletion request?')) return;
+  if(!await uiConfirm('Your account stays open and nothing is deleted.',{title:'Cancel your deletion request?',tone:'info',ok:'Yes, keep my account',cancel:'Go back'})) return;
   const undo=mutate('my-deletion',()=>null);
   try{
     const{error}=await withTimeout(supa.rpc('cancel_account_deletion'),15000);
@@ -2882,7 +3005,7 @@ async function adminAddVerifiedNumber(){
   loadAdminUnverified();
 }
 async function adminRemoveVerifiedNumber(phone){
-  if(!confirm(`Remove ${phone} from verified numbers? It will pay the unverified price until a bundle to it is delivered again.`)) return;
+  if(!await uiConfirm('It will pay the unverified price until a bundle to it is delivered again.',{title:`Remove ${phone} from verified numbers?`,tone:'warning',icon:'phone',ok:'Remove',cancel:'Keep it'})) return;
   const undo=mutate('admin-unverified',d=>({...d,list:(d.list||[]).filter(r=>r.phone!==phone)}));
   const{error}=await supa.from('verified_numbers').delete().eq('phone',phone);
   if(error){undo();showToast('Could not remove: '+error.message,5000,'error');return;}
@@ -2921,7 +3044,7 @@ async function adminAddBundle(){
   const network=document.getElementById('nb-network').value;
   const f=readBundleFields(document.getElementById('nb-size').value,document.getElementById('nb-price').value,document.getElementById('nb-validity').value);
   if(!f) return;
-  if((viewCache.get('admin-bundles')||NORMAL_BUNDLES).some(b=>b.network===network&&b.size.toLowerCase()===f.size.toLowerCase())&&!confirm(`${NET_LABEL[network]} already has a ${f.size} bundle. Add another one?`)) return;
+  if((viewCache.get('admin-bundles')||NORMAL_BUNDLES).some(b=>b.network===network&&b.size.toLowerCase()===f.size.toLowerCase())&&!await uiConfirm('Customers will see both in the shop.',{title:`${NET_LABEL[network]} already has a ${f.size} bundle`,tone:'warning',ok:'Add another',cancel:'Go back'})) return;
   const row={id:network.charAt(0)+'-'+Date.now().toString(36),network,size:f.size,price:f.price,validity:f.validity,sort_order:bundleSortKey(f.size),active:true};
   ['nb-size','nb-price'].forEach(i=>{document.getElementById(i).value='';});
   await optimisticBundles(list=>[...list,{...row,_pending:true}],()=>supa.from('bundles').insert([row]).select('id'),`${NET_LABEL[network]} ${f.size} added at ₵${f.price.toFixed(2)}`,'Could not add bundle');
@@ -2946,7 +3069,7 @@ async function adminToggleBundle(id){
 }
 async function adminDeleteBundle(id){
   const b=(viewCache.get('admin-bundles')||[]).find(x=>x.id===id);if(!b) return;
-  if(!confirm(`Delete the ${NET_LABEL[b.network]} ${b.size} bundle? Past orders are kept. To take it out of the shop for now, use Hide instead.`)) return;
+  if(!await uiConfirm('Past orders are kept. To take it out of the shop for now, use Hide instead.',{title:`Delete the ${NET_LABEL[b.network]} ${b.size} bundle?`,tone:'danger',icon:'trash',ok:'Delete bundle',cancel:'Keep it'})) return;
   await optimisticBundles(list=>list.filter(x=>x.id!==id),()=>supa.from('bundles').delete().eq('id',id).select('id'),`${b.size} deleted`,'Could not delete');
 }
 
@@ -3009,7 +3132,7 @@ async function adminSaveMomoDetails(){
   const fee=Math.round(parseFloat(document.getElementById('momo-set-fee')?.value)*100)/100;
   if(!MOMO_NETWORK_LABEL[network]){showToast('Choose the network of the number',4000,'error');return;}
   if(!(fee>=0&&fee<=10)){showToast('The deposit fee must be between 0 and 10%',4000,'error');return;}
-  if(!confirm(`Customers will be told to send money to:\n\n${number} (${MOMO_NETWORK_LABEL[network]})\n${name}\n\nDeposit fee: ${pctText(fee)}\n\nSave these details?`)) return;
+  if(!await uiConfirm('Customers will be told to send money to:',{title:'Save these MoMo details?',tone:'brand',icon:'money',rows:[['Number',number],['Network',MOMO_NETWORK_LABEL[network]],['Name',name],['Deposit fee',pctText(fee)]],ok:'Save details',cancel:'Go back'})) return;
   const before={number:MOMO_NUMBER,name:MOMO_NAME,network:MOMO_NETWORK,fee:DEPOSIT_FEE};
   setMomo(number,name,network,fee);
   try{
@@ -3152,7 +3275,7 @@ async function loadAdminSecurity(){
   },adminSecurityHtml,SK.list(3,48),()=>errorBox('Could not load sign-in security.','loadAdminSecurity()'));
 }
 async function adminUnlockLogin(email){
-  if(!confirm(`Unlock ${email}? They can sign in again straight away.`)) return;
+  if(!await uiConfirm('They can sign in again straight away.',{title:`Unlock ${email}?`,tone:'info',icon:'lock',ok:'Unlock',cancel:'Cancel'})) return;
   const undo=mutate('admin-security',d=>({...d,locked:(d.locked||[]).filter(l=>l.email!==email)}));
   try{
     const{error}=await supa.rpc('admin_unlock_login',{p_email:email});
@@ -3262,17 +3385,17 @@ async function adminSendSmsCompose(){
     const list=Object.values(c.picked),to=[...new Set(list.map(u=>u.phone))];
     if(!to.length){showToast('Choose at least one customer',3000,'error');return;}
     const who=list.length===1?(list[0].name||list[0].email||list[0].phone):list.length+' customers';
-    if(!confirm(`Send this text to ${who}?\n\n${text}`)) return;
+    if(!await uiConfirm('',{title:`Send this text to ${who}?`,tone:'info',icon:'send',quote:text,ok:'Send text',cancel:'Cancel'})) return;
     ({data,error}=await supa.rpc('admin_send_sms',{p_to:to,p_message:text}));
   }else if(c.to==='numbers'){
     const{ok,bad}=smsNumbers();
     if(!ok.length){showToast('Enter at least one valid Ghana number, like 0241234567',4000,'error');return;}
-    if(bad.length&&!confirm(`${bad.length} number${bad.length===1?' is':'s are'} not valid and will be skipped. Send to the other ${ok.length}?`)) return;
-    if(!confirm(`Send this text to ${ok.length} number${ok.length===1?'':'s'}?\n\n${text}`)) return;
+    if(bad.length&&!await uiConfirm(`${bad.length} number${bad.length===1?' is':'s are'} not valid and will be skipped:\n${bad.slice(0,6).join(', ')}${bad.length>6?'…':''}`,{title:`Send to the other ${ok.length}?`,tone:'warning',ok:'Continue',cancel:'Fix the numbers'})) return;
+    if(!await uiConfirm('',{title:`Send this text to ${ok.length} number${ok.length===1?'':'s'}?`,tone:'info',icon:'send',quote:text,ok:'Send text',cancel:'Cancel'})) return;
     ({data,error}=await supa.rpc('admin_send_sms',{p_to:ok,p_message:text}));
   }else{
     const n=state.smsAudience;
-    if(!confirm(`Send this text to all ${n!=null?n+' ':''}registered customers?\n\n${text}`)) return;
+    if(!await uiConfirm('',{title:`Send this text to all ${n!=null?n+' ':''}registered customers?`,tone:'warning',icon:'send',quote:text,ok:'Send to everyone',cancel:'Cancel'})) return;
     ({data,error}=await supa.rpc('admin_sms_customers',{p_message:text}));
   }
   if(error){showToast((error.code==='PGRST202'?'Run the SMS SQL first. ':'Not sent: ')+(error.message||'error'),6000,'error');return;}
@@ -3354,7 +3477,7 @@ function smsPairCodeHtml(){
 }
 async function adminSmsPair(){
   const cur=viewCache.get('admin-sms-settings');
-  if(cur&&cur.device_paired&&!confirm('Make a new pairing code? The phone paired now stops sending until it gets the new code.')) return;
+  if(cur&&cur.device_paired&&!await uiConfirm('The phone paired now stops sending until it gets the new code.',{title:'Make a new pairing code?',tone:'warning',icon:'phone',ok:'Make new code',cancel:'Cancel'})) return;
   const{data,error}=await supa.rpc('admin_sms_pair_device');
   if(error){showToast((error.code==='PGRST202'?'Run the TRU SMS SQL first. ':'Could not pair: ')+(error.message||''),6000,'error');return;}
   // Kept on screen for 15 minutes, even if the page refreshes (switching to TRU SMS to type it).
@@ -3367,7 +3490,7 @@ async function adminSmsPair(){
   if((cur?.provider||'httpsms')!=='device'){smsShowProvider('device');await saveSmsProvider('device');}
 }
 async function adminSmsUnpair(){
-  if(!confirm('Disconnect the phone? It stops sending texts until you pair it again.')) return;
+  if(!await uiConfirm('It stops sending texts until you pair it again.',{title:'Disconnect the phone?',tone:'danger',icon:'phone',ok:'Disconnect',cancel:'Keep connected'})) return;
   const{error}=await supa.rpc('admin_sms_unpair_device');
   if(error){showToast('Could not disconnect: '+(error.message||''),5000,'error');return;}
   state.smsPairCode=null;
@@ -3431,7 +3554,7 @@ async function loadAdminSmsLog(){
 }
 async function adminDeleteSms(id){
   const m=(viewCache.get('admin-sms-log')||[]).find(x=>x.id===id);
-  if(m&&(m.status==='pending'||m.status==='sending')&&!confirm('This message has not gone out yet. Delete it so it is not sent?')) return;
+  if(m&&(m.status==='pending'||m.status==='sending')&&!await uiConfirm('Deleting it means it is never sent.',{title:'This text has not gone out yet',tone:'warning',icon:'trash',ok:'Delete it',cancel:'Keep it'})) return;
   const undo=mutate('admin-sms-log',list=>list.filter(x=>x.id!==id));
   try{
     const{error}=await supa.rpc('admin_delete_sms',{p_ids:[id]});
@@ -3441,7 +3564,7 @@ async function adminDeleteSms(id){
 }
 async function adminClearSms(which){
   const label=which==='failed'?'failed':'sent';
-  if(!confirm(`Delete all ${label} messages from the log? This cannot be undone.`)) return;
+  if(!await uiConfirm('This cannot be undone.',{title:`Delete all ${label} messages?`,tone:'danger',icon:'trash',ok:'Delete all',cancel:'Cancel'})) return;
   const keep=m=>which==='failed'?m.status!=='failed':!(m.status==='sent'||m.status==='skipped');
   const undo=mutate('admin-sms-log',list=>list.filter(keep));
   try{
@@ -3503,7 +3626,7 @@ async function adminCreditWallet(){
   if(!code){showToast('Enter the customer reference',3000,'error');return;}
   if(!amount||amount<=0){showToast('Enter the amount',3000,'error');return;}
   const fx=depositAfterFee(amount,DEPOSIT_FEE);
-  if(!confirm(DEPOSIT_FEE>0?`Received ₵${fx.amount.toFixed(2)} from ${code}.\nLess the ${pctText(DEPOSIT_FEE)} fee (₵${fx.fee.toFixed(2)}), ₵${fx.credit.toFixed(2)} will be credited.\n\nContinue?`:`Credit ₵${amount.toFixed(2)} to ${code}?`)) return;
+  if(!await uiConfirm('',{title:`Credit ${code}'s wallet?`,tone:'success',icon:'money',rows:DEPOSIT_FEE>0?[['Received','₵'+fx.amount.toFixed(2)],['Deposit fee ('+pctText(DEPOSIT_FEE)+')','− ₵'+fx.fee.toFixed(2)],['Credited','₵'+fx.credit.toFixed(2),1]]:[['Credited','₵'+amount.toFixed(2),1]],ok:'Credit wallet',cancel:'Cancel'})) return;
   try{
     const{data,error}=await supa.rpc('admin_credit_wallet',{p_deposit_code:code,p_amount:amount,p_momo_txn_id:txn||null});
     if(error) throw error;
@@ -3612,7 +3735,7 @@ function seevCanDelete(r){return !['creating','pending'].includes(r.status)||Dat
 async function adminDeleteSeev(id,btn){
   const r=(viewCache.get('admin-seev-payments')||[]).find(x=>x.id===id);
   const what=r?`₵${Number(r.deposit).toFixed(2)} from ${r.email||'this customer'} (${(SEEV_STATUS[r.status]||[r.status])[0]})`:'this payment';
-  if(!confirm(`Delete the SeevPlus record for ${what}?\n\nThis only removes it from this list. A wallet credit already made is kept, and the record cannot be credited again.`)) return;
+  if(!await uiConfirm('This only removes it from this list. A wallet credit already made is kept, and the record cannot be credited again.',{title:`Delete the SeevPlus record for ${what}?`,tone:'danger',icon:'trash',ok:'Delete record',cancel:'Keep it'})) return;
   if(btn){btn.disabled=true;btn.textContent='Deleting…';}
   const{error}=await supa.rpc('admin_delete_seev_payment',{p_id:id});
   if(error){if(btn){btn.disabled=false;btn.textContent='Delete';}showToast(/admin_delete_seev_payment|does not exist|schema cache/i.test(error.message||'')?'Run the SeevPlus delete SQL first.':error.message||'Could not delete it',6000,'error');return;}
@@ -3693,31 +3816,44 @@ async function guestRefundCall(ref){
 }
 window.adminGuestRefund=async function(ref,btn){
   const o=state.orders.find(x=>x.ref===ref);if(!o||!guestCanRefund(o)) return;
-  if(!confirm(`Refund the guest's full payment for ${ref} through Paystack, to the MoMo or card they paid with?`)) return;
+  if(!await uiConfirm('The full payment goes back to the MoMo or card they paid with, and the guest is texted.',{title:`Refund order ${ref}?`,tone:'warning',icon:'refund',rows:[['Order',ref],['Refund through','Paystack'],['Guest phone',o.guest_phone]],ok:'Refund payment',cancel:'Not now'})) return;
   if(btn){btn.disabled=true;btn.textContent='Refunding…';}
   const r=await guestRefundCall(ref);
-  if(!r.ok){if(btn){btn.disabled=false;btn.textContent='Refund';}alert(`The refund did not go through.\n\n${r.error}`);fetchOrders();return;}
+  if(!r.ok){if(btn){btn.disabled=false;btn.textContent='Refund';}await uiAlert(r.error,{title:'The refund did not go through',tone:'danger'});fetchOrders();return;}
   Object.assign(o,{guest_refund_status:r.status,guest_refund_amount:r.amount});paintAdminOrders();
   showToast(`Refund of ${r.amount!=null?'₵'+Number(r.amount).toFixed(2):'the payment'} sent to Paystack. The guest is texted.`,5000,'success');
 };
 window.deleteOrder=async function(ref){
-  // Cancelling keeps the record and, unless the data was delivered, refunds the customer's wallet.
-  const order=state.orders.find(o=>o.ref===ref);
-  if(!order||!confirm(`Cancel order ${ref}?`)) return;
+  // Cancelling keeps the record. A customer with an account can be refunded to their wallet;
+  // a guest who paid with Paystack can be refunded to their MoMo or card; SeevPlus guests by hand.
+  const order=state.orders.find(o=>o.ref===ref);if(!order) return;
   const delivered=order.Status==='Delivered'||order.Status==='Completed';
-  // A guest has no wallet: a Paystack payment can be refunded from here; SeevPlus is refunded by hand.
   const guest=!order.user_id&&!!order.guest_phone,via=order.guest_paid_with==='seevplus'?'SeevPlus':'Paystack';
+  const amt='₵'+parseFloat(order.Amount||0).toFixed(2);
+  const rows=[['Order',ref],['Bundle',`${order.bundle_name||''} ${String(order.Network||'').toUpperCase()}`],['To',order.Phone||''],['Amount',amt],guest?['Customer','Guest · paid with '+via]:null];
+  const keep={label:'Keep order',value:null,kind:'plain'};
+  let choice;
   if(guest&&guestCanRefund(order)){
-    if(confirm(`Refund this guest's payment through Paystack?\n\nOK = refund the full payment to the MoMo or card they paid with, then cancel the order.\nCancel = cancel the order without a refund.`)){
-      const r=await guestRefundCall(ref);
-      if(!r.ok){alert(`The refund did not go through, so the order was not cancelled.\n\n${r.error}`);fetchOrders();return;}
-      Object.assign(order,{guest_refund_status:r.status,guest_refund_amount:r.amount});
-      showToast(`Refund of ${r.amount!=null?'₵'+Number(r.amount).toFixed(2):'the payment'} sent to Paystack`,4000,'success');
-    }
-  }else if(guest) alert(`This guest paid with ${via}${order.paystack_reference?' (reference '+order.paystack_reference+')':''}. To give the money back, refund that payment in your ${via} dashboard. The guest is texted that the order was cancelled.`);
-  const refund=!guest&&confirm(delivered
-    ?`This order is marked ${order.Status}. Refund ₵${parseFloat(order.Amount||0).toFixed(2)} to the customer anyway? (Cancel = no refund)`
-    :`Refund ₵${parseFloat(order.Amount||0).toFixed(2)} to the customer's wallet? (Cancel = no refund)`);
+    choice=await uiDialog({title:`Cancel order ${ref}?`,message:'This guest paid with Paystack. Send their full payment back to the MoMo or card they paid with?',tone:'danger',icon:'trash',rows,
+      note:delivered?`This order is marked ${order.Status}: refund only if the data did not arrive.`:'',
+      buttons:[keep,{label:'Cancel without refund',value:'cancel',kind:delivered?'main':'soft'},{label:'Refund & cancel',value:'refund',kind:delivered?'soft':'main'}],dismiss:null});
+  }else if(guest){
+    choice=await uiDialog({title:`Cancel order ${ref}?`,message:`The guest is texted that the order was cancelled.`,tone:'danger',icon:'trash',rows,
+      note:`Refund this guest yourself in your ${via} dashboard${order.paystack_reference?' (reference '+order.paystack_reference+')':''}.`,
+      buttons:[keep,{label:'Cancel order',value:'cancel',kind:'main'}],dismiss:null});
+  }else{
+    choice=await uiDialog({title:`Cancel order ${ref}?`,message:`Refund ${amt} to the customer's wallet?`,tone:'danger',icon:'trash',rows,
+      note:delivered?`This order is marked ${order.Status}: refund only if the data did not arrive.`:'',
+      buttons:[keep,{label:'Cancel without refund',value:'cancel',kind:delivered?'main':'soft'},{label:`Cancel & refund ${amt}`,value:'refund',kind:delivered?'soft':'main'}],dismiss:null});
+  }
+  if(!choice) return;
+  if(guest&&choice==='refund'){
+    const r=await guestRefundCall(ref);
+    if(!r.ok){await uiAlert(`${r.error}\n\nThe order was not cancelled.`,{title:'The refund did not go through',tone:'danger'});fetchOrders();return;}
+    Object.assign(order,{guest_refund_status:r.status,guest_refund_amount:r.amount});
+    showToast(`Refund of ${r.amount!=null?'₵'+Number(r.amount).toFixed(2):'the payment'} sent to Paystack`,4000,'success');
+  }
+  const refund=!guest&&choice==='refund';
   const prev=order.Status;
   order.Status='Deleted';order._pending=true;paintAdminOrders();
   try{
@@ -3836,7 +3972,7 @@ async function saveAnnouncement(){
   showToast(id?'Reposted! Customers see it on the home page now.':'Announcement posted! Customers see it on the home page now.',3500,'success');
 }
 async function takeDownAnnouncement(){
-  if(!confirm('Take the live announcement down? Customers will see no announcement until you post or repost one.')) return;
+  if(!await uiConfirm('Customers will see no announcement until you post or repost one.',{title:'Take the announcement down?',tone:'warning',ok:'Take it down',cancel:'Keep it live'})) return;
   const undo=mutate('admin-announcements',l=>l.map(a=>({...a,is_live:false})));
   const{error}=await supa.rpc('admin_take_down_announcement');
   if(error){undo();showToast('Could not take it down: '+(error.message||'error'),5000,'error');return;}
@@ -3845,7 +3981,7 @@ async function takeDownAnnouncement(){
 }
 async function deleteAnnouncement(id){
   const a=(viewCache.get('admin-announcements')||[]).find(x=>x.id===id);
-  if(!confirm(`Delete this announcement for good?\n\n"${a?a.main_message:''}"${a&&a.is_live?'\n\nIt is live now: customers will see no announcement until you post another.':''}`)) return;
+  if(!await uiConfirm('',{title:'Delete this announcement for good?',tone:'danger',icon:'trash',quote:a?a.main_message:'',note:a&&a.is_live?'It is live now: customers will see no announcement until you post another.':'',ok:'Delete',cancel:'Keep it'})) return;
   const undo=mutate('admin-announcements',l=>l.filter(x=>x.id!==id));
   const{error}=await supa.from('announcements').delete().eq('id',id);
   if(error){undo();showToast('Could not delete: '+(error.message||'error'),5000,'error');return;}
@@ -4183,7 +4319,7 @@ function maybeSuggestIosInstall(){
     showIosInstall();
   },6000);
 }
-function appLogout(){if(confirm('Log out of TRU Data?')) logoutUser();}
+async function appLogout(){if(await uiConfirm('You can sign back in any time.',{title:'Log out of TRU Data?',tone:'brand',icon:'logout',ok:'Log out',cancel:'Stay signed in'})) logoutUser();}
 
 function render(){
   const app=document.getElementById('app-view'),extended=document.getElementById('extended-content');
