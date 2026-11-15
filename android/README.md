@@ -1,4 +1,4 @@
-# TRU Data Android app (2.1.8)
+# TRU Data Android app (2.1.9)
 
 This folder is the complete Android project. Open it in AIDE (or Android Studio)
 and build it as it is.
@@ -25,6 +25,29 @@ normal site.
 **Merge the website changes (index.html) before you install this APK.** Until
 the site is in app mode, the app keeps its own bars hidden and simply shows
 the site, so nothing breaks in the meantime.
+
+## Notifications (2.1.9)
+
+Every text a customer gets (order received / being processed / delivered /
+cancelled, wallet credited, deposit not confirmed, account locked, the admin's
+messages) also arrives as an app notification. It pops up at the top of the
+screen even when the app is closed; tapping it opens My Orders or the Wallet.
+While the app is open, the update shows as a pop-up banner inside the app.
+
+Set it up once:
+1. https://console.firebase.google.com: create a project, then **Add app →
+   Android**, package `com.trudata.app`, and download `google-services.json`.
+2. Copy four values from that file into `app/src/main/res/values/strings.xml`
+   (`google_app_id`, `gcm_defaultSenderId`, `google_api_key`, `project_id`; the
+   comment there says where each one is). They are not secret.
+3. Firebase → Project settings → **Service accounts → Generate new private
+   key**. In Supabase → Edge Functions → **Secrets**, add `FCM_SERVICE_ACCOUNT`
+   with the whole content of that file. This one is secret: never commit it or
+   paste it anywhere else.
+4. Build 2.1.9 and publish it as usual.
+
+Left empty, the four values in strings.xml just turn notifications off; the
+app works as before.
 
 ## Build
 

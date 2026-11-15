@@ -46,6 +46,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.VibrationEffect;
+import android.provider.Settings;
 import android.os.Vibrator;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -70,7 +71,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.NotificationManagerCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
@@ -200,6 +206,10 @@ public class MainActivity extends Activity {
     private long launchedAt = 0;
     private boolean launchAdHandled = false;
     private long backgroundAt = 0;
+
+    // Push notifications (2.1.9): the open screen, for TruMessagingService.
+    static volatile MainActivity current;
+    private volatile boolean onScreen = false;
     private boolean leftAppOnPurpose = false;
 
     private boolean offlineShown = false;
@@ -240,9 +250,13 @@ public class MainActivity extends Activity {
         setupOfflineView();
         watchKeyboard();
 
+        current = this;
+        Push.createChannels(this);
+
         // Start loading the site first; everything else waits so it does not slow it down.
         if (savedInstanceState != null) webView.restoreState(savedInstanceState);
         else loadWebApp(getIntent());
+        initPush();
         showSplash();
         launchedAt = System.currentTimeMillis();
         loadAppOpenAd(); // so it can be ready as the splash fades
@@ -600,6 +614,38 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String version() {
             return versionName;
+        }
+
+        // Push notifications: this phone's Firebase token ("" until Firebase gives one).
+        @JavascriptInterface
+        public String pushToken() {
+            return Push.token(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public boolean notificationsOn() {
+            return NotificationManagerCompat.from(MainActivity.this).areNotificationsEnabled();
+        }
+
+        @JavascriptInterface
+        public void openNotificationSettings() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Intent i;
+                        if (Build.VERSION.SDK_INT >= 26) {
+                            i = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                            i.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                        } else {
+                            i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
+                        }
+                        startActivity(i);
+                    } catch (Exception e) {
+                        // no settings screen
+                    }
+                }
+            });
         }
 
         // {"url": "https://patupaa.com", "title": "Patupaa", "info": "0241234567 · MTN 2GB", "copy": "0241234567"}
@@ -1074,6 +1120,12 @@ public class MainActivity extends Activity {
 
     // Links to https://trudata.rvhssystems.com (for example from the password reset page) open in the app.
     private void loadWebApp(Intent intent) {
+        // A tapped notification opens its page (for example #/my-orders).
+        String open = intent != null ? intent.getStringExtra("open") : null;
+        if (open != null && open.startsWith("#/")) {
+            webView.loadUrl(HOME + open);
+            return;
+        }
         Uri data = intent != null ? intent.getData() : null;
         if (data != null && SITE_HOST.equals(data.getHost())) webView.loadUrl(data.toString());
         else webView.loadUrl(HOME);
@@ -1082,7 +1134,62 @@ public class MainActivity extends Activity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        String open = intent != null ? intent.getStringExtra("open") : null;
+        if (open != null && open.startsWith("#/")) {
+            // Already on the site: just change page; otherwise load it there.
+            String url = webView.getUrl();
+            if (url != null && SITE_HOST.equals(Uri.parse(url).getHost())) {
+                webView.evaluateJavascript("location.hash=" + JSONObject.quote(open), null);
+            } else {
+                loadWebApp(intent);
+            }
+            return;
+        }
         if (intent != null && intent.getData() != null) loadWebApp(intent);
+    }
+
+    // =====================================================================
+    // Push notifications (2.1.9). The page registers this phone's token for
+    // the signed-in customer (window.truOnPushToken) and shows its own pop-up
+    // for a notification that arrives while the app is open (window.truOnPush).
+    // =====================================================================
+
+    private void initPush() {
+        try {
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                @Override
+                public void onComplete(Task<String> task) {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        Push.saveToken(MainActivity.this, task.getResult());
+                        deliverPushToken(task.getResult());
+                    }
+                }
+            });
+        } catch (Throwable e) {
+            // Firebase is not set up in strings.xml yet: no notifications.
+        }
+    }
+
+    boolean isOnScreen() {
+        return onScreen;
+    }
+
+    void deliverPushToken(final String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (webView != null) webView.evaluateJavascript("window.truOnPushToken&&truOnPushToken(" + JSONObject.quote(token) + ")", null);
+            }
+        });
+    }
+
+    void deliverPush(final String json) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (webView != null) webView.evaluateJavascript("window.truOnPush&&truOnPush(" + json + ")", null);
+            }
+        });
     }
 
     private boolean openOutsideIfNeeded(Uri uri) {
@@ -1650,6 +1757,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        current = this;
+        onScreen = true;
         updateCacheMode();
         webView.onResume();
         if (panelWeb != null) panelWeb.onResume();
@@ -1660,6 +1769,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onPause() {
+        onScreen = false;
         if (bannerAd != null) bannerAd.pause();
         webView.onPause();
         if (panelWeb != null) panelWeb.onPause();
@@ -1669,6 +1779,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (current == this) current = null;
         handler.removeCallbacksAndMessages(null);
         if (receiverRegistered) {
             try {

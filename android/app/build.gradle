@@ -9,8 +9,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         // Raise both for every new APK.
-        versionCode 33
-        versionName "2.1.8"
+        versionCode 34
+        versionName "2.1.9"
     }
 
     buildTypes {
@@ -39,4 +39,6 @@ dependencies {
     implementation 'androidx.core:core:1.3.2'
     // Stay on 19.x: the app uses InterstitialAd.isLoaded(), removed in 20.0.
     implementation 'com.google.android.gms:play-services-ads:19.7.0'
+    // Push notifications (2.1.9). 21.x matches the Google Play services version of the ads library.
+    implementation 'com.google.firebase:firebase-messaging:21.0.1'
 }
