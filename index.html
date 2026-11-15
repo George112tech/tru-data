@@ -1034,7 +1034,7 @@ function uiNotify(o){
   el.addEventListener('click',e=>{
     if(e.target.closest('.ui-ntf-x')){close();return;}
     close();
-    if(o.open){const v=String(o.open).replace(/^#\/?/,'');if(v) navigateTo(v);}
+    if(o.open){const v=String(o.open).replace(/^#\/?/,'');const r=hashToView('#/'+v);if(r) navigateTo(r.view,r.params);else if(v) navigateTo(v);}
   });
   // Swipe it up (or sideways) to dismiss.
   let y0=null,x0=null;
@@ -1507,7 +1507,10 @@ function viewToHash(view,params){
 function hashToView(h){
   if(!h||!h.startsWith('#/')) return null;
   const[a,b]=h.slice(2).split('/');
-  if(a==='buy') return b&&NETWORKS[b]?{view:'network',params:b}:{view:'home',params:null};
+  if(a==='buy'||a==='home') return b&&NETWORKS[b]?{view:'network',params:b}:{view:'home',params:null};
+  if(a==='my-orders') return{view:'my-orders',params:null};
+  // #/admin/orders, #/admin/deposits: the admin dashboard on that tab (from a notification).
+  if(a==='admin'&&b&&/^[a-z-]{2,20}$/.test(b)) state.adminTab=b;
   const m={terms:'terms',privacy:'privacy',about:'about',login:'login',register:'register','forgot-password':'forgot-password','reset-password':'reset-password',track:'track',guest:'guest',wallet:'wallet',orders:'my-orders',admin:'admin-dashboard',account:'account'};
   return m[a]?{view:m[a],params:null}:null;
 }
@@ -4573,13 +4576,20 @@ async function pushAskPermission(){
 const PUSH_LOOK={
   order_placed:['brand','cart','my-orders'],order_processing:['info','bolt','my-orders'],order_processed:['success','success','my-orders'],
   order_delivered:['success','success','my-orders'],order_cancelled:['danger','trash','my-orders'],
-  deposit_credited:['success','money','wallet'],deposit_rejected:['danger','money','wallet'],account_locked:['warning','lock','home']
+  deposit_credited:['success','money','wallet'],deposit_rejected:['danger','money','wallet'],account_locked:['warning','lock','home'],
+  admin_new_order:['brand','cart','admin/orders'],admin_new_deposit:['warning','money','admin/deposits'],admin_online_deposit:['success','money','admin/deposits']
 };
 window.truOnPushToken=t=>{pushSync(t);};
 window.truOnPush=p=>{
   try{
     p=typeof p==='string'?JSON.parse(p):p||{};
     const d=p.data||{},kind=d.kind||'',look=PUSH_LOOK[kind]||['brand','info','home'];
+    if(kind.startsWith('admin_')){
+      // The admin's live connection refreshes the lists; this pop-up and the live one show once.
+      uiNotify({title:p.title||'TRU Data',body:p.body||'',tone:look[0],icon:look[1],open:(d.open||'').replace(/^#\/?/,'')||look[2],
+        key:kind==='admin_new_order'&&d.ref?'admin:order:'+d.ref:'admin:deposit',label:'Admin'});
+      return;
+    }
     if(kind.startsWith('order')) soon('push-orders',()=>{if(typeof fetchMyOrders==='function') fetchMyOrders();},300);
     if(kind.startsWith('deposit')) soon('push-wallet',()=>{refreshProfile(true);if(typeof fetchUserTransactions==='function') fetchUserTransactions();},300);
     // The customer just placed it: the order screen already says so.
@@ -4589,7 +4599,7 @@ window.truOnPush=p=>{
       label:d.ref?'Order '+d.ref:kind.startsWith('deposit')?'Wallet':'TRU Data'});
   }catch(e){}
 };
-function adminAlert(msg){showToast('🔔 '+msg,6000,'info');}
+function adminAlert(o){uiNotify({label:'Admin',ms:9000,...o});}
 function onMyProfile(row){
   if(!row) return;
   const roleBefore=state.userProfile?.role;
@@ -4633,11 +4643,11 @@ function startLive(){
   if(admin){
     on('orders',null,p=>{
       if(adminLoaded()) applyAdminOrderChange(p.eventType==='DELETE'?p.old:p.new,p.eventType);
-      if(p.eventType==='INSERT'&&p.new) adminAlert('New order '+(p.new.ref||'')+': '+(p.new.bundle_name||'')+' '+String(p.new.Network||'').toUpperCase()+' to '+(p.new.Phone||''));
+      if(p.eventType==='INSERT'&&p.new) adminAlert({title:'New order',body:`${p.new.ref||''}: ${p.new.bundle_name||''} ${String(p.new.Network||'').toUpperCase()} to ${p.new.Phone||''}, ₵${Number(p.new.Amount||0).toFixed(2)}`+(!p.new.user_id&&p.new.guest_phone?' · Guest':''),tone:'brand',icon:'cart',open:'admin/orders',key:'admin:order:'+(p.new.ref||p.new.id)});
     });
-    on('deposit_requests',null,p=>{soon('admin-deposits',()=>{if(adminLoaded()) loadAdminDepositRequests();},400);if(p.eventType==='INSERT'&&p.new) adminAlert('New MoMo deposit to check: ₵'+Number(p.new.amount||0).toFixed(2));});
+    on('deposit_requests',null,p=>{soon('admin-deposits',()=>{if(adminLoaded()) loadAdminDepositRequests();},400);if(p.eventType==='INSERT'&&p.new) adminAlert({title:'Deposit to check',body:`A customer says they sent ₵${Number(p.new.amount||0).toFixed(2)}${p.new.momo_txn_id?' (MoMo ID '+p.new.momo_txn_id+')':''}. Check it and approve in Deposits.`,tone:'warning',icon:'money',open:'admin/deposits',key:'admin:deposit'});});
     on('sms_outbox',null,()=>soon('admin-sms',()=>{if(adminLoaded()) loadAdminSmsLog();},1000));
-    on('account_deletion_requests',null,p=>{soon('admin-del',()=>{if(adminLoaded()) loadAdminDeletions();},400);if(p.eventType==='INSERT'&&p.new) adminAlert('New account deletion request from '+(p.new.label||'a user'));});
+    on('account_deletion_requests',null,p=>{soon('admin-del',()=>{if(adminLoaded()) loadAdminDeletions();},400);if(p.eventType==='INSERT'&&p.new) adminAlert({title:'Account deletion request',body:`${p.new.label||'A customer'} asked for their account to be deleted.`,tone:'danger',icon:'trash',open:'admin/deletions',key:'admin:del:'+(p.new.id||'')});});
   }
   ch.subscribe(status=>{
     liveStatus=status;paintHtml('live-indicator',liveIndicatorHtml());
