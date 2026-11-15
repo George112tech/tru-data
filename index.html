@@ -317,6 +317,22 @@ input:focus,select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 4px
 .ui-tone-info{--dlg-grad:linear-gradient(135deg,#60a5fa 0%,#3b82f6 50%,#1d4ed8 100%);--dlg-glow:rgba(37,99,235,.55);--dlg-solid:#2563eb;--dlg-soft:#dbeafe;--dlg-text:#1e40af;--dlg-wash:rgba(59,130,246,.16);}
 .ui-tone-success{--dlg-grad:linear-gradient(135deg,#34d399 0%,#10b981 50%,#047857 100%);--dlg-glow:rgba(5,150,105,.55);--dlg-solid:#059669;--dlg-soft:#d1fae5;--dlg-text:#065f46;--dlg-wash:rgba(16,185,129,.16);}
 .ui-tone-brand{--dlg-grad:linear-gradient(135deg,#ef4444 0%,#dc2626 60%,#991b1b 100%);--dlg-glow:rgba(220,38,38,.55);--dlg-solid:#dc2626;--dlg-soft:#fee2e2;--dlg-text:#991b1b;--dlg-wash:rgba(220,38,38,.12);}
+.ui-dlg-field{margin:16px 22px 0;text-align:left;}
+.ui-dlg-label{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-tertiary);margin:0 0 6px 2px;}
+.ui-dlg-input{width:100%;padding:13px 15px;border-radius:14px;font-size:15px;font-weight:600;background:var(--bg-secondary);border:2px solid transparent;color:var(--text-primary);transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;}
+textarea.ui-dlg-input{min-height:84px;resize:vertical;line-height:1.45;}
+.ui-dlg-input:focus{outline:none;background:var(--bg-card);border-color:var(--dlg-solid);box-shadow:0 0 0 4px var(--dlg-soft);}
+.ui-dlg-input.ui-dlg-bad{border-color:#dc2626;box-shadow:0 0 0 4px #fee2e2;}
+.ui-dlg-big{font-size:26px;font-weight:900;text-align:center;letter-spacing:-.01em;}
+.ui-dlg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.ui-dlg-chip{padding:7px 11px;border-radius:999px;font-size:12.5px;font-weight:700;background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border-color);transition:all .15s ease;}
+.ui-dlg-chip:hover{border-color:var(--dlg-solid);color:var(--dlg-text);}
+.ui-dlg-chip.on{background:var(--dlg-soft);border-color:var(--dlg-solid);color:var(--dlg-text);}
+.ui-dlg-hint{margin:8px 2px 0;font-size:12.5px;font-weight:700;color:var(--text-secondary);min-height:1em;white-space:pre-line;}
+.ui-dlg-hint.ui-dlg-err{color:#dc2626;}
+.ui-dlg-btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.3);}
+@keyframes uiDlgShake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
+.ui-dlg-shake{animation:uiDlgShake .4s;}
 @keyframes uiDlgFade{from{opacity:0;}to{opacity:1;}}
 @keyframes uiDlgPop{from{opacity:0;transform:translateY(14px) scale(.94);}to{opacity:1;transform:none;}}
 @keyframes uiDlgUp{from{transform:translateY(100%);}to{transform:none;}}
@@ -913,7 +929,11 @@ function setBusy(btn,on){
    uiDialog({title, message, tone, rows, quote, note, buttons, dismiss}) -> the chosen value.
    tone: danger | warning | info | success | brand. buttons: [{label, value, kind: main|soft|plain}].
    Esc, the backdrop and the handle dismiss (value `dismiss`, false by default); Enter picks the main button.
-   uiConfirm(message, opts) -> true/false; uiAlert(message, opts) -> after OK. */
+   input: {label, value, placeholder, multiline, type, inputmode, suggestions, hint(value), check(value), require}
+     adds a text box; the main button then answers with the typed text (check() returns an error to show,
+     require is a word that must be typed before the main button works).
+   uiConfirm(message, opts) -> true/false; uiAlert(message, opts) -> after OK;
+   uiPrompt(message, opts) -> the typed text, or null if cancelled. */
 const UI_DLG_ICONS={
   danger:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>',
   trash:'<path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
@@ -948,6 +968,11 @@ function uiDialog(o){
       ${rows?`<div class="ui-dlg-rows">${rows}</div>`:''}
       ${o.quote?`<div class="ui-dlg-quote">${esc(o.quote)}</div>`:''}
       ${o.note?`<div class="ui-dlg-note">${esc(o.note)}</div>`:''}
+      ${o.input?`<div class="ui-dlg-field">${o.input.label?`<label class="ui-dlg-label" for="${id}-i">${esc(o.input.label)}</label>`:''}${o.input.multiline
+        ?`<textarea id="${id}-i" class="ui-dlg-input" rows="3" maxlength="${o.input.maxlength||300}" placeholder="${esc(o.input.placeholder||'')}">${esc(o.input.value||'')}</textarea>`
+        :`<input id="${id}-i" class="ui-dlg-input${o.input.big?' ui-dlg-big':''}" type="${o.input.type||'text'}" ${o.input.inputmode?`inputmode="${o.input.inputmode}"`:''} ${o.input.step?`step="${o.input.step}"`:''} autocomplete="off" maxlength="${o.input.maxlength||200}" placeholder="${esc(o.input.placeholder||'')}" value="${esc(o.input.value||'')}">`}
+        ${(o.input.suggestions||[]).length?`<div class="ui-dlg-chips">${o.input.suggestions.map(t=>`<button type="button" class="ui-dlg-chip" data-chip="${esc(t)}">${esc(t)}</button>`).join('')}</div>`:''}
+        <div class="ui-dlg-hint" id="${id}-h"></div></div>`:''}
       <div class="ui-dlg-btns${stack?' ui-dlg-stack':''}">${order.map((b,i)=>`<button type="button" class="ui-dlg-btn ui-dlg-${b.kind||'plain'}" data-i="${buttons.indexOf(b)}">${esc(b.label)}</button>`).join('')}</div>
     </div>`;
     // A spinner already showing on the tapped button waits until the answer.
@@ -968,20 +993,52 @@ function uiDialog(o){
       if(e.key==='Escape'){e.preventDefault();close(dismiss);}
       else if(e.key==='Tab'){const f=[...wrap.querySelectorAll('button')];const i=f.indexOf(document.activeElement);e.preventDefault();f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus();}
     };
+    // The text box: the main button answers with what was typed.
+    const field=o.input?wrap.querySelector('.ui-dlg-input'):null,hint=o.input?wrap.querySelector('.ui-dlg-hint'):null;
+    const mainIdx=buttons.findIndex(b=>b.kind==='main');
+    const sync=()=>{
+      if(!field) return;
+      const v=field.value;
+      wrap.querySelectorAll('.ui-dlg-chip').forEach(c=>c.classList.toggle('on',c.dataset.chip===v));
+      if(o.input.require){const mb=wrap.querySelector(`.ui-dlg-btn[data-i="${mainIdx}"]`);if(mb) mb.disabled=v.trim().toUpperCase()!==o.input.require;}
+      field.classList.remove('ui-dlg-bad');hint.classList.remove('ui-dlg-err');
+      hint.textContent=o.input.hint?(o.input.hint(v)||''):'';
+    };
+    const submit=i=>{
+      const b=buttons[i];
+      if(!field||b.kind!=='main'){close(b.value);return;}
+      const v=field.value.trim();
+      if(o.input.require&&v.toUpperCase()!==o.input.require) return;
+      const bad=o.input.check?o.input.check(v):'';
+      if(bad){field.classList.add('ui-dlg-bad');hint.classList.add('ui-dlg-err');hint.textContent=bad;const c=wrap.querySelector('.ui-dlg-card');c.classList.remove('ui-dlg-shake');void c.offsetWidth;c.classList.add('ui-dlg-shake');field.focus();return;}
+      close(v);
+    };
+    if(field){
+      field.addEventListener('input',sync);
+      if(!o.input.multiline) field.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(mainIdx>=0) submit(mainIdx);}});
+      sync();
+    }
     wrap.addEventListener('click',e=>{
+      const chip=e.target.closest('.ui-dlg-chip');
+      if(chip&&field){field.value=chip.dataset.chip;sync();field.focus();return;}
       const b=e.target.closest('.ui-dlg-btn');
-      if(b){close(buttons[+b.dataset.i].value);return;}
+      if(b){if(!b.disabled) submit(+b.dataset.i);return;}
       if(e.target===wrap) close(dismiss);
     });
     document.addEventListener('keydown',onKey,true);
     document.body.appendChild(wrap);
     const main=wrap.querySelector('.ui-dlg-main')||wrap.querySelector('.ui-dlg-btn:last-child');
-    // Keyboard users start on the main button; on touch screens nothing is pre-selected.
-    if(!matchMedia('(hover: none)').matches) setTimeout(()=>{try{main&&main.focus({preventScroll:true});}catch(e){}},30);
+    // A text box gets the cursor; otherwise keyboard users start on the main button and on touch
+    // screens nothing is pre-selected.
+    if(field) setTimeout(()=>{try{field.focus({preventScroll:true});if(field.select&&!o.input.multiline) field.select();}catch(e){}},60);
+    else if(!matchMedia('(hover: none)').matches) setTimeout(()=>{try{main&&main.focus({preventScroll:true});}catch(e){}},30);
   });
 }
 function uiConfirm(message,o={}){
   return uiDialog({...o,message,buttons:[{label:o.cancel||'Cancel',value:false,kind:'plain'},{label:o.ok||'OK',value:true,kind:'main'}],dismiss:false});
+}
+function uiPrompt(message,o={}){
+  return uiDialog({...o,message,input:o.input||{},buttons:[{label:o.cancel||'Cancel',value:null,kind:'plain'},{label:o.ok||'OK',value:'',kind:'main'}],dismiss:null});
 }
 function uiAlert(message,o={}){
   return uiDialog({tone:'info',...o,message,buttons:[{label:o.ok||'OK',value:true,kind:'main'}],dismiss:true});
@@ -2909,7 +2966,9 @@ async function loadMyDeletion(){
 async function requestAccountDeletion(){
   const bal=parseFloat(state.userProfile?.balance||0);
   if(!await uiConfirm(`Once the admin approves, these are deleted for good:\n• Your account and login\n• Your wallet${bal>0?' (₵'+bal.toFixed(2)+')':''}\n• Your orders and payment history`,{title:'Delete your TRU Data account?',tone:'danger',icon:'trash',note:'There is no refund of any money left in the account.',ok:'Yes, delete my account',cancel:'Keep my account'})) return;
-  const reason=prompt('Why are you leaving? (optional)','');
+  const reason=await uiPrompt('It helps us improve TRU Data. You can leave it empty.',{title:'Why are you leaving?',tone:'info',
+    input:{label:'Your reason (optional)',multiline:true,placeholder:'Tell us what we could do better',suggestions:['I no longer need it','Prices are too high','Delivery was too slow','I use another service']},
+    ok:'Send deletion request',cancel:'Go back'});
   if(reason===null) return;
   if(!viewCache.has('my-deletion')) viewCache.set('my-deletion',null);
   const undo=mutate('my-deletion',()=>({id:'tmp',status:'pending',created_at:new Date().toISOString(),_pending:true}));
@@ -3101,9 +3160,10 @@ async function loadAdminDeletions(){
 }
 async function adminApproveDeletion(id){
   const r=(viewCache.get('admin-deletions')?.pending||[]).find(x=>x.id===id);if(!r) return;
-  const typed=prompt(`Permanently delete ${r.label||r.email}'s account?\n\nTheir login, wallet${r.balance>0?' (₵'+Number(r.balance).toFixed(2)+', not refunded)':''}, orders, payments will be deleted. This cannot be undone.\n\nType DELETE to confirm.`,'');
+  const typed=await uiPrompt('Their login, wallet, orders and payments are deleted for good. This cannot be undone.',{title:`Permanently delete ${r.label||r.email}'s account?`,tone:'danger',icon:'trash',
+    rows:[['Customer',r.label||r.email||''],['Email',r.email||''],r.phone?['Phone',r.phone]:null,['Wallet balance','₵'+Number(r.balance||0).toFixed(2)+(r.balance>0?' (not refunded)':''),r.balance>0?1:0],r.reason?['Their reason',r.reason]:null],
+    input:{label:'Type DELETE to confirm',placeholder:'DELETE',require:'DELETE'},ok:'Delete account',cancel:'Keep account'});
   if(typed===null) return;
-  if(typed.trim().toUpperCase()!=='DELETE'){showToast('Not deleted. Type DELETE to confirm.',4000,'error');return;}
   const undo=mutate('admin-deletions',d=>({...d,pending:d.pending.filter(x=>x.id!==id)}));
   try{
     const{data,error}=await withTimeout(supa.rpc('approve_account_deletion',{p_id:id}),20000);
@@ -3113,7 +3173,10 @@ async function adminApproveDeletion(id){
   }catch(err){undo();showToast('Delete failed: '+(err.message||'error'),6000,'error');}
 }
 async function adminRejectDeletion(id){
-  const note=prompt('Reason shown to the person (optional):','');
+  const r=(viewCache.get('admin-deletions')?.pending||[]).find(x=>x.id===id);
+  const note=await uiPrompt('Their account stays open. The reason is shown to them.',{title:`Keep ${r?(r.label||r.email):'this'} account open?`,tone:'info',icon:'lock',
+    input:{label:'Reason shown to them (optional)',multiline:true,placeholder:'Why the request was rejected',suggestions:['You have an order still being processed','Please contact support first','Your wallet still has a balance']},
+    ok:'Reject request',cancel:'Go back'});
   if(note===null) return;
   const undo=mutate('admin-deletions',d=>({...d,pending:d.pending.filter(x=>x.id!==id)}));
   try{
@@ -3598,7 +3661,13 @@ async function loadAdminDepositRequests(){
 }
 async function adminApproveDeposit(id,amount,feePct){
   const pct=Number(feePct)||0;
-  const input=prompt('Amount received on MoMo (₵). Change it if the customer sent a different amount.'+(pct>0?`\nThe ${pctText(pct)} fee is taken off before the wallet is credited.`:''),parseFloat(amount).toFixed(2));
+  const dr=(viewCache.get('admin-deposits')||[]).find(x=>x.id===id);
+  const input=await uiPrompt('Check it on your MoMo statement. Change it if the customer sent a different amount.',{title:'Approve this deposit?',tone:'success',icon:'money',
+    rows:dr?[['Customer',dr.profiles?.full_name||dr.profiles?.email||''],['Reference',dr.profiles?.deposit_code||''],['MoMo Txn ID',dr.momo_txn_id||''],['Sent from',dr.sender_phone||''],['They say they sent','₵'+Number(dr.amount).toFixed(2)]]:[],
+    input:{label:'Amount received on MoMo (₵)',type:'number',inputmode:'decimal',step:'0.01',big:true,value:parseFloat(amount).toFixed(2),
+      hint:v=>{const n=parseFloat(v);if(!(n>0)) return '';if(pct<=0) return `₵${n.toFixed(2)} will be credited to their wallet.`;const fx=depositAfterFee(n,pct);return `Less the ${pctText(pct)} fee (₵${fx.fee.toFixed(2)}): ₵${fx.credit.toFixed(2)} will be credited.`;},
+      check:v=>parseFloat(v)>0?'':'Enter the amount you received'},
+    ok:'Approve & credit',cancel:'Cancel'});
   if(input===null) return;
   const value=parseFloat(input);
   if(!value||value<=0){showToast('Enter a valid amount',3000,'error');return;}
@@ -3610,7 +3679,12 @@ async function adminApproveDeposit(id,amount,feePct){
   }catch(err){undo();showToast('Approve failed: '+(err.message||'error'),5000,'error');}
 }
 async function adminRejectDeposit(id){
-  const note=prompt('Reason shown to the customer (optional):','Payment not found on our MoMo statement');
+  const dr=(viewCache.get('admin-deposits')||[]).find(x=>x.id===id);
+  const note=await uiPrompt('The customer is told the deposit was not confirmed, with this reason. Their wallet is not credited.',{title:'Reject this deposit?',tone:'danger',
+    rows:dr?[['Customer',dr.profiles?.full_name||dr.profiles?.email||''],['Amount','₵'+Number(dr.amount).toFixed(2)],['MoMo Txn ID',dr.momo_txn_id||''],['Sent from',dr.sender_phone||'']]:[],
+    input:{label:'Reason shown to the customer',multiline:true,value:'Payment not found on our MoMo statement',placeholder:'Why the deposit was rejected',
+      suggestions:['Payment not found on our MoMo statement','Amount does not match what was sent','Wrong MoMo transaction ID','Sent from a different number']},
+    ok:'Reject deposit',cancel:'Go back'});
   if(note===null) return;
   const undo=mutate('admin-deposits',list=>list.filter(r=>r.id!==id));
   try{
