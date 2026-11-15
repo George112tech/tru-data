@@ -347,16 +347,6 @@ textarea.ui-dlg-input{min-height:84px;resize:vertical;line-height:1.45;}
 .price-tag{display:inline-flex;align-items:center;padding:.25rem .75rem;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;border-radius:9999px;font-weight:700;font-size:.875rem;box-shadow:0 4px 15px -3px rgba(220,38,38,.4);}
 @media(max-width:768px){.hero-logo{max-width:200px;}.wa-float{width:50px;height:50px;font-size:24px;bottom:20px;right:20px;}}
 @media print{.wa-float,#admin-actions-bar,nav{display:none!important;}}
-#admin-order-confirmation{display:none;position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:150;width:90%;max-width:500px;}
-.admin-confirmation-content{background:var(--bg-card);border:2px solid var(--accent-primary);border-radius:1.5rem;padding:2rem;box-shadow:var(--shadow-xl),0 0 40px rgba(220,38,38,.3);animation:slide-up .4s ease-out;}
-.admin-confirmation-header{text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border-color);}
-.admin-confirmation-title{font-size:1.25rem;font-weight:800;color:var(--text-primary);margin-bottom:.5rem;}
-.admin-confirmation-subtitle{font-size:.875rem;color:var(--text-secondary);}
-.admin-order-details{background:var(--bg-secondary);border-radius:1rem;padding:1rem;margin-bottom:1.5rem;}
-.admin-order-detail-row{display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.875rem;}
-.admin-order-detail-row:last-child{margin-bottom:0;}
-.admin-order-detail-label{color:var(--text-secondary);font-weight:500;}
-.admin-order-detail-value{color:var(--text-primary);font-weight:700;}
 .provider-selection{margin-bottom:1.5rem;}
 .provider-selection-title{font-size:.875rem;font-weight:700;margin-bottom:.75rem;color:var(--text-primary);text-align:center;}
 .provider-buttons{display:flex;gap:1rem;}
@@ -364,12 +354,6 @@ textarea.ui-dlg-input{min-height:84px;resize:vertical;line-height:1.45;}
 .provider-btn:hover{border-color:var(--accent-primary);color:var(--accent-primary);}
 .provider-btn.selected{border-color:var(--accent-primary);background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;}
 .provider-btn svg{width:24px;height:24px;}
-.admin-confirmation-actions{display:flex;gap:1rem;}
-.admin-confirmation-actions button{flex:1;padding:1rem;border-radius:1rem;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .3s ease;border:none;}
-.btn-cancel-process{background:var(--bg-tertiary);color:var(--text-secondary);}
-.btn-cancel-process:hover{background:var(--border-color);}
-.btn-confirm-process{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;}
-.btn-confirm-process:hover{transform:translateY(-2px);box-shadow:0 10px 20px -5px rgba(220,38,38,.4);}
 .wallet-card{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:white;border-radius:1.5rem;padding:1.5rem;position:relative;overflow:hidden;box-shadow:var(--shadow-xl);}
 .wallet-card::before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 60%);transform:rotate(45deg);}
 .wallet-balance{font-size:2.5rem;font-weight:800;position:relative;z-index:1;}
@@ -656,34 +640,6 @@ body:has(.order-modal) .apk-float{display:none!important;}
   <span class="apk-float-label">Android APK</span>
 </div>
 
-<div id="admin-order-confirmation">
-  <div class="admin-confirmation-content">
-    <div class="admin-confirmation-header">
-      <div class="admin-confirmation-title">Process Order</div>
-      <div class="admin-confirmation-subtitle">Select a provider to fulfill this order</div>
-    </div>
-    <div class="admin-order-details">
-      <div class="admin-order-detail-row"><span class="admin-order-detail-label">Phone Number:</span><span class="admin-order-detail-value" id="confirm-phone"></span></div>
-      <div class="admin-order-detail-row"><span class="admin-order-detail-label">Network:</span><span class="admin-order-detail-value" id="confirm-network"></span></div>
-      <div class="admin-order-detail-row"><span class="admin-order-detail-label">Bundle:</span><span class="admin-order-detail-value" id="confirm-bundle"></span></div>
-      <div class="admin-order-detail-row"><span class="admin-order-detail-label">Amount:</span><span class="admin-order-detail-value" id="confirm-amount"></span></div>
-    </div>
-    <div class="provider-selection">
-      <div class="provider-selection-title">Choose Provider Platform</div>
-      <div class="provider-buttons">
-        <button class="provider-btn selected" id="btn-patupaa-confirm" onclick="selectConfirmationProvider('patupaa')">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-          Patupaa
-        </button>
-      </div>
-    </div>
-    <div class="admin-confirmation-actions">
-      <button class="btn-cancel-process" onclick="closeAdminConfirmation()">Cancel</button>
-      <button class="btn-confirm-process" onclick="confirmProcessOrder()">Process Order</button>
-    </div>
-  </div>
-</div>
-
 <footer class="cust-only py-16 text-center border-t border-slate-200 bg-gradient-to-t from-slate-50 to-transparent">
   <div class="max-w-4xl mx-auto px-4">
     <div class="mb-8">
@@ -946,6 +902,7 @@ const UI_DLG_ICONS={
   phone:'<path stroke-linecap="round" stroke-linejoin="round" d="M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm4 16h.01"/>',
   lock:'<path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0 1 9.9-1M5 11h14v10H5z"/>',
   logout:'<path stroke-linecap="round" stroke-linejoin="round" d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/>',
+  bolt:'<path stroke-linecap="round" stroke-linejoin="round" d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/>',
   cart:'<path stroke-linecap="round" stroke-linejoin="round" d="M6 6h15l-1.5 9h-12zM6 6 5 3H2m7 18a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>'
 };
 let uiDlgOpen=0,uiBusyLater=[],uiDlgSeq=0;
@@ -1370,7 +1327,7 @@ function selectConfirmationProvider(p){
   document.querySelectorAll('.provider-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('btn-patupaa-confirm')?.classList.add('selected');
 }
-function closeAdminConfirmation(){document.getElementById('admin-order-confirmation').style.display='none';state.currentProcessingOrder=null;}
+function closeAdminConfirmation(){state.currentProcessingOrder=null;}
 function confirmProcessOrder(){
   const o=state.currentProcessingOrder;if(!o) return;
   // Orders move to Processing by themselves (and the customer is texted then);
@@ -3862,15 +3819,20 @@ async function adminSaveSeevKey(){
   loadAdminSeevSettings();
 }
 
-window.showProcessConfirmation=function(ref){
+window.showProcessConfirmation=async function(ref){
   const order=state.orders.find(o=>o.ref===ref);if(!order) return;
+  const net=String(order.Network||'').toUpperCase(),unvFee=Number(order.unverified_fee)||0;
+  const texted=order.Status==='Processing';
+  const go=await uiDialog({title:`Process order ${ref}?`,tone:'info',icon:'bolt',
+    message:'Patupaa opens with the number ready to paste.',
+    rows:[['Send to',order.Phone||'',1],['Network',net],['Bundle',order.bundle_name||''],['Amount paid','₵'+parseFloat(order.Amount||0).toFixed(2)],
+      order.unverified_combo?['Send 2 bundles',order.unverified_combo+' (unverified prices)',1]:unvFee>0?['Unverified number','+₵'+unvFee.toFixed(2)]:null,
+      !order.user_id&&order.guest_phone?['Customer','Guest · updates to '+order.guest_phone]:null],
+    note:texted?'The customer was already texted that it is being processed: no new text is sent.':'The order is marked Processing and the customer is texted that it is being processed.',
+    buttons:[{label:'Cancel',value:false,kind:'plain'},{label:'Process on Patupaa',value:true,kind:'main'}],dismiss:false});
+  if(!go) return;
   state.currentProcessingOrder=order;
-  document.getElementById('confirm-phone').textContent=order.Phone;
-  document.getElementById('confirm-network').textContent=order.Network?.toUpperCase();
-  document.getElementById('confirm-bundle').textContent=order.bundle_name;
-  document.getElementById('confirm-amount').textContent='₵'+parseFloat(order.Amount).toFixed(2);
-  selectConfirmationProvider('patupaa');
-  document.getElementById('admin-order-confirmation').style.display='block';
+  confirmProcessOrder();
 };
 function cancelActiveProcess(){document.getElementById('admin-actions-bar').style.display='none';state.isDirectMode=false;state.activeOrderData=null;}
 // Guest orders paid with Paystack can be refunded from here (guest-refund Edge Function).
