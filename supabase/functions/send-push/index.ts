@@ -2,7 +2,7 @@
 // Firebase Cloud Messaging (HTTP v1).
 //
 // Woken by the database (pg_net, header x-dispatch-secret) when a
-// notification is queued, and every minute by pg_cron while any are waiting.
+// notification is queued, and every 10 seconds by pg_cron while any are waiting.
 // Deployed with verify_jwt off: the dispatch secret is the check.
 //
 // Needs the FCM_SERVICE_ACCOUNT secret on the Edge Functions: the whole JSON
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
 
   const endpoint = `https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`;
   let sent = 0, failed = 0, rounds = 0, wait = false;
-  // A notification put back after a temporary Firebase error waits for the next run (every minute).
+  // A notification put back after a temporary Firebase error waits for the next run (every 10 seconds).
   while (rounds++ < 5 && !wait) {
     const { data: batch, error } = await admin.rpc("push_claim", { p_limit: 50 });
     if (error) return json({ error: error.message }, 500);

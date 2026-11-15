@@ -19,8 +19,8 @@
 --   push_outbox    notifications waiting / sent / failed.
 --
 -- Delivery: a new row wakes send-push at once (pg_net, with a dispatch
--- secret, like the SMS queue); a pg_cron job retries every minute and gives
--- up on a notification after an hour. Nothing is sent until the
+-- secret, like the SMS queue); a pg_cron job checks every 10 seconds and
+-- gives up on a notification after an hour. Nothing is sent until the
 -- FCM_SERVICE_ACCOUNT secret is set on the Edge Functions (see android/README).
 
 create table if not exists public.push_devices (
@@ -151,7 +151,9 @@ begin
   v_open := case when p_event like 'order%' then '#/my-orders'
                  when p_event like 'deposit%' then '#/wallet'
                  else '#/home' end;
-  for r in select id from public.profiles where public.sms_normalize_phone(phone) = v_to loop
+  -- Only accounts that have the app on a phone (cheap when nobody has it yet).
+  for r in select distinct p.id from public.profiles p join public.push_devices d on d.user_id = p.id
+            where public.sms_normalize_phone(p.phone) = v_to loop
     perform private.push_enqueue(r.id, v_title, v_body,
       jsonb_strip_nulls(jsonb_build_object('kind', p_event, 'ref', v_ref, 'open', v_open)));
   end loop;
@@ -166,7 +168,7 @@ create or replace function public.sms_enqueue(p_event text, p_to text, p_content
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, private
 as $$
 declare
   v_set private.sms_settings%rowtype;
@@ -261,7 +263,7 @@ create trigger push_outbox_kick
   after insert on public.push_outbox
   for each statement execute function private.push_kick_trigger();
 
--- Every minute: give up on old notifications, free stuck ones, retry the rest.
+-- Every 10 seconds: give up on old notifications, free stuck ones, send the rest.
 create or replace function private.push_retry()
 returns void
 language plpgsql
@@ -280,7 +282,7 @@ end;
 $$;
 
 select cron.unschedule(jobid) from cron.job where jobname = 'push-retry';
-select cron.schedule('push-retry', '1 minute', 'select private.push_retry()');
+select cron.schedule('push-retry', '10 seconds', 'select private.push_retry()');
 
 -- ===== For the send-push Edge Function (service role) =====
 create or replace function public.push_dispatch_secret_ok(p_secret text)
