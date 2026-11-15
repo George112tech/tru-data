@@ -74,12 +74,23 @@ Deno.serve(async (req) => {
   const { data: ok } = await admin.rpc("push_dispatch_secret_ok", { p_secret: req.headers.get("x-dispatch-secret") ?? "" });
   if (ok !== true) return json({ error: "Not allowed" }, 401);
 
+  // The service account key. The answer says what is wrong with it, never what is in it.
+  const raw = (Deno.env.get("FCM_SERVICE_ACCOUNT") ?? "").trim();
+  if (!raw) {
+    const similar = Object.keys(Deno.env.toObject()).filter((k) => /FCM|FIREBASE|SERVICE_ACC|GOOGLE/i.test(k));
+    return json({ error: "FCM_SERVICE_ACCOUNT is not set", similar_secret_names: similar }, 503);
+  }
   let sa: ServiceAccount;
   try {
-    sa = JSON.parse(Deno.env.get("FCM_SERVICE_ACCOUNT") || "");
-    if (!sa.project_id || !sa.client_email || !sa.private_key) throw new Error("incomplete");
+    let v: unknown = JSON.parse(raw);
+    if (typeof v === "string") v = JSON.parse(v); // pasted with extra quotes around it
+    sa = v as ServiceAccount;
   } catch {
-    return json({ error: "FCM_SERVICE_ACCOUNT is not set (or is not the service account's JSON key)" }, 503);
+    return json({ error: `FCM_SERVICE_ACCOUNT is not valid JSON (${raw.length} characters, starts with "${raw[0]}"). Paste the whole content of the downloaded .json file.` }, 503);
+  }
+  const missing = ["project_id", "client_email", "private_key"].filter((k) => !(sa as Record<string, unknown>)?.[k]);
+  if (missing.length) {
+    return json({ error: "FCM_SERVICE_ACCOUNT is missing " + missing.join(", ") + ": use the service account key (Project settings > Service accounts > Generate new private key), not google-services.json" }, 503);
   }
 
   let bearer: string;
