@@ -24,4 +24,22 @@
     <string name="panel_back">Back to TRU Data</string>
     <string name="panel_copy">Copy number</string>
     <string name="panel_copied">%1$s copied</string>
+
+    <!-- Notifications (2.1.9) -->
+    <string name="notif_channel_orders">Order updates</string>
+    <string name="notif_channel_orders_desc">When your order is being processed, delivered or cancelled.</string>
+    <string name="notif_channel_quiet">Order updates while using the app</string>
+    <string name="notif_channel_quiet_desc">Shown in the list only: the app already shows the update on screen.</string>
+
+    <!-- Firebase (push notifications). Copy these four values from the
+         google-services.json file Firebase gives you for com.trudata.app
+         (see README). Left empty, the app works as before without notifications.
+           google_app_id        client[0].client_info.mobilesdk_app_id
+           gcm_defaultSenderId  project_info.project_number
+           google_api_key       client[0].api_key[0].current_key
+           project_id           project_info.project_id -->
+    <string name="google_app_id" translatable="false"></string>
+    <string name="gcm_defaultSenderId" translatable="false"></string>
+    <string name="google_api_key" translatable="false"></string>
+    <string name="project_id" translatable="false"></string>
 </resources>
