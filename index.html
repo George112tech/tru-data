@@ -333,6 +333,22 @@ textarea.ui-dlg-input{min-height:84px;resize:vertical;line-height:1.45;}
 .ui-dlg-btn:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.3);}
 @keyframes uiDlgShake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
 .ui-dlg-shake{animation:uiDlgShake .4s;}
+/* Pop-up banner for updates (uiNotify): order and wallet updates, app notifications */
+.ui-ntf{position:fixed;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top));z-index:450;max-width:440px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;padding:14px 14px 16px;border-radius:20px;background:var(--bg-card);color:var(--text-primary);box-shadow:0 20px 48px -14px rgba(15,23,42,.42),0 0 0 1px rgba(15,23,42,.06);cursor:pointer;overflow:hidden;animation:uiNtfIn .42s cubic-bezier(.2,.9,.3,1.2);touch-action:pan-x;}
+.ui-ntf.ui-ntf-out{animation:uiNtfOut .22s ease-in forwards;}
+.ui-ntf-ic{flex:none;width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--dlg-grad);box-shadow:0 8px 18px -8px var(--dlg-glow);}
+.ui-ntf-ic svg{width:22px;height:22px;}
+.ui-ntf-main{flex:1;min-width:0;}
+.ui-ntf-top{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--text-tertiary);}
+.ui-ntf-top b{color:var(--dlg-text);}
+.ui-ntf-title{margin-top:2px;font-size:15px;font-weight:900;line-height:1.3;}
+.ui-ntf-body{margin-top:2px;font-size:13.5px;line-height:1.45;color:var(--text-secondary);}
+.ui-ntf-x{flex:none;width:28px;height:28px;margin:-4px -4px 0 0;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);}
+.ui-ntf-x:hover{background:var(--bg-secondary);}
+.ui-ntf-bar{position:absolute;left:0;bottom:0;height:3px;background:var(--dlg-solid);opacity:.55;animation:uiNtfBar linear forwards;}
+@keyframes uiNtfIn{from{opacity:0;transform:translateY(-120%) scale(.96);}to{opacity:1;transform:none;}}
+@keyframes uiNtfOut{to{opacity:0;transform:translateY(-120%);}}
+@keyframes uiNtfBar{from{width:100%;}to{width:0;}}
 @keyframes uiDlgFade{from{opacity:0;}to{opacity:1;}}
 @keyframes uiDlgPop{from{opacity:0;transform:translateY(14px) scale(.94);}to{opacity:1;transform:none;}}
 @keyframes uiDlgUp{from{transform:translateY(100%);}to{transform:none;}}
@@ -997,6 +1013,39 @@ function uiConfirm(message,o={}){
 function uiPrompt(message,o={}){
   return uiDialog({...o,message,input:o.input||{},buttons:[{label:o.cancel||'Cancel',value:null,kind:'plain'},{label:o.ok||'OK',value:'',kind:'main'}],dismiss:null});
 }
+/* uiNotify({title, body, tone, icon, open, key, label}): a pop-up banner at the top of the
+   screen for an update (order delivered, wallet credited, an app notification). Tapping it
+   opens `open` (a page such as 'my-orders'); it closes by itself. The same update arriving
+   twice within a minute (live update + app notification) shows once (key). */
+const uiNtfSeen=new Map();
+function uiNotify(o){
+  const now=Date.now();
+  if(o.key){const t=uiNtfSeen.get(o.key);if(t&&now-t<60000) return;uiNtfSeen.set(o.key,now);}
+  document.querySelectorAll('.ui-ntf').forEach(n=>n.remove());
+  const tone=o.tone||'info',ms=o.ms||7000;
+  const icon=UI_DLG_ICONS[o.icon]||UI_DLG_ICONS[tone]||UI_DLG_ICONS.info;
+  const el=document.createElement('div');
+  el.className='ui-ntf ui-tone-'+tone;el.setAttribute('role','status');el.setAttribute('aria-live','polite');
+  el.innerHTML=`<div class="ui-ntf-ic"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">${icon}</svg></div>
+    <div class="ui-ntf-main"><div class="ui-ntf-top"><b>${esc(o.label||'TRU Data')}</b><span>· now</span></div><div class="ui-ntf-title">${esc(o.title||'')}</div>${o.body?`<div class="ui-ntf-body">${esc(o.body)}</div>`:''}</div>
+    <button type="button" class="ui-ntf-x" aria-label="Close"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="ui-ntf-bar" style="animation-duration:${ms}ms"></div>`;
+  let gone=false;const close=()=>{if(gone) return;gone=true;el.classList.add('ui-ntf-out');setTimeout(()=>el.remove(),230);};
+  el.addEventListener('click',e=>{
+    if(e.target.closest('.ui-ntf-x')){close();return;}
+    close();
+    if(o.open){const v=String(o.open).replace(/^#\/?/,'');if(v) navigateTo(v);}
+  });
+  // Swipe it up (or sideways) to dismiss.
+  let y0=null,x0=null;
+  el.addEventListener('touchstart',e=>{y0=e.touches[0].clientY;x0=e.touches[0].clientX;},{passive:true});
+  el.addEventListener('touchend',e=>{if(y0==null) return;const dy=e.changedTouches[0].clientY-y0,dx=e.changedTouches[0].clientX-x0;y0=null;if(dy<-30||Math.abs(dx)>60) close();},{passive:true});
+  let timer=setTimeout(close,ms);
+  el.addEventListener('mouseenter',()=>{clearTimeout(timer);const b=el.querySelector('.ui-ntf-bar');if(b) b.style.animationPlayState='paused';});
+  el.addEventListener('mouseleave',()=>{timer=setTimeout(close,2500);});
+  document.body.appendChild(el);
+  if(typeof appHaptic==='function') try{appHaptic('tick');}catch(e){}
+}
 function uiAlert(message,o={}){
   return uiDialog({tone:'info',...o,message,buttons:[{label:o.ok||'OK',value:true,kind:'main'}],dismiss:true});
 }
@@ -1360,6 +1409,7 @@ function validateGhanaPhone(phone){
 // Signing out updates the page at once; the server call finishes in the background.
 async function logoutUser(){
   const wasAdmin=state.isAdmin;
+  pushForget();
   resetUserState();
   navigateTo('landing');
   showToast(wasAdmin?'Logged out':'Logged out successfully',3000,'success');
@@ -4474,16 +4524,71 @@ function remember(table,rows,field){
 function announce(table,r){
   const money=x=>'₵'+parseFloat(x||0).toFixed(2);
   if(table==='orders'){
-    const what=`${r.bundle_name||'data'} ${String(r.Network||'').toUpperCase()} to ${r.Phone||''}`.trim();
-    if(r.Status==='Delivered') showToast('✅ Your '+what+' has been delivered.',7000,'success');
-    else if(r.Status==='Completed') showToast('🟢 Your '+what+' has been processed successfully. Your data will be delivered shortly.',7000,'success');
-    else if(r.Status==='Processing') showToast('Your '+what+' is being processed.',4000,'info');
-    else if(r.Status==='Deleted') showToast('Your order '+(r.ref||'')+' was cancelled. Any refund is back in your wallet.',7000,'error');
+    const what=`${r.bundle_name||'data'} ${String(r.Network||'').toUpperCase()}`.trim(),to=r.Phone?` for ${r.Phone}`:'';
+    const n={key:'order:'+(r.ref||r.id),open:'my-orders',label:'Order '+(r.ref||'')};
+    if(r.Status==='Delivered') uiNotify({...n,title:'Data delivered',body:`Your ${what} has been delivered${r.Phone?' to '+r.Phone:''}. Enjoy!`,tone:'success',icon:'success'});
+    else if(r.Status==='Completed') uiNotify({...n,title:'Order processed',body:`Your ${what}${to} has been processed. It will be delivered shortly.`,tone:'success',icon:'success'});
+    else if(r.Status==='Processing') uiNotify({...n,title:'Your order is being processed',body:`Your ${what}${to} is being processed now. We will let you know when it is delivered.`,tone:'info',icon:'bolt'});
+    else if(r.Status==='Deleted') uiNotify({...n,title:'Order cancelled',body:`Your order ${r.ref||''} (${what}) was cancelled. Any refund is back in your wallet.`,tone:'danger',icon:'trash'});
   }else if(table==='deposit_requests'){
-    if(r.status==='approved') showToast('✅ '+money(r.credited_amount??r.amount)+' has been added to your wallet.',7000,'success');
-    else if(r.status==='rejected') showToast('We could not confirm your deposit of '+money(r.amount)+(r.admin_note?': '+r.admin_note:'.'),8000,'error');
+    if(r.status==='approved') uiNotify({key:'deposit',open:'wallet',label:'Wallet',title:'Wallet credited',body:money(r.credited_amount??r.amount)+' has been added to your wallet.',tone:'success',icon:'money'});
+    else if(r.status==='rejected') uiNotify({key:'deposit',open:'wallet',label:'Wallet',title:'Deposit not confirmed',body:'We could not confirm your deposit of '+money(r.amount)+(r.admin_note?': '+r.admin_note:'.'),tone:'danger',icon:'money',ms:10000});
   }
 }
+/* ===== APP NOTIFICATIONS (app 2.1.9+, Firebase) =====
+   The app gives this phone's token; it is saved for the signed-in customer
+   (push_register), so every text they get also arrives as a notification.
+   Logging out forgets it (push_unregister). A notification that arrives while
+   the app is open is shown as a pop-up banner here (window.truOnPush). */
+function appPushToken(){try{const n=appNative();return n&&typeof n.pushToken==='function'?String(n.pushToken()||''):'';}catch(e){return '';}}
+let pushSavedFor='';
+async function pushSync(token){
+  token=token||appPushToken();
+  if(!token||!state.user) return;
+  const key=state.user.id+'|'+token;
+  if(pushSavedFor===key) return;
+  pushSavedFor=key;
+  try{
+    const n=appNative(),v=n&&typeof n.version==='function'?String(n.version()||''):'';
+    const{error}=await supa.rpc('push_register',{p_token:token,p_platform:'android',p_app_version:v});
+    if(error) pushSavedFor='';
+  }catch(e){pushSavedFor='';}
+  pushAskPermission();
+}
+function pushForget(){
+  const t=appPushToken();pushSavedFor='';
+  if(t) supa.rpc('push_unregister',{p_token:t}).then(()=>{},()=>{});
+}
+// Notifications switched off for the app: offer to turn them on (at most once a week).
+async function pushAskPermission(){
+  const n=appNative();
+  if(!n||typeof n.notificationsOn!=='function'||typeof n.openNotificationSettings!=='function') return;
+  let on=true;try{on=!!n.notificationsOn();}catch(e){}
+  if(on) return;
+  try{const t=+localStorage.getItem('tru:push-ask')||0;if(Date.now()-t<7*864e5) return;localStorage.setItem('tru:push-ask',String(Date.now()));}catch(e){}
+  if(await uiConfirm('Get a notification when your order is being processed, delivered or cancelled, and when your wallet is credited.',{title:'Turn on notifications?',tone:'brand',icon:'bolt',ok:'Turn on',cancel:'Not now'})){
+    try{n.openNotificationSettings();}catch(e){}
+  }
+}
+const PUSH_LOOK={
+  order_placed:['brand','cart','my-orders'],order_processing:['info','bolt','my-orders'],order_processed:['success','success','my-orders'],
+  order_delivered:['success','success','my-orders'],order_cancelled:['danger','trash','my-orders'],
+  deposit_credited:['success','money','wallet'],deposit_rejected:['danger','money','wallet'],account_locked:['warning','lock','home']
+};
+window.truOnPushToken=t=>{pushSync(t);};
+window.truOnPush=p=>{
+  try{
+    p=typeof p==='string'?JSON.parse(p):p||{};
+    const d=p.data||{},kind=d.kind||'',look=PUSH_LOOK[kind]||['brand','info','home'];
+    if(kind.startsWith('order')) soon('push-orders',()=>{if(typeof fetchMyOrders==='function') fetchMyOrders();},300);
+    if(kind.startsWith('deposit')) soon('push-wallet',()=>{refreshProfile(true);if(typeof fetchUserTransactions==='function') fetchUserTransactions();},300);
+    // The customer just placed it: the order screen already says so.
+    if(kind==='order_placed') return;
+    uiNotify({title:p.title||'TRU Data',body:p.body||'',tone:look[0],icon:look[1],open:(d.open||'').replace(/^#\/?/,'')||look[2],
+      key:d.ref?'order:'+d.ref:kind.startsWith('deposit')?'deposit':'push:'+(p.title||'')+(p.body||''),
+      label:d.ref?'Order '+d.ref:kind.startsWith('deposit')?'Wallet':'TRU Data'});
+  }catch(e){}
+};
 function adminAlert(msg){showToast('🔔 '+msg,6000,'info');}
 function onMyProfile(row){
   if(!row) return;
@@ -4508,6 +4613,7 @@ function stopLive(){
 }
 function startLive(){
   stopLive();
+  if(state.user) pushSync();
   if(typeof supa.channel!=='function') return;
   const uid=state.user?.id,admin=state.isAdmin;
   const ch=supa.channel('tru-live-'+(uid||'guest')+'-'+Date.now());
